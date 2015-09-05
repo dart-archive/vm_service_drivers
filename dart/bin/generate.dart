@@ -32,12 +32,13 @@ void _generateDart(String appDirPath, List<Node> nodes) {
   var outDirPath = normalize(join(appDirPath, '..', 'lib'));
   var outDir = new Directory(outDirPath);
   if (!outDir.existsSync()) outDir.createSync(recursive: true);
-  var outputFile = new File(join(outDirPath, 'observatory_gen.dart'));
+  var outputFile = new File(join(outDirPath, 'observatory_lib.dart'));
   var generator = new DartGenerator();
   dart.api = new dart.Api();
   dart.api.parse(nodes);
   dart.api.generate(generator);
   outputFile.writeAsStringSync(generator.toString());
+  Process.runSync('dartfmt', ['-w', outDirPath]);
   print('Wrote Dart to ${outputFile.path}.');
 }
 

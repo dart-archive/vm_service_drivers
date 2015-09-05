@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import 'package:observatory_api_dart/observatory_gen.dart';
+import 'package:observatory_lib/observatory_lib.dart';
 
 main(List<String> args) async {
   if (args.length != 1) {

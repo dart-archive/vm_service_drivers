@@ -27,14 +27,15 @@ String _coerceRefType(String typeName) {
 final String _headerCode = r'''
 // This is a generated file.
 
-library observatory_gen;
+/// A library to access the Observatory API.
+library observatory_lib;
 
 import 'dart:async';
 import 'dart:convert' show JSON, JsonCodec;
 
 import 'package:logging/logging.dart';
 
-final Logger _logger = new Logger('observatory_gen');
+final Logger _logger = new Logger('observatory_lib');
 
 /// @optional
 const String optional = 'optional';
