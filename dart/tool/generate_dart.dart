@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-library generate_observatory_api_dart;
+library generate_vm_service_lib_dart;
 
 import 'package:markdown/markdown.dart';
 
@@ -24,18 +24,20 @@ String _coerceRefType(String typeName) {
   return typeName;
 }
 
+// TODO: Make the logger in the generated library injectable.
+
 final String _headerCode = r'''
 // This is a generated file.
 
-/// A library to access the Observatory API.
-library observatory_lib;
+/// A library to access the VM Service API.
+library vm_service_lib;
 
 import 'dart:async';
 import 'dart:convert' show JSON, JsonCodec;
 
 import 'package:logging/logging.dart';
 
-final Logger _logger = new Logger('observatory_lib');
+final Logger _logger = new Logger('vm_service_lib');
 
 /// @optional
 const String optional = 'optional';

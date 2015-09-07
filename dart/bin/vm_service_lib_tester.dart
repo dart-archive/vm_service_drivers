@@ -2,18 +2,18 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-library observatory_tester;
+library service_tester;
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import 'package:observatory_lib/observatory_lib.dart';
+import 'package:vm_service_lib/vm_service_lib.dart';
 
 main(List<String> args) async {
   if (args.length != 1) {
-    print('usage: dart tool/observatory/observatory_tester.dart <sdk location>');
+    print('usage: dart bin/vm_service_lib_tester.dart <sdk location>');
     exit(1);
   }
 

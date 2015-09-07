@@ -1,6 +1,6 @@
-name: observatory_lib
-description: A library to access the Observatory API.
-version: 0.0.1
+name: vm_service_lib
+description: A library to access the VM Service API.
+version: 0.1.0
 #author: Your Name <email@example.com>
 #homepage: https://www.example.com
 

@@ -1,14 +1,14 @@
 // This is a generated file.
 
-/// A library to access the Observatory API.
-library observatory_lib;
+/// A library to access the VM Service API.
+library vm_service_lib;
 
 import 'dart:async';
 import 'dart:convert' show JSON, JsonCodec;
 
 import 'package:logging/logging.dart';
 
-final Logger _logger = new Logger('observatory_lib');
+final Logger _logger = new Logger('vm_service_lib');
 
 /// @optional
 const String optional = 'optional';
