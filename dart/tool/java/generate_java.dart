@@ -6,11 +6,11 @@ library generate_vm_service_lib_java;
 
 import 'package:markdown/markdown.dart';
 
-import 'src/parser.dart';
-import 'src/src_gen_common.dart';
-import 'src/src_gen_java.dart';
+import '../common/parser.dart';
+import '../common/src_gen_common.dart';
+import 'src_gen_java.dart';
 
-export 'src/src_gen_java.dart' show JavaGenerator;
+export 'src_gen_java.dart' show JavaGenerator;
 
 Api api;
 

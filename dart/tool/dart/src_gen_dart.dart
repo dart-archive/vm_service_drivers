@@ -5,7 +5,7 @@
 /// A library to generate Dart source code.
 library src_gen_dart;
 
-import 'src_gen_common.dart';
+import '../common/src_gen_common.dart';
 
 /**
  * A class used to generate Dart source code. This class facilitates writing out
