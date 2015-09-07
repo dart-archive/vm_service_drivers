@@ -1,7 +1,7 @@
 # vm_service_drivers
 
-Dart and Java libraries to access the VM Service Protocol, and code to generate
-both libraries from the markdown specification.
+This repository contains Dart and Java libraries to access the VM Service
+Protocol, and code to generate both libraries from the markdown specification.
 
 ## Usage and Info
 
