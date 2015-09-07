@@ -1,0 +1,11 @@
+language: dart
+sudo: false
+script: (cd dart; ./tool/travis.sh)
+
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+  - $HOME/.pub-cache
