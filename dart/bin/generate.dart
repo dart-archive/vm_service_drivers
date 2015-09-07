@@ -12,8 +12,8 @@ import '../tool/generate_dart.dart' as dart show Api, api;
 import '../tool/generate_java.dart' show JavaGenerator;
 import '../tool/generate_java.dart' as java show Api, api;
 
-/// Parse the 'service.md' into a model
-/// and generate both Dart and Java API code.
+/// Parse the 'service.md' into a model and generate both Dart and Java
+/// libraries.
 main(List<String> args) {
   String appDirPath = dirname(Platform.script.toFilePath());
 
@@ -32,12 +32,13 @@ void _generateDart(String appDirPath, List<Node> nodes) {
   var outDirPath = normalize(join(appDirPath, '..', 'lib'));
   var outDir = new Directory(outDirPath);
   if (!outDir.existsSync()) outDir.createSync(recursive: true);
-  var outputFile = new File(join(outDirPath, 'observatory_gen.dart'));
+  var outputFile = new File(join(outDirPath, 'vm_service_lib.dart'));
   var generator = new DartGenerator();
   dart.api = new dart.Api();
   dart.api.parse(nodes);
   dart.api.generate(generator);
   outputFile.writeAsStringSync(generator.toString());
+  Process.runSync('dartfmt', ['-w', outDirPath]);
   print('Wrote Dart to ${outputFile.path}.');
 }
 

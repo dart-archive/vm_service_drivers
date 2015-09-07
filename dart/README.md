@@ -1,19 +1,13 @@
-# observatory_api_dart
+# vm_service_lib
 
-A library for Dart developers. It is awesome.
+A library to access the VM Service API.
 
 ## Usage
 
-A simple usage example:
-
-    import 'package:observatory_api_dart/observatory_api_dart.dart';
-
-    main() {
-      var awesome = new Awesome();
-    }
+TODO:
 
 ## Features and bugs
 
 Please file feature requests and bugs at the [issue tracker][tracker].
 
-[tracker]: http://example.com/issues/replaceme
+[tracker]: https://github.com/dart-lang/vm_service_drivers/issues

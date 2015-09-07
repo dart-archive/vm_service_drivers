@@ -1,18 +1,20 @@
 // This is a generated file.
 
-library observatory_gen;
+/// A library to access the VM Service API.
+library vm_service_lib;
 
 import 'dart:async';
 import 'dart:convert' show JSON, JsonCodec;
 
 import 'package:logging/logging.dart';
 
-final Logger _logger = new Logger('observatory_gen');
+final Logger _logger = new Logger('vm_service_lib');
 
 /// @optional
 const String optional = 'optional';
 
-Map<String, Function> _typeFactories = {'BoundField': BoundField.parse,
+Map<String, Function> _typeFactories = {
+  'BoundField': BoundField.parse,
   'BoundVariable': BoundVariable.parse,
   'Breakpoint': Breakpoint.parse,
   '@Class': ClassRef.parse,
@@ -85,34 +87,46 @@ class Observatory {
   Stream<Event> get onStdoutEvent => _stdoutController.stream;
   Stream<Event> get onStderrEvent => _stderrController.stream;
 
-
   /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
   /// some script.
-  Future<Breakpoint> addBreakpoint(String isolateId, String scriptId, int line) {
-    return _call('addBreakpoint', {'isolateId': isolateId, 'scriptId': scriptId, 'line': line});
+  Future<Breakpoint> addBreakpoint(
+      String isolateId, String scriptId, int line) {
+    return _call('addBreakpoint',
+        {'isolateId': isolateId, 'scriptId': scriptId, 'line': line});
   }
 
   /// The [addBreakpointAtEntry] RPC is used to add a breakpoint at the
   /// entrypoint of some function.
   Future<Breakpoint> addBreakpointAtEntry(String isolateId, String functionId) {
-    return _call('addBreakpointAtEntry', {'isolateId': isolateId, 'functionId': functionId});
+    return _call('addBreakpointAtEntry',
+        {'isolateId': isolateId, 'functionId': functionId});
   }
 
   /// The [evaluate] RPC is used to evaluate an expression in the context of
   /// some target.
-  /// 
+  ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
-  Future<dynamic> evaluate(String isolateId, String targetId, String expression) {
-    return _call('evaluate', {'isolateId': isolateId, 'targetId': targetId, 'expression': expression});
+  Future<dynamic> evaluate(
+      String isolateId, String targetId, String expression) {
+    return _call('evaluate', {
+      'isolateId': isolateId,
+      'targetId': targetId,
+      'expression': expression
+    });
   }
 
   /// The [evaluateInFrame] RPC is used to evaluate an expression in the context
   /// of a particular stack frame. [frameIndex] is the index of the desired
   /// Frame, with an index of [0] indicating the top (most recent) frame.
-  /// 
+  ///
   /// The return value can be one of [InstanceRef] or [ErrorRef].
-  Future<dynamic> evaluateInFrame(String isolateId, int frameIndex, String expression) {
-    return _call('evaluateInFrame', {'isolateId': isolateId, 'frameIndex': frameIndex, 'expression': expression});
+  Future<dynamic> evaluateInFrame(
+      String isolateId, int frameIndex, String expression) {
+    return _call('evaluateInFrame', {
+      'isolateId': isolateId,
+      'frameIndex': frameIndex,
+      'expression': expression
+    });
   }
 
   /// The _getFlagList RPC returns a list of all command line flags in the VM
@@ -126,7 +140,7 @@ class Observatory {
 
   /// The [getObject] RPC is used to lookup an [object] from some isolate by its
   /// [id].
-  /// 
+  ///
   /// The return value can be one of [Obj] or [Sentinel].
   Future<dynamic> getObject(String isolateId, String objectId) {
     return _call('getObject', {'isolateId': isolateId, 'objectId': objectId});
@@ -154,7 +168,8 @@ class Observatory {
 
   /// The [removeBreakpoint] RPC is used to remove a breakpoint by its [id].
   Future<Success> removeBreakpoint(String isolateId, String breakpointId) {
-    return _call('removeBreakpoint', {'isolateId': isolateId, 'breakpointId': breakpointId});
+    return _call('removeBreakpoint',
+        {'isolateId': isolateId, 'breakpointId': breakpointId});
   }
 
   /// The [resume] RPC is used to resume execution of a paused isolate.
@@ -171,8 +186,13 @@ class Observatory {
 
   /// The [setLibraryDebuggable] RPC is used to enable or disable whether
   /// breakpoints and stepping work for a given library.
-  Future<Success> setLibraryDebuggable(String isolateId, String libraryId, bool isDebuggable) {
-    return _call('setLibraryDebuggable', {'isolateId': isolateId, 'libraryId': libraryId, 'isDebuggable': isDebuggable});
+  Future<Success> setLibraryDebuggable(
+      String isolateId, String libraryId, bool isDebuggable) {
+    return _call('setLibraryDebuggable', {
+      'isolateId': isolateId,
+      'libraryId': libraryId,
+      'isDebuggable': isDebuggable
+    });
   }
 
   /// The [streamCancel] RPC cancels a stream subscription in the VM.
@@ -242,7 +262,8 @@ class Observatory {
           var result = json['result'];
           String type = result['type'];
           if (_typeFactories[type] == null) {
-            completer.completeError(new RPCError(0, 'unknown response type ${type}'));
+            completer.completeError(
+                new RPCError(0, 'unknown response type ${type}'));
           } else {
             completer.complete(createObject(result));
           }
@@ -257,61 +278,58 @@ class Observatory {
 }
 
 Object createObject(dynamic json) {
-    if (json == null) return null;
+  if (json == null) return null;
 
-    if (json is List) {
-        return (json as List).map((e) => createObject(e)).toList();
-      } else if (json is Map) {
-        String type = json['type'];
-        if (_typeFactories[type] == null) {
-            _logger.severe("no factory for type '${type}'");
-            return null;
-          } else {
-            return _typeFactories[type](json);
-          }
-      } else {
-        // Handle simple types.
-        return json;
-      }
+  if (json is List) {
+    return (json as List).map((e) => createObject(e)).toList();
+  } else if (json is Map) {
+    String type = json['type'];
+    if (_typeFactories[type] == null) {
+      _logger.severe("no factory for type '${type}'");
+      return null;
+    } else {
+      return _typeFactories[type](json);
+    }
+  } else {
+    // Handle simple types.
+    return json;
+  }
 }
 
 Object _parseEnum(Iterable itor, String valueName) {
-    if (valueName == null) return null;
-    return itor.firstWhere((i) => i.toString() == valueName, orElse: () => null);
+  if (valueName == null) return null;
+  return itor.firstWhere((i) => i.toString() == valueName, orElse: () => null);
 }
 
 class RPCError {
-    static RPCError parse(dynamic json) {
-        return new RPCError(json['code'], json['message'], json['data']);
-      }
+  static RPCError parse(dynamic json) {
+    return new RPCError(json['code'], json['message'], json['data']);
+  }
 
-    final int code;
-    final String message;
-    final Map data;
+  final int code;
+  final String message;
+  final Map data;
 
-    RPCError(this.code, this.message, [this.data]);
+  RPCError(this.code, this.message, [this.data]);
 
-    String toString() => '${code}: ${message}';
+  String toString() => '${code}: ${message}';
 }
 
 // enums
 
-enum CodeKind {
-  Dart,
-  Native,
-  Stub,
-  Tag,
-  Collected
-}
+enum CodeKind { Dart, Native, Stub, Tag, Collected }
 
 enum ErrorKind {
   /// The isolate has encountered an unhandled Dart exception.
   UnhandledException,
+
   /// The isolate has encountered a Dart language error in the program.
   LanguageError,
+
   /// The isolate has encounted an internal error. These errors should be
   /// reported as bugs.
   InternalError,
+
   /// The isolate has been terminated by an external source.
   TerminationError
 }
@@ -321,33 +339,47 @@ enum ErrorKind {
 enum EventKind {
   /// Notification that a new isolate has started.
   IsolateStart,
+
   /// Notification that an isolate is ready to run.
   IsolateRunnable,
+
   /// Notification that an isolate has exited.
   IsolateExit,
+
   /// Notification that isolate identifying information has changed. Currently
   /// used to notify of changes to the isolate debugging name via setName.
   IsolateUpdate,
+
   /// An isolate has paused at start, before executing code.
   PauseStart,
+
   /// An isolate has paused at exit, before terminating.
   PauseExit,
+
   /// An isolate has paused at a breakpoint or due to stepping.
   PauseBreakpoint,
+
   /// An isolate has paused due to interruption via pause.
   PauseInterrupted,
+
   /// An isolate has paused due to an exception.
   PauseException,
+
   /// An isolate has started or resumed execution.
   Resume,
+
   /// A breakpoint has been added for an isolate.
   BreakpointAdded,
+
   /// An unresolved breakpoint has been resolved for an isolate.
   BreakpointResolved,
+
   /// A breakpoint has been removed.
   BreakpointRemoved,
+
   /// A garbage collection event.
   GC,
+
   /// Notification of bytes written, for example, to stdout/stderr.
   WriteEvent
 }
@@ -357,22 +389,30 @@ enum EventKind {
 enum InstanceKind {
   /// A general instance of the Dart class Object.
   PlainInstance,
+
   /// null instance.
   Null,
+
   /// true or false.
   Bool,
+
   /// An instance of the Dart class double.
   Double,
+
   /// An instance of the Dart class int.
   Int,
+
   /// An instance of the Dart class String.
   String,
+
   /// An instance of the built-in VM List implementation. User-defined Lists
   /// will be PlainInstance.
   List,
+
   /// An instance of the built-in VM Map implementation. User-defined Maps will
   /// be PlainInstance.
   Map,
+
   /// An instance of the built-in VM TypedData implementations. User-defined
   /// TypedDatas will be PlainInstance.
   Uint8ClampedList,
@@ -389,21 +429,29 @@ enum InstanceKind {
   Int32x4List,
   Float32x4List,
   Float64x2List,
+
   /// An instance of the built-in VM Closure implementation. User-defined
   /// Closures will be PlainInstance.
   Closure,
+
   /// An instance of the Dart class MirrorReference.
   MirrorReference,
+
   /// An instance of the Dart class RegExp.
   RegExp,
+
   /// An instance of the Dart class WeakProperty.
   WeakProperty,
+
   /// An instance of the Dart class Type
   Type,
+
   /// An instance of the Dart class TypeParamer
   TypeParameter,
+
   /// An instance of the Dart class TypeRef
   TypeRef,
+
   /// An instance of the Dart class BoundedType
   BoundedType
 }
@@ -413,25 +461,26 @@ enum InstanceKind {
 enum SentinelKind {
   /// Indicates that the object referred to has been collected by the GC.
   Collected,
+
   /// Indicates that an object id has expired.
   Expired,
+
   /// Indicates that a variable or field has not been initialized.
   NotInitialized,
+
   /// Indicates that a variable or field is in the process of being initialized.
   BeingInitialized,
+
   /// Indicates that a variable has been eliminated by the optimizing compiler.
   OptimizedOut,
+
   /// Reserved for future use.
   Free
 }
 
 /// A [StepOption] indicates which form of stepping is requested in a resume
 /// RPC.
-enum StepOption {
-  Into,
-  Over,
-  Out
-}
+enum StepOption { Into, Over, Out }
 
 // types
 
@@ -491,7 +540,7 @@ class Breakpoint extends Obj {
   SourceLocation location;
 
   String toString() => '[Breakpoint ' //
-  'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, breakpointNumber: ${breakpointNumber}, resolved: ${resolved}, location: ${location}]';
+      'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, breakpointNumber: ${breakpointNumber}, resolved: ${resolved}, location: ${location}]';
 }
 
 /// [ClassRef] is a reference to a [Class].
@@ -595,7 +644,8 @@ class CodeRef extends ObjRef {
   /// What kind of code object is this?
   CodeKind kind;
 
-  String toString() => '[CodeRef type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
+  String toString() =>
+      '[CodeRef type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
 }
 
 /// A [Code] object represents compiled code in the Dart VM.
@@ -614,7 +664,8 @@ class Code extends ObjRef {
   /// What kind of code object is this?
   CodeKind kind;
 
-  String toString() => '[Code type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
+  String toString() =>
+      '[Code type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
 }
 
 class ContextRef {
@@ -650,7 +701,8 @@ class Context {
   /// The variables in this context object.
   List<ContextElement> variables;
 
-  String toString() => '[Context length: ${length}, parent: ${parent}, variables: ${variables}]';
+  String toString() =>
+      '[Context length: ${length}, parent: ${parent}, variables: ${variables}]';
 }
 
 class ContextElement {
@@ -683,7 +735,8 @@ class ErrorRef extends ObjRef {
   /// A description of the error.
   String message;
 
-  String toString() => '[ErrorRef type: ${type}, id: ${id}, kind: ${kind}, message: ${message}]';
+  String toString() =>
+      '[ErrorRef type: ${type}, id: ${id}, kind: ${kind}, message: ${message}]';
 }
 
 /// An [Error] represents a Dart language level error. This is distinct from an
@@ -883,7 +936,7 @@ class Flag {
   @optional String valueAsString;
 
   String toString() => '[Flag ' //
-  'name: ${name}, comment: ${comment}, modified: ${modified}, valueAsString: ${valueAsString}]';
+      'name: ${name}, comment: ${comment}, modified: ${modified}, valueAsString: ${valueAsString}]';
 }
 
 /// A [FlagList] represents the complete set of VM command line flags.
@@ -924,7 +977,7 @@ class Frame extends Response {
   List<BoundVariable> vars;
 
   String toString() => '[Frame ' //
-  'type: ${type}, index: ${index}, function: ${function}, code: ${code}, location: ${location}, vars: ${vars}]';
+      'type: ${type}, index: ${index}, function: ${function}, code: ${code}, location: ${location}, vars: ${vars}]';
 }
 
 /// An [FuncRef] is a reference to a [Func].
@@ -943,7 +996,7 @@ class FuncRef extends ObjRef {
   String name;
 
   /// The owner of this field, which can be a Library, Class, or a Function.
-  /// 
+  ///
   /// [owner] can be one of [LibraryRef], [ClassRef] or [FuncRef].
   dynamic owner;
 
@@ -954,7 +1007,7 @@ class FuncRef extends ObjRef {
   bool isConst;
 
   String toString() => '[FuncRef ' //
-  'type: ${type}, id: ${id}, name: ${name}, owner: ${owner}, isStatic: ${isStatic}, isConst: ${isConst}]';
+      'type: ${type}, id: ${id}, name: ${name}, owner: ${owner}, isStatic: ${isStatic}, isConst: ${isConst}]';
 }
 
 /// A [Func] represents a Dart language function.
@@ -973,7 +1026,7 @@ class Func extends Obj {
   String name;
 
   /// The owner of this field, which can be a Library, Class, or a Function.
-  /// 
+  ///
   /// [owner] can be one of [LibraryRef], [ClassRef] or [FuncRef].
   dynamic owner;
 
@@ -1110,7 +1163,7 @@ class Instance extends Obj {
   @optional BoundField fields;
 
   /// The elements of a List instance. Provided for instance kinds: List
-  /// 
+  ///
   /// [elements] can be one of [InstanceRef] or [List<Sentinel>].
   @optional dynamic elements;
 
@@ -1195,7 +1248,8 @@ class IsolateRef extends Response {
   /// A name identifying this isolate. Not guaranteed to be unique.
   String name;
 
-  String toString() => '[IsolateRef type: ${type}, id: ${id}, number: ${number}, name: ${name}]';
+  String toString() =>
+      '[IsolateRef type: ${type}, id: ${id}, number: ${number}, name: ${name}]';
 }
 
 /// An [Isolate] object provides information about one isolate in the VM.
@@ -1278,7 +1332,8 @@ class LibraryRef extends ObjRef {
   /// The uri of this library.
   String uri;
 
-  String toString() => '[LibraryRef type: ${type}, id: ${id}, name: ${name}, uri: ${uri}]';
+  String toString() =>
+      '[LibraryRef type: ${type}, id: ${id}, name: ${name}, uri: ${uri}]';
 }
 
 /// A [Library] provides information about a Dart language library.
@@ -1326,7 +1381,8 @@ class Library extends Obj {
 
 /// A [LibraryDependency] provides information about an import or export.
 class LibraryDependency {
-  static LibraryDependency parse(Map json) => new LibraryDependency.fromJson(json);
+  static LibraryDependency parse(Map json) =>
+      new LibraryDependency.fromJson(json);
 
   LibraryDependency();
   LibraryDependency.fromJson(Map json) {
@@ -1349,7 +1405,7 @@ class LibraryDependency {
   LibraryRef target;
 
   String toString() => '[LibraryDependency ' //
-  'isImport: ${isImport}, isDeferred: ${isDeferred}, prefix: ${prefix}, target: ${target}]';
+      'isImport: ${isImport}, isDeferred: ${isDeferred}, prefix: ${prefix}, target: ${target}]';
 }
 
 class MapAssociation {
@@ -1396,7 +1452,7 @@ class Message extends Response {
   @optional SourceLocation location;
 
   String toString() => '[Message ' //
-  'type: ${type}, index: ${index}, name: ${name}, messageObjectId: ${messageObjectId}, size: ${size}, handler: ${handler}, location: ${location}]';
+      'type: ${type}, index: ${index}, name: ${name}, messageObjectId: ${messageObjectId}, size: ${size}, handler: ${handler}, location: ${location}]';
 }
 
 /// [NullRef] is a reference to an a [Null].
@@ -1472,7 +1528,8 @@ class Obj extends Response {
   /// which are stored entirely within their object pointers.
   @optional int size;
 
-  String toString() => '[Obj type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}]';
+  String toString() =>
+      '[Obj type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}]';
 }
 
 /// A [Sentinel] is used to indicate that the normal response is not available.
@@ -1491,7 +1548,8 @@ class Sentinel extends Response {
   /// A reasonable string representation of this sentinel.
   String valueAsString;
 
-  String toString() => '[Sentinel type: ${type}, kind: ${kind}, valueAsString: ${valueAsString}]';
+  String toString() =>
+      '[Sentinel type: ${type}, kind: ${kind}, valueAsString: ${valueAsString}]';
 }
 
 /// [ScriptRef] is a reference to a [Script].
@@ -1559,7 +1617,7 @@ class SourceLocation extends Response {
   @optional int endTokenPos;
 
   String toString() => '[SourceLocation ' //
-  'type: ${type}, script: ${script}, tokenPos: ${tokenPos}, endTokenPos: ${endTokenPos}]';
+      'type: ${type}, script: ${script}, tokenPos: ${tokenPos}, endTokenPos: ${endTokenPos}]';
 }
 
 class Stack extends Response {
@@ -1575,7 +1633,8 @@ class Stack extends Response {
 
   List<Message> messages;
 
-  String toString() => '[Stack type: ${type}, frames: ${frames}, messages: ${messages}]';
+  String toString() =>
+      '[Stack type: ${type}, frames: ${frames}, messages: ${messages}]';
 }
 
 /// The [Success] type is used to indicate that an operation completed
@@ -1584,15 +1643,15 @@ class Success extends Response {
   static Success parse(Map json) => new Success.fromJson(json);
 
   Success();
-  Success.fromJson(Map json) : super.fromJson(json) {
-  }
+  Success.fromJson(Map json) : super.fromJson(json) {}
 
   String toString() => '[Success type: ${type}]';
 }
 
 /// [TypeArgumentsRef] is a reference to a [TypeArguments] object.
 class TypeArgumentsRef extends ObjRef {
-  static TypeArgumentsRef parse(Map json) => new TypeArgumentsRef.fromJson(json);
+  static TypeArgumentsRef parse(Map json) =>
+      new TypeArgumentsRef.fromJson(json);
 
   TypeArgumentsRef();
   TypeArgumentsRef.fromJson(Map json) : super.fromJson(json) {
@@ -1602,7 +1661,8 @@ class TypeArgumentsRef extends ObjRef {
   /// A name for this type argument list.
   String name;
 
-  String toString() => '[TypeArgumentsRef type: ${type}, id: ${id}, name: ${name}]';
+  String toString() =>
+      '[TypeArgumentsRef type: ${type}, id: ${id}, name: ${name}]';
 }
 
 /// A [TypeArguments] object represents the type argument vector for some
@@ -1624,7 +1684,7 @@ class TypeArguments extends Obj {
   List<InstanceRef> types;
 
   String toString() => '[TypeArguments ' //
-  'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, name: ${name}, types: ${types}]';
+      'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, name: ${name}, types: ${types}]';
 }
 
 /// Every non-error response returned by the Service Protocol extends
@@ -1663,7 +1723,8 @@ class Version extends Response {
   /// backwards compatible way.
   int minor;
 
-  String toString() => '[Version type: ${type}, major: ${major}, minor: ${minor}]';
+  String toString() =>
+      '[Version type: ${type}, major: ${major}, minor: ${minor}]';
 }
 
 class VM extends Response {
