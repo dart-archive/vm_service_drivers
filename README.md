@@ -1,5 +1,7 @@
 # vm_service_drivers
 
+[![Build Status](https://travis-ci.org/dart-lang/vm_service_drivers.svg)](https://travis-ci.org/dart-lang/vm_service_drivers)
+
 This repository contains Dart and Java libraries to access the VM Service
 Protocol, and code to generate both libraries from the markdown specification.
 
@@ -10,7 +12,7 @@ The generator can be found in the `dart/` subdirectory, and invoked from
 library (`dart/lib/vm_service_lib.dart`) and the Java library (`java/src`).
 
 The VM Service Protocol spec lives at
-[github.com/dart-lang/sdk](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md).
+[github.com/dart-lang/sdk/runtime/vm/service/service.md](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md).
 
 ## Feedback
 
