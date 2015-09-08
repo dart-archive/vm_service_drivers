@@ -110,14 +110,14 @@ public class ObservatoryTest {
     }
     File currentDir = new File(".").getAbsoluteFile();
     File projDir = currentDir;
-    String projName = "observatory_api";
+    String projName = "vm_service_drivers";
     while (!projDir.getName().equals(projName)) {
       projDir = projDir.getParentFile();
       if (projDir == null) {
         showErrorAndExit("Cannot find project " + projName + " from " + currentDir);
       }
     }
-    sampleDart = new File(projDir, "dart/bin/sample_main.dart".replace("/", File.separator));
+    sampleDart = new File(projDir, "dart/example/sample_main.dart".replace("/", File.separator));
     if (!sampleDart.isFile()) {
       showErrorAndExit("Cannot find sample: " + sampleDart);
     }
