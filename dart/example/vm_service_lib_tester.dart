@@ -11,9 +11,14 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
+final String host = 'localhost';
+final int port = 7575;
+
+Observatory observatory;
+
 main(List<String> args) async {
   if (args.length != 1) {
-    print('usage: dart bin/vm_service_lib_tester.dart <sdk location>');
+    print('usage: dart example/vm_service_lib_tester.dart <sdk location>');
     exit(1);
   }
 
@@ -28,7 +33,7 @@ main(List<String> args) async {
   Process process = await Process.start('${sdk}/bin/dart', [
       '--pause_isolates_on_start',
       '--enable-vm-service=${port}',
-      'tool/observatory/sample_main.dart'
+      'example/sample_main.dart'
   ]);
 
   print('dart process started');
@@ -77,14 +82,3 @@ main(List<String> args) async {
   socket.close();
   process.kill();
 }
-
-// TODO: connect to the observatory
-
-// TODO: perform some actions
-
-// TODO: listen for events
-
-final String host = 'localhost';
-Observatory observatory;
-
-final int port = 7575;
