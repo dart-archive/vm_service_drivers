@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2015, the Dart project authors.
- * 
+ *
  * Licensed under the Eclipse Public License v1.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -30,17 +30,51 @@ public class Class extends Element {
   }
 
   /**
-   * The name of this class.
-   */
-  public String getName() {
-    return json.get("name").getAsString();
-  }
-
-  /**
    * The error which occurred during class finalization, if it exists.
    */
   public ErrorRef getError() {
     return new ErrorRef((JsonObject) json.get("error"));
+  }
+
+  /**
+   * A list of fields in this class. Does not include fields from superclasses.
+   */
+  public List<FieldRef> getFields() {
+    JsonArray array = (JsonArray) json.get("fields");
+    int size = array.size();
+    List<FieldRef> result = new ArrayList<FieldRef>();
+    for (int index = 0; index < size; ++index) {
+      result.add(new FieldRef((JsonObject) array.get(index)));
+    }
+    return result;
+  }
+
+  /**
+   * A list of functions in this class. Does not include functions from
+   * superclasses.
+   */
+  public List<FuncRef> getFunctions() {
+    JsonArray array = (JsonArray) json.get("functions");
+    int size = array.size();
+    List<FuncRef> result = new ArrayList<FuncRef>();
+    for (int index = 0; index < size; ++index) {
+      result.add(new FuncRef((JsonObject) array.get(index)));
+    }
+    return result;
+  }
+
+  /**
+   * A list of interface types for this class. The value will be of the kind:
+   * Type.
+   */
+  public List<InstanceRef> getInterfaces() {
+    JsonArray array = (JsonArray) json.get("interfaces");
+    int size = array.size();
+    List<InstanceRef> result = new ArrayList<InstanceRef>();
+    for (int index = 0; index < size; ++index) {
+      result.add(new InstanceRef((JsonObject) array.get(index)));
+    }
+    return result;
   }
 
   /**
@@ -72,51 +106,10 @@ public class Class extends Element {
   }
 
   /**
-   * The superclass of this class, if any.
+   * The name of this class.
    */
-  public ClassRef getSuperClass() {
-    return new ClassRef((JsonObject) json.get("super"));
-  }
-
-  /**
-   * A list of interface types for this class. The value will be of the kind:
-   * Type.
-   */
-  public List<InstanceRef> getInterfaces() {
-    JsonArray array = (JsonArray) json.get("interfaces");
-    int size = array.size();
-    List<InstanceRef> result = new ArrayList<InstanceRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new InstanceRef((JsonObject) array.get(index)));
-    }
-    return result;
-  }
-
-  /**
-   * A list of fields in this class. Does not include fields from superclasses.
-   */
-  public List<FieldRef> getFields() {
-    JsonArray array = (JsonArray) json.get("fields");
-    int size = array.size();
-    List<FieldRef> result = new ArrayList<FieldRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new FieldRef((JsonObject) array.get(index)));
-    }
-    return result;
-  }
-
-  /**
-   * A list of functions in this class. Does not include functions from
-   * superclasses.
-   */
-  public List<FuncRef> getFunctions() {
-    JsonArray array = (JsonArray) json.get("functions");
-    int size = array.size();
-    List<FuncRef> result = new ArrayList<FuncRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new FuncRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public String getName() {
+    return json.get("name").getAsString();
   }
 
   /**
@@ -130,5 +123,12 @@ public class Class extends Element {
       result.add(new ClassRef((JsonObject) array.get(index)));
     }
     return result;
+  }
+
+  /**
+   * The superclass of this class, if any.
+   */
+  public ClassRef getSuperClass() {
+    return new ClassRef((JsonObject) json.get("super"));
   }
 }

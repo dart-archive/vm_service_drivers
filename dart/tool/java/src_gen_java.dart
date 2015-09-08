@@ -77,6 +77,7 @@ class TypeWriter {
   String superclassName;
   List<String> interfaceNames = <String>[];
   final StringBuffer _content = new StringBuffer();
+  final Map<String, String> _methods = new Map<String, String>();
 
   TypeWriter(String typeName)
       : this.pkgName = pkgNameFor(typeName),
@@ -141,31 +142,35 @@ class TypeWriter {
   void addMethod(
       String name, Iterable<JavaMethodArg> args, WriteStatements write,
       {String javadoc, String modifiers: 'public', String returnType: 'void'}) {
-    _content.writeln();
+    var mthDecl = new StringBuffer();
     if (javadoc != null && javadoc.isNotEmpty) {
-      _content.writeln('  /**');
+      mthDecl.writeln('  /**');
       wrap(javadoc.trim(), colBoundary - 6)
           .split('\n')
-          .forEach((line) => _content.writeln('   * $line'));
-      _content.writeln('   */');
+          .forEach((line) => mthDecl.writeln('   * $line'));
+      mthDecl.writeln('   */');
     }
-    _content.write('  ');
+    mthDecl.write('  ');
     if (modifiers != null && modifiers.isNotEmpty) {
-      _content.write('$modifiers ');
+      mthDecl.write('$modifiers ');
     }
-    _content.write('$returnType $name(');
-    _content.write(
+    mthDecl.write('$returnType $name(');
+    mthDecl.write(
         args.map((a) => '${classNameFor(a.typeName)} ${a.name}').join(', '));
-    _content.write(')');
+    mthDecl.write(')');
     if (write != null) {
-      _content.writeln(' {');
+      mthDecl.writeln(' {');
       StatementWriter writer = new StatementWriter();
       write(writer);
-      _content.write(writer.toSource());
-      _content.writeln('  }');
+      mthDecl.write(writer.toSource());
+      mthDecl.writeln('  }');
     } else {
-      _content.writeln(';');
+      mthDecl.writeln(';');
     }
+    var key = (modifiers != null && modifiers.contains('public'))
+        ? '1 $name'
+        : '2 $name';
+    _methods[key] = mthDecl.toString();
   }
 
   String toSource() {
@@ -202,6 +207,12 @@ class TypeWriter {
     }
     buffer.writeln(' {');
     buffer.write(_content.toString());
+    _methods.keys.toList()
+      ..sort()
+      ..forEach((mthName) {
+        buffer.writeln();
+        buffer.write(_methods[mthName]);
+      });
     buffer.writeln('}');
     return buffer.toString();
   }

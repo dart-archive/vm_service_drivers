@@ -53,15 +53,6 @@ public class Instance extends Element {
   }
 
   /**
-   * The bytes of a TypedData instance. Provided for instance kinds: Uint8ClampedList Uint8List
-   * Uint16List Uint32List Uint64List Int8List Int16List Int32List Int64List Float32List Float64List
-   * Int32x4List Float32x4List Float64x2List
-   */
-  public List<Integer> getBytes() {
-    return null;
-  }
-
-  /**
    * Instance references always include their class.
    */
   public ClassRef getClassRef() {

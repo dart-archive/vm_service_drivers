@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2015, the Dart project authors.
- * 
+ *
  * Licensed under the Eclipse Public License v1.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -34,13 +34,6 @@ public class VM extends Element {
   }
 
   /**
-   * The CPU we are generating code for.
-   */
-  public String getTargetCPU() {
-    return json.get("targetCPU").getAsString();
-  }
-
-  /**
    * The CPU we are actually running on.
    */
   public String getHostCPU() {
@@ -48,10 +41,16 @@ public class VM extends Element {
   }
 
   /**
-   * The Dart VM version string.
+   * A list of isolates running in the VM.
    */
-  public String getVersion() {
-    return json.get("version").getAsString();
+  public List<IsolateRef> getIsolates() {
+    JsonArray array = (JsonArray) json.get("isolates");
+    int size = array.size();
+    List<IsolateRef> result = new ArrayList<IsolateRef>();
+    for (int index = 0; index < size; ++index) {
+      result.add(new IsolateRef((JsonObject) array.get(index)));
+    }
+    return result;
   }
 
   /**
@@ -70,15 +69,16 @@ public class VM extends Element {
   }
 
   /**
-   * A list of isolates running in the VM.
+   * The CPU we are generating code for.
    */
-  public List<IsolateRef> getIsolates() {
-    JsonArray array = (JsonArray) json.get("isolates");
-    int size = array.size();
-    List<IsolateRef> result = new ArrayList<IsolateRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new IsolateRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public String getTargetCPU() {
+    return json.get("targetCPU").getAsString();
+  }
+
+  /**
+   * The Dart VM version string.
+   */
+  public String getVersion() {
+    return json.get("version").getAsString();
   }
 }

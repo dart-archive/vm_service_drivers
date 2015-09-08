@@ -17,8 +17,6 @@ package com.google.dart.observatory.element;
 
 import com.google.gson.JsonObject;
 
-import java.util.List;
-
 /**
  * A [Script] provides information about a Dart language script.
  */
@@ -41,13 +39,6 @@ public class Script extends Element {
    */
   public String getSource() {
     return json.get("source").getAsString();
-  }
-
-  /**
-   * A table encoding a mapping from token position to line and column.
-   */
-  public List<List<Integer>> getTokenPosTable() {
-    return null;
   }
 
   /**

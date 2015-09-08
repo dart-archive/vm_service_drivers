@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2015, the Dart project authors.
- * 
+ *
  * Licensed under the Eclipse Public License v1.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -27,13 +27,6 @@ public class InstanceRef extends Element {
   }
 
   /**
-   * What kind of instance is this?
-   */
-  public InstanceKind getKind() {
-    return InstanceKind.valueOf(((JsonObject) json.get("kind")).getAsString());
-  }
-
-  /**
    * Instance references always include their class.
    */
   public ClassRef getClassRef() {
@@ -41,21 +34,10 @@ public class InstanceRef extends Element {
   }
 
   /**
-   * The value of this instance as a string. Provided for the instance kinds:
-   * Null (null) Bool (true or false) Double (suitable for passing to
-   * Double.parse()) Int (suitable for passing to int.parse()) String (value
-   * may be truncated)
+   * What kind of instance is this?
    */
-  public String getValueAsString() {
-    return json.get("valueAsString").getAsString();
-  }
-
-  /**
-   * The valueAsString for String references may be truncated. If so, this
-   * property is added with the value 'true'.
-   */
-  public boolean getValueAsStringIsTruncated() {
-    return json.get("valueAsStringIsTruncated").getAsBoolean();
+  public InstanceKind getKind() {
+    return InstanceKind.valueOf(((JsonObject) json.get("kind")).getAsString());
   }
 
   /**
@@ -76,14 +58,6 @@ public class InstanceRef extends Element {
   }
 
   /**
-   * The corresponding Class if this Type is canonical. Provided for instance
-   * kinds: Type
-   */
-  public ClassRef getTypeClass() {
-    return new ClassRef((JsonObject) json.get("typeClass"));
-  }
-
-  /**
    * The parameterized class of a type parameter: Provided for instance kinds:
    * TypeParameter
    */
@@ -96,5 +70,31 @@ public class InstanceRef extends Element {
    */
   public String getPattern() {
     return json.get("pattern").getAsString();
+  }
+
+  /**
+   * The corresponding Class if this Type is canonical. Provided for instance
+   * kinds: Type
+   */
+  public ClassRef getTypeClass() {
+    return new ClassRef((JsonObject) json.get("typeClass"));
+  }
+
+  /**
+   * The value of this instance as a string. Provided for the instance kinds:
+   * Null (null) Bool (true or false) Double (suitable for passing to
+   * Double.parse()) Int (suitable for passing to int.parse()) String (value
+   * may be truncated)
+   */
+  public String getValueAsString() {
+    return json.get("valueAsString").getAsString();
+  }
+
+  /**
+   * The valueAsString for String references may be truncated. If so, this
+   * property is added with the value 'true'.
+   */
+  public boolean getValueAsStringIsTruncated() {
+    return json.get("valueAsStringIsTruncated").getAsBoolean();
   }
 }

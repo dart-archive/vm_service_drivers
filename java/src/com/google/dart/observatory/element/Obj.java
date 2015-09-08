@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2015, the Dart project authors.
- * 
+ *
  * Licensed under the Eclipse Public License v1.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -27,14 +27,6 @@ public class Obj extends Element {
   }
 
   /**
-   * A unique identifier for an Object. Passed to the getObject RPC to reload
-   * this Object. Some objects may get a new id when they are reloaded.
-   */
-  public String getId() {
-    return json.get("id").getAsString();
-  }
-
-  /**
    * If an object is allocated in the Dart heap, it will have a corresponding
    * class object. The class of a non-instance is not a Dart class, but is
    * instead an internal vm object. Moving an Object into or out of the heap is
@@ -42,6 +34,14 @@ public class Obj extends Element {
    */
   public ClassRef getClassRef() {
     return new ClassRef((JsonObject) json.get("class"));
+  }
+
+  /**
+   * A unique identifier for an Object. Passed to the getObject RPC to reload
+   * this Object. Some objects may get a new id when they are reloaded.
+   */
+  public String getId() {
+    return json.get("id").getAsString();
   }
 
   /**
