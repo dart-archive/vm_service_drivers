@@ -8,10 +8,8 @@ homepage: https://github.com/dart-lang/vm_service_drivers
 environment:
   sdk: '>=1.8.0 <2.0.0'
 
-dependencies:
-  logging: any
-
 dev_dependencies:
+  logging: ^0.11.0
   markdown: ^0.7.0
   path: ^1.0.0
   test: ^0.12.0

@@ -24,8 +24,6 @@ String _coerceRefType(String typeName) {
   return typeName;
 }
 
-// TODO: Make the logger in the generated library injectable.
-
 final String _headerCode = r'''
 // This is a generated file.
 
@@ -34,10 +32,6 @@ library vm_service_lib;
 
 import 'dart:async';
 import 'dart:convert' show JSON, JsonCodec;
-
-import 'package:logging/logging.dart';
-
-final Logger _logger = new Logger('vm_service_lib');
 
 /// @optional
 const String optional = 'optional';
@@ -89,13 +83,13 @@ final String _implCode = r'''
         } else if (streamId == 'Stderr') {
           _stderrController.add(createObject(params['event']));
         } else {
-          _logger.warning('unknown streamId: ${streamId}');
+          _log.warning('unknown streamId: ${streamId}');
         }
       } else if (json['id'] != null) {
         Completer completer = _completers.remove(json['id']);
 
         if (completer == null) {
-          _logger.severe('unmatched request response: ${message}');
+          _log.severe('unmatched request response: ${message}');
         } else if (json['error'] != null) {
           completer.completeError(RPCError.parse(json['error']));
         } else {
@@ -108,10 +102,10 @@ final String _implCode = r'''
           }
         }
       } else {
-        _logger.severe('unknown message type: ${message}');
+        _log.severe('unknown message type: ${message}');
       }
     } catch (e) {
-      _logger.severe('unable to decode message: ${message}, ${e}');
+      _log.severe('unable to decode message: ${message}, ${e}');
     }
   }
 ''';
@@ -125,7 +119,6 @@ Object createObject(dynamic json) {
   } else if (json is Map) {
     String type = json['type'];
     if (_typeFactories[type] == null) {
-      _logger.severe("no factory for type '${type}'");
       return null;
     } else {
       return _typeFactories[type](json);
@@ -153,6 +146,16 @@ class RPCError {
   RPCError(this.code, this.message, [this.data]);
 
   String toString() => '${code}: ${message}';
+}
+
+abstract class Log {
+  void warning(String message);
+  void severe(String message);
+}
+
+class _NullLog implements Log {
+  void warning(String message) { }
+  void severe(String message) { }
 }
 ''';
 
@@ -244,6 +247,7 @@ class Api extends Member {
     gen.writeStatement('Function _writeMessage;');
     gen.writeStatement('int _id = 0;');
     gen.writeStatement('Map<String, Completer> _completers = {};');
+    gen.writeStatement('Log _log;');
     gen.writeln();
     gen.writeln("StreamController _onSend = new StreamController.broadcast();");
     gen.writeln("StreamController _onReceive = new StreamController.broadcast();");
@@ -255,9 +259,10 @@ class Api extends Member {
     gen.writeln("StreamController<Event> _stderrController = new StreamController.broadcast();");
     gen.writeln();
     gen.writeStatement(
-        'Observatory(Stream<String> inStream, void writeMessage(String message)) {');
+        'Observatory(Stream<String> inStream, void writeMessage(String message), {Log log}) {');
     gen.writeStatement('_streamSub = inStream.listen(_processMessage);');
     gen.writeStatement('_writeMessage = writeMessage;');
+    gen.writeStatement('_log = log == null ? new _NullLog() : log;');
     gen.writeln('}');
     gen.writeln();
     gen.writeln("Stream<Event> get onIsolateEvent => _isolateController.stream;");

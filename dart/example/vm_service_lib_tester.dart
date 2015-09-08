@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 final String host = 'localhost';
@@ -21,9 +20,6 @@ main(List<String> args) async {
     print('usage: dart example/vm_service_lib_tester.dart <sdk location>');
     exit(1);
   }
-
-  Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen(print);
 
   String sdk = args.first;
 
@@ -55,7 +51,7 @@ main(List<String> args) async {
 
   observatory = new Observatory(_controller.stream, (String message) {
     socket.add(message);
-  });
+  }, log: new StdoutLog());
 
   observatory.onSend.listen((str)    => print('--> ${str}'));
   observatory.onReceive.listen((str) => print('<-- ${str}'));
@@ -81,4 +77,9 @@ main(List<String> args) async {
   observatory.dispose();
   socket.close();
   process.kill();
+}
+
+class StdoutLog extends Log {
+  void warning(String message) => print(message);
+  void severe(String message) => print(message);
 }

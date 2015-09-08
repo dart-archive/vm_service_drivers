@@ -1,10 +1,15 @@
 # vm_service_lib
 
-A library to access the VM Service API.
+A library to access the VM Service Protocol.
 
 ## Usage
 
-TODO:
+See the
+[example](https://github.com/dart-lang/vm_service_drivers/blob/master/dart/example/vm_service_lib_tester.dart)
+for a simple use of the library's API.
+
+The VM Service Protocol spec can be found at
+[github.com/dart-lang/sdk/runtime/vm/service/service.md](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md).
 
 ## Features and bugs
 
