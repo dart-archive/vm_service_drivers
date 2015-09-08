@@ -16,3 +16,6 @@ dart tool/generate.dart
 # Ensure all the code analyzes cleanly.
 pub global activate tuneup
 pub global run tuneup check
+
+# Run the VM service protcol smoke tester.
+dart example/vm_service_lib_tester.dart $DART_SDK
