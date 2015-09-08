@@ -7,10 +7,8 @@ import 'dart:io';
 import 'package:markdown/markdown.dart';
 import 'package:path/path.dart';
 
-import '../tool/generate_dart.dart' show DartGenerator;
-import '../tool/generate_dart.dart' as dart show Api, api;
-import '../tool/generate_java.dart' show JavaGenerator;
-import '../tool/generate_java.dart' as java show Api, api;
+import 'dart/generate_dart.dart' as dart show Api, api, DartGenerator;
+import 'java/generate_java.dart' as java show Api, api, JavaGenerator;
 
 /// Parse the 'service.md' into a model and generate both Dart and Java
 /// libraries.
@@ -33,7 +31,7 @@ void _generateDart(String appDirPath, List<Node> nodes) {
   var outDir = new Directory(outDirPath);
   if (!outDir.existsSync()) outDir.createSync(recursive: true);
   var outputFile = new File(join(outDirPath, 'vm_service_lib.dart'));
-  var generator = new DartGenerator();
+  var generator = new dart.DartGenerator();
   dart.api = new dart.Api();
   dart.api.parse(nodes);
   dart.api.generate(generator);
@@ -45,7 +43,7 @@ void _generateDart(String appDirPath, List<Node> nodes) {
 void _generateJava(String appDirPath, List<Node> nodes) {
   var srcDirPath = normalize(join(appDirPath, '..', '..', 'java', 'src'));
   assert(new Directory(srcDirPath).existsSync());
-  var generator = new JavaGenerator(srcDirPath);
+  var generator = new java.JavaGenerator(srcDirPath);
   java.api = new java.Api();
   java.api.parse(nodes);
   java.api.generate(generator);

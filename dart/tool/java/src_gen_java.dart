@@ -9,7 +9,7 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 
-import 'src_gen_common.dart';
+import '../common/src_gen_common.dart';
 
 /// The maximum length for javadoc comments.
 int colBoundary = 80;

@@ -11,7 +11,7 @@ set -e
 pub get
 
 # Ensure the generator works.
-dart bin/generate.dart
+dart tool/generate.dart
 
 # Ensure all the code analyzes cleanly.
 pub global activate tuneup
