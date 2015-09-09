@@ -14,118 +14,6 @@ export 'src_gen_java.dart' show JavaGenerator;
 
 Api api;
 
-final String _implCode = r'''
-
-  Stream<String> get onSend => _onSend.stream;
-
-  Stream<String> get onReceive => _onReceive.stream;
-
-  void dispose() {
-    _streamSub.cancel();
-    _completers.values.forEach((c) => c.completeError('disposed'));
-  }
-
-  Future<Response> _call(String method, [Map args = const {}]) {
-    String id = '${++_id}';
-    _completers[id] = new Completer();
-    // TODO: The observatory needs 'params' to be there...
-    Map m = {'id': id, 'method': method, 'params': args};
-    if (args != null) m['params'] = args;
-    String message = JSON.encode(m);
-    _onSend.add(message);
-    _writeMessage(message);
-    return _completers[id].future;
-  }
-
-  void _processMessage(String message) {
-    try {
-      _onReceive.add(message);
-
-      var json = JSON.decode(message);
-
-      if (json['id'] == null && json['method'] == 'streamNotify') {
-        Map params = json['params'];
-        String streamId = params['streamId'];
-
-        // TODO: These could be generated from a list.
-        if (streamId == 'Isolate') {
-          _isolateController.add(createObject(params['event']));
-        } else if (streamId == 'Debug') {
-          _debugController.add(createObject(params['event']));
-        } else if (streamId == 'GC') {
-          _gcController.add(createObject(params['event']));
-        } else if (streamId == 'Stdout') {
-          _stdoutController.add(createObject(params['event']));
-        } else if (streamId == 'Stderr') {
-          _stderrController.add(createObject(params['event']));
-        } else {
-          _logger.warning('unknown streamId: ${streamId}');
-        }
-      } else if (json['id'] != null) {
-        Completer completer = _completers.remove(json['id']);
-
-        if (completer == null) {
-          _logger.severe('unmatched request response: ${message}');
-        } else if (json['error'] != null) {
-          completer.completeError(RPCError.parse(json['error']));
-        } else {
-          var result = json['result'];
-          String type = result['type'];
-          if (_typeFactories[type] == null) {
-            completer.completeError(new RPCError(0, 'unknown response type ${type}'));
-          } else {
-            completer.complete(createObject(result));
-          }
-        }
-      } else {
-        _logger.severe('unknown message type: ${message}');
-      }
-    } catch (e) {
-      _logger.severe('unable to decode message: ${message}, ${e}');
-    }
-  }
-''';
-
-final String _rpcError = r'''
-Object createObject(dynamic json) {
-  if (json == null) return null;
-
-  if (json is List) {
-    return (json as List).map((e) => createObject(e)).toList();
-  } else if (json is Map) {
-    String type = json['type'];
-    if (_typeFactories[type] == null) {
-      _logger.severe("no factory for type '${type}'");
-      return null;
-    } else {
-      return _typeFactories[type](json);
-    }
-  } else {
-    // Handle simple types.
-    return json;
-  }
-}
-
-Object _parseEnum(Iterable itor, String valueName) {
-  if (valueName == null) return null;
-  return itor.firstWhere((i) => i.toString() == valueName, orElse: () => null);
-}
-
-class RPCError {
-  static RPCError parse(dynamic json) {
-    return new RPCError(json['code'], json['message'], json['data']);
-  }
-
-  final int code;
-  final String message;
-  final Map data;
-
-  RPCError(this.code, this.message, [this.data]);
-
-  String toString() => '${code}: ${message}';
-}
-''';
-
 String _coerceRefType(String typeName) {
   if (typeName == 'Object') typeName = 'Obj';
   if (typeName == '@Object') typeName = 'ObjRef';
@@ -907,22 +795,22 @@ class TypeRef {
 
   TypeRef(this.name);
 
-  bool get isArray => arrayDepth > 0;
+  String get elementTypeName {
+    if (isSimple) return null;
+    return 'com.google.dart.observatory.element.$name';
+  }
 
-  bool get isSimple => name == 'int' || name == 'String' || name == 'bool';
+  bool get isArray => arrayDepth > 0;
 
   /// Hacked enum determination
   bool get isEnum => name.endsWith('Kind');
+
+  bool get isSimple => name == 'int' || name == 'String' || name == 'bool';
 
   String get javaBoxedName {
     if (name == 'bool') return 'Boolean';
     if (name == 'int') return 'Integer';
     return name;
-  }
-
-  String get elementTypeName {
-    if (isSimple) return null;
-    return 'com.google.dart.observatory.element.$name';
   }
 
   String get javaUnboxedName => name == 'bool' ? 'boolean' : name;
@@ -956,7 +844,8 @@ class TypeRef {
       if (isArray) {
         print('skipped accessor $propertyName');
       } else {
-        writer.addLine('return $javaUnboxedName.valueOf(((JsonObject) json.get("$propertyName")).getAsString());');
+        writer.addLine(
+            'return $javaUnboxedName.valueOf(((JsonObject) json.get("$propertyName")).getAsString());');
       }
     } else {
       if (arrayDepth > 1) {

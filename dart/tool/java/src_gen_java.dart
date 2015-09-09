@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-/// A library to generate Java source code.
+/// A library to generate Java source code. See [JavaGenerator].
 library src_gen_java;
 
 import 'dart:io';
@@ -30,6 +30,15 @@ String pkgNameFor(String typeName) {
 typedef WriteStatements(StatementWriter writer);
 typedef WriteType(TypeWriter writer);
 
+/// [JavaGenerator] generates java source files, one per Java type.
+/// Typical usage:
+///
+///    var generator = new JavaGenerator('/path/to/java/src');
+///    generator.writeType('some.package.Foo', (TypeWriter) writer) {
+///      ...
+///    });
+///    ...
+///
 class JavaGenerator {
   /// The java source directory into which files are generated.
   final String srcDirPath;
@@ -66,6 +75,22 @@ class StatementWriter {
   String toSource() => _content.toString();
 }
 
+/// [TypeWriter] describes a Java type to be generated.
+/// Typical usage:
+///
+///     writer.addImport('package.one.Bar');
+///     writer.addImport('package.two.*');
+///     writer.superclassName = 'package.three.Blat';
+///     writer.addMethod('foo', [
+///       new JavaMethodArg('arg1', 'LocalType'),
+///       new JavaMethodArg('arg2', 'java.util.List'),
+///     ], (StatementWriter writer) {
+///       ...
+///     });
+///
+/// The [toSource()] method generates the source,
+/// but need not be called if used in conjunction with
+/// [JavaGenerator].
 class TypeWriter {
   final String pkgName;
   final String className;
