@@ -15,6 +15,8 @@ package com.google.dart.observatory;
 
 import com.google.common.collect.Maps;
 import com.google.dart.observatory.consumer.Consumer;
+import com.google.dart.observatory.consumer.GetLibraryConsumer;
+import com.google.dart.observatory.consumer.GetObjectConsumer;
 import com.google.dart.observatory.element.RPCError;
 import com.google.dart.observatory.internal.ObservatoryConst;
 import com.google.dart.observatory.internal.RequestSink;
@@ -151,6 +153,17 @@ abstract class ObservatoryBase implements ObservatoryConst {
   }
 
   /**
+   * Return the library with the given identifier.
+   */
+  public void getLibrary(String isolateId, String libraryId,
+      GetLibraryConsumer consumer) {
+    getObject(isolateId, libraryId, consumer);
+  }
+
+  public abstract void getObject(String isolateId, String objectId,
+      GetObjectConsumer consumer);
+
+  /**
    * Sends the request and associates the request with the passed {@link Consumer}.
    */
   protected void request(String method, JsonObject params, Consumer consumer) {
@@ -174,8 +187,14 @@ abstract class ObservatoryBase implements ObservatoryConst {
   abstract void forwardResponse(Consumer consumer, String type, JsonObject json);
 
   void logUnknownResponse(Consumer consumer, JsonObject json) {
-    Logging.getLogger().logError(
-        "Expected response for " + consumer.getClass().getSimpleName() + " but received " + json);
+    Class<? extends Consumer> consumerClass = consumer.getClass();
+    StringBuilder msg = new StringBuilder();
+    msg.append("Expected response for " + consumerClass + "\n");
+    for (Class<?> interf : consumerClass.getInterfaces()) {
+      msg.append("  implementing " + interf + "\n");
+    }
+    msg.append("  but received " + json);
+    Logging.getLogger().logError(msg.toString());
   }
 
   /**
@@ -203,7 +222,8 @@ abstract class ObservatoryBase implements ObservatoryConst {
     }
     Consumer consumer = consumerMap.remove(id);
     if (consumer == null) {
-      Logging.getLogger().logError("No consumer associated with " + ID + ": " + id);
+      Logging.getLogger().logError(
+          "No consumer associated with " + ID + ": " + id);
       return;
     }
 

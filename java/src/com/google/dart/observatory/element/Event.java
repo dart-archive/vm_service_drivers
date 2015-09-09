@@ -79,7 +79,7 @@ public class Event extends Element {
    * PauseBreakpoint
    */
   public List<Breakpoint> getPauseBreakpoints() {
-    JsonArray array = (JsonArray) json.get("pauseBreakpoints");
+    JsonArray array = json.getAsJsonArray("pauseBreakpoints");
     int size = array.size();
     List<Breakpoint> result = new ArrayList<Breakpoint>();
     for (int index = 0; index < size; ++index) {

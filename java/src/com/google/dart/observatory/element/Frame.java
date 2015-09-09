@@ -43,7 +43,7 @@ public class Frame extends Element {
   }
 
   public List<BoundVariable> getVars() {
-    JsonArray array = (JsonArray) json.get("vars");
+    JsonArray array = json.getAsJsonArray("vars");
     int size = array.size();
     List<BoundVariable> result = new ArrayList<BoundVariable>();
     for (int index = 0; index < size; ++index) {

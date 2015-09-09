@@ -44,7 +44,7 @@ public class Context extends Element {
    * The variables in this context object.
    */
   public List<ContextElement> getVariables() {
-    JsonArray array = (JsonArray) json.get("variables");
+    JsonArray array = json.getAsJsonArray("variables");
     int size = array.size();
     List<ContextElement> result = new ArrayList<ContextElement>();
     for (int index = 0; index < size; ++index) {

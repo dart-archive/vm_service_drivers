@@ -33,7 +33,7 @@ public class FlagList extends Element {
    * A list of all flags in the VM.
    */
   public List<Flag> getFlags() {
-    JsonArray array = (JsonArray) json.get("flags");
+    JsonArray array = json.getAsJsonArray("flags");
     int size = array.size();
     List<Flag> result = new ArrayList<Flag>();
     for (int index = 0; index < size; ++index) {

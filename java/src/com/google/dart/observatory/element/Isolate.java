@@ -33,7 +33,7 @@ public class Isolate extends Element {
    * A list of all breakpoints for this isolate.
    */
   public List<Breakpoint> getBreakpoints() {
-    JsonArray array = (JsonArray) json.get("breakpoints");
+    JsonArray array = json.getAsJsonArray("breakpoints");
     int size = array.size();
     List<Breakpoint> result = new ArrayList<Breakpoint>();
     for (int index = 0; index < size; ++index) {
@@ -69,7 +69,7 @@ public class Isolate extends Element {
    * when the IsolateRunnable event fires.
    */
   public List<LibraryRef> getLibraries() {
-    JsonArray array = (JsonArray) json.get("libraries");
+    JsonArray array = json.getAsJsonArray("libraries");
     int size = array.size();
     List<LibraryRef> result = new ArrayList<LibraryRef>();
     for (int index = 0; index < size; ++index) {

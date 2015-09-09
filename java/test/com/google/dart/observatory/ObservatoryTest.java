@@ -13,12 +13,16 @@
  */
 package com.google.dart.observatory;
 
+import com.google.dart.observatory.consumer.BreakpointConsumer;
+import com.google.dart.observatory.consumer.GetLibraryConsumer;
 import com.google.dart.observatory.consumer.IsolateConsumer;
 import com.google.dart.observatory.consumer.SuccessConsumer;
 import com.google.dart.observatory.consumer.VMConsumer;
 import com.google.dart.observatory.consumer.VersionConsumer;
+import com.google.dart.observatory.element.Breakpoint;
 import com.google.dart.observatory.element.Isolate;
 import com.google.dart.observatory.element.IsolateRef;
+import com.google.dart.observatory.element.Library;
 import com.google.dart.observatory.element.RPCError;
 import com.google.dart.observatory.element.StepOption;
 import com.google.dart.observatory.element.Success;
@@ -42,10 +46,8 @@ public class ObservatoryTest {
   private static int vmPort;
   private static Process process;
   private static Observatory observatory;
-  private static List<IsolateRef> isolates;
   private static SampleOutPrinter sampleOut;
   private static SampleOutPrinter sampleErr;
-  private static Isolate sampleIsolate;
 
   public static void main(String[] args) {
     setupLogging();
@@ -55,21 +57,24 @@ public class ObservatoryTest {
       sleep(500);
       vmConnect();
       vmGetVersion();
-      vmGetIsolates();
-      vmGetSampleIsolate(isolates.get(0).getId());
+      List<IsolateRef> isolates = vmGetVmIsolates();
+      Isolate sampleIsolate = vmGetIsolate(isolates.get(0).getId());
+      Library rootLib = vmGetLibrary(sampleIsolate.getId(),
+          sampleIsolate.getRootLib().getId());
 
-      // Run to breakpoint
-      vmAddBreakpoint(isolates.get(0), 8);
-//      vmResume(isolates.get(0), null);
-//      sampleOut.waitFor("hello");
-//      sleep(200);
-//      sampleOut.assertLastLine("hello");
+      // Run to breakpoint on line "foo(1);"
+      vmAddBreakpoint(sampleIsolate.getId(),
+          rootLib.getScripts().get(0).getId(), 11);
+      vmResume(isolates.get(0), null);
+      sampleOut.waitFor("hello");
+      sleep(200);
+      sampleOut.assertLastLine("hello");
 
-      // Step over one line
-//      vmResume(isolates.get(0), StepOption.Over);
-//      sampleOut.waitFor("val: 1");
-//      sleep(200);
-//      sampleOut.assertLastLine("val: 1");
+      // Step over line "foo(1);"
+      vmResume(isolates.get(0), StepOption.Over);
+      sampleOut.waitFor("val: 1");
+      sleep(200);
+      sampleOut.assertLastLine("val: 1");
 
       // Finish execution
       vmResume(isolates.get(0), null);
@@ -114,10 +119,12 @@ public class ObservatoryTest {
     while (!projDir.getName().equals(projName)) {
       projDir = projDir.getParentFile();
       if (projDir == null) {
-        showErrorAndExit("Cannot find project " + projName + " from " + currentDir);
+        showErrorAndExit("Cannot find project " + projName + " from "
+            + currentDir);
       }
     }
-    sampleDart = new File(projDir, "dart/example/sample_main.dart".replace("/", File.separator));
+    sampleDart = new File(projDir, "dart/example/sample_main.dart".replace("/",
+        File.separator));
     if (!sampleDart.isFile()) {
       showErrorAndExit("Cannot find sample: " + sampleDart);
     }
@@ -228,30 +235,33 @@ public class ObservatoryTest {
     System.out.println("Terminated sample process");
   }
 
-  private static void vmAddBreakpoint(IsolateRef isolateRef, int lineNum) {
-//    final CountDownLatch latch = new CountDownLatch(1);
-//    observatory.addBreakpoint(isolateRef.getId(), "sample_main.dart$main", lineNum,
-//        new BreakpointConsumer() {
-//          @Override
-//          public void onError(RPCError error) {
-//            showRPCError(error);
-//          }
-//
-//          @Override
-//          public void received(Breakpoint response) {
-//            System.out.println("Received Breakpoint response");
-//            System.out.println("  BreakpointNumber:" + response.getBreakpointNumber());
-//            latch.countDown();
-//          }
-//        });
-//    waitFor(latch);
+  private static void vmAddBreakpoint(String isolateId, String scriptId,
+      int lineNum) {
+    final OpLatch latch = new OpLatch();
+    observatory.addBreakpoint(isolateId, scriptId, lineNum,
+        new BreakpointConsumer() {
+          @Override
+          public void onError(RPCError error) {
+            showRPCError(error);
+          }
+
+          @Override
+          public void received(Breakpoint response) {
+            System.out.println("Received Breakpoint response");
+            System.out.println("  BreakpointNumber:"
+                + response.getBreakpointNumber());
+            latch.opComplete();
+          }
+        });
+    latch.waitForOp();
   }
 
   private static void vmConnect() {
     try {
       observatory = Observatory.localConnect(vmPort);
     } catch (IOException e) {
-      throw new RuntimeException("Failed to connect to the VM observatory service", e);
+      throw new RuntimeException(
+          "Failed to connect to the VM observatory service", e);
     }
   }
 
@@ -261,36 +271,9 @@ public class ObservatoryTest {
     }
   }
 
-  private static void vmGetIsolates() {
-    final CountDownLatch latch = new CountDownLatch(1);
-    observatory.getVM(new VMConsumer() {
-      @Override
-      public void onError(RPCError error) {
-        showRPCError(error);
-      }
-
-      @Override
-      public void received(VM response) {
-        System.out.println("Received VM response");
-        System.out.println("  ArchitectureBits: " + response.getArchitectureBits());
-        System.out.println("  HostCPU: " + response.getHostCPU());
-        System.out.println("  TargetCPU: " + response.getTargetCPU());
-        System.out.println("  Pid: " + response.getPid());
-        System.out.println("  StartTime: " + response.getStartTime());
-        isolates = response.getIsolates();
-        for (IsolateRef isolate : isolates) {
-          System.out.println("  Isolate " + isolate.getNumber() + ", " + isolate.getId() + ", "
-              + isolate.getName());
-        }
-        latch.countDown();
-      }
-    });
-    waitFor(latch);
-  }
-
-  private static void vmGetSampleIsolate(String id) {
-    final CountDownLatch latch = new CountDownLatch(1);
-    observatory.getIsolate(id, new IsolateConsumer() {
+  private static Isolate vmGetIsolate(String isolateId) {
+    final Result<Isolate> latch = new Result<Isolate>();
+    observatory.getIsolate(isolateId, new IsolateConsumer() {
       @Override
       public void onError(RPCError error) {
         showRPCError(error);
@@ -306,16 +289,33 @@ public class ObservatoryTest {
         System.out.println("  RootLib Uri: " + response.getRootLib().getUri());
         System.out.println("  RootLib Name: " + response.getRootLib().getName());
         System.out.println("  RootLib Json: " + response.getRootLib().getJson());
-        sampleIsolate = response;
-        System.out.println("  Isolate: " + sampleIsolate);
-        latch.countDown();
+        System.out.println("  Isolate: " + response);
+        latch.setValue(response);
       }
     });
-    waitFor(latch);
+    return latch.getValue();
+  }
+
+  private static Library vmGetLibrary(String isolateId, String libraryId) {
+    final Result<Library> latch = new Result<Library>();
+    observatory.getLibrary(isolateId, libraryId, new GetLibraryConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        showRPCError(error);
+      }
+
+      @Override
+      public void received(Library response) {
+        System.out.println("Received GetLibrary library");
+        System.out.println("  uri: " + response.getUri());
+        latch.setValue(response);
+      }
+    });
+    return latch.getValue();
   }
 
   private static void vmGetVersion() {
-    final CountDownLatch latch = new CountDownLatch(1);
+    final OpLatch latch = new OpLatch();
     observatory.getVersion(new VersionConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -328,10 +328,37 @@ public class ObservatoryTest {
         System.out.println("  Major: " + response.getMajor());
         System.out.println("  Minor: " + response.getMinor());
         System.out.println(response.getJson());
-        latch.countDown();
+        latch.opComplete();
       }
     });
-    waitFor(latch);
+    latch.waitForOp();
+  }
+
+  private static List<IsolateRef> vmGetVmIsolates() {
+    final Result<List<IsolateRef>> latch = new Result<List<IsolateRef>>();
+    observatory.getVM(new VMConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        showRPCError(error);
+      }
+
+      @Override
+      public void received(VM response) {
+        System.out.println("Received VM response");
+        System.out.println("  ArchitectureBits: "
+            + response.getArchitectureBits());
+        System.out.println("  HostCPU: " + response.getHostCPU());
+        System.out.println("  TargetCPU: " + response.getTargetCPU());
+        System.out.println("  Pid: " + response.getPid());
+        System.out.println("  StartTime: " + response.getStartTime());
+        for (IsolateRef isolate : response.getIsolates()) {
+          System.out.println("  Isolate " + isolate.getNumber() + ", "
+              + isolate.getId() + ", " + isolate.getName());
+        }
+        latch.setValue(response.getIsolates());
+      }
+    });
+    return latch.getValue();
   }
 
   private static void vmResume(IsolateRef isolateRef, final StepOption step) {
@@ -351,9 +378,18 @@ public class ObservatoryTest {
         }
       }
     });
+    // Do not wait for confirmation, but display error if it occurs
+  }
+}
+
+class OpLatch {
+  final CountDownLatch latch = new CountDownLatch(1);
+
+  void opComplete() {
+    latch.countDown();
   }
 
-  private static void waitFor(final CountDownLatch latch) {
+  void waitForOp() {
     try {
       if (!latch.await(5, TimeUnit.SECONDS)) {
         System.out.println(">>> No response received");
@@ -363,5 +399,19 @@ public class ObservatoryTest {
       System.out.println(">>> Interrupted while waiting for response");
       throw new RuntimeException("Interrupted while waiting for response", e);
     }
+  }
+}
+
+class Result<T> extends OpLatch {
+  private T value;
+
+  T getValue() {
+    waitForOp();
+    return value;
+  }
+
+  void setValue(T value) {
+    this.value = value;
+    opComplete();
   }
 }
