@@ -166,7 +166,10 @@ class TypeWriter {
 
   void addMethod(
       String name, Iterable<JavaMethodArg> args, WriteStatements write,
-      {String javadoc, String modifiers: 'public', String returnType: 'void'}) {
+      {String javadoc,
+      String modifiers: 'public',
+      String returnType: 'void',
+      bool isOverride: false}) {
     var mthDecl = new StringBuffer();
     if (javadoc != null && javadoc.isNotEmpty) {
       mthDecl.writeln('  /**');
@@ -174,6 +177,9 @@ class TypeWriter {
           .split('\n')
           .forEach((line) => mthDecl.writeln('   * $line'));
       mthDecl.writeln('   */');
+    }
+    if (isOverride) {
+      mthDecl.writeln('  @Override');
     }
     mthDecl.write('  ');
     if (modifiers != null && modifiers.isNotEmpty) {
@@ -193,8 +199,9 @@ class TypeWriter {
       mthDecl.writeln(';');
     }
     var key = (modifiers != null && modifiers.contains('public'))
-        ? '1 $name'
-        : '2 $name';
+        ? '1 $name('
+        : '2 $name(';
+    key = args.fold(key, (k, a) => '$k${a.typeName},');
     _methods[key] = mthDecl.toString();
   }
 

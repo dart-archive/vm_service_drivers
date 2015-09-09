@@ -42,7 +42,7 @@ public class TypeArguments extends Element {
    * TypeParameter, BoundedType.
    */
   public List<InstanceRef> getTypes() {
-    JsonArray array = (JsonArray) json.get("types");
+    JsonArray array = json.getAsJsonArray("types");
     int size = array.size();
     List<InstanceRef> result = new ArrayList<InstanceRef>();
     for (int index = 0; index < size; ++index) {

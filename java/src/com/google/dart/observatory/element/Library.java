@@ -33,7 +33,7 @@ public class Library extends Element {
    * A list of all classes in this library.
    */
   public List<ClassRef> getClasses() {
-    JsonArray array = (JsonArray) json.get("classes");
+    JsonArray array = json.getAsJsonArray("classes");
     int size = array.size();
     List<ClassRef> result = new ArrayList<ClassRef>();
     for (int index = 0; index < size; ++index) {
@@ -53,7 +53,7 @@ public class Library extends Element {
    * A list of the imports for this library.
    */
   public List<LibraryDependency> getDependencies() {
-    JsonArray array = (JsonArray) json.get("dependencies");
+    JsonArray array = json.getAsJsonArray("dependencies");
     int size = array.size();
     List<LibraryDependency> result = new ArrayList<LibraryDependency>();
     for (int index = 0; index < size; ++index) {
@@ -66,7 +66,7 @@ public class Library extends Element {
    * A list of the top-level functions in this library.
    */
   public List<FuncRef> getFunctions() {
-    JsonArray array = (JsonArray) json.get("functions");
+    JsonArray array = json.getAsJsonArray("functions");
     int size = array.size();
     List<FuncRef> result = new ArrayList<FuncRef>();
     for (int index = 0; index < size; ++index) {
@@ -86,7 +86,7 @@ public class Library extends Element {
    * A list of the scripts which constitute this library.
    */
   public List<ScriptRef> getScripts() {
-    JsonArray array = (JsonArray) json.get("scripts");
+    JsonArray array = json.getAsJsonArray("scripts");
     int size = array.size();
     List<ScriptRef> result = new ArrayList<ScriptRef>();
     for (int index = 0; index < size; ++index) {
@@ -106,7 +106,7 @@ public class Library extends Element {
    * A list of the top-level variables in this library.
    */
   public List<FieldRef> getVariables() {
-    JsonArray array = (JsonArray) json.get("variables");
+    JsonArray array = json.getAsJsonArray("variables");
     int size = array.size();
     List<FieldRef> result = new ArrayList<FieldRef>();
     for (int index = 0; index < size; ++index) {

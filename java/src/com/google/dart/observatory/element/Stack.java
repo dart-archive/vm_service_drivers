@@ -27,7 +27,7 @@ public class Stack extends Element {
   }
 
   public List<Frame> getFrames() {
-    JsonArray array = (JsonArray) json.get("frames");
+    JsonArray array = json.getAsJsonArray("frames");
     int size = array.size();
     List<Frame> result = new ArrayList<Frame>();
     for (int index = 0; index < size; ++index) {
@@ -37,7 +37,7 @@ public class Stack extends Element {
   }
 
   public List<Message> getMessages() {
-    JsonArray array = (JsonArray) json.get("messages");
+    JsonArray array = json.getAsJsonArray("messages");
     int size = array.size();
     List<Message> result = new ArrayList<Message>();
     for (int index = 0; index < size; ++index) {

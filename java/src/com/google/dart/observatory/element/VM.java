@@ -44,7 +44,7 @@ public class VM extends Element {
    * A list of isolates running in the VM.
    */
   public List<IsolateRef> getIsolates() {
-    JsonArray array = (JsonArray) json.get("isolates");
+    JsonArray array = json.getAsJsonArray("isolates");
     int size = array.size();
     List<IsolateRef> result = new ArrayList<IsolateRef>();
     for (int index = 0; index < size; ++index) {

@@ -40,7 +40,7 @@ public class Class extends Element {
    * A list of fields in this class. Does not include fields from superclasses.
    */
   public List<FieldRef> getFields() {
-    JsonArray array = (JsonArray) json.get("fields");
+    JsonArray array = json.getAsJsonArray("fields");
     int size = array.size();
     List<FieldRef> result = new ArrayList<FieldRef>();
     for (int index = 0; index < size; ++index) {
@@ -54,7 +54,7 @@ public class Class extends Element {
    * superclasses.
    */
   public List<FuncRef> getFunctions() {
-    JsonArray array = (JsonArray) json.get("functions");
+    JsonArray array = json.getAsJsonArray("functions");
     int size = array.size();
     List<FuncRef> result = new ArrayList<FuncRef>();
     for (int index = 0; index < size; ++index) {
@@ -68,7 +68,7 @@ public class Class extends Element {
    * Type.
    */
   public List<InstanceRef> getInterfaces() {
-    JsonArray array = (JsonArray) json.get("interfaces");
+    JsonArray array = json.getAsJsonArray("interfaces");
     int size = array.size();
     List<InstanceRef> result = new ArrayList<InstanceRef>();
     for (int index = 0; index < size; ++index) {
@@ -116,7 +116,7 @@ public class Class extends Element {
    * A list of subclasses of this class.
    */
   public List<ClassRef> getSubclasses() {
-    JsonArray array = (JsonArray) json.get("subclasses");
+    JsonArray array = json.getAsJsonArray("subclasses");
     int size = array.size();
     List<ClassRef> result = new ArrayList<ClassRef>();
     for (int index = 0; index < size; ++index) {
