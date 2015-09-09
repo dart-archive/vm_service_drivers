@@ -57,7 +57,7 @@ Map<String, Function> _typeFactories = {
   'VM': VM.parse
 };
 
-class Observatory {
+class VmService {
   StreamSubscription _streamSub;
   Function _writeMessage;
   int _id = 0;
@@ -73,7 +73,7 @@ class Observatory {
   StreamController<Event> _stdoutController = new StreamController.broadcast();
   StreamController<Event> _stderrController = new StreamController.broadcast();
 
-  Observatory(Stream<String> inStream, void writeMessage(String message),
+  VmService(Stream<String> inStream, void writeMessage(String message),
       {Log log}) {
     _streamSub = inStream.listen(_processMessage);
     _writeMessage = writeMessage;
@@ -217,7 +217,7 @@ class Observatory {
   Future<Response> _call(String method, [Map args = const {}]) {
     String id = '${++_id}';
     _completers[id] = new Completer();
-    // TODO: The observatory needs 'params' to be there...
+    // The service protocol needs 'params' to be there.
     Map m = {'id': id, 'method': method, 'params': args};
     if (args != null) m['params'] = args;
     String message = JSON.encode(m);

@@ -13,7 +13,7 @@ import 'package:vm_service_lib/vm_service_lib.dart';
 final String host = 'localhost';
 final int port = 7575;
 
-Observatory observatory;
+VmService serviceClient;
 
 main(List<String> args) async {
   if (args.length != 1) {
@@ -34,7 +34,7 @@ main(List<String> args) async {
 
   print('dart process started');
 
-  process.exitCode.then((code) => print('observatory exited: ${code}'));
+  process.exitCode.then((code) => print('vm exited: ${code}'));
   process.stdout.transform(UTF8.decoder).listen(print);
   process.stderr.transform(UTF8.decoder).listen(print);
 
@@ -49,32 +49,32 @@ main(List<String> args) async {
     _controller.add(data);
   });
 
-  observatory = new Observatory(_controller.stream, (String message) {
+  serviceClient = new VmService(_controller.stream, (String message) {
     socket.add(message);
   }, log: new StdoutLog());
 
-  observatory.onSend.listen((str)    => print('--> ${str}'));
-  observatory.onReceive.listen((str) => print('<-- ${str}'));
+  serviceClient.onSend.listen((str)    => print('--> ${str}'));
+  serviceClient.onReceive.listen((str) => print('<-- ${str}'));
 
-  observatory.onIsolateEvent.listen((e) => print('onIsolateEvent: ${e}'));
-  observatory.onDebugEvent.listen((e) => print('onDebugEvent: ${e}'));
-  observatory.onGcEvent.listen((e) => print('onGcEvent: ${e}'));
-  observatory.onStdoutEvent.listen((e) => print('onStdoutEvent: ${e}'));
-  observatory.onStderrEvent.listen((e) => print('onStderrEvent: ${e}'));
+  serviceClient.onIsolateEvent.listen((e) => print('onIsolateEvent: ${e}'));
+  serviceClient.onDebugEvent.listen((e) => print('onDebugEvent: ${e}'));
+  serviceClient.onGcEvent.listen((e) => print('onGcEvent: ${e}'));
+  serviceClient.onStdoutEvent.listen((e) => print('onStdoutEvent: ${e}'));
+  serviceClient.onStderrEvent.listen((e) => print('onStderrEvent: ${e}'));
 
-  observatory.streamListen('Isolate');
-  observatory.streamListen('Debug');
-  observatory.streamListen('Stdout');
+  serviceClient.streamListen('Isolate');
+  serviceClient.streamListen('Debug');
+  serviceClient.streamListen('Stdout');
 
-  VM vm = await observatory.getVM();
-  print(await observatory.getVersion());
+  VM vm = await serviceClient.getVM();
+  print(await serviceClient.getVersion());
   List<IsolateRef> isolates = await vm.isolates;
   print(isolates);
 
   IsolateRef isolateRef = isolates.first;
-  print(await observatory.resume(isolateRef.id));
+  print(await serviceClient.resume(isolateRef.id));
 
-  observatory.dispose();
+  serviceClient.dispose();
   socket.close();
   process.kill();
 }
