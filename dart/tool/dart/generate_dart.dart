@@ -52,7 +52,7 @@ final String _implCode = r'''
   Future<Response> _call(String method, [Map args = const {}]) {
     String id = '${++_id}';
     _completers[id] = new Completer();
-    // TODO: The observatory needs 'params' to be there...
+    // The service protocol needs 'params' to be there.
     Map m = {'id': id, 'method': method, 'params': args};
     if (args != null) m['params'] = args;
     String message = JSON.encode(m);
@@ -242,7 +242,7 @@ class Api extends Member {
     });
     gen.writeln('};');
     gen.writeln();
-    gen.writeStatement('class Observatory {');
+    gen.writeStatement('class VmService {');
     gen.writeStatement('StreamSubscription _streamSub;');
     gen.writeStatement('Function _writeMessage;');
     gen.writeStatement('int _id = 0;');
@@ -259,7 +259,7 @@ class Api extends Member {
     gen.writeln("StreamController<Event> _stderrController = new StreamController.broadcast();");
     gen.writeln();
     gen.writeStatement(
-        'Observatory(Stream<String> inStream, void writeMessage(String message), {Log log}) {');
+        'VmService(Stream<String> inStream, void writeMessage(String message), {Log log}) {');
     gen.writeStatement('_streamSub = inStream.listen(_processMessage);');
     gen.writeStatement('_writeMessage = writeMessage;');
     gen.writeStatement('_log = log == null ? new _NullLog() : log;');
