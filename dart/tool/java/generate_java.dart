@@ -34,7 +34,7 @@ class Api extends Member {
   String get name => 'api';
 
   void addProperty(String typeName, String propertyName, {String javadoc}) {
-    var t = types.firstWhere((t) => t.name == 'LibraryRef');
+    var t = types.firstWhere((t) => t.name == typeName);
     for (var f in t.fields) {
       if (f.name == propertyName) {
         print('$typeName already has $propertyName field');
@@ -49,11 +49,20 @@ class Api extends Member {
     print('added $propertyName field to $typeName');
   }
 
+  void addReturnType(String methodName, String newReturnTypeName) {
+    var m = methods.firstWhere((m) => m.name == methodName);
+    m.returnType.types.add(new TypeRef(newReturnTypeName));
+  }
+
   void generate(JavaGenerator gen) {
     _setFileHeader();
 
     // Add undocumented "id" property
     addProperty('LibraryRef', 'id', javadoc: 'The id of this library.');
+    addProperty('ScriptRef', 'id', javadoc: 'The id of this script.');
+
+    // Add additional object return types
+    addReturnType('getObject', 'Library');
 
     // Hack to populate method argument docs
     for (var m in methods) {
@@ -89,32 +98,20 @@ class Api extends Member {
         var generatedForwards = new Set<String>();
 
         var sorted = methods.toList()
-          ..removeWhere((m) {
-            if (m.returnType.isMultipleReturns) {
-              print('skipped forward for ${m.returnType.name}');
-              return true;
-            } else {
-              return false;
-            }
-          })
           ..sort((m1, m2) {
-            return m1.returnType.consumerTypeName
-                .compareTo(m2.returnType.consumerTypeName);
+            return m1.consumerTypeName.compareTo(m2.consumerTypeName);
           });
         for (var m in sorted) {
-          if (generatedForwards.add(m.returnType.consumerTypeName)) {
+          if (generatedForwards.add(m.consumerTypeName)) {
             m.generateObservatoryForward(writer);
           }
         }
         writer.addLine('logUnknownResponse(consumer, json);');
-      }, modifiers: null);
+      }, modifiers: null, isOverride: true);
     });
 
-    var generatedConsumers = new Set<String>();
     for (var m in methods) {
-      if (generatedConsumers.add(m.returnType.consumerTypeName)) {
-        m.generateConsumerInterface(gen);
-      }
+      m.generateConsumerInterface(gen);
     }
     for (var t in types) {
       t.generateElement(gen);
@@ -122,52 +119,6 @@ class Api extends Member {
     for (var e in enums) {
       e.generateEnum(gen);
     }
-
-// gen.write('Map<String, Function> _typeFactories = {');
-// types.forEach((Type type) {
-//   //if (type.isResponse)
-//   gen.write("'${type.rawName}': ${type.name}.parse");
-//   gen.writeln(type == types.last ? '' : ',');
-// });
-// gen.writeln('};');
-// gen.writeln();
-// gen.writeStatement('class Observatory {');
-// gen.writeStatement('StreamSubscription _streamSub;');
-// gen.writeStatement('Function _writeMessage;');
-// gen.writeStatement('int _id = 0;');
-// gen.writeStatement('Map<String, Completer> _completers = {};');
-// gen.writeln();
-// gen.writeln("StreamController _onSend = new StreamController.broadcast();");
-// gen.writeln("StreamController _onReceive = new StreamController.broadcast();");
-// gen.writeln();
-// gen.writeln("StreamController<Event> _isolateController = new StreamController.broadcast();");
-// gen.writeln("StreamController<Event> _debugController = new StreamController.broadcast();");
-// gen.writeln("StreamController<Event> _gcController = new StreamController.broadcast();");
-// gen.writeln("StreamController<Event> _stdoutController = new StreamController.broadcast();");
-// gen.writeln("StreamController<Event> _stderrController = new StreamController.broadcast();");
-// gen.writeln();
-// gen.writeStatement(
-//     'Observatory(Stream<String> inStream, void writeMessage(String message)) {');
-// gen.writeStatement('_streamSub = inStream.listen(_processMessage);');
-// gen.writeStatement('_writeMessage = writeMessage;');
-// gen.writeln('}');
-// gen.writeln();
-// gen.writeln("Stream<Event> get onIsolateEvent => _isolateController.stream;");
-// gen.writeln("Stream<Event> get onDebugEvent => _debugController.stream;");
-// gen.writeln("Stream<Event> get onGcEvent => _gcController.stream;");
-// gen.writeln("Stream<Event> get onStdoutEvent => _stdoutController.stream;");
-// gen.writeln("Stream<Event> get onStderrEvent => _stderrController.stream;");
-// gen.writeln();
-// methods.forEach((m) => m.generate(gen));
-// gen.out(_implCode);
-// gen.writeStatement('}');
-// gen.writeln();
-// gen.writeln(_rpcError);
-// gen.writeln('// enums');
-// enums.forEach((e) => e.generate(gen));
-// gen.writeln();
-// gen.writeln('// types');
-// types.forEach((t) => t.generate(gen));
   }
 
   Type getType(String name) =>
@@ -325,14 +276,6 @@ class MemberType extends Member {
 
   MemberType();
 
-  String get consumerTypeName {
-    if (types.isEmpty) return null;
-    if (types.length == 1) {
-      return 'com.google.dart.observatory.consumer.${types.first.ref}Consumer';
-    }
-    return null;
-  }
-
   bool get isEnum => types.length == 1 && api.isEnumName(types.first.name);
 
   bool get isMultipleReturns => types.length > 1;
@@ -372,18 +315,22 @@ class Method extends Member {
     _parse(new Tokenizer(definition).tokenize());
   }
 
+  String get consumerTypeName {
+    String prefix;
+    if (returnType.isMultipleReturns) {
+      prefix = titleCase(name);
+    } else {
+      prefix = returnType.types.first.javaBoxedName;
+    }
+    return 'com.google.dart.observatory.consumer.${prefix}Consumer';
+  }
+
   bool get hasArgs => args.isNotEmpty;
 
   bool get hasOptionalArgs => args.any((MethodArg arg) => arg.optional);
 
   void generateConsumerInterface(JavaGenerator gen) {
-    // TODO Generate consumer for dynamic
-    if (returnType.isMultipleReturns) {
-      print('skipped consumer $name');
-      return;
-    }
-
-    gen.writeType(returnType.consumerTypeName, (TypeWriter writer) {
+    gen.writeType(consumerTypeName, (TypeWriter writer) {
       writer.javadoc = returnType.docs;
       writer.interfaceNames
           .add('com.google.dart.observatory.consumer.Consumer');
@@ -397,18 +344,20 @@ class Method extends Member {
   }
 
   void generateObservatoryForward(StatementWriter writer) {
-    var jsonType = returnType.name;
-    var consumerName = classNameFor(returnType.consumerTypeName);
-    for (var t in returnType.types) {
+    var consumerName = classNameFor(consumerTypeName);
+    writer.addLine('if (consumer instanceof $consumerName) {');
+    var types = returnType.types.toList()
+      ..sort((t1, t2) => t1.name.compareTo(t2.name));
+    for (var t in types) {
+      var jsonType = t.name;
       var responseName = classNameFor(t.elementTypeName);
-      writer.addLine('if (consumer instanceof $consumerName) {');
-      writer.addLine('  $responseName response = new $responseName(json);');
       writer.addLine('  if (responseType.equals("$jsonType")) {');
-      writer.addLine('    (($consumerName) consumer).received(response);');
+      writer.addLine(
+          '    (($consumerName) consumer).received(new $responseName(json));');
       writer.addLine('    return;');
       writer.addLine('  }');
-      writer.addLine('}');
     }
+    writer.addLine('}');
   }
 
   void generateObservatoryMethod(TypeWriter writer) {
@@ -441,13 +390,7 @@ class Method extends Member {
     }
 
     var mthArgs = args.map((a) => a.asJavaMethodArg).toList();
-    if (!returnType.isMultipleReturns) {
-      mthArgs.add(new JavaMethodArg(
-          'consumer', classNameFor(returnType.consumerTypeName)));
-    } else {
-      print('skipped consumer arg in Observatory method $name');
-    }
-
+    mthArgs.add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
     writer.addMethod(name, mthArgs, (StatementWriter writer) {
       writer.addLine('JsonObject params = new JsonObject();');
       for (MethodArg arg in args) {
@@ -463,10 +406,6 @@ class Method extends Member {
         }
       }
       writer.addLine('request("$name", params, consumer);');
-      if (returnType.isMultipleReturns) {
-        writer
-            .addLine('// Consumer: ${returnType.name} ${returnType.isSimple}');
-      }
     }, javadoc: javadoc.toString());
 
 //    if (docs != null) {
@@ -736,8 +675,9 @@ class TypeField extends Member {
 
   void generateAccessor(TypeWriter writer) {
     if (type.isMultipleReturns) {
-      // TODO(danrubel) generate accessors for dynamic
-      print('skipped accessor for $name');
+      print('skipped accessor for $name '
+          '(${type.types.map((t) => t.name).join(',')}) '
+          ' in ${writer.className}');
       return;
     }
 
@@ -824,35 +764,37 @@ class TypeRef {
   void generateAccessStatements(StatementWriter writer, String propertyName) {
     if (name == 'bool') {
       if (isArray) {
-        print('skipped accessor $propertyName');
+        print('skipped accessor body for $propertyName');
       } else {
         writer.addLine('return json.get("$propertyName").getAsBoolean();');
       }
     } else if (name == 'int') {
-      if (isArray) {
-        print('skipped accessor $propertyName');
+      if (arrayDepth > 1) {
+        writer.addLine('return getListListInt("$propertyName");');
+      } else if (arrayDepth == 1) {
+        writer.addLine('return getListInt("$propertyName");');
       } else {
         writer.addLine('return json.get("$propertyName").getAsInt();');
       }
     } else if (name == 'String') {
       if (isArray) {
-        print('skipped accessor $propertyName');
+        print('skipped accessor body for $propertyName');
       } else {
         writer.addLine('return json.get("$propertyName").getAsString();');
       }
     } else if (isEnum) {
       if (isArray) {
-        print('skipped accessor $propertyName');
+        print('skipped accessor body for $propertyName');
       } else {
         writer.addLine(
             'return $javaUnboxedName.valueOf(((JsonObject) json.get("$propertyName")).getAsString());');
       }
     } else {
       if (arrayDepth > 1) {
-        print('skipped accessor $propertyName');
+        print('skipped accessor body for $propertyName');
       } else if (arrayDepth == 1) {
-        writer.addLine(
-            'JsonArray array = (JsonArray) json.get("$propertyName");');
+        writer
+            .addLine('JsonArray array = json.getAsJsonArray("$propertyName");');
         writer.addLine('int size = array.size();');
         writer.addLine(
             'List<$javaBoxedName> result = new ArrayList<$javaBoxedName>();');

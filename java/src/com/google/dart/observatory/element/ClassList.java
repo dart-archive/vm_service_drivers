@@ -27,7 +27,7 @@ public class ClassList extends Element {
   }
 
   public List<ClassRef> getClasses() {
-    JsonArray array = (JsonArray) json.get("classes");
+    JsonArray array = json.getAsJsonArray("classes");
     int size = array.size();
     List<ClassRef> result = new ArrayList<ClassRef>();
     for (int index = 0; index < size; ++index) {

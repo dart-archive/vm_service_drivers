@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2015, the Dart project authors.
- * 
+ *
  * Licensed under the Eclipse Public License v1.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -15,28 +15,15 @@ package com.google.dart.observatory;
 
 // This is a generated file.
 
-import com.google.dart.observatory.consumer.BreakpointConsumer;
-import com.google.dart.observatory.consumer.Consumer;
-import com.google.dart.observatory.consumer.FlagListConsumer;
-import com.google.dart.observatory.consumer.IsolateConsumer;
-import com.google.dart.observatory.consumer.StackConsumer;
-import com.google.dart.observatory.consumer.SuccessConsumer;
-import com.google.dart.observatory.consumer.VMConsumer;
-import com.google.dart.observatory.consumer.VersionConsumer;
-import com.google.dart.observatory.element.Breakpoint;
-import com.google.dart.observatory.element.FlagList;
-import com.google.dart.observatory.element.Isolate;
-import com.google.dart.observatory.element.Stack;
-import com.google.dart.observatory.element.StepOption;
-import com.google.dart.observatory.element.Success;
-import com.google.dart.observatory.element.VM;
-import com.google.dart.observatory.element.Version;
+import com.google.dart.observatory.consumer.*;
+import com.google.dart.observatory.element.*;
 import com.google.gson.JsonObject;
 
 public class Observatory extends ObservatoryBase {
 
   /**
-   * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
+   * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
+   * some script.
    */
   public void addBreakpoint(String isolateId, String scriptId, int line, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -47,7 +34,8 @@ public class Observatory extends ObservatoryBase {
   }
 
   /**
-   * The [addBreakpointAtEntry] RPC is used to add a breakpoint at the entrypoint of some function.
+   * The [addBreakpointAtEntry] RPC is used to add a breakpoint at the
+   * entrypoint of some function.
    */
   public void addBreakpointAtEntry(String isolateId, String functionId, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -57,8 +45,33 @@ public class Observatory extends ObservatoryBase {
   }
 
   /**
-   * The _getFlagList RPC returns a list of all command line flags in the VM along with their
-   * current values.
+   * The [evaluate] RPC is used to evaluate an expression in the context of
+   * some target.
+   */
+  public void evaluate(String isolateId, String targetId, String expression, EvaluateConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("targetId", targetId);
+    params.addProperty("expression", expression);
+    request("evaluate", params, consumer);
+  }
+
+  /**
+   * The [evaluateInFrame] RPC is used to evaluate an expression in the context
+   * of a particular stack frame. [frameIndex] is the index of the desired
+   * Frame, with an index of [0] indicating the top (most recent) frame.
+   */
+  public void evaluateInFrame(String isolateId, int frameIndex, String expression, EvaluateInFrameConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("frameIndex", frameIndex);
+    params.addProperty("expression", expression);
+    request("evaluateInFrame", params, consumer);
+  }
+
+  /**
+   * The _getFlagList RPC returns a list of all command line flags in the VM
+   * along with their current values.
    */
   public void getFlagList(FlagListConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -75,22 +88,24 @@ public class Observatory extends ObservatoryBase {
   }
 
   /**
-   * The [getStack] RPC is used to retrieve the current execution stack and message queue for an
-   * isolate. The isolate does not need to be paused.
+   * The [getObject] RPC is used to lookup an [object] from some isolate by its
+   * [id].
+   */
+  public void getObject(String isolateId, String objectId, GetObjectConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("objectId", objectId);
+    request("getObject", params, consumer);
+  }
+
+  /**
+   * The [getStack] RPC is used to retrieve the current execution stack and
+   * message queue for an isolate. The isolate does not need to be paused.
    */
   public void getStack(String isolateId, StackConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     request("getStack", params, consumer);
-  }
-
-  /**
-   * The [getVersion] RPC is used to determine what version of the Service Protocol is served by a
-   * VM.
-   */
-  public void getVersion(VersionConsumer consumer) {
-    JsonObject params = new JsonObject();
-    request("getVersion", params, consumer);
   }
 
   /**
@@ -102,8 +117,18 @@ public class Observatory extends ObservatoryBase {
   }
 
   /**
-   * The [pause] RPC is used to interrupt a running isolate. The RPC enqueues the interrupt request
-   * and potentially returns before the isolate is paused.
+   * The [getVersion] RPC is used to determine what version of the Service
+   * Protocol is served by a VM.
+   */
+  public void getVersion(VersionConsumer consumer) {
+    JsonObject params = new JsonObject();
+    request("getVersion", params, consumer);
+  }
+
+  /**
+   * The [pause] RPC is used to interrupt a running isolate. The RPC enqueues
+   * the interrupt request and potentially returns before the isolate is
+   * paused.
    */
   public void pause(String isolateId, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -124,24 +149,21 @@ public class Observatory extends ObservatoryBase {
   /**
    * The [resume] RPC is used to resume execution of a paused isolate.
    * 
-   * @param step A [StepOption] indicates which form of stepping is requested in a resume RPC. This
-   *          parameter is optional and may be null.
+   * @param step A [StepOption] indicates which form of stepping is requested
+   * in a resume RPC. This parameter is optional and may be null.
    */
   public void resume(String isolateId, StepOption step, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
-    if (step != null) {
-      params.addProperty("step", step.name());
-    }
+    if (step != null) params.addProperty("step", step.name());
     request("resume", params, consumer);
   }
 
   /**
-   * The [setLibraryDebuggable] RPC is used to enable or disable whether breakpoints and stepping
-   * work for a given library.
+   * The [setLibraryDebuggable] RPC is used to enable or disable whether
+   * breakpoints and stepping work for a given library.
    */
-  public void setLibraryDebuggable(String isolateId, String libraryId, boolean isDebuggable,
-      SuccessConsumer consumer) {
+  public void setLibraryDebuggable(String isolateId, String libraryId, boolean isDebuggable, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("libraryId", libraryId);
@@ -169,8 +191,8 @@ public class Observatory extends ObservatoryBase {
   }
 
   /**
-   * The [streamListen] RPC subscribes to a stream in the VM. Once subscribed, the client will begin
-   * receiving events from the stream.
+   * The [streamListen] RPC subscribes to a stream in the VM. Once subscribed,
+   * the client will begin receiving events from the stream.
    */
   public void streamListen(String streamId, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -181,51 +203,82 @@ public class Observatory extends ObservatoryBase {
   @Override
   void forwardResponse(Consumer consumer, String responseType, JsonObject json) {
     if (consumer instanceof BreakpointConsumer) {
-      Breakpoint response = new Breakpoint(json);
       if (responseType.equals("Breakpoint")) {
-        ((BreakpointConsumer) consumer).received(response);
+        ((BreakpointConsumer) consumer).received(new Breakpoint(json));
+        return;
+      }
+    }
+    if (consumer instanceof EvaluateConsumer) {
+      if (responseType.equals("ErrorRef")) {
+        ((EvaluateConsumer) consumer).received(new ErrorRef(json));
+        return;
+      }
+      if (responseType.equals("InstanceRef")) {
+        ((EvaluateConsumer) consumer).received(new InstanceRef(json));
+        return;
+      }
+      if (responseType.equals("Sentinel")) {
+        ((EvaluateConsumer) consumer).received(new Sentinel(json));
+        return;
+      }
+    }
+    if (consumer instanceof EvaluateInFrameConsumer) {
+      if (responseType.equals("ErrorRef")) {
+        ((EvaluateInFrameConsumer) consumer).received(new ErrorRef(json));
+        return;
+      }
+      if (responseType.equals("InstanceRef")) {
+        ((EvaluateInFrameConsumer) consumer).received(new InstanceRef(json));
         return;
       }
     }
     if (consumer instanceof FlagListConsumer) {
-      FlagList response = new FlagList(json);
       if (responseType.equals("FlagList")) {
-        ((FlagListConsumer) consumer).received(response);
+        ((FlagListConsumer) consumer).received(new FlagList(json));
+        return;
+      }
+    }
+    if (consumer instanceof GetObjectConsumer) {
+      if (responseType.equals("Library")) {
+        ((GetObjectConsumer) consumer).received(new Library(json));
+        return;
+      }
+      if (responseType.equals("Obj")) {
+        ((GetObjectConsumer) consumer).received(new Obj(json));
+        return;
+      }
+      if (responseType.equals("Sentinel")) {
+        ((GetObjectConsumer) consumer).received(new Sentinel(json));
         return;
       }
     }
     if (consumer instanceof IsolateConsumer) {
-      Isolate response = new Isolate(json);
       if (responseType.equals("Isolate")) {
-        ((IsolateConsumer) consumer).received(response);
+        ((IsolateConsumer) consumer).received(new Isolate(json));
         return;
       }
     }
     if (consumer instanceof StackConsumer) {
-      Stack response = new Stack(json);
       if (responseType.equals("Stack")) {
-        ((StackConsumer) consumer).received(response);
+        ((StackConsumer) consumer).received(new Stack(json));
         return;
       }
     }
     if (consumer instanceof SuccessConsumer) {
-      Success response = new Success(json);
       if (responseType.equals("Success")) {
-        ((SuccessConsumer) consumer).received(response);
+        ((SuccessConsumer) consumer).received(new Success(json));
         return;
       }
     }
     if (consumer instanceof VMConsumer) {
-      VM response = new VM(json);
       if (responseType.equals("VM")) {
-        ((VMConsumer) consumer).received(response);
+        ((VMConsumer) consumer).received(new VM(json));
         return;
       }
     }
     if (consumer instanceof VersionConsumer) {
-      Version response = new Version(json);
       if (responseType.equals("Version")) {
-        ((VersionConsumer) consumer).received(response);
+        ((VersionConsumer) consumer).received(new Version(json));
         return;
       }
     }

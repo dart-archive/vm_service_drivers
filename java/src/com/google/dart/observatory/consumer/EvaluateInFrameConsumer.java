@@ -11,32 +11,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.dart.observatory.element;
+package com.google.dart.observatory.consumer;
 
 // This is a generated file.
 
-import com.google.gson.JsonObject;
+import com.google.dart.observatory.element.ErrorRef;
+import com.google.dart.observatory.element.InstanceRef;
 
-/**
- * [ScriptRef] is a reference to a [Script].
- */
-public class ScriptRef extends Element {
+public interface EvaluateInFrameConsumer extends Consumer {
 
-  public ScriptRef(JsonObject json) {
-    super(json);
-  }
+  public void received(ErrorRef response);
 
-  /**
-   * The id of this script.
-   */
-  public String getId() {
-    return json.get("id").getAsString();
-  }
-
-  /**
-   * The uri from which this script was loaded.
-   */
-  public String getUri() {
-    return json.get("uri").getAsString();
-  }
+  public void received(InstanceRef response);
 }
