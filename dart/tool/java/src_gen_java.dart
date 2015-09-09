@@ -2,8 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-/// A library to generate Java source code.
-/// See [JavaGenerator].
+/// A library to generate Java source code. See [JavaGenerator].
 library src_gen_java;
 
 import 'dart:io';
