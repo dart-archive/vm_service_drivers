@@ -17,6 +17,10 @@ pub as `vm_service_lib`.
 The VM Service Protocol spec can be found at
 [github.com/dart-lang/sdk/runtime/vm/service/service.md](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md).
 
+## See also
+
+The Dart [package](https://github.com/dart-lang/vm_service_drivers/tree/master/dart).
+
 ## Feedback
 
 Please file bugs and feedback at the [issue tracker][tracker].
