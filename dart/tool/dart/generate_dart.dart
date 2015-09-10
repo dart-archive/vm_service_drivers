@@ -321,13 +321,16 @@ class Method extends Member {
       }
       if (_docs.isNotEmpty) gen.writeDocs(_docs);
       gen.write('Future<${returnType.name}> ${name}(');
+      bool startedOptional = false;
       gen.write(args.map((MethodArg arg) {
-        if (arg.optional) {
-          return '[${arg.type} ${arg.name}]';
+        if (arg.optional && !startedOptional) {
+          startedOptional = true;
+          return '[${arg.type} ${arg.name}';
         } else {
           return '${arg.type} ${arg.name}';
         }
       }).join(', '));
+      if (startedOptional) gen.write(']');
       gen.write(') ');
       if (!hasArgs) {
         gen.writeStatement("=> _call('${name}');");

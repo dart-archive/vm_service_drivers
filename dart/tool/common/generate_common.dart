@@ -21,7 +21,8 @@ class ApiParseUtil {
     Match match = regex.firstMatch(text.text);
     if (match == null) throw 'Unable to locate service protocol version';
 
-    String ver = match.group(0);
+    // Append a `.0`.
+    String ver = '${match.group(0)}.0';
 
     // Ensure that the version parses; this will throw a FormatException on
     // parse errors.
