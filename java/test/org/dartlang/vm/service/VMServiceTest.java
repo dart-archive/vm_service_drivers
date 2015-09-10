@@ -13,19 +13,23 @@
  */
 package org.dartlang.vm.service;
 
-
-import org.dartlang.vm.service.VmService;
 import org.dartlang.vm.service.consumer.BreakpointConsumer;
 import org.dartlang.vm.service.consumer.GetLibraryConsumer;
 import org.dartlang.vm.service.consumer.IsolateConsumer;
+import org.dartlang.vm.service.consumer.StackConsumer;
 import org.dartlang.vm.service.consumer.SuccessConsumer;
 import org.dartlang.vm.service.consumer.VMConsumer;
 import org.dartlang.vm.service.consumer.VersionConsumer;
 import org.dartlang.vm.service.element.Breakpoint;
+import org.dartlang.vm.service.element.Frame;
 import org.dartlang.vm.service.element.Isolate;
 import org.dartlang.vm.service.element.IsolateRef;
 import org.dartlang.vm.service.element.Library;
+import org.dartlang.vm.service.element.LibraryRef;
+import org.dartlang.vm.service.element.Message;
 import org.dartlang.vm.service.element.RPCError;
+import org.dartlang.vm.service.element.ScriptRef;
+import org.dartlang.vm.service.element.Stack;
 import org.dartlang.vm.service.element.StepOption;
 import org.dartlang.vm.service.element.Success;
 import org.dartlang.vm.service.element.VM;
@@ -60,17 +64,18 @@ public class VMServiceTest {
       vmConnect();
       vmGetVersion();
       List<IsolateRef> isolates = vmGetVmIsolates();
-      Isolate sampleIsolate = vmGetIsolate(isolates.get(0).getId());
-      Library rootLib = vmGetLibrary(sampleIsolate.getId(),
-          sampleIsolate.getRootLib().getId());
+      Isolate sampleIsolate = vmGetIsolate(isolates.get(0));
+      Library rootLib = vmGetLibrary(sampleIsolate, sampleIsolate.getRootLib());
 
       // Run to breakpoint on line "foo(1);"
-      vmAddBreakpoint(sampleIsolate.getId(),
-          rootLib.getScripts().get(0).getId(), 11);
+      vmAddBreakpoint(sampleIsolate, rootLib.getScripts().get(0), 11);
       vmResume(isolates.get(0), null);
       sampleOut.waitFor("hello");
       sleep(200);
       sampleOut.assertLastLine("hello");
+
+      // Get stack trace
+      vmGetStack(sampleIsolate);
 
       // Step over line "foo(1);"
       vmResume(isolates.get(0), StepOption.Over);
@@ -237,10 +242,10 @@ public class VMServiceTest {
     System.out.println("Terminated sample process");
   }
 
-  private static void vmAddBreakpoint(String isolateId, String scriptId,
+  private static void vmAddBreakpoint(Isolate isolate, ScriptRef script,
       int lineNum) {
     final OpLatch latch = new OpLatch();
-    vmService.addBreakpoint(isolateId, scriptId, lineNum,
+    vmService.addBreakpoint(isolate.getId(), script.getId(), lineNum,
         new BreakpointConsumer() {
           @Override
           public void onError(RPCError error) {
@@ -273,9 +278,9 @@ public class VMServiceTest {
     }
   }
 
-  private static Isolate vmGetIsolate(String isolateId) {
+  private static Isolate vmGetIsolate(IsolateRef isolate) {
     final Result<Isolate> latch = new Result<Isolate>();
-    vmService.getIsolate(isolateId, new IsolateConsumer() {
+    vmService.getIsolate(isolate.getId(), new IsolateConsumer() {
       @Override
       public void onError(RPCError error) {
         showRPCError(error);
@@ -298,22 +303,50 @@ public class VMServiceTest {
     return latch.getValue();
   }
 
-  private static Library vmGetLibrary(String isolateId, String libraryId) {
+  private static Library vmGetLibrary(Isolate isolateId, LibraryRef library) {
     final Result<Library> latch = new Result<Library>();
-    vmService.getLibrary(isolateId, libraryId, new GetLibraryConsumer() {
+    vmService.getLibrary(isolateId.getId(), library.getId(),
+        new GetLibraryConsumer() {
+          @Override
+          public void onError(RPCError error) {
+            showRPCError(error);
+          }
+
+          @Override
+          public void received(Library response) {
+            System.out.println("Received GetLibrary library");
+            System.out.println("  uri: " + response.getUri());
+            latch.setValue(response);
+          }
+        });
+    return latch.getValue();
+  }
+
+  private static void vmGetStack(Isolate isolate) {
+    final OpLatch latch = new OpLatch();
+    vmService.getStack(isolate.getId(), new StackConsumer() {
       @Override
       public void onError(RPCError error) {
         showRPCError(error);
       }
 
       @Override
-      public void received(Library response) {
-        System.out.println("Received GetLibrary library");
-        System.out.println("  uri: " + response.getUri());
-        latch.setValue(response);
+      public void received(Stack response) {
+        System.out.println("Received Stack response");
+        System.out.println("  Messages:");
+        for (Message message : response.getMessages()) {
+          System.out.println("    " + message.getName());
+        }
+        System.out.println("  Frames:");
+        for (Frame frame : response.getFrames()) {
+          System.out.println("    #" + frame.getIndex() + " "
+              + frame.getFunction().getName() + " ("
+              + frame.getLocation().getScript().getUri() + ")");
+        }
+        latch.opComplete();
       }
     });
-    return latch.getValue();
+    latch.waitForOp();
   }
 
   private static void vmGetVersion() {
