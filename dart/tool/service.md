@@ -372,9 +372,9 @@ in the section on [public types](#public-types).
 
 ```
 Breakpoint addBreakpoint(string isolateId,
+                         int line,
                          string scriptId [optional],
                          string scriptUri [optional],
-                         int line,
                          int column [optional])
 ```
 

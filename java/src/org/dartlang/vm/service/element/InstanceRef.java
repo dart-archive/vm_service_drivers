@@ -84,7 +84,7 @@ public class InstanceRef extends Element {
    * The value of this instance as a string. Provided for the instance kinds:
    * Null (null) Bool (true or false) Double (suitable for passing to
    * Double.parse()) Int (suitable for passing to int.parse()) String (value
-   * may be truncated)
+   * may be truncated) Float32x4 Float64x2 Int32x4 StackTrace
    */
   public String getValueAsString() {
     return json.get("valueAsString").getAsString();

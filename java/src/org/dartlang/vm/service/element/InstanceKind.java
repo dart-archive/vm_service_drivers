@@ -64,6 +64,15 @@ public enum InstanceKind {
   Map,
 
   /**
+   * Vector instance kinds.
+   */
+  Float32x4,
+
+  Float64x2,
+
+  Int32x4,
+
+  /**
    * An instance of the built-in VM TypedData implementations. User-defined
    * TypedDatas will be PlainInstance.
    */
@@ -94,6 +103,11 @@ public enum InstanceKind {
   Float32x4List,
 
   Float64x2List,
+
+  /**
+   * An instance of the Dart class StackTrace.
+   */
+  StackTrace,
 
   /**
    * An instance of the built-in VM Closure implementation. User-defined

@@ -44,6 +44,7 @@ Map<String, Function> _typeFactories = {
   'Null': Null.parse,
   '@Object': ObjRef.parse,
   'Object': Obj.parse,
+  'Response': Response.parse,
   'Sentinel': Sentinel.parse,
   '@Script': ScriptRef.parse,
   'Script': Script.parse,
@@ -52,13 +53,13 @@ Map<String, Function> _typeFactories = {
   'Success': Success.parse,
   '@TypeArguments': TypeArgumentsRef.parse,
   'TypeArguments': TypeArguments.parse,
-  'Response': Response.parse,
+  'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
   'Version': Version.parse,
   'VM': VM.parse
 };
 
 class VmService {
-  static const String generatedServiceVersion = '2.0.0';
+  static const String generatedServiceVersion = '3.0.0';
 
   StreamSubscription _streamSub;
   Function _writeMessage;
@@ -90,10 +91,13 @@ class VmService {
 
   /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
   /// some script.
-  Future<Breakpoint> addBreakpoint(
-      String isolateId, String scriptId, int line) {
-    return _call('addBreakpoint',
-        {'isolateId': isolateId, 'scriptId': scriptId, 'line': line});
+  Future<Breakpoint> addBreakpoint(String isolateId, int line,
+      [String scriptId, String scriptUri, int column]) {
+    Map m = {'isolateId': isolateId, 'line': line};
+    if (scriptId != null) m['scriptId'] = scriptId;
+    if (scriptUri != null) m['scriptUri'] = scriptUri;
+    if (column != null) m['column'] = column;
+    return _call('addBreakpoint', m);
   }
 
   /// The [addBreakpointAtEntry] RPC is used to add a breakpoint at the
@@ -423,6 +427,11 @@ enum InstanceKind {
   /// be PlainInstance.
   Map,
 
+  /// Vector instance kinds.
+  Float32x4,
+  Float64x2,
+  Int32x4,
+
   /// An instance of the built-in VM TypedData implementations. User-defined
   /// TypedDatas will be PlainInstance.
   Uint8ClampedList,
@@ -439,6 +448,9 @@ enum InstanceKind {
   Int32x4List,
   Float32x4List,
   Float64x2List,
+
+  /// An instance of the Dart class StackTrace.
+  StackTrace,
 
   /// An instance of the built-in VM Closure implementation. User-defined
   /// Closures will be PlainInstance.
@@ -547,7 +559,8 @@ class Breakpoint extends Obj {
 
   bool resolved;
 
-  SourceLocation location;
+  /// [location] can be one of [SourceLocation] or [UnresolvedSourceLocation].
+  dynamic location;
 
   String toString() => '[Breakpoint ' //
       'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, breakpointNumber: ${breakpointNumber}, resolved: ${resolved}, location: ${location}]';
@@ -1075,7 +1088,7 @@ class InstanceRef extends ObjRef {
   /// The value of this instance as a string. Provided for the instance kinds:
   /// Null (null) Bool (true or false) Double (suitable for passing to
   /// Double.parse()) Int (suitable for passing to int.parse()) String (value
-  /// may be truncated)
+  /// may be truncated) Float32x4 Float64x2 Int32x4 StackTrace
   @optional String valueAsString;
 
   /// The valueAsString for String references may be truncated. If so, this
@@ -1542,6 +1555,24 @@ class Obj extends Response {
       '[Obj type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}]';
 }
 
+/// Every non-error response returned by the Service Protocol extends
+/// [Response]. By using the [type] property, the client can determine which
+/// type of response has been provided.
+class Response {
+  static Response parse(Map json) => new Response.fromJson(json);
+
+  Response();
+  Response.fromJson(Map json) {
+    type = json['type'];
+  }
+
+  /// Every response returned by the VM Service has the type property. This
+  /// allows the client distinguish between different kinds of responses.
+  String type;
+
+  String toString() => '[Response type: ${type}]';
+}
+
 /// A [Sentinel] is used to indicate that the normal response is not available.
 class Sentinel extends Response {
   static Sentinel parse(Map json) => new Sentinel.fromJson(json);
@@ -1697,22 +1728,43 @@ class TypeArguments extends Obj {
       'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, name: ${name}, types: ${types}]';
 }
 
-/// Every non-error response returned by the Service Protocol extends
-/// [Response]. By using the [type] property, the client can determine which
-/// type of response has been provided.
-class Response {
-  static Response parse(Map json) => new Response.fromJson(json);
+/// The [UnresolvedSourceLocation] class is used to refer to an unresolved
+/// breakpoint location. As such, it is meant to approximate the final location
+/// of the breakpoint but it is not exact.
+class UnresolvedSourceLocation extends Response {
+  static UnresolvedSourceLocation parse(Map json) =>
+      new UnresolvedSourceLocation.fromJson(json);
 
-  Response();
-  Response.fromJson(Map json) {
-    type = json['type'];
+  UnresolvedSourceLocation();
+  UnresolvedSourceLocation.fromJson(Map json) : super.fromJson(json) {
+    script = createObject(json['script']);
+    scriptUri = json['scriptUri'];
+    tokenPos = json['tokenPos'];
+    line = json['line'];
+    column = json['column'];
   }
 
-  /// Every response returned by the VM Service has the type property. This
-  /// allows the client distinguish between different kinds of responses.
-  String type;
+  /// The script containing the source location if the script has been loaded.
+  @optional ScriptRef script;
 
-  String toString() => '[Response type: ${type}]';
+  /// The uri of the script containing the source location if the script has yet
+  /// to be loaded.
+  @optional String scriptUri;
+
+  /// An approximate token position for the source location. This may change
+  /// when the location is resolved.
+  @optional int tokenPos;
+
+  /// An approximate line number for the source location. This may change when
+  /// the location is resolved.
+  @optional int line;
+
+  /// An approximate column number for the source location. This may change when
+  /// the location is resolved.
+  @optional int column;
+
+  String toString() => '[UnresolvedSourceLocation ' //
+      'type: ${type}, script: ${script}, scriptUri: ${scriptUri}, tokenPos: ${tokenPos}, line: ${line}, column: ${column}]';
 }
 
 /// See Versioning.
