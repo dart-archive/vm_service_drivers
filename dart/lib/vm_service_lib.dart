@@ -58,7 +58,7 @@ Map<String, Function> _typeFactories = {
 };
 
 class VmService {
-  static const String generatedServiceVersion = '2.0';
+  static const String generatedServiceVersion = '2.0.0';
 
   StreamSubscription _streamSub;
   Function _writeMessage;

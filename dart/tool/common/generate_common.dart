@@ -56,7 +56,7 @@ class ApiParseUtil {
     var start = text.indexOf(new RegExp(r'\d+\.\d+'));
     if (start == -1) throw 'failed to find version';
     var index = text.indexOf('.', start);
-    var end = text.indexOf(new RegExp(r'!\d'), index + 1);
+    var end = text.indexOf(new RegExp(r'\D'), index + 1);
     if (end == -1) end = text.length;
     version.add(int.parse(text.substring(start, index)));
     version.add(int.parse(text.substring(index + 1, end)));

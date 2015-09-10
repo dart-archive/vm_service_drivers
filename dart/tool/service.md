@@ -1,8 +1,8 @@
-# Dart VM Service Protocol 2.0
+# Dart VM Service Protocol 2.0.0
 
 > Please post feedback to the [observatory-discuss group][discuss-list]
 
-This document describes of _version 2.0_ of the Dart VM Service Protocol. This
+This document describes of _version 2.0.0_ of the Dart VM Service Protocol. This
 protocol is used to communicate with a running Dart Virtual Machine.
 
 To use the Service Protocol, start the VM with the *--observe* flag.
