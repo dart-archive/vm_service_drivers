@@ -5,14 +5,33 @@
 library generate_vm_service_lib_common;
 
 import 'package:markdown/markdown.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 import 'src_gen_common.dart';
 
-/// [ApiParseUtil] contains top level parsing utilities
+/// [ApiParseUtil] contains top level parsing utilities.
 class ApiParseUtil {
-  /// Extract the current VM Service version number
-  List<int> parseServiceVersion(List<Node> nodes) {
+  /// Extract the current VM Service version number as a String.
+  static String parseVersionString(List<Node> nodes) {
+    final RegExp regex = new RegExp(r'[\d.]+');
 
+    // Extract version from header: `# Dart VM Service Protocol 2.0`.
+    Element node = nodes.firstWhere((n) => isH1(n));
+    Text text = node.children[0];
+    Match match = regex.firstMatch(text.text);
+    if (match == null) throw 'Unable to locate service protocol version';
+
+    String ver = match.group(0);
+
+    // Ensure that the version parses; this will throw a FormatException on
+    // parse errors.
+    new Version.parse(ver);
+
+    return ver;
+  }
+
+  /// Extract the current VM Service version number.
+  List<int> parseServiceVersion(List<Node> nodes) {
     // Extract version from header
     // e.g. # Dart VM Service Protocol 2.0
     Element node = nodes.firstWhere((n) => isH1(n));
@@ -37,7 +56,7 @@ class ApiParseUtil {
     var start = text.indexOf(new RegExp(r'\d+\.\d+'));
     if (start == -1) throw 'failed to find version';
     var index = text.indexOf('.', start);
-    var end = text.indexOf(new RegExp(r'!\d'), index + 1);
+    var end = text.indexOf(new RegExp(r'\D'), index + 1);
     if (end == -1) end = text.length;
     version.add(int.parse(text.substring(start, index)));
     version.add(int.parse(text.substring(index + 1, end)));

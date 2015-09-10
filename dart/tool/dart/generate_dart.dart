@@ -171,20 +171,13 @@ abstract class Member {
 }
 
 class Api extends Member with ApiParseUtil {
-  int serviceMajor;
-  int serviceMinor;
   String serviceVersion;
   List<Method> methods = [];
   List<Enum> enums = [];
   List<Type> types = [];
 
   void parse(List<Node> nodes) {
-    var version = parseServiceVersion(nodes);
-    serviceMajor = version[0];
-    serviceMinor = version[1];
-    serviceVersion = '$serviceMajor.$serviceMinor';
-    // TODO encode service version into generated dart
-    // and then compare it against what's returned by the running VM.
+    serviceVersion = ApiParseUtil.parseVersionString(nodes);
 
     // Look for h3 nodes
     // the pre following it is the definition
@@ -254,6 +247,8 @@ class Api extends Member with ApiParseUtil {
     gen.writeln('};');
     gen.writeln();
     gen.writeStatement('class VmService {');
+    gen.writeStatement("static const String generatedServiceVersion = '${serviceVersion}';");
+    gen.writeln();
     gen.writeStatement('StreamSubscription _streamSub;');
     gen.writeStatement('Function _writeMessage;');
     gen.writeStatement('int _id = 0;');
