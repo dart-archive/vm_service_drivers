@@ -173,14 +173,16 @@ abstract class Member {
 class Api extends Member with ApiParseUtil {
   int serviceMajor;
   int serviceMinor;
+  String serviceVersion;
   List<Method> methods = [];
   List<Enum> enums = [];
   List<Type> types = [];
 
   void parse(List<Node> nodes) {
-    var serviceVersion = parseServiceVersion(nodes);
-    serviceMajor = serviceVersion[0];
-    serviceMinor = serviceVersion[1];
+    var version = parseServiceVersion(nodes);
+    serviceMajor = version[0];
+    serviceMinor = version[1];
+    serviceVersion = '$serviceMajor.$serviceMinor';
     // TODO encode service version into generated dart
     // and then compare it against what's returned by the running VM.
 

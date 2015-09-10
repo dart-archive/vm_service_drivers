@@ -28,6 +28,7 @@ String _coerceRefType(String typeName) {
 class Api extends Member with ApiParseUtil {
   int serviceMajor;
   int serviceMinor;
+  String serviceVersion;
   List<Method> methods = [];
   List<Enum> enums = [];
   List<Type> types = [];
@@ -139,9 +140,10 @@ class Api extends Member with ApiParseUtil {
   bool isEnumName(String typeName) => enums.any((Enum e) => e.name == typeName);
 
   void parse(List<Node> nodes) {
-    var serviceVersion = parseServiceVersion(nodes);
-    serviceMajor = serviceVersion[0];
-    serviceMinor = serviceVersion[1];
+    var version = parseServiceVersion(nodes);
+    serviceMajor = version[0];
+    serviceMinor = version[1];
+    serviceVersion = '$serviceMajor.$serviceMinor';
 
     // Look for h3 nodes
     // the pre following it is the definition
