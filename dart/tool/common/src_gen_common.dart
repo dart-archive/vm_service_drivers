@@ -15,8 +15,10 @@ final RegExp _wsRegexp = new RegExp(r'\s+');
 
 String collapseWhitespace(String str) => str.replaceAll(_wsRegexp, ' ');
 
+bool isEmphasis(Node node) => node is Element && node.tag == 'em';
 bool isPara(Node node) => node is Element && node.tag == 'p';
 bool isPre(Node node) => node is Element && node.tag == 'pre';
+bool isH1(Node node) => node is Element && node.tag == 'h1';
 bool isH3(Node node) => node is Element && node.tag == 'h3';
 bool isHeader(Node node) => node is Element && node.tag.startsWith('h');
 String textForElement(Node node) => (((node as Element).children.first) as Text).text;

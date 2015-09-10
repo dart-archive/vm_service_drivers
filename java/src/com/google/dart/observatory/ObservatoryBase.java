@@ -17,7 +17,9 @@ import com.google.common.collect.Maps;
 import com.google.dart.observatory.consumer.Consumer;
 import com.google.dart.observatory.consumer.GetLibraryConsumer;
 import com.google.dart.observatory.consumer.GetObjectConsumer;
+import com.google.dart.observatory.consumer.VersionConsumer;
 import com.google.dart.observatory.element.RPCError;
+import com.google.dart.observatory.element.Version;
 import com.google.dart.observatory.internal.ObservatoryConst;
 import com.google.dart.observatory.internal.RequestSink;
 import com.google.dart.observatory.internal.WebSocketRequestSink;
@@ -36,6 +38,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -106,10 +110,46 @@ abstract class ObservatoryBase implements ObservatoryConst {
     }
     observatory.requestSink = new WebSocketRequestSink(webSocket);
 
+    // Check protocol version
+    final CountDownLatch latch = new CountDownLatch(1);
+    final String[] errMsg = new String[1];
+    observatory.getVersion(new VersionConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        String msg = "Failed to determine protocol version: " + error.getCode()
+            + "\n  message: " + error.getMessage() + "\n  details: "
+            + error.getDetails();
+        Logging.getLogger().logInformation(msg);
+        errMsg[0] = msg;
+      }
+
+      @Override
+      public void received(Version response) {
+        if (response.getMajor() != Observatory.versionMajor
+            || response.getMinor() < Observatory.versionMinor) {
+          String msg = "Incompatible protocol version: client="
+              + Observatory.versionMajor + "." + Observatory.versionMinor
+              + " vm=" + response.getMajor() + "." + response.getMinor();
+          Logging.getLogger().logError(msg);
+          errMsg[0] = msg;
+        } else if (response.getMinor() != Observatory.versionMinor) {
+          Logging.getLogger().logInformation(
+              "Minor difference in protocol version: client="
+                  + Observatory.versionMajor + "." + Observatory.versionMinor
+                  + " vm=" + response.getMajor() + "." + response.getMinor());
+        }
+        latch.countDown();
+      }
+    });
     try {
-      Thread.sleep(500);
-    } catch (InterruptedException e1) {
-      e1.printStackTrace();
+      if (!latch.await(5, TimeUnit.SECONDS)) {
+        throw new IOException("Failed to determine protocol version");
+      }
+      if (errMsg[0] != null) {
+        throw new IOException(errMsg[0]);
+      }
+    } catch (InterruptedException e) {
+      throw new RuntimeException("Interrupted while waiting for response", e);
     }
 
     return observatory;

@@ -6,6 +6,7 @@ library generate_vm_service_lib_dart;
 
 import 'package:markdown/markdown.dart';
 
+import '../common/generate_common.dart';
 import '../common/parser.dart';
 import '../common/src_gen_common.dart';
 import 'src_gen_dart.dart';
@@ -169,12 +170,20 @@ abstract class Member {
   String toString() => name;
 }
 
-class Api extends Member {
+class Api extends Member with ApiParseUtil {
+  int serviceMajor;
+  int serviceMinor;
   List<Method> methods = [];
   List<Enum> enums = [];
   List<Type> types = [];
 
   void parse(List<Node> nodes) {
+    var serviceVersion = parseServiceVersion(nodes);
+    serviceMajor = serviceVersion[0];
+    serviceMinor = serviceVersion[1];
+    // TODO encode service version into generated dart
+    // and then compare it against what's returned by the running VM.
+
     // Look for h3 nodes
     // the pre following it is the definition
     // the optional p following that is the dcumentation

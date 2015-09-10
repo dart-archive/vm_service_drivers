@@ -6,6 +6,7 @@ library generate_vm_service_lib_java;
 
 import 'package:markdown/markdown.dart';
 
+import '../common/generate_common.dart';
 import '../common/parser.dart';
 import '../common/src_gen_common.dart';
 import 'src_gen_java.dart';
@@ -24,7 +25,9 @@ String _coerceRefType(String typeName) {
   return typeName;
 }
 
-class Api extends Member {
+class Api extends Member with ApiParseUtil {
+  int serviceMajor;
+  int serviceMinor;
   List<Method> methods = [];
   List<Enum> enums = [];
   List<Type> types = [];
@@ -87,6 +90,16 @@ class Api extends Member {
       writer.addImport('com.google.dart.observatory.consumer.*');
       writer.addImport('com.google.dart.observatory.element.*');
       writer.superclassName = 'com.google.dart.observatory.ObservatoryBase';
+      writer.addField('versionMajor', 'int',
+          modifiers: 'public static final',
+          value: '$serviceMajor',
+          javadoc:
+              'The major version number of the protocol supported by this client.');
+      writer.addField('versionMinor', 'int',
+          modifiers: 'public static final',
+          value: '$serviceMinor',
+          javadoc:
+              'The minor version number of the protocol supported by this client.');
       for (var m in methods) {
         m.generateObservatoryMethod(writer);
       }
@@ -127,6 +140,10 @@ class Api extends Member {
   bool isEnumName(String typeName) => enums.any((Enum e) => e.name == typeName);
 
   void parse(List<Node> nodes) {
+    var serviceVersion = parseServiceVersion(nodes);
+    serviceMajor = serviceVersion[0];
+    serviceMinor = serviceVersion[1];
+
     // Look for h3 nodes
     // the pre following it is the definition
     // the optional p following that is the dcumentation

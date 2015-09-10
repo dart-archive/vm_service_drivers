@@ -102,6 +102,7 @@ class TypeWriter {
   String superclassName;
   List<String> interfaceNames = <String>[];
   final StringBuffer _content = new StringBuffer();
+  final List<String> _fields = <String>[];
   final Map<String, String> _methods = new Map<String, String>();
 
   TypeWriter(String typeName)
@@ -154,6 +155,28 @@ class TypeWriter {
     } else {
       _content.writeln(';');
     }
+  }
+
+  void addField(String name, String typeName,
+      {String modifiers: 'public', String value, String javadoc}) {
+    var fieldDecl = new StringBuffer();
+    if (javadoc != null && javadoc.isNotEmpty) {
+      fieldDecl.writeln('  /**');
+      wrap(javadoc.trim(), colBoundary - 6)
+          .split('\n')
+          .forEach((line) => fieldDecl.writeln('   * $line'));
+      fieldDecl.writeln('   */');
+    }
+    fieldDecl.write('  ');
+    if (modifiers != null && modifiers.length > 0) {
+      fieldDecl.write('$modifiers ');
+    }
+    fieldDecl.write('$typeName $name');
+    if (value != null && value.length > 0) {
+      fieldDecl.write(' = $value');
+    }
+    fieldDecl.writeln(';');
+    _fields.add(fieldDecl.toString());
   }
 
   void addImport(String typeName) {
@@ -239,6 +262,10 @@ class TypeWriter {
     }
     buffer.writeln(' {');
     buffer.write(_content.toString());
+    _fields.forEach((f) {
+      buffer.writeln();
+      buffer.write(f);
+    });
     _methods.keys.toList()
       ..sort()
       ..forEach((mthName) {

@@ -22,6 +22,16 @@ import com.google.gson.JsonObject;
 public class Observatory extends ObservatoryBase {
 
   /**
+   * The major version number of the protocol supported by this client.
+   */
+  public static final int versionMajor = 2;
+
+  /**
+   * The minor version number of the protocol supported by this client.
+   */
+  public static final int versionMinor = 0;
+
+  /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
    * some script.
    */
