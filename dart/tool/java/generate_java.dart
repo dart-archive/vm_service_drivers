@@ -84,12 +84,11 @@ class Api extends Member with ApiParseUtil {
       }
     }
 
-    gen.writeType('com.google.dart.observatory.Observatory',
-        (TypeWriter writer) {
+    gen.writeType('org.dartlang.vm.service.VmService', (TypeWriter writer) {
       writer.addImport('com.google.gson.JsonObject');
-      writer.addImport('com.google.dart.observatory.consumer.*');
-      writer.addImport('com.google.dart.observatory.element.*');
-      writer.superclassName = 'com.google.dart.observatory.ObservatoryBase';
+      writer.addImport('org.dartlang.vm.service.consumer.*');
+      writer.addImport('org.dartlang.vm.service.element.*');
+      writer.superclassName = 'org.dartlang.vm.service.VmServiceBase';
       writer.addField('versionMajor', 'int',
           modifiers: 'public static final',
           value: '$serviceMajor',
@@ -101,7 +100,7 @@ class Api extends Member with ApiParseUtil {
           javadoc:
               'The minor version number of the protocol supported by this client.');
       for (var m in methods) {
-        m.generateObservatoryMethod(writer);
+        m.generateVmServiceMethod(writer);
       }
       writer.addMethod('forwardResponse', [
         new JavaMethodArg('consumer', 'Consumer'),
@@ -116,7 +115,7 @@ class Api extends Member with ApiParseUtil {
           });
         for (var m in sorted) {
           if (generatedForwards.add(m.consumerTypeName)) {
-            m.generateObservatoryForward(writer);
+            m.generateVmServiceForward(writer);
           }
         }
         writer.addLine('logUnknownResponse(consumer, json);');
@@ -226,7 +225,7 @@ class Enum extends Member {
     _parse(new Tokenizer(definition).tokenize());
   }
 
-  String get elementTypeName => 'com.google.dart.observatory.element.$name';
+  String get elementTypeName => 'org.dartlang.vm.service.element.$name';
 
   void generateEnum(JavaGenerator gen) {
     gen.writeType(elementTypeName, (TypeWriter writer) {
@@ -339,7 +338,7 @@ class Method extends Member {
     } else {
       prefix = returnType.types.first.javaBoxedName;
     }
-    return 'com.google.dart.observatory.consumer.${prefix}Consumer';
+    return 'org.dartlang.vm.service.consumer.${prefix}Consumer';
   }
 
   bool get hasArgs => args.isNotEmpty;
@@ -349,8 +348,7 @@ class Method extends Member {
   void generateConsumerInterface(JavaGenerator gen) {
     gen.writeType(consumerTypeName, (TypeWriter writer) {
       writer.javadoc = returnType.docs;
-      writer.interfaceNames
-          .add('com.google.dart.observatory.consumer.Consumer');
+      writer.interfaceNames.add('org.dartlang.vm.service.consumer.Consumer');
       writer.isInterface = true;
       for (var t in returnType.types) {
         writer.addImport(t.elementTypeName);
@@ -360,7 +358,7 @@ class Method extends Member {
     });
   }
 
-  void generateObservatoryForward(StatementWriter writer) {
+  void generateVmServiceForward(StatementWriter writer) {
     var consumerName = classNameFor(consumerTypeName);
     writer.addLine('if (consumer instanceof $consumerName) {');
     var types = returnType.types.toList()
@@ -377,7 +375,7 @@ class Method extends Member {
     writer.addLine('}');
   }
 
-  void generateObservatoryMethod(TypeWriter writer) {
+  void generateVmServiceMethod(TypeWriter writer) {
     // TODO(danrubel) move this to the Consumer's javadoc
 //    String javadoc = docs == null ? '' : docs;
 //    if (returnType.isMultipleReturns) {
@@ -418,42 +416,12 @@ class Method extends Member {
         } else if (arg.isEnumType) {
           writer.addLine('${op}params.addProperty("$name", $name.name());');
         } else {
-          print('skipped addProperty ${name} in Observatory method $name');
+          print('skipped addProperty ${name} in VmService method $name');
           writer.addLine('// ${name} ${arg.type}');
         }
       }
       writer.addLine('request("$name", params, consumer);');
     }, javadoc: javadoc.toString());
-
-//    if (docs != null) {
-//      if (!hasArgs) {
-//        gen.writeStatement("=> _call('${name}');");
-//      } else if (hasOptionalArgs) {
-//        gen.writeStatement('{');
-//        gen.write('Map m = {');
-//        gen.write(args
-//            .where((MethodArg a) => !a.optional)
-//            .map((arg) => "'${arg.name}': ${arg.name}")
-//            .join(', '));
-//        gen.writeln('};');
-//        args.where((MethodArg a) => a.optional).forEach((MethodArg arg) {
-//          String valueRef = arg.name;
-//          if (api.isEnumName(arg.type)) {
-//            valueRef = '${arg.name}.toString()';
-//          }
-//          gen.writeln(
-//              "if (${arg.name} != null) m['${arg.name}'] = ${valueRef};");
-//        });
-//        gen.writeStatement("return _call('${name}', m);");
-//        gen.writeStatement('}');
-//      } else {
-//        gen.writeStatement('{');
-//        gen.write("return _call('${name}', {");
-//        gen.write(args.map((arg) => "'${arg.name}': ${arg.name}").join(', '));
-//        gen.writeStatement('});');
-//        gen.writeStatement('}');
-//      }
-//    }
   }
 
   void _parse(Token token) {
@@ -577,8 +545,7 @@ class Type extends Member {
   }
 
   void generateElement(JavaGenerator gen) {
-    gen.writeType('com.google.dart.observatory.element.$name',
-        (TypeWriter writer) {
+    gen.writeType('org.dartlang.vm.service.element.$name', (TypeWriter writer) {
       if (fields.any((f) => f.type.types.any((t) => t.isArray))) {
         writer.addImport('com.google.gson.JsonObject');
       }
@@ -699,9 +666,11 @@ class TypeField extends Member {
     }
 
     if (type.types.first.isArray) {
-      writer.addImport('com.google.gson.JsonArray');
-      writer.addImport('java.util.ArrayList');
       writer.addImport('java.util.List');
+      if (type.types.first.name != 'int') {
+        writer.addImport('com.google.gson.JsonArray');
+        writer.addImport('java.util.ArrayList');
+      }
     }
     writer.addMethod(accessorName, [], (StatementWriter writer) {
       type.types.first.generateAccessStatements(writer, name);
@@ -754,7 +723,7 @@ class TypeRef {
 
   String get elementTypeName {
     if (isSimple) return null;
-    return 'com.google.dart.observatory.element.$name';
+    return 'org.dartlang.vm.service.element.$name';
   }
 
   bool get isArray => arrayDepth > 0;
