@@ -5,6 +5,7 @@
 library generate_vm_service_lib_common;
 
 import 'package:markdown/markdown.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 import 'src_gen_common.dart';
 
@@ -19,7 +20,14 @@ class ApiParseUtil {
     Text text = node.children[0];
     Match match = regex.firstMatch(text.text);
     if (match == null) throw 'Unable to locate service protocol version';
-    return match.group(0);
+
+    String ver = match.group(0);
+
+    // Ensure that the version parses; this will throw a FormatException on
+    // parse errors.
+    new Version.parse(ver);
+
+    return ver;
   }
 
   /// Extract the current VM Service version number.
