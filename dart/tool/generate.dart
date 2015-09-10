@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:markdown/markdown.dart';
 import 'package:path/path.dart';
 
+import 'common/generate_common.dart';
 import 'dart/generate_dart.dart' as dart show Api, api, DartGenerator;
 import 'java/generate_java.dart' as java show Api, api, JavaGenerator;
 
@@ -20,6 +21,7 @@ main(List<String> args) {
   var document = new Document();
   var nodes = document.parseLines(file.readAsStringSync().split('\n'));
   print('Parsed ${file.path}.');
+  print('Service protocol version ${ApiParseUtil.parseVersionString(nodes)}.');
 
   // Generate code from the model.
   _generateDart(appDirPath, nodes);
@@ -27,6 +29,7 @@ main(List<String> args) {
 }
 
 void _generateDart(String appDirPath, List<Node> nodes) {
+  print('');
   var outDirPath = normalize(join(appDirPath, '..', 'lib'));
   var outDir = new Directory(outDirPath);
   if (!outDir.existsSync()) outDir.createSync(recursive: true);
@@ -41,11 +44,12 @@ void _generateDart(String appDirPath, List<Node> nodes) {
 }
 
 void _generateJava(String appDirPath, List<Node> nodes) {
+  print('');
   var srcDirPath = normalize(join(appDirPath, '..', '..', 'java', 'src'));
   assert(new Directory(srcDirPath).existsSync());
   var generator = new java.JavaGenerator(srcDirPath);
   java.api = new java.Api();
   java.api.parse(nodes);
   java.api.generate(generator);
-  print('Wrote Java to $srcDirPath');
+  print('Wrote Java to $srcDirPath.');
 }

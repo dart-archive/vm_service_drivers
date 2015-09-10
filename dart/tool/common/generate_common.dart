@@ -8,11 +8,22 @@ import 'package:markdown/markdown.dart';
 
 import 'src_gen_common.dart';
 
-/// [ApiParseUtil] contains top level parsing utilities
+/// [ApiParseUtil] contains top level parsing utilities.
 class ApiParseUtil {
-  /// Extract the current VM Service version number
-  List<int> parseServiceVersion(List<Node> nodes) {
+  /// Extract the current VM Service version number as a String.
+  static String parseVersionString(List<Node> nodes) {
+    final RegExp regex = new RegExp(r'[\d.]+');
 
+    // Extract version from header: `# Dart VM Service Protocol 2.0`.
+    Element node = nodes.firstWhere((n) => isH1(n));
+    Text text = node.children[0];
+    Match match = regex.firstMatch(text.text);
+    if (match == null) throw 'Unable to locate service protocol version';
+    return match.group(0);
+  }
+
+  /// Extract the current VM Service version number.
+  List<int> parseServiceVersion(List<Node> nodes) {
     // Extract version from header
     // e.g. # Dart VM Service Protocol 2.0
     Element node = nodes.firstWhere((n) => isH1(n));
