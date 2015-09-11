@@ -6,6 +6,8 @@ library vm_service_lib;
 import 'dart:async';
 import 'dart:convert' show JSON, JsonCodec;
 
+const String vmServiceVersion = '2.0.0';
+
 /// @optional
 const String optional = 'optional';
 
@@ -58,8 +60,6 @@ Map<String, Function> _typeFactories = {
 };
 
 class VmService {
-  static const String generatedServiceVersion = '2.0.0';
-
   StreamSubscription _streamSub;
   Function _writeMessage;
   int _id = 0;
