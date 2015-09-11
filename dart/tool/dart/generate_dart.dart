@@ -34,9 +34,6 @@ library vm_service_lib;
 import 'dart:async';
 import 'dart:convert' show JSON, JsonCodec;
 
-/// @optional
-const String optional = 'optional';
-
 ''';
 
 final String _implCode = r'''
@@ -238,17 +235,19 @@ class Api extends Member with ApiParseUtil {
 
   void generate(DartGenerator gen) {
     gen.out(_headerCode);
+    gen.writeln("const String vmServiceVersion = '${serviceVersion}';");
+    gen.writeln();
+    gen.writeln('/// @optional');
+    gen.writeln("const String optional = 'optional';");
+    gen.writeln();
     gen.write('Map<String, Function> _typeFactories = {');
     types.forEach((Type type) {
-      //if (type.isResponse)
       gen.write("'${type.rawName}': ${type.name}.parse");
       gen.writeln(type == types.last ? '' : ',');
     });
     gen.writeln('};');
     gen.writeln();
     gen.writeStatement('class VmService {');
-    gen.writeStatement("static const String generatedServiceVersion = '${serviceVersion}';");
-    gen.writeln();
     gen.writeStatement('StreamSubscription _streamSub;');
     gen.writeStatement('Function _writeMessage;');
     gen.writeStatement('int _id = 0;');

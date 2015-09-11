@@ -1,0 +1,34 @@
+<project name="vm_service_lib" default="dist">
+  <target name="clean">
+    <delete dir="build"/>
+  </target>
+
+  <target name="init">
+    <!-- TODO: implement -->
+
+  </target>
+
+  <target name="compile" depends="init">
+    <mkdir dir="build/classes"/>
+    <javac srcdir="src" destdir="build/classes" includeantruntime="false"
+        classpath="third_party/gson/gson-2.2.4.jar;third_party/guava/guava-13.0.1.jar;third_party/weberknecht/weberknecht-0.1.5.jar"/>
+
+    <!-- TODO: compile tests -->
+  </target>
+
+  <target name="jar" depends="compile">
+    <!-- TODO: implement -->
+    <!-- mkdir dir="build/jar"/>
+    <jar destfile="build/jar/HelloWorld.jar" basedir="build/classes"/ -->
+  </target>
+
+  <target name="test">
+    <!-- TODO: implement -->
+
+  </target>
+
+  <target name="dist" depends="jar,test">
+    <!-- TODO: implement -->
+
+  </target>
+</project>
