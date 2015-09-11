@@ -30,7 +30,7 @@ public class Sentinel extends Element {
    * What kind of sentinel is this?
    */
   public SentinelKind getKind() {
-    return SentinelKind.valueOf(((JsonObject) json.get("kind")).getAsString());
+    return SentinelKind.valueOf(json.get("kind").getAsString());
   }
 
   /**

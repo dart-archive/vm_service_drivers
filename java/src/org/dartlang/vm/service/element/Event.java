@@ -67,7 +67,7 @@ public class Event extends Element {
    * What kind of event is this?
    */
   public EventKind getKind() {
-    return EventKind.valueOf(((JsonObject) json.get("kind")).getAsString());
+    return EventKind.valueOf(json.get("kind").getAsString());
   }
 
   /**

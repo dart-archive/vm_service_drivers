@@ -792,7 +792,7 @@ class TypeRef {
         print('skipped accessor body for $propertyName');
       } else {
         writer.addLine(
-            'return $javaUnboxedName.valueOf(((JsonObject) json.get("$propertyName")).getAsString());');
+            'return $javaUnboxedName.valueOf(json.get("$propertyName").getAsString());');
       }
     } else {
       if (arrayDepth > 1) {

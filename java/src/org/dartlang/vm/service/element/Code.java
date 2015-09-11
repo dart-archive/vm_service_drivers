@@ -30,7 +30,7 @@ public class Code extends Element {
    * What kind of code object is this?
    */
   public CodeKind getKind() {
-    return CodeKind.valueOf(((JsonObject) json.get("kind")).getAsString());
+    return CodeKind.valueOf(json.get("kind").getAsString());
   }
 
   /**

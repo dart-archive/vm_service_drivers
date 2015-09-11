@@ -37,7 +37,7 @@ public class InstanceRef extends Element {
    * What kind of instance is this?
    */
   public InstanceKind getKind() {
-    return InstanceKind.valueOf(((JsonObject) json.get("kind")).getAsString());
+    return InstanceKind.valueOf(json.get("kind").getAsString());
   }
 
   /**

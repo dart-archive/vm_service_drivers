@@ -30,7 +30,7 @@ public class ErrorRef extends Element {
    * What kind of error is this?
    */
   public ErrorKind getKind() {
-    return ErrorKind.valueOf(((JsonObject) json.get("kind")).getAsString());
+    return ErrorKind.valueOf(json.get("kind").getAsString());
   }
 
   /**
