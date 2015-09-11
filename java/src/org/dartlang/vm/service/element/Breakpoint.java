@@ -30,6 +30,10 @@ public class Breakpoint extends Element {
     return json.get("breakpointNumber").getAsInt();
   }
 
+  public SourceLocation getLocation() {
+    return new SourceLocation((JsonObject) json.get("location"));
+  }
+
   public boolean getResolved() {
     return json.get("resolved").getAsBoolean();
   }

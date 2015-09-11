@@ -24,7 +24,7 @@ public class VmService extends VmServiceBase {
   /**
    * The major version number of the protocol supported by this client.
    */
-  public static final int versionMajor = 3;
+  public static final int versionMajor = 2;
 
   /**
    * The minor version number of the protocol supported by this client.
@@ -34,18 +34,12 @@ public class VmService extends VmServiceBase {
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
    * some script.
-   * 
-   * @param scriptId This parameter is optional and may be null.
-   * @param scriptUri This parameter is optional and may be null.
-   * @param column This parameter is optional and may be null.
    */
-  public void addBreakpoint(String isolateId, int line, String scriptId, String scriptUri, int column, BreakpointConsumer consumer) {
+  public void addBreakpoint(String isolateId, String scriptId, int line, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
+    params.addProperty("scriptId", scriptId);
     params.addProperty("line", line);
-    if (scriptId != null) params.addProperty("scriptId", scriptId);
-    if (scriptUri != null) params.addProperty("scriptUri", scriptUri);
-    if (column != null) params.addProperty("column", column);
     request("addBreakpoint", params, consumer);
   }
 

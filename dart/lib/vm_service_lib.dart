@@ -44,7 +44,6 @@ Map<String, Function> _typeFactories = {
   'Null': Null.parse,
   '@Object': ObjRef.parse,
   'Object': Obj.parse,
-  'Response': Response.parse,
   'Sentinel': Sentinel.parse,
   '@Script': ScriptRef.parse,
   'Script': Script.parse,
@@ -53,13 +52,13 @@ Map<String, Function> _typeFactories = {
   'Success': Success.parse,
   '@TypeArguments': TypeArgumentsRef.parse,
   'TypeArguments': TypeArguments.parse,
-  'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
+  'Response': Response.parse,
   'Version': Version.parse,
   'VM': VM.parse
 };
 
 class VmService {
-  static const String generatedServiceVersion = '3.0.0';
+  static const String generatedServiceVersion = '2.0.0';
 
   StreamSubscription _streamSub;
   Function _writeMessage;
@@ -91,13 +90,10 @@ class VmService {
 
   /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
   /// some script.
-  Future<Breakpoint> addBreakpoint(String isolateId, int line,
-      [String scriptId, String scriptUri, int column]) {
-    Map m = {'isolateId': isolateId, 'line': line};
-    if (scriptId != null) m['scriptId'] = scriptId;
-    if (scriptUri != null) m['scriptUri'] = scriptUri;
-    if (column != null) m['column'] = column;
-    return _call('addBreakpoint', m);
+  Future<Breakpoint> addBreakpoint(
+      String isolateId, String scriptId, int line) {
+    return _call('addBreakpoint',
+        {'isolateId': isolateId, 'scriptId': scriptId, 'line': line});
   }
 
   /// The [addBreakpointAtEntry] RPC is used to add a breakpoint at the
@@ -559,8 +555,7 @@ class Breakpoint extends Obj {
 
   bool resolved;
 
-  /// [location] can be one of [SourceLocation] or [UnresolvedSourceLocation].
-  dynamic location;
+  SourceLocation location;
 
   String toString() => '[Breakpoint ' //
       'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, breakpointNumber: ${breakpointNumber}, resolved: ${resolved}, location: ${location}]';
@@ -1555,24 +1550,6 @@ class Obj extends Response {
       '[Obj type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}]';
 }
 
-/// Every non-error response returned by the Service Protocol extends
-/// [Response]. By using the [type] property, the client can determine which
-/// type of response has been provided.
-class Response {
-  static Response parse(Map json) => new Response.fromJson(json);
-
-  Response();
-  Response.fromJson(Map json) {
-    type = json['type'];
-  }
-
-  /// Every response returned by the VM Service has the type property. This
-  /// allows the client distinguish between different kinds of responses.
-  String type;
-
-  String toString() => '[Response type: ${type}]';
-}
-
 /// A [Sentinel] is used to indicate that the normal response is not available.
 class Sentinel extends Response {
   static Sentinel parse(Map json) => new Sentinel.fromJson(json);
@@ -1728,43 +1705,22 @@ class TypeArguments extends Obj {
       'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, name: ${name}, types: ${types}]';
 }
 
-/// The [UnresolvedSourceLocation] class is used to refer to an unresolved
-/// breakpoint location. As such, it is meant to approximate the final location
-/// of the breakpoint but it is not exact.
-class UnresolvedSourceLocation extends Response {
-  static UnresolvedSourceLocation parse(Map json) =>
-      new UnresolvedSourceLocation.fromJson(json);
+/// Every non-error response returned by the Service Protocol extends
+/// [Response]. By using the [type] property, the client can determine which
+/// type of response has been provided.
+class Response {
+  static Response parse(Map json) => new Response.fromJson(json);
 
-  UnresolvedSourceLocation();
-  UnresolvedSourceLocation.fromJson(Map json) : super.fromJson(json) {
-    script = createObject(json['script']);
-    scriptUri = json['scriptUri'];
-    tokenPos = json['tokenPos'];
-    line = json['line'];
-    column = json['column'];
+  Response();
+  Response.fromJson(Map json) {
+    type = json['type'];
   }
 
-  /// The script containing the source location if the script has been loaded.
-  @optional ScriptRef script;
+  /// Every response returned by the VM Service has the type property. This
+  /// allows the client distinguish between different kinds of responses.
+  String type;
 
-  /// The uri of the script containing the source location if the script has yet
-  /// to be loaded.
-  @optional String scriptUri;
-
-  /// An approximate token position for the source location. This may change
-  /// when the location is resolved.
-  @optional int tokenPos;
-
-  /// An approximate line number for the source location. This may change when
-  /// the location is resolved.
-  @optional int line;
-
-  /// An approximate column number for the source location. This may change when
-  /// the location is resolved.
-  @optional int column;
-
-  String toString() => '[UnresolvedSourceLocation ' //
-      'type: ${type}, script: ${script}, scriptUri: ${scriptUri}, tokenPos: ${tokenPos}, line: ${line}, column: ${column}]';
+  String toString() => '[Response type: ${type}]';
 }
 
 /// See Versioning.
