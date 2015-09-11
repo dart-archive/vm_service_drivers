@@ -1,6 +1,8 @@
 language: dart
 sudo: false
-script: (cd dart; ./tool/travis.sh)
+script:
+  (cd dart; ./tool/travis.sh)
+  (cd java; ant -f build.xml)
 
 branches:
   only:
