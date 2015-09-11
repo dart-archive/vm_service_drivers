@@ -19,6 +19,7 @@ pubspec.lock
 
 # IDEs
 .idea
+*.iml
 .project
 .settings
 

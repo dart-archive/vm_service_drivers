@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +83,20 @@ public class Instance extends Element {
    */
   public FuncRef getClosureFunction() {
     return new FuncRef((JsonObject) json.get("closureFunction"));
+  }
+
+  /**
+   * The elements of a List instance. Provided for instance kinds: List
+   * 
+   * [elements] can be one of [InstanceRef] or [List<Sentinel>].
+   */
+  public InstanceRef getElements() {
+    JsonElement elem = json.get("elements");
+    if (!elem.isJsonObject()) return null;
+    JsonObject child = elem.getAsJsonObject();
+    String type = child.get("type").getAsString();
+    if ("Sentinel".equals(type)) return null;
+    return new InstanceRef(child);
   }
 
   /**

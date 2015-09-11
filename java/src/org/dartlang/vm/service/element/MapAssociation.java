@@ -15,11 +15,36 @@ package org.dartlang.vm.service.element;
 
 // This is a generated file.
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class MapAssociation extends Element {
 
   public MapAssociation(JsonObject json) {
     super(json);
+  }
+
+  /**
+   * [key] can be one of [InstanceRef] or [Sentinel].
+   */
+  public InstanceRef getKey() {
+    JsonElement elem = json.get("key");
+    if (!elem.isJsonObject()) return null;
+    JsonObject child = elem.getAsJsonObject();
+    String type = child.get("type").getAsString();
+    if ("Sentinel".equals(type)) return null;
+    return new InstanceRef(child);
+  }
+
+  /**
+   * [value] can be one of [InstanceRef] or [Sentinel].
+   */
+  public InstanceRef getValue() {
+    JsonElement elem = json.get("value");
+    if (!elem.isJsonObject()) return null;
+    JsonObject child = elem.getAsJsonObject();
+    String type = child.get("type").getAsString();
+    if ("Sentinel".equals(type)) return null;
+    return new InstanceRef(child);
   }
 }
