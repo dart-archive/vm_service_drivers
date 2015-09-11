@@ -294,16 +294,28 @@ class MemberType extends Member {
 
   MemberType();
 
+  bool get hasSentinel => types.any((t) => t.name == 'Sentinel');
+
   bool get isEnum => types.length == 1 && api.isEnumName(types.first.name);
 
   bool get isMultipleReturns => types.length > 1;
 
   bool get isSimple => types.length == 1 && types.first.isSimple;
 
+  bool get isValueAndSentinel => types.length == 2 && hasSentinel;
+
   String get name {
     if (types.isEmpty) return '';
     if (types.length == 1) return types.first.ref;
     return 'dynamic';
+  }
+
+  TypeRef get valueType {
+    if (types.length == 1) return types.first;
+    if (isValueAndSentinel) {
+      return types.firstWhere((t) => t.name != 'Sentinel');
+    }
+    return null;
   }
 
   void parse(Parser parser) {
@@ -660,7 +672,7 @@ class TypeField extends Member {
   }
 
   void generateAccessor(TypeWriter writer) {
-    if (type.isMultipleReturns) {
+    if (type.isMultipleReturns && !type.isValueAndSentinel) {
       print('skipped accessor for $name '
           '(${type.types.map((t) => t.name).join(',')}) '
           ' in ${writer.className}');
@@ -674,8 +686,12 @@ class TypeField extends Member {
         writer.addImport('java.util.ArrayList');
       }
     }
+    if (type.isValueAndSentinel) {
+      writer.addImport('com.google.gson.JsonElement');
+    }
     writer.addMethod(accessorName, [], (StatementWriter writer) {
-      type.types.first.generateAccessStatements(writer, name);
+      type.valueType.generateAccessStatements(writer, name,
+          canBeSentinel: type.isValueAndSentinel);
     }, javadoc: docs, returnType: type.types.first.ref);
   }
 }
@@ -749,7 +765,8 @@ class TypeRef {
     return javaUnboxedName;
   }
 
-  void generateAccessStatements(StatementWriter writer, String propertyName) {
+  void generateAccessStatements(StatementWriter writer, String propertyName,
+      {bool canBeSentinel: false}) {
     if (name == 'bool') {
       if (isArray) {
         print('skipped accessor body for $propertyName');
@@ -792,8 +809,17 @@ class TypeRef {
         writer.addLine('}');
         writer.addLine('return result;');
       } else {
-        writer.addLine(
-            'return new $name((JsonObject) json.get("$propertyName"));');
+        if (canBeSentinel) {
+          writer.addLine('JsonElement elem = json.get("$propertyName");');
+          writer.addLine('if (!elem.isJsonObject()) return null;');
+          writer.addLine('JsonObject child = elem.getAsJsonObject();');
+          writer.addLine('String type = child.get("type").getAsString();');
+          writer.addLine('if ("Sentinel".equals(type)) return null;');
+          writer.addLine('return new $name(child);');
+        } else {
+          writer.addLine(
+              'return new $name((JsonObject) json.get("$propertyName"));');
+        }
       }
     }
   }
