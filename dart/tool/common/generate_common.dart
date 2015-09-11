@@ -12,7 +12,10 @@ import 'src_gen_common.dart';
 /// [ApiParseUtil] contains top level parsing utilities.
 class ApiParseUtil {
   /// Extract the current VM Service version number as a String.
-  static String parseVersionString(List<Node> nodes) {
+  static String parseVersionString(List<Node> nodes) =>
+      parseVersionSemVer(nodes).toString();
+
+  static Version parseVersionSemVer(List<Node> nodes) {
     final RegExp regex = new RegExp(r'[\d.]+');
 
     // Extract version from header: `# Dart VM Service Protocol 2.0`.
@@ -24,11 +27,7 @@ class ApiParseUtil {
     // Append a `.0`.
     String ver = '${match.group(0)}.0';
 
-    // Ensure that the version parses; this will throw a FormatException on
-    // parse errors.
-    new Version.parse(ver);
-
-    return ver;
+    return new Version.parse(ver);
   }
 
   /// Extract the current VM Service version number.

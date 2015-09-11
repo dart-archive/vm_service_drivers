@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:markdown/markdown.dart';
 import 'package:path/path.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 import 'common/generate_common.dart';
 import 'dart/generate_dart.dart' as dart show Api, api, DartGenerator;
@@ -40,6 +41,14 @@ void _generateDart(String appDirPath, List<Node> nodes) {
   dart.api.generate(generator);
   outputFile.writeAsStringSync(generator.toString());
   Process.runSync('dartfmt', ['-w', outDirPath]);
+
+  // Update the pubspec file.
+  Version version = ApiParseUtil.parseVersionSemVer(nodes);
+  _stampPubspec(version);
+
+  // Validate that the changelog contains an entry for the current version.
+  _checkUpdateChangelog(version);
+
   print('Wrote Dart to ${outputFile.path}.');
 }
 
@@ -52,4 +61,39 @@ void _generateJava(String appDirPath, List<Node> nodes) {
   java.api.parse(nodes);
   java.api.generate(generator);
   print('Wrote Java to $srcDirPath.');
+}
+
+// Push the major and minor versions into the pubspec.
+void _stampPubspec(Version version) {
+  final String pattern = 'version: ';
+  File file = new File('pubspec.yaml');
+  String text = file.readAsStringSync();
+  bool found = false;
+
+  text = text.split('\n').map((line) {
+    if (line.startsWith(pattern)) {
+      found = true;
+      Version v = new Version.parse(line.substring(pattern.length));
+      String pre = v.preRelease.isEmpty ? null : v.preRelease.join('-');
+      String build = v.build.isEmpty ? null : v.build.join('+');
+      v = new Version(version.major, version.minor, v.patch, pre: pre, build: build);
+      return '${pattern}${v.toString()}';
+    } else {
+      return line;
+    }
+  }).join('\n');
+
+  if (!found) throw '`${pattern}` not found';
+
+  file.writeAsStringSync(text);
+}
+
+void _checkUpdateChangelog(Version version) {
+  // Look for `## major.minor`.
+  String check = '## ${version.major}.${version.minor}';
+
+  File file = new File('CHANGELOG.md');
+  String text = file.readAsStringSync();
+  bool containsReleaseNotes = text.split('\n').any((line) => line.startsWith(check));
+  if (!containsReleaseNotes) throw '`${check}` not found in the CHANGELOG.md file';
 }
