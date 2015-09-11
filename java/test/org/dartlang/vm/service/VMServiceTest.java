@@ -13,27 +13,8 @@
  */
 package org.dartlang.vm.service;
 
-import org.dartlang.vm.service.consumer.BreakpointConsumer;
-import org.dartlang.vm.service.consumer.GetLibraryConsumer;
-import org.dartlang.vm.service.consumer.IsolateConsumer;
-import org.dartlang.vm.service.consumer.StackConsumer;
-import org.dartlang.vm.service.consumer.SuccessConsumer;
-import org.dartlang.vm.service.consumer.VMConsumer;
-import org.dartlang.vm.service.consumer.VersionConsumer;
-import org.dartlang.vm.service.element.Breakpoint;
-import org.dartlang.vm.service.element.Frame;
-import org.dartlang.vm.service.element.Isolate;
-import org.dartlang.vm.service.element.IsolateRef;
-import org.dartlang.vm.service.element.Library;
-import org.dartlang.vm.service.element.LibraryRef;
-import org.dartlang.vm.service.element.Message;
-import org.dartlang.vm.service.element.RPCError;
-import org.dartlang.vm.service.element.ScriptRef;
-import org.dartlang.vm.service.element.Stack;
-import org.dartlang.vm.service.element.StepOption;
-import org.dartlang.vm.service.element.Success;
-import org.dartlang.vm.service.element.VM;
-import org.dartlang.vm.service.element.Version;
+import org.dartlang.vm.service.consumer.*;
+import org.dartlang.vm.service.element.*;
 import org.dartlang.vm.service.logging.Logger;
 import org.dartlang.vm.service.logging.Logging;
 
@@ -42,8 +23,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 public class VMServiceTest {
 
@@ -260,7 +239,7 @@ public class VMServiceTest {
             latch.opComplete();
           }
         });
-    latch.waitForOp();
+    latch.waitAndAssertOpComplete();
   }
 
   private static void vmConnect() {
@@ -324,6 +303,8 @@ public class VMServiceTest {
 
   private static void vmGetStack(Isolate isolate) {
     final OpLatch latch = new OpLatch();
+    final InstanceRefToString convert = new InstanceRefToString(vmService,
+        latch);
     vmService.getStack(isolate.getId(), new StackConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -342,11 +323,16 @@ public class VMServiceTest {
           System.out.println("    #" + frame.getIndex() + " "
               + frame.getFunction().getName() + " ("
               + frame.getLocation().getScript().getUri() + ")");
+          for (BoundVariable var : frame.getVars()) {
+            InstanceRef instanceRef = var.getValue();
+            System.out.println("      " + var.getName() + " = "
+                + convert.toString(instanceRef));
+          }
         }
         latch.opComplete();
       }
     });
-    latch.waitForOp();
+    latch.waitAndAssertOpComplete();
   }
 
   private static void vmGetVersion() {
@@ -366,7 +352,7 @@ public class VMServiceTest {
         latch.opComplete();
       }
     });
-    latch.waitForOp();
+    latch.waitAndAssertOpComplete();
   }
 
   private static List<IsolateRef> vmGetVmIsolates() {
@@ -417,31 +403,11 @@ public class VMServiceTest {
   }
 }
 
-class OpLatch {
-  final CountDownLatch latch = new CountDownLatch(1);
-
-  void opComplete() {
-    latch.countDown();
-  }
-
-  void waitForOp() {
-    try {
-      if (!latch.await(5, TimeUnit.SECONDS)) {
-        System.out.println(">>> No response received");
-        throw new RuntimeException("No response received");
-      }
-    } catch (InterruptedException e) {
-      System.out.println(">>> Interrupted while waiting for response");
-      throw new RuntimeException("Interrupted while waiting for response", e);
-    }
-  }
-}
-
 class Result<T> extends OpLatch {
   private T value;
 
   T getValue() {
-    waitForOp();
+    waitAndAssertOpComplete();
     return value;
   }
 
