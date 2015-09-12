@@ -1368,7 +1368,7 @@ class Instance extends Object {
   //
   // Provided for instance kinds:
   //   List
-  @Instance|Sentinel[] elements [optional];
+  @Instance[]|Sentinel[] elements [optional];
 
   // The elements of a List instance.
   //
