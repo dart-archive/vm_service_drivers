@@ -13,9 +13,8 @@
  */
 package org.dartlang.vm.service.consumer;
 
-import com.google.gson.JsonObject;
-
-import org.dartlang.vm.service.consumer.GetObjectConsumer;
+import org.dartlang.vm.service.element.Element;
+import org.dartlang.vm.service.element.Instance;
 import org.dartlang.vm.service.element.Obj;
 import org.dartlang.vm.service.element.RPCError;
 import org.dartlang.vm.service.element.Sentinel;
@@ -23,17 +22,21 @@ import org.dartlang.vm.service.element.Sentinel;
 public abstract class GetLibraryConsumer implements GetObjectConsumer {
 
   @Override
+  public void received(Instance response) {
+    onError(newRPCError(response));
+  }
+
+  @Override
   public void received(Obj response) {
-    onError(newRPCError("Expected Library Response", response.getJson()));
+    onError(newRPCError(response));
   }
 
   @Override
   public void received(Sentinel response) {
-    onError(newRPCError("Expected Library Response", response.getJson()));
+    onError(newRPCError(response));
   }
 
-  private RPCError newRPCError(String errMsg, JsonObject json) {
-    // TODO(danrubel) implement
+  private RPCError newRPCError(Element response) {
     throw new RuntimeException("not implemented yet");
   }
 }

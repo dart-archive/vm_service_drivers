@@ -13,6 +13,28 @@ import 'src_gen_java.dart';
 
 export 'src_gen_java.dart' show JavaGenerator;
 
+const vmServiceJavadoc = '''
+{@link VmService} allows control of and access to information in a running
+Dart VM instance.
+<br/>
+Launch the Dart VM with the arguments:
+<pre>
+--pause_isolates_on_start
+--observe
+--enable-vm-service=some-port
+</pre>
+where <strong>some-port</strong> is a port number of your choice
+which this client will use to communicate with the Dart VM.
+See https://www.dartlang.org/tools/dart-vm/ for more details.
+Once the VM is running, instantiate a new {@link VmService}
+to connect to that VM via {@link VmService#connect(String)}
+or {@link VmService#localConnect(int)}.
+<br/>
+Calls to {@link VmService} should not be nested.
+More specifically, you should not make any calls to {@link VmService}
+from within any {@link Consumer} method.
+''';
+
 Api api;
 
 String _coerceRefType(String typeName) {
@@ -62,11 +84,16 @@ class Api extends Member with ApiParseUtil {
     _setFileHeader();
 
     // Add undocumented "id" property
+    addProperty('InstanceRef', 'id', javadoc: 'The id of this instance.');
+    addProperty('Instance', 'id', javadoc: 'The id of this instance.');
     addProperty('LibraryRef', 'id', javadoc: 'The id of this library.');
+    addProperty('Library', 'id', javadoc: 'The id of this library.');
     addProperty('ScriptRef', 'id', javadoc: 'The id of this script.');
+    addProperty('Script', 'id', javadoc: 'The id of this script.');
 
     // Add additional object return types
     addReturnType('getObject', 'Library');
+    addReturnType('getObject', 'Instance');
 
     // Hack to populate method argument docs
     for (var m in methods) {
@@ -89,6 +116,7 @@ class Api extends Member with ApiParseUtil {
       writer.addImport('com.google.gson.JsonObject');
       writer.addImport('org.dartlang.vm.service.consumer.*');
       writer.addImport('org.dartlang.vm.service.element.*');
+      writer.javadoc = vmServiceJavadoc;
       writer.superclassName = 'org.dartlang.vm.service.VmServiceBase';
       writer.addField('versionMajor', 'int',
           modifiers: 'public static final',

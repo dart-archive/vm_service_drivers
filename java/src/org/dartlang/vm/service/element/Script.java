@@ -28,6 +28,13 @@ public class Script extends Element {
   }
 
   /**
+   * The id of this script.
+   */
+  public String getId() {
+    return json.get("id").getAsString();
+  }
+
+  /**
    * The library which owns this script.
    */
   public LibraryRef getLibrary() {

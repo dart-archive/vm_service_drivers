@@ -34,6 +34,13 @@ public class InstanceRef extends Element {
   }
 
   /**
+   * The id of this instance.
+   */
+  public String getId() {
+    return json.get("id").getAsString();
+  }
+
+  /**
    * What kind of instance is this?
    */
   public InstanceKind getKind() {

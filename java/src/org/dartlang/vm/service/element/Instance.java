@@ -107,6 +107,13 @@ public class Instance extends Element {
   }
 
   /**
+   * The id of this instance.
+   */
+  public String getId() {
+    return json.get("id").getAsString();
+  }
+
+  /**
    * Whether this regular expression is case sensitive. Provided for instance
    * kinds: RegExp
    */

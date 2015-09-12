@@ -5,6 +5,8 @@
 void main(List<String> args) {
   String local1 = 'abcd';
   int local2 = 2;
+  var simpleList = [1, "hello"];
+  var deepList = [3, [[[[[7]]], "end"]]];
 
   print('hello from main');
 
@@ -13,6 +15,8 @@ void main(List<String> args) {
   foo(3);
   foo(local1.length);
 
+  print(simpleList);
+  print(deepList);
   print('exiting...');
 }
 
