@@ -240,6 +240,7 @@ public class Instance extends Element {
    * property is added with the value 'true'.
    */
   public boolean getValueAsStringIsTruncated() {
-    return json.get("valueAsStringIsTruncated").getAsBoolean();
+    JsonElement elem = json.get("valueAsStringIsTruncated");
+    return elem != null ? elem.getAsBoolean() : false;
   }
 }

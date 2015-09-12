@@ -95,6 +95,10 @@ class Api extends Member with ApiParseUtil {
     addReturnType('getObject', 'Library');
     addReturnType('getObject', 'Instance');
 
+    // Set default value for unspecified property
+    setDefaultValue('Instance', 'valueAsStringIsTruncated');
+    setDefaultValue('InstanceRef', 'valueAsStringIsTruncated');
+
     // Hack to populate method argument docs
     for (var m in methods) {
       for (var a in m.args) {
@@ -198,6 +202,12 @@ class Api extends Member with ApiParseUtil {
         h3Name = null;
       }
     }
+  }
+
+  void setDefaultValue(String typeName, String propertyName) {
+    var type = types.firstWhere((t) => t.name == typeName);
+    var field = type.fields.firstWhere((f) => f.name == propertyName);
+    field.defaultValue = 'false';
   }
 
   void _parse(String name, String definition, [String docs]) {
@@ -680,6 +690,7 @@ class TypeField extends Member {
   MemberType type = new MemberType();
   String name;
   bool optional = false;
+  String defaultValue;
 
   TypeField(this.parent, this._docs);
 
@@ -714,12 +725,12 @@ class TypeField extends Member {
         writer.addImport('java.util.ArrayList');
       }
     }
-    if (type.isValueAndSentinel) {
+    if (type.isValueAndSentinel || defaultValue != null) {
       writer.addImport('com.google.gson.JsonElement');
     }
     writer.addMethod(accessorName, [], (StatementWriter writer) {
       type.valueType.generateAccessStatements(writer, name,
-          canBeSentinel: type.isValueAndSentinel);
+          canBeSentinel: type.isValueAndSentinel, defaultValue: defaultValue);
     }, javadoc: docs, returnType: type.types.first.ref);
   }
 }
@@ -794,12 +805,18 @@ class TypeRef {
   }
 
   void generateAccessStatements(StatementWriter writer, String propertyName,
-      {bool canBeSentinel: false}) {
+      {bool canBeSentinel: false, String defaultValue}) {
     if (name == 'bool') {
       if (isArray) {
         print('skipped accessor body for $propertyName');
       } else {
-        writer.addLine('return json.get("$propertyName").getAsBoolean();');
+        if (defaultValue != null) {
+          writer.addLine('JsonElement elem = json.get("$propertyName");');
+          writer.addLine(
+              'return elem != null ? elem.getAsBoolean() : $defaultValue;');
+        } else {
+          writer.addLine('return json.get("$propertyName").getAsBoolean();');
+        }
       }
     } else if (name == 'int') {
       if (arrayDepth > 1) {

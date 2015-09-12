@@ -15,6 +15,7 @@ package org.dartlang.vm.service.element;
 
 // This is a generated file.
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
@@ -102,6 +103,7 @@ public class InstanceRef extends Element {
    * property is added with the value 'true'.
    */
   public boolean getValueAsStringIsTruncated() {
-    return json.get("valueAsStringIsTruncated").getAsBoolean();
+    JsonElement elem = json.get("valueAsStringIsTruncated");
+    return elem != null ? elem.getAsBoolean() : false;
   }
 }
