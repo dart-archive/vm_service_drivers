@@ -32,8 +32,7 @@ public class VmService extends VmServiceBase {
   public static final int versionMinor = 0;
 
   /**
-   * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
-   * some script.
+   * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
    */
   public void addBreakpoint(String isolateId, String scriptId, int line, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -44,8 +43,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The [addBreakpointAtEntry] RPC is used to add a breakpoint at the
-   * entrypoint of some function.
+   * The [addBreakpointAtEntry] RPC is used to add a breakpoint at the entrypoint of some function.
    */
   public void addBreakpointAtEntry(String isolateId, String functionId, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -55,8 +53,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The [evaluate] RPC is used to evaluate an expression in the context of
-   * some target.
+   * The [evaluate] RPC is used to evaluate an expression in the context of some target.
    */
   public void evaluate(String isolateId, String targetId, String expression, EvaluateConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -67,9 +64,9 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The [evaluateInFrame] RPC is used to evaluate an expression in the context
-   * of a particular stack frame. [frameIndex] is the index of the desired
-   * Frame, with an index of [0] indicating the top (most recent) frame.
+   * The [evaluateInFrame] RPC is used to evaluate an expression in the context of a particular
+   * stack frame. [frameIndex] is the index of the desired Frame, with an index of [0] indicating
+   * the top (most recent) frame.
    */
   public void evaluateInFrame(String isolateId, int frameIndex, String expression, EvaluateInFrameConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -80,8 +77,8 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The _getFlagList RPC returns a list of all command line flags in the VM
-   * along with their current values.
+   * The _getFlagList RPC returns a list of all command line flags in the VM along with their
+   * current values.
    */
   public void getFlagList(FlagListConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -98,8 +95,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The [getObject] RPC is used to lookup an [object] from some isolate by its
-   * [id].
+   * The [getObject] RPC is used to lookup an [object] from some isolate by its [id].
    */
   public void getObject(String isolateId, String objectId, GetObjectConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -109,8 +105,8 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The [getStack] RPC is used to retrieve the current execution stack and
-   * message queue for an isolate. The isolate does not need to be paused.
+   * The [getStack] RPC is used to retrieve the current execution stack and message queue for an
+   * isolate. The isolate does not need to be paused.
    */
   public void getStack(String isolateId, StackConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -127,8 +123,8 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The [getVersion] RPC is used to determine what version of the Service
-   * Protocol is served by a VM.
+   * The [getVersion] RPC is used to determine what version of the Service Protocol is served by a
+   * VM.
    */
   public void getVersion(VersionConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -136,9 +132,8 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The [pause] RPC is used to interrupt a running isolate. The RPC enqueues
-   * the interrupt request and potentially returns before the isolate is
-   * paused.
+   * The [pause] RPC is used to interrupt a running isolate. The RPC enqueues the interrupt request
+   * and potentially returns before the isolate is paused.
    */
   public void pause(String isolateId, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -159,8 +154,8 @@ public class VmService extends VmServiceBase {
   /**
    * The [resume] RPC is used to resume execution of a paused isolate.
    * 
-   * @param step A [StepOption] indicates which form of stepping is requested
-   * in a resume RPC. This parameter is optional and may be null.
+   * @param step A [StepOption] indicates which form of stepping is requested in a resume RPC. This
+   * parameter is optional and may be null.
    */
   public void resume(String isolateId, StepOption step, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -170,8 +165,8 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The [setLibraryDebuggable] RPC is used to enable or disable whether
-   * breakpoints and stepping work for a given library.
+   * The [setLibraryDebuggable] RPC is used to enable or disable whether breakpoints and stepping
+   * work for a given library.
    */
   public void setLibraryDebuggable(String isolateId, String libraryId, boolean isDebuggable, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -201,8 +196,8 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The [streamListen] RPC subscribes to a stream in the VM. Once subscribed,
-   * the client will begin receiving events from the stream.
+   * The [streamListen] RPC subscribes to a stream in the VM. Once subscribed, the client will
+   * begin receiving events from the stream.
    */
   public void streamListen(String streamId, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();

@@ -16,8 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 /**
- * A [StepOption] indicates which form of stepping is requested in a resume
- * RPC.
+ * A [StepOption] indicates which form of stepping is requested in a resume RPC.
  */
 public enum StepOption {
 

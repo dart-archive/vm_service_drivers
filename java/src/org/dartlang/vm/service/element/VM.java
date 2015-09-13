@@ -61,8 +61,8 @@ public class VM extends Element {
   }
 
   /**
-   * The time that the VM started in milliseconds since the epoch. Suitable to
-   * pass to DateTime.fromMillisecondsSinceEpoch.
+   * The time that the VM started in milliseconds since the epoch. Suitable to pass to
+   * DateTime.fromMillisecondsSinceEpoch.
    */
   public int getStartTime() {
     return json.get("startTime").getAsInt();

@@ -13,6 +13,8 @@ import 'src_gen_java.dart';
 
 export 'src_gen_java.dart' show JavaGenerator;
 
+const String servicePackage = 'org.dartlang.vm.service';
+
 Api api;
 
 String _coerceRefType(String typeName) {
@@ -85,11 +87,11 @@ class Api extends Member with ApiParseUtil {
       }
     }
 
-    gen.writeType('org.dartlang.vm.service.VmService', (TypeWriter writer) {
+    gen.writeType('$servicePackage.VmService', (TypeWriter writer) {
       writer.addImport('com.google.gson.JsonObject');
-      writer.addImport('org.dartlang.vm.service.consumer.*');
-      writer.addImport('org.dartlang.vm.service.element.*');
-      writer.superclassName = 'org.dartlang.vm.service.VmServiceBase';
+      writer.addImport('$servicePackage.consumer.*');
+      writer.addImport('$servicePackage.element.*');
+      writer.superclassName = '$servicePackage.VmServiceBase';
       writer.addField('versionMajor', 'int',
           modifiers: 'public static final',
           value: '$serviceMajor',
@@ -227,7 +229,7 @@ class Enum extends Member {
     _parse(new Tokenizer(definition).tokenize());
   }
 
-  String get elementTypeName => 'org.dartlang.vm.service.element.$name';
+  String get elementTypeName => '$servicePackage.element.$name';
 
   void generateEnum(JavaGenerator gen) {
     gen.writeType(elementTypeName, (TypeWriter writer) {
@@ -352,7 +354,7 @@ class Method extends Member {
     } else {
       prefix = returnType.types.first.javaBoxedName;
     }
-    return 'org.dartlang.vm.service.consumer.${prefix}Consumer';
+    return '$servicePackage.consumer.${prefix}Consumer';
   }
 
   bool get hasArgs => args.isNotEmpty;
@@ -362,7 +364,7 @@ class Method extends Member {
   void generateConsumerInterface(JavaGenerator gen) {
     gen.writeType(consumerTypeName, (TypeWriter writer) {
       writer.javadoc = returnType.docs;
-      writer.interfaceNames.add('org.dartlang.vm.service.consumer.Consumer');
+      writer.interfaceNames.add('$servicePackage.consumer.Consumer');
       writer.isInterface = true;
       for (var t in returnType.types) {
         writer.addImport(t.elementTypeName);
@@ -559,7 +561,7 @@ class Type extends Member {
   }
 
   void generateElement(JavaGenerator gen) {
-    gen.writeType('org.dartlang.vm.service.element.$name', (TypeWriter writer) {
+    gen.writeType('$servicePackage.element.$name', (TypeWriter writer) {
       if (fields.any((f) => f.type.types.any((t) => t.isArray))) {
         writer.addImport('com.google.gson.JsonObject');
       }
@@ -660,8 +662,8 @@ class TypeField extends Member {
   String get docs {
     String str = _docs == null ? '' : _docs;
     if (type.isMultipleReturns) {
-      str += '\n\n[${generatableName}] can be one of '
-          '${joinLast(type.types.map((t) => '[${t}]'), ', ', ' or ')}.';
+      str += '\n\n@return one of '
+          '${joinLast(type.types.map((t) => '<code>${t}</code>'), ', ', ' or ')}';
       str = str.trim();
     }
     return str;
@@ -741,7 +743,7 @@ class TypeRef {
 
   String get elementTypeName {
     if (isSimple) return null;
-    return 'org.dartlang.vm.service.element.$name';
+    return '$servicePackage.element.$name';
   }
 
   bool get isArray => arrayDepth > 0;
