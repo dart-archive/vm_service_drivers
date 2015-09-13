@@ -12,7 +12,7 @@ import 'package:path/path.dart';
 import '../common/src_gen_common.dart';
 
 /// The maximum length for javadoc comments.
-int colBoundary = 80;
+int colBoundary = 100;
 
 /// The header for every generated file.
 String fileHeader;

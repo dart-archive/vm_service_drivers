@@ -16,8 +16,8 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 /**
- * Adding new values to [InstanceKind] is considered a backwards compatible
- * change. Clients should treat unrecognized instance kinds as [PlainInstance].
+ * Adding new values to [InstanceKind] is considered a backwards compatible change. Clients should
+ * treat unrecognized instance kinds as [PlainInstance].
  */
 public enum InstanceKind {
 
@@ -52,14 +52,12 @@ public enum InstanceKind {
   String,
 
   /**
-   * An instance of the built-in VM List implementation. User-defined Lists
-   * will be PlainInstance.
+   * An instance of the built-in VM List implementation. User-defined Lists will be PlainInstance.
    */
   List,
 
   /**
-   * An instance of the built-in VM Map implementation. User-defined Maps will
-   * be PlainInstance.
+   * An instance of the built-in VM Map implementation. User-defined Maps will be PlainInstance.
    */
   Map,
 
@@ -73,8 +71,8 @@ public enum InstanceKind {
   Int32x4,
 
   /**
-   * An instance of the built-in VM TypedData implementations. User-defined
-   * TypedDatas will be PlainInstance.
+   * An instance of the built-in VM TypedData implementations. User-defined TypedDatas will be
+   * PlainInstance.
    */
   Uint8ClampedList,
 
@@ -110,8 +108,8 @@ public enum InstanceKind {
   StackTrace,
 
   /**
-   * An instance of the built-in VM Closure implementation. User-defined
-   * Closures will be PlainInstance.
+   * An instance of the built-in VM Closure implementation. User-defined Closures will be
+   * PlainInstance.
    */
   Closure,
 

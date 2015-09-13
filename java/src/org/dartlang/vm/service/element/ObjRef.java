@@ -27,8 +27,7 @@ public class ObjRef extends Element {
   }
 
   /**
-   * A unique identifier for an Object. Passed to the getObject RPC to load
-   * this Object.
+   * A unique identifier for an Object. Passed to the getObject RPC to load this Object.
    */
   public String getId() {
     return json.get("id").getAsString();

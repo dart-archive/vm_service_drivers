@@ -19,8 +19,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
- * A [BoundVariable] represents a local variable bound to a particular value in
- * a [Frame].
+ * A [BoundVariable] represents a local variable bound to a particular value in a [Frame].
  */
 public class BoundVariable extends Element {
 
@@ -33,7 +32,7 @@ public class BoundVariable extends Element {
   }
 
   /**
-   * [value] can be one of [InstanceRef] or [Sentinel].
+   * @return one of <code>InstanceRef</code> or <code>Sentinel</code>
    */
   public InstanceRef getValue() {
     JsonElement elem = json.get("value");

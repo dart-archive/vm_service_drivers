@@ -18,8 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * The [SourceLocation] class is used to designate a position or range in some
- * script.
+ * The [SourceLocation] class is used to designate a position or range in some script.
  */
 public class SourceLocation extends Element {
 

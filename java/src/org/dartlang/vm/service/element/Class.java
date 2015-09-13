@@ -50,8 +50,7 @@ public class Class extends Element {
   }
 
   /**
-   * A list of functions in this class. Does not include functions from
-   * superclasses.
+   * A list of functions in this class. Does not include functions from superclasses.
    */
   public List<FuncRef> getFunctions() {
     JsonArray array = json.getAsJsonArray("functions");
@@ -64,8 +63,7 @@ public class Class extends Element {
   }
 
   /**
-   * A list of interface types for this class. The value will be of the kind:
-   * Type.
+   * A list of interface types for this class. The value will be of the kind: Type.
    */
   public List<InstanceRef> getInterfaces() {
     JsonArray array = json.getAsJsonArray("interfaces");

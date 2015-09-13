@@ -25,7 +25,7 @@ public class MapAssociation extends Element {
   }
 
   /**
-   * [key] can be one of [InstanceRef] or [Sentinel].
+   * @return one of <code>InstanceRef</code> or <code>Sentinel</code>
    */
   public InstanceRef getKey() {
     JsonElement elem = json.get("key");
@@ -37,7 +37,7 @@ public class MapAssociation extends Element {
   }
 
   /**
-   * [value] can be one of [InstanceRef] or [Sentinel].
+   * @return one of <code>InstanceRef</code> or <code>Sentinel</code>
    */
   public InstanceRef getValue() {
     JsonElement elem = json.get("value");

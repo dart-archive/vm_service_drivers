@@ -25,7 +25,7 @@ public class ContextElement extends Element {
   }
 
   /**
-   * [value] can be one of [InstanceRef] or [Sentinel].
+   * @return one of <code>InstanceRef</code> or <code>Sentinel</code>
    */
   public InstanceRef getValue() {
     JsonElement elem = json.get("value");

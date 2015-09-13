@@ -42,8 +42,8 @@ public class Script extends Element {
   }
 
   /**
-   * The source code for this script. For certain built-in scripts, this may be
-   * reconstructed without source comments.
+   * The source code for this script. For certain built-in scripts, this may be reconstructed
+   * without source comments.
    */
   public String getSource() {
     return json.get("source").getAsString();
