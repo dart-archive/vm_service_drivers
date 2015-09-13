@@ -27,16 +27,16 @@ public class Version extends Element {
   }
 
   /**
-   * The major version number is incremented when the protocol is changed in a
-   * potentially incompatible way.
+   * The major version number is incremented when the protocol is changed in a potentially
+   * incompatible way.
    */
   public int getMajor() {
     return json.get("major").getAsInt();
   }
 
   /**
-   * The minor version number is incremented when the protocol is changed in a
-   * backwards compatible way.
+   * The minor version number is incremented when the protocol is changed in a backwards compatible
+   * way.
    */
   public int getMinor() {
     return json.get("minor").getAsInt();

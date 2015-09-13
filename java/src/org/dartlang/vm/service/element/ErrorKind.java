@@ -28,8 +28,7 @@ public enum ErrorKind {
   LanguageError,
 
   /**
-   * The isolate has encounted an internal error. These errors should be
-   * reported as bugs.
+   * The isolate has encounted an internal error. These errors should be reported as bugs.
    */
   InternalError,
 

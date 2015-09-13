@@ -16,8 +16,8 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 /**
- * Adding new values to [EventKind] is considered a backwards compatible
- * change. Clients should ignore unrecognized events.
+ * Adding new values to [EventKind] is considered a backwards compatible change. Clients should
+ * ignore unrecognized events.
  */
 public enum EventKind {
 
@@ -37,8 +37,8 @@ public enum EventKind {
   IsolateExit,
 
   /**
-   * Notification that isolate identifying information has changed. Currently
-   * used to notify of changes to the isolate debugging name via setName.
+   * Notification that isolate identifying information has changed. Currently used to notify of
+   * changes to the isolate debugging name via setName.
    */
   IsolateUpdate,
 

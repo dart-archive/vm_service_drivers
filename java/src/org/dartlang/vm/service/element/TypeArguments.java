@@ -21,8 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A [TypeArguments] object represents the type argument vector for some
- * instantiated generic type.
+ * A [TypeArguments] object represents the type argument vector for some instantiated generic type.
  */
 public class TypeArguments extends Element {
 
@@ -38,8 +37,8 @@ public class TypeArguments extends Element {
   }
 
   /**
-   * A list of types. The value will always be one of the kinds: Type, TypeRef,
-   * TypeParameter, BoundedType.
+   * A list of types. The value will always be one of the kinds: Type, TypeRef, TypeParameter,
+   * BoundedType.
    */
   public List<InstanceRef> getTypes() {
     JsonArray array = json.getAsJsonArray("types");
