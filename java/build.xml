@@ -8,6 +8,8 @@
     <mkdir dir="dist"/>
 
     <property environment="env"/>
+    <property file="version.txt" prefix="service"/>
+
     <property
         name="path"
         value="third_party/gson/gson-2.2.4.jar;third_party/guava/guava-13.0.1.jar;third_party/weberknecht/weberknecht-0.1.5.jar"/>
@@ -26,9 +28,8 @@
   </target>
 
   <target name="jar" depends="compile">
-    <!-- TODO: implement -->
-    <!-- mkdir dir="build/jar"/>
-    <jar destfile="build/jar/HelloWorld.jar" basedir="build/classes"/ -->
+    <copy file="version.txt" todir="build/classes"/>
+    <jar destfile="build/vm_service_lib.jar" basedir="build/classes"/>
   </target>
 
   <target name="test" depends="compile">
@@ -41,23 +42,10 @@
         <pathelement location="build/test"/>
       </classpath>
     </java>
-
-    <!-- junit printsummary="yes" fork="yes" haltonfailure="yes">
-      <classpath>
-        <pathelement path="${path}"/>
-        <pathelement location="build/classes"/>
-        <pathelement location="build/test"/>
-        <pathelement location="third_party/junit/junit-4.12.jar"/>
-      </classpath>
-
-      <formatter type="plain" usefile="false"/>
-
-      <test name="org.dartlang.vm.service.VMServiceTest"/>
-    </junit -->
   </target>
 
   <target name="dist" depends="jar,test">
-    <!-- TODO: implement; copy and rename the library -->
-
+    <!-- copy and rename the library -->
+    <copy file="build/vm_service_lib.jar" tofile="dest/vm_service_lib-${service.version}.jar"/>
   </target>
 </project>
