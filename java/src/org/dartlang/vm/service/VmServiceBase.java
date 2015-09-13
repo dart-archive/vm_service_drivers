@@ -19,7 +19,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
+import de.roderick.weberknecht.WebSocket;
+import de.roderick.weberknecht.WebSocketEventHandler;
+import de.roderick.weberknecht.WebSocketException;
+import de.roderick.weberknecht.WebSocketMessage;
+
 import org.dartlang.vm.service.consumer.Consumer;
+import org.dartlang.vm.service.consumer.GetInstanceConsumer;
 import org.dartlang.vm.service.consumer.GetLibraryConsumer;
 import org.dartlang.vm.service.consumer.GetObjectConsumer;
 import org.dartlang.vm.service.consumer.VersionConsumer;
@@ -29,11 +35,6 @@ import org.dartlang.vm.service.internal.ObservatoryConst;
 import org.dartlang.vm.service.internal.RequestSink;
 import org.dartlang.vm.service.internal.WebSocketRequestSink;
 import org.dartlang.vm.service.logging.Logging;
-
-import de.roderick.weberknecht.WebSocket;
-import de.roderick.weberknecht.WebSocketEventHandler;
-import de.roderick.weberknecht.WebSocketException;
-import de.roderick.weberknecht.WebSocketMessage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -129,8 +130,8 @@ abstract class VmServiceBase implements ObservatoryConst {
         if (response.getMajor() != VmService.versionMajor
             || response.getMinor() < VmService.versionMinor) {
           String msg = "Incompatible protocol version: client="
-              + VmService.versionMajor + "." + VmService.versionMinor
-              + " vm=" + response.getMajor() + "." + response.getMinor();
+              + VmService.versionMajor + "." + VmService.versionMinor + " vm="
+              + response.getMajor() + "." + response.getMinor();
           Logging.getLogger().logError(msg);
           errMsg[0] = msg;
         } else if (response.getMinor() != VmService.versionMinor) {
@@ -191,6 +192,14 @@ abstract class VmServiceBase implements ObservatoryConst {
    */
   public void disconnect() {
     requestSink.close();
+  }
+
+  /**
+   * Return the instance with the given identifier.
+   */
+  public void getInstance(String isolateId, String instanceId,
+      GetInstanceConsumer consumer) {
+    getObject(isolateId, instanceId, consumer);
   }
 
   /**

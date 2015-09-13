@@ -47,7 +47,7 @@ public class VMServiceTest {
       Library rootLib = vmGetLibrary(sampleIsolate, sampleIsolate.getRootLib());
 
       // Run to breakpoint on line "foo(1);"
-      vmAddBreakpoint(sampleIsolate, rootLib.getScripts().get(0), 11);
+      vmAddBreakpoint(sampleIsolate, rootLib.getScripts().get(0), 13);
       vmResume(isolates.get(0), null);
       sampleOut.waitFor("hello");
       sleep(200);
@@ -258,7 +258,7 @@ public class VMServiceTest {
   }
 
   private static Isolate vmGetIsolate(IsolateRef isolate) {
-    final Result<Isolate> latch = new Result<Isolate>();
+    final ResultLatch<Isolate> latch = new ResultLatch<Isolate>();
     vmService.getIsolate(isolate.getId(), new IsolateConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -283,7 +283,7 @@ public class VMServiceTest {
   }
 
   private static Library vmGetLibrary(Isolate isolateId, LibraryRef library) {
-    final Result<Library> latch = new Result<Library>();
+    final ResultLatch<Library> latch = new ResultLatch<Library>();
     vmService.getLibrary(isolateId.getId(), library.getId(),
         new GetLibraryConsumer() {
           @Override
@@ -302,9 +302,7 @@ public class VMServiceTest {
   }
 
   private static void vmGetStack(Isolate isolate) {
-    final OpLatch latch = new OpLatch();
-    final InstanceRefToString convert = new InstanceRefToString(vmService,
-        latch);
+    final ResultLatch<Stack> latch = new ResultLatch<Stack>();
     vmService.getStack(isolate.getId(), new StackConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -312,27 +310,29 @@ public class VMServiceTest {
       }
 
       @Override
-      public void received(Stack response) {
-        System.out.println("Received Stack response");
-        System.out.println("  Messages:");
-        for (Message message : response.getMessages()) {
-          System.out.println("    " + message.getName());
-        }
-        System.out.println("  Frames:");
-        for (Frame frame : response.getFrames()) {
-          System.out.println("    #" + frame.getIndex() + " "
-              + frame.getFunction().getName() + " ("
-              + frame.getLocation().getScript().getUri() + ")");
-          for (BoundVariable var : frame.getVars()) {
-            InstanceRef instanceRef = var.getValue();
-            System.out.println("      " + var.getName() + " = "
-                + convert.toString(instanceRef));
-          }
-        }
-        latch.opComplete();
+      public void received(Stack stack) {
+        latch.setValue(stack);
       }
     });
-    latch.waitAndAssertOpComplete();
+    Stack stack = latch.getValue();
+    System.out.println("Received Stack response");
+    System.out.println("  Messages:");
+    for (Message message : stack.getMessages()) {
+      System.out.println("    " + message.getName());
+    }
+    System.out.println("  Frames:");
+    InstanceRefToString convert = new InstanceRefToString(isolate, vmService,
+        latch);
+    for (Frame frame : stack.getFrames()) {
+      System.out.println("    #" + frame.getIndex() + " "
+          + frame.getFunction().getName() + " ("
+          + frame.getLocation().getScript().getUri() + ")");
+      for (BoundVariable var : frame.getVars()) {
+        InstanceRef instanceRef = var.getValue();
+        System.out.println("      " + var.getName() + " = "
+            + convert.toString(instanceRef));
+      }
+    }
   }
 
   private static void vmGetVersion() {
@@ -356,7 +356,7 @@ public class VMServiceTest {
   }
 
   private static List<IsolateRef> vmGetVmIsolates() {
-    final Result<List<IsolateRef>> latch = new Result<List<IsolateRef>>();
+    final ResultLatch<List<IsolateRef>> latch = new ResultLatch<List<IsolateRef>>();
     vmService.getVM(new VMConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -400,19 +400,5 @@ public class VMServiceTest {
       }
     });
     // Do not wait for confirmation, but display error if it occurs
-  }
-}
-
-class Result<T> extends OpLatch {
-  private T value;
-
-  T getValue() {
-    waitAndAssertOpComplete();
-    return value;
-  }
-
-  void setValue(T value) {
-    this.value = value;
-    opComplete();
   }
 }
