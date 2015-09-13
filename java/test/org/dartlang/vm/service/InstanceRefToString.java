@@ -13,15 +13,20 @@
  */
 package org.dartlang.vm.service;
 
+import org.dartlang.vm.service.consumer.GetInstanceConsumer;
+import org.dartlang.vm.service.element.Instance;
 import org.dartlang.vm.service.element.InstanceKind;
 import org.dartlang.vm.service.element.InstanceRef;
+import org.dartlang.vm.service.element.Isolate;
+import org.dartlang.vm.service.element.RPCError;
 
 /**
  * Utility class for converting {@link InstanceRef} to a human readable string.
  */
 public class InstanceRefToString {
-//  private final VmService service;
-//  private final OpLatch latch;
+  private Isolate isolate;
+  private final VmService service;
+  private final OpLatch masterLatch;
 
   /**
    * Construct a new instance for converting one or more {@link InstanceRef} to human readable
@@ -29,69 +34,128 @@ public class InstanceRefToString {
    * waiting thread as it makes {@link VmService} class to obtain details about each
    * {@link InstanceRef}.
    */
-  public InstanceRefToString(VmService service, OpLatch latch) {
-//    this.service = service;
-//    this.latch = latch;
+  public InstanceRefToString(Isolate isolate, VmService service, OpLatch latch) {
+    this.isolate = isolate;
+    this.service = service;
+    this.masterLatch = latch;
   }
 
   /**
    * Return a human readable string for the given {@link InstanceRef}.
    */
   public String toString(InstanceRef ref) {
-    return toString(ref, 4);
+    StringBuilder result = new StringBuilder();
+    printInstance(result, ref, 4);
+    return result.toString();
   }
 
   /**
-   * Return a human readable string for the given {@link InstanceRef}.
+   * Request the instance information from the {@link VmService}.
    * 
-   * @param maxDepth the maximum number of recursions this method can make on itself to determine
-   *          human readable strings for child objects.
+   * @param ref the instance reference (not {@code null})
+   * @return the instance or {@code null} if there was a problem.
    */
-  public String toString(InstanceRef ref, int maxDepth) {
+  private Instance getInstance(InstanceRef ref) {
+
+    // Request master latch extend its timeout because we are making another call to VmService
+    masterLatch.opWorking();
+
+    final ResultLatch<Instance> instLatch = new ResultLatch<Instance>();
+    service.getInstance(isolate.getId(), ref.getId(),
+        new GetInstanceConsumer() {
+          @Override
+          public void onError(RPCError error) {
+            instLatch.setValue(null);
+          }
+
+          @Override
+          public void received(Instance instance) {
+            instLatch.setValue(instance);
+          }
+        });
+    return instLatch.getValue();
+  }
+
+  /**
+   * Convert the given {@link InstanceRef} into a human readable string.
+   * 
+   * @param result the buffer to which the human readable string is added
+   * @param ref the instance to be converted (not {@code null})
+   * @param maxDepth the maximum number of recursions this method can make on itself to determine
+   *          human readable strings for child objects
+   */
+  private void printInstance(StringBuilder result, InstanceRef ref, int maxDepth) {
     if (ref == null) {
-      return "-- no value --";
+      result.append("-- no value --");
+      return;
     }
     InstanceKind kind = ref.getKind();
-    if (kind != null) {
-      switch (kind) {
-        case Bool:
-        case Double:
-        case Float32x4:
-        case Float64x2:
-        case Int:
-        case Int32x4:
-        case Null:
-        case String:
-        case StackTrace:
-          return ref.getValueAsString();
-        case List:
-          // TODO call VmService to obtain list content
-        case BoundedType:
-        case Closure:
-        case Float32List:
-        case Float32x4List:
-        case Float64List:
-        case Float64x2List:
-        case Int16List:
-        case Int32List:
-        case Int32x4List:
-        case Int64List:
-        case Int8List:
-        case Map:
-        case MirrorReference:
-        case PlainInstance:
-        case RegExp:
-        case Type:
-        case TypeParameter:
-        case TypeRef:
-        case Uint16List:
-        case Uint32List:
-        case Uint64List:
-        case Uint8ClampedList:
-        case Uint8List:
-        case WeakProperty:
-      }
+    if (kind == null) {
+      result.append("a " + kind);
+      return;
     }
-    return "a " + kind;
+    switch (kind) {
+      case Bool:
+      case Double:
+      case Float32x4:
+      case Float64x2:
+      case Int:
+      case Int32x4:
+      case Null:
+      case String:
+      case StackTrace:
+        result.append(ref.getValueAsString());
+        return;
+      case List:
+        printList(result, ref, maxDepth);
+        return;
+      case BoundedType:
+      case Closure:
+      case Float32List:
+      case Float32x4List:
+      case Float64List:
+      case Float64x2List:
+      case Int16List:
+      case Int32List:
+      case Int32x4List:
+      case Int64List:
+      case Int8List:
+      case Map:
+      case MirrorReference:
+      case PlainInstance:
+      case RegExp:
+      case Type:
+      case TypeParameter:
+      case TypeRef:
+      case Uint16List:
+      case Uint32List:
+      case Uint64List:
+      case Uint8ClampedList:
+      case Uint8List:
+      case WeakProperty:
+    }
+    result.append("a " + kind);
+  }
+
+  /**
+   * Convert the given list into a human readable string.
+   * 
+   * @param result the buffer to which the human readable string is added
+   * @param ref an instance reference of type "List" (not {@code null})
+   * @param maxDepth the maximum number of recursions this method can make on itself to determine
+   *          human readable strings for child objects
+   */
+  private void printList(StringBuilder result, InstanceRef ref, int maxDepth) {
+    if (maxDepth == 0) {
+      result.append("a List");
+      return;
+    }
+    result.append("[");
+    Instance list = getInstance(ref);
+    if (list == null) {
+      result.append("?error?]");
+      return;
+    }
+    result.append(list.getLength() + " elements]");
   }
 }

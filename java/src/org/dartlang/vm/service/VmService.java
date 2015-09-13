@@ -19,6 +19,27 @@ import com.google.gson.JsonObject;
 import org.dartlang.vm.service.consumer.*;
 import org.dartlang.vm.service.element.*;
 
+/**
+ * {@link VmService} allows control of and access to information in a running
+ * Dart VM instance.
+ * <br/>
+ * Launch the Dart VM with the arguments:
+ * <pre>
+ * --pause_isolates_on_start
+ * --observe
+ * --enable-vm-service=some-port
+ * </pre>
+ * where <strong>some-port</strong> is a port number of your choice
+ * which this client will use to communicate with the Dart VM.
+ * See https://www.dartlang.org/tools/dart-vm/ for more details.
+ * Once the VM is running, instantiate a new {@link VmService}
+ * to connect to that VM via {@link VmService#connect(String)}
+ * or {@link VmService#localConnect(int)}.
+ * <br/>
+ * Calls to {@link VmService} should not be nested.
+ * More specifically, you should not make any calls to {@link VmService}
+ * from within any {@link Consumer} method.
+ */
 public class VmService extends VmServiceBase {
 
   /**
@@ -244,6 +265,10 @@ public class VmService extends VmServiceBase {
       }
     }
     if (consumer instanceof GetObjectConsumer) {
+      if (responseType.equals("Instance")) {
+        ((GetObjectConsumer) consumer).received(new Instance(json));
+        return;
+      }
       if (responseType.equals("Library")) {
         ((GetObjectConsumer) consumer).received(new Library(json));
         return;

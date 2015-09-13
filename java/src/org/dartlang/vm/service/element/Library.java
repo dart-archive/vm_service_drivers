@@ -76,6 +76,13 @@ public class Library extends Element {
   }
 
   /**
+   * The id of this library.
+   */
+  public String getId() {
+    return json.get("id").getAsString();
+  }
+
+  /**
    * The name of this library.
    */
   public String getName() {

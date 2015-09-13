@@ -85,15 +85,16 @@ public class Instance extends Element {
   /**
    * The elements of a List instance. Provided for instance kinds: List
    * 
-   * @return one of <code>InstanceRef</code> or <code>List<Sentinel></code>
+   * @return one of <code>List<InstanceRef></code> or <code>List<Sentinel></code>
    */
-  public InstanceRef getElements() {
-    JsonElement elem = json.get("elements");
-    if (!elem.isJsonObject()) return null;
-    JsonObject child = elem.getAsJsonObject();
-    String type = child.get("type").getAsString();
-    if ("Sentinel".equals(type)) return null;
-    return new InstanceRef(child);
+  public List<InstanceRef> getElements() {
+    JsonArray array = json.getAsJsonArray("elements");
+    int size = array.size();
+    List<InstanceRef> result = new ArrayList<InstanceRef>();
+    for (int index = 0; index < size; ++index) {
+      result.add(new InstanceRef((JsonObject) array.get(index)));
+    }
+    return result;
   }
 
   /**
@@ -101,6 +102,13 @@ public class Instance extends Element {
    */
   public BoundField getFields() {
     return new BoundField((JsonObject) json.get("fields"));
+  }
+
+  /**
+   * The id of this instance.
+   */
+  public String getId() {
+    return json.get("id").getAsString();
   }
 
   /**
