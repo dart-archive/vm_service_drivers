@@ -13,8 +13,30 @@
  */
 package org.dartlang.vm.service;
 
-import org.dartlang.vm.service.consumer.*;
-import org.dartlang.vm.service.element.*;
+import org.dartlang.vm.service.consumer.BreakpointConsumer;
+import org.dartlang.vm.service.consumer.GetLibraryConsumer;
+import org.dartlang.vm.service.consumer.IsolateConsumer;
+import org.dartlang.vm.service.consumer.StackConsumer;
+import org.dartlang.vm.service.consumer.SuccessConsumer;
+import org.dartlang.vm.service.consumer.VMConsumer;
+import org.dartlang.vm.service.consumer.VersionConsumer;
+import org.dartlang.vm.service.element.BoundVariable;
+import org.dartlang.vm.service.element.Breakpoint;
+import org.dartlang.vm.service.element.ElementList;
+import org.dartlang.vm.service.element.Frame;
+import org.dartlang.vm.service.element.InstanceRef;
+import org.dartlang.vm.service.element.Isolate;
+import org.dartlang.vm.service.element.IsolateRef;
+import org.dartlang.vm.service.element.Library;
+import org.dartlang.vm.service.element.LibraryRef;
+import org.dartlang.vm.service.element.Message;
+import org.dartlang.vm.service.element.RPCError;
+import org.dartlang.vm.service.element.ScriptRef;
+import org.dartlang.vm.service.element.Stack;
+import org.dartlang.vm.service.element.StepOption;
+import org.dartlang.vm.service.element.Success;
+import org.dartlang.vm.service.element.VM;
+import org.dartlang.vm.service.element.Version;
 import org.dartlang.vm.service.logging.Logger;
 import org.dartlang.vm.service.logging.Logging;
 
@@ -42,7 +64,7 @@ public class VMServiceTest {
       sleep(500);
       vmConnect();
       vmGetVersion();
-      List<IsolateRef> isolates = vmGetVmIsolates();
+      ElementList<IsolateRef> isolates = vmGetVmIsolates();
       Isolate sampleIsolate = vmGetIsolate(isolates.get(0));
       Library rootLib = vmGetLibrary(sampleIsolate, sampleIsolate.getRootLib());
 
@@ -105,12 +127,10 @@ public class VMServiceTest {
     while (!projDir.getName().equals(projName)) {
       projDir = projDir.getParentFile();
       if (projDir == null) {
-        showErrorAndExit("Cannot find project " + projName + " from "
-            + currentDir);
+        showErrorAndExit("Cannot find project " + projName + " from " + currentDir);
       }
     }
-    sampleDart = new File(projDir, "dart/example/sample_main.dart".replace("/",
-        File.separator));
+    sampleDart = new File(projDir, "dart/example/sample_main.dart".replace("/", File.separator));
     if (!sampleDart.isFile()) {
       showErrorAndExit("Cannot find sample: " + sampleDart);
     }
@@ -221,24 +241,21 @@ public class VMServiceTest {
     System.out.println("Terminated sample process");
   }
 
-  private static void vmAddBreakpoint(Isolate isolate, ScriptRef script,
-      int lineNum) {
+  private static void vmAddBreakpoint(Isolate isolate, ScriptRef script, int lineNum) {
     final OpLatch latch = new OpLatch();
-    vmService.addBreakpoint(isolate.getId(), script.getId(), lineNum,
-        new BreakpointConsumer() {
-          @Override
-          public void onError(RPCError error) {
-            showRPCError(error);
-          }
+    vmService.addBreakpoint(isolate.getId(), script.getId(), lineNum, new BreakpointConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        showRPCError(error);
+      }
 
-          @Override
-          public void received(Breakpoint response) {
-            System.out.println("Received Breakpoint response");
-            System.out.println("  BreakpointNumber:"
-                + response.getBreakpointNumber());
-            latch.opComplete();
-          }
-        });
+      @Override
+      public void received(Breakpoint response) {
+        System.out.println("Received Breakpoint response");
+        System.out.println("  BreakpointNumber:" + response.getBreakpointNumber());
+        latch.opComplete();
+      }
+    });
     latch.waitAndAssertOpComplete();
   }
 
@@ -246,8 +263,7 @@ public class VMServiceTest {
     try {
       vmService = VmService.localConnect(vmPort);
     } catch (IOException e) {
-      throw new RuntimeException(
-          "Failed to connect to the VM vmService service", e);
+      throw new RuntimeException("Failed to connect to the VM vmService service", e);
     }
   }
 
@@ -284,20 +300,19 @@ public class VMServiceTest {
 
   private static Library vmGetLibrary(Isolate isolateId, LibraryRef library) {
     final ResultLatch<Library> latch = new ResultLatch<Library>();
-    vmService.getLibrary(isolateId.getId(), library.getId(),
-        new GetLibraryConsumer() {
-          @Override
-          public void onError(RPCError error) {
-            showRPCError(error);
-          }
+    vmService.getLibrary(isolateId.getId(), library.getId(), new GetLibraryConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        showRPCError(error);
+      }
 
-          @Override
-          public void received(Library response) {
-            System.out.println("Received GetLibrary library");
-            System.out.println("  uri: " + response.getUri());
-            latch.setValue(response);
-          }
-        });
+      @Override
+      public void received(Library response) {
+        System.out.println("Received GetLibrary library");
+        System.out.println("  uri: " + response.getUri());
+        latch.setValue(response);
+      }
+    });
     return latch.getValue();
   }
 
@@ -321,16 +336,13 @@ public class VMServiceTest {
       System.out.println("    " + message.getName());
     }
     System.out.println("  Frames:");
-    InstanceRefToString convert = new InstanceRefToString(isolate, vmService,
-        latch);
+    InstanceRefToString convert = new InstanceRefToString(isolate, vmService, latch);
     for (Frame frame : stack.getFrames()) {
-      System.out.println("    #" + frame.getIndex() + " "
-          + frame.getFunction().getName() + " ("
+      System.out.println("    #" + frame.getIndex() + " " + frame.getFunction().getName() + " ("
           + frame.getLocation().getScript().getUri() + ")");
       for (BoundVariable var : frame.getVars()) {
         InstanceRef instanceRef = var.getValue();
-        System.out.println("      " + var.getName() + " = "
-            + convert.toString(instanceRef));
+        System.out.println("      " + var.getName() + " = " + convert.toString(instanceRef));
       }
     }
   }
@@ -355,8 +367,8 @@ public class VMServiceTest {
     latch.waitAndAssertOpComplete();
   }
 
-  private static List<IsolateRef> vmGetVmIsolates() {
-    final ResultLatch<List<IsolateRef>> latch = new ResultLatch<List<IsolateRef>>();
+  private static ElementList<IsolateRef> vmGetVmIsolates() {
+    final ResultLatch<ElementList<IsolateRef>> latch = new ResultLatch<ElementList<IsolateRef>>();
     vmService.getVM(new VMConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -366,15 +378,14 @@ public class VMServiceTest {
       @Override
       public void received(VM response) {
         System.out.println("Received VM response");
-        System.out.println("  ArchitectureBits: "
-            + response.getArchitectureBits());
+        System.out.println("  ArchitectureBits: " + response.getArchitectureBits());
         System.out.println("  HostCPU: " + response.getHostCPU());
         System.out.println("  TargetCPU: " + response.getTargetCPU());
         System.out.println("  Pid: " + response.getPid());
         System.out.println("  StartTime: " + response.getStartTime());
         for (IsolateRef isolate : response.getIsolates()) {
-          System.out.println("  Isolate " + isolate.getNumber() + ", "
-              + isolate.getId() + ", " + isolate.getName());
+          System.out.println("  Isolate " + isolate.getNumber() + ", " + isolate.getId() + ", "
+              + isolate.getName());
         }
         latch.setValue(response.getIsolates());
       }

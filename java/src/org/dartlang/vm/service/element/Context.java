@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Context extends Element {
 
@@ -43,13 +41,12 @@ public class Context extends Element {
   /**
    * The variables in this context object.
    */
-  public List<ContextElement> getVariables() {
-    JsonArray array = json.getAsJsonArray("variables");
-    int size = array.size();
-    List<ContextElement> result = new ArrayList<ContextElement>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new ContextElement((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<ContextElement> getVariables() {
+    return new ElementList<ContextElement>(json.get("variables").getAsJsonArray()) {
+      @Override
+      protected ContextElement basicGet(JsonArray array, int index) {
+        return new ContextElement(array.get(index).getAsJsonObject());
+      }
+    };
   }
 }

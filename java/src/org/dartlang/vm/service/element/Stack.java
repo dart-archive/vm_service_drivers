@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Stack extends Response {
 
@@ -26,23 +24,21 @@ public class Stack extends Response {
     super(json);
   }
 
-  public List<Frame> getFrames() {
-    JsonArray array = json.getAsJsonArray("frames");
-    int size = array.size();
-    List<Frame> result = new ArrayList<Frame>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new Frame((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<Frame> getFrames() {
+    return new ElementList<Frame>(json.get("frames").getAsJsonArray()) {
+      @Override
+      protected Frame basicGet(JsonArray array, int index) {
+        return new Frame(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
-  public List<Message> getMessages() {
-    JsonArray array = json.getAsJsonArray("messages");
-    int size = array.size();
-    List<Message> result = new ArrayList<Message>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new Message((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<Message> getMessages() {
+    return new ElementList<Message>(json.get("messages").getAsJsonArray()) {
+      @Override
+      protected Message basicGet(JsonArray array, int index) {
+        return new Message(array.get(index).getAsJsonObject());
+      }
+    };
   }
 }

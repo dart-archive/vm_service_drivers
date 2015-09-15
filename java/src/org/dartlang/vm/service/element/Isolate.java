@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An [Isolate] object provides information about one isolate in the VM.
@@ -32,14 +30,13 @@ public class Isolate extends Response {
   /**
    * A list of all breakpoints for this isolate.
    */
-  public List<Breakpoint> getBreakpoints() {
-    JsonArray array = json.getAsJsonArray("breakpoints");
-    int size = array.size();
-    List<Breakpoint> result = new ArrayList<Breakpoint>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new Breakpoint((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<Breakpoint> getBreakpoints() {
+    return new ElementList<Breakpoint>(json.get("breakpoints").getAsJsonArray()) {
+      @Override
+      protected Breakpoint basicGet(JsonArray array, int index) {
+        return new Breakpoint(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
@@ -68,14 +65,13 @@ public class Isolate extends Response {
    * A list of all libraries for this isolate. Guaranteed to be initialized when the
    * IsolateRunnable event fires.
    */
-  public List<LibraryRef> getLibraries() {
-    JsonArray array = json.getAsJsonArray("libraries");
-    int size = array.size();
-    List<LibraryRef> result = new ArrayList<LibraryRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new LibraryRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<LibraryRef> getLibraries() {
+    return new ElementList<LibraryRef>(json.get("libraries").getAsJsonArray()) {
+      @Override
+      protected LibraryRef basicGet(JsonArray array, int index) {
+        return new LibraryRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**

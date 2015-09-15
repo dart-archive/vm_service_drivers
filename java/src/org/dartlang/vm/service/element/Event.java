@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An [Event] is an asynchronous notification from the VM. It is delivered only when the client has
@@ -72,14 +70,13 @@ public class Event extends Response {
    * with no breakpoints. If there is more than one breakpoint set at the program position, then
    * all of them will be provided. This is provided for the event kinds: PauseBreakpoint
    */
-  public List<Breakpoint> getPauseBreakpoints() {
-    JsonArray array = json.getAsJsonArray("pauseBreakpoints");
-    int size = array.size();
-    List<Breakpoint> result = new ArrayList<Breakpoint>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new Breakpoint((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<Breakpoint> getPauseBreakpoints() {
+    return new ElementList<Breakpoint>(json.get("pauseBreakpoints").getAsJsonArray()) {
+      @Override
+      protected Breakpoint basicGet(JsonArray array, int index) {
+        return new Breakpoint(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**

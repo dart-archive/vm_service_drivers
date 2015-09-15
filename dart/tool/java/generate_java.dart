@@ -404,7 +404,6 @@ class Method extends Member {
     }
     types.sort((t1, t2) => t1.name.compareTo(t2.name));
     for (var t in types) {
-
       // TODO(danrubel) rename classes to prevent collision
       // with common java types. e.g. "Class" --> "DartClass"
       if (t.name == 'Class' || t.name == 'Error') continue;
@@ -721,9 +720,6 @@ class TypeField extends Member {
       return;
     }
 
-    if (type.types.first.isArray) {
-      writer.addImport('java.util.List');
-    }
     writer.addMethod(accessorName, [], (StatementWriter writer) {
       type.valueType.generateAccessStatements(writer, name,
           canBeSentinel: type.isValueAndSentinel, defaultValue: defaultValue);
@@ -795,8 +791,13 @@ class TypeRef {
   String get javaUnboxedName => name == 'bool' ? 'boolean' : name;
 
   String get ref {
-    if (arrayDepth == 2) return 'List<List<${javaBoxedName}>>';
-    if (arrayDepth == 1) return 'List<${javaBoxedName}>';
+    if (isSimple) {
+      if (arrayDepth == 2) return 'List<List<${javaBoxedName}>>';
+      if (arrayDepth == 1) return 'List<${javaBoxedName}>';
+    } else {
+      if (arrayDepth == 2) return 'ElementList<ElementList<${javaBoxedName}>>';
+      if (arrayDepth == 1) return 'ElementList<${javaBoxedName}>';
+    }
     return javaUnboxedName;
   }
 
@@ -819,8 +820,10 @@ class TypeRef {
       }
     } else if (name == 'int') {
       if (arrayDepth > 1) {
+        writer.addImport('java.util.List');
         writer.addLine('return getListListInt("$propertyName");');
       } else if (arrayDepth == 1) {
+        writer.addImport('java.util.List');
         writer.addLine('return getListInt("$propertyName");');
       } else {
         writer.addLine('return json.get("$propertyName").getAsInt();');
@@ -842,19 +845,13 @@ class TypeRef {
       if (arrayDepth > 1) {
         print('skipped accessor body for $propertyName');
       } else if (arrayDepth == 1) {
-        writer.addImport('java.util.List');
-        writer.addImport('java.util.ArrayList');
         writer.addImport('com.google.gson.JsonArray');
-        writer
-            .addLine('JsonArray array = json.getAsJsonArray("$propertyName");');
-        writer.addLine('int size = array.size();');
-        writer.addLine(
-            'List<$javaBoxedName> result = new ArrayList<$javaBoxedName>();');
-        writer.addLine('for (int index = 0; index < size; ++index) {');
-        writer.addLine(
-            '  result.add(new $javaBoxedName((JsonObject) array.get(index)));');
-        writer.addLine('}');
-        writer.addLine('return result;');
+        writer.addLine('return new ElementList<$javaBoxedName>(json.get("$propertyName").getAsJsonArray()) {');
+        writer.addLine('  @Override');
+        writer.addLine('  protected $javaBoxedName basicGet(JsonArray array, int index) {');
+        writer.addLine('    return new $javaBoxedName(array.get(index).getAsJsonObject());');
+        writer.addLine('  }');
+        writer.addLine('};');
       } else {
         if (canBeSentinel) {
           writer.addImport('com.google.gson.JsonElement');

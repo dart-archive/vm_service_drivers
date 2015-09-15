@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A [TypeArguments] object represents the type argument vector for some instantiated generic type.
@@ -40,13 +38,12 @@ public class TypeArguments extends Obj {
    * A list of types. The value will always be one of the kinds: Type, TypeRef, TypeParameter,
    * BoundedType.
    */
-  public List<InstanceRef> getTypes() {
-    JsonArray array = json.getAsJsonArray("types");
-    int size = array.size();
-    List<InstanceRef> result = new ArrayList<InstanceRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new InstanceRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<InstanceRef> getTypes() {
+    return new ElementList<InstanceRef>(json.get("types").getAsJsonArray()) {
+      @Override
+      protected InstanceRef basicGet(JsonArray array, int index) {
+        return new InstanceRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 }

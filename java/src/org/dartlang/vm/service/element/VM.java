@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 public class VM extends Response {
 
@@ -43,14 +41,13 @@ public class VM extends Response {
   /**
    * A list of isolates running in the VM.
    */
-  public List<IsolateRef> getIsolates() {
-    JsonArray array = json.getAsJsonArray("isolates");
-    int size = array.size();
-    List<IsolateRef> result = new ArrayList<IsolateRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new IsolateRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<IsolateRef> getIsolates() {
+    return new ElementList<IsolateRef>(json.get("isolates").getAsJsonArray()) {
+      @Override
+      protected IsolateRef basicGet(JsonArray array, int index) {
+        return new IsolateRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**

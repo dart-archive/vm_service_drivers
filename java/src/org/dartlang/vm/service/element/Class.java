@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A [Class] provides information about a Dart language class.
@@ -39,40 +37,37 @@ public class Class extends Obj {
   /**
    * A list of fields in this class. Does not include fields from superclasses.
    */
-  public List<FieldRef> getFields() {
-    JsonArray array = json.getAsJsonArray("fields");
-    int size = array.size();
-    List<FieldRef> result = new ArrayList<FieldRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new FieldRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<FieldRef> getFields() {
+    return new ElementList<FieldRef>(json.get("fields").getAsJsonArray()) {
+      @Override
+      protected FieldRef basicGet(JsonArray array, int index) {
+        return new FieldRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
    * A list of functions in this class. Does not include functions from superclasses.
    */
-  public List<FuncRef> getFunctions() {
-    JsonArray array = json.getAsJsonArray("functions");
-    int size = array.size();
-    List<FuncRef> result = new ArrayList<FuncRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new FuncRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<FuncRef> getFunctions() {
+    return new ElementList<FuncRef>(json.get("functions").getAsJsonArray()) {
+      @Override
+      protected FuncRef basicGet(JsonArray array, int index) {
+        return new FuncRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
    * A list of interface types for this class. The value will be of the kind: Type.
    */
-  public List<InstanceRef> getInterfaces() {
-    JsonArray array = json.getAsJsonArray("interfaces");
-    int size = array.size();
-    List<InstanceRef> result = new ArrayList<InstanceRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new InstanceRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<InstanceRef> getInterfaces() {
+    return new ElementList<InstanceRef>(json.get("interfaces").getAsJsonArray()) {
+      @Override
+      protected InstanceRef basicGet(JsonArray array, int index) {
+        return new InstanceRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
@@ -113,14 +108,13 @@ public class Class extends Obj {
   /**
    * A list of subclasses of this class.
    */
-  public List<ClassRef> getSubclasses() {
-    JsonArray array = json.getAsJsonArray("subclasses");
-    int size = array.size();
-    List<ClassRef> result = new ArrayList<ClassRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new ClassRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<ClassRef> getSubclasses() {
+    return new ElementList<ClassRef>(json.get("subclasses").getAsJsonArray()) {
+      @Override
+      protected ClassRef basicGet(JsonArray array, int index) {
+        return new ClassRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**

@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A [Library] provides information about a Dart language library.
@@ -32,14 +30,13 @@ public class Library extends Obj {
   /**
    * A list of all classes in this library.
    */
-  public List<ClassRef> getClasses() {
-    JsonArray array = json.getAsJsonArray("classes");
-    int size = array.size();
-    List<ClassRef> result = new ArrayList<ClassRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new ClassRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<ClassRef> getClasses() {
+    return new ElementList<ClassRef>(json.get("classes").getAsJsonArray()) {
+      @Override
+      protected ClassRef basicGet(JsonArray array, int index) {
+        return new ClassRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
@@ -52,27 +49,25 @@ public class Library extends Obj {
   /**
    * A list of the imports for this library.
    */
-  public List<LibraryDependency> getDependencies() {
-    JsonArray array = json.getAsJsonArray("dependencies");
-    int size = array.size();
-    List<LibraryDependency> result = new ArrayList<LibraryDependency>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new LibraryDependency((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<LibraryDependency> getDependencies() {
+    return new ElementList<LibraryDependency>(json.get("dependencies").getAsJsonArray()) {
+      @Override
+      protected LibraryDependency basicGet(JsonArray array, int index) {
+        return new LibraryDependency(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
    * A list of the top-level functions in this library.
    */
-  public List<FuncRef> getFunctions() {
-    JsonArray array = json.getAsJsonArray("functions");
-    int size = array.size();
-    List<FuncRef> result = new ArrayList<FuncRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new FuncRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<FuncRef> getFunctions() {
+    return new ElementList<FuncRef>(json.get("functions").getAsJsonArray()) {
+      @Override
+      protected FuncRef basicGet(JsonArray array, int index) {
+        return new FuncRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
@@ -85,14 +80,13 @@ public class Library extends Obj {
   /**
    * A list of the scripts which constitute this library.
    */
-  public List<ScriptRef> getScripts() {
-    JsonArray array = json.getAsJsonArray("scripts");
-    int size = array.size();
-    List<ScriptRef> result = new ArrayList<ScriptRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new ScriptRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<ScriptRef> getScripts() {
+    return new ElementList<ScriptRef>(json.get("scripts").getAsJsonArray()) {
+      @Override
+      protected ScriptRef basicGet(JsonArray array, int index) {
+        return new ScriptRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
@@ -105,13 +99,12 @@ public class Library extends Obj {
   /**
    * A list of the top-level variables in this library.
    */
-  public List<FieldRef> getVariables() {
-    JsonArray array = json.getAsJsonArray("variables");
-    int size = array.size();
-    List<FieldRef> result = new ArrayList<FieldRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new FieldRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<FieldRef> getVariables() {
+    return new ElementList<FieldRef>(json.get("variables").getAsJsonArray()) {
+      @Override
+      protected FieldRef basicGet(JsonArray array, int index) {
+        return new FieldRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 }

@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ClassList extends Response {
 
@@ -26,13 +24,12 @@ public class ClassList extends Response {
     super(json);
   }
 
-  public List<ClassRef> getClasses() {
-    JsonArray array = json.getAsJsonArray("classes");
-    int size = array.size();
-    List<ClassRef> result = new ArrayList<ClassRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new ClassRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<ClassRef> getClasses() {
+    return new ElementList<ClassRef>(json.get("classes").getAsJsonArray()) {
+      @Override
+      protected ClassRef basicGet(JsonArray array, int index) {
+        return new ClassRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 }

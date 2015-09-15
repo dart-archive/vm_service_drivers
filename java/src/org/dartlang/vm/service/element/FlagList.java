@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A [FlagList] represents the complete set of VM command line flags.
@@ -32,13 +30,12 @@ public class FlagList extends Response {
   /**
    * A list of all flags in the VM.
    */
-  public List<Flag> getFlags() {
-    JsonArray array = json.getAsJsonArray("flags");
-    int size = array.size();
-    List<Flag> result = new ArrayList<Flag>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new Flag((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<Flag> getFlags() {
+    return new ElementList<Flag>(json.get("flags").getAsJsonArray()) {
+      @Override
+      protected Flag basicGet(JsonArray array, int index) {
+        return new Flag(array.get(index).getAsJsonObject());
+      }
+    };
   }
 }

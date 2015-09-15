@@ -17,8 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Frame extends Response {
 
@@ -42,13 +40,12 @@ public class Frame extends Response {
     return new SourceLocation((JsonObject) json.get("location"));
   }
 
-  public List<BoundVariable> getVars() {
-    JsonArray array = json.getAsJsonArray("vars");
-    int size = array.size();
-    List<BoundVariable> result = new ArrayList<BoundVariable>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new BoundVariable((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<BoundVariable> getVars() {
+    return new ElementList<BoundVariable>(json.get("vars").getAsJsonArray()) {
+      @Override
+      protected BoundVariable basicGet(JsonArray array, int index) {
+        return new BoundVariable(array.get(index).getAsJsonObject());
+      }
+    };
   }
 }

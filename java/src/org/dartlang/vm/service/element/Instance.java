@@ -18,7 +18,6 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,14 +32,13 @@ public class Instance extends Obj {
   /**
    * The elements of a List instance. Provided for instance kinds: Map
    */
-  public List<MapAssociation> getAssociations() {
-    JsonArray array = json.getAsJsonArray("associations");
-    int size = array.size();
-    List<MapAssociation> result = new ArrayList<MapAssociation>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new MapAssociation((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<MapAssociation> getAssociations() {
+    return new ElementList<MapAssociation>(json.get("associations").getAsJsonArray()) {
+      @Override
+      protected MapAssociation basicGet(JsonArray array, int index) {
+        return new MapAssociation(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
@@ -85,16 +83,15 @@ public class Instance extends Obj {
   /**
    * The elements of a List instance. Provided for instance kinds: List
    * 
-   * @return one of <code>List<InstanceRef></code> or <code>List<Sentinel></code>
+   * @return one of <code>ElementList<InstanceRef></code> or <code>ElementList<Sentinel></code>
    */
-  public List<InstanceRef> getElements() {
-    JsonArray array = json.getAsJsonArray("elements");
-    int size = array.size();
-    List<InstanceRef> result = new ArrayList<InstanceRef>();
-    for (int index = 0; index < size; ++index) {
-      result.add(new InstanceRef((JsonObject) array.get(index)));
-    }
-    return result;
+  public ElementList<InstanceRef> getElements() {
+    return new ElementList<InstanceRef>(json.get("elements").getAsJsonArray()) {
+      @Override
+      protected InstanceRef basicGet(JsonArray array, int index) {
+        return new InstanceRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
