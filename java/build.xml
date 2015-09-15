@@ -46,6 +46,6 @@
 
   <target name="dist" depends="jar,test">
     <!-- copy and rename the library -->
-    <copy file="build/vm_service_lib.jar" tofile="dest/vm_service_lib-${service.version}.jar"/>
+    <copy file="build/vm_service_lib.jar" tofile="dist/vm_service_lib-${service.version}.jar"/>
   </target>
 </project>
