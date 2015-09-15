@@ -234,6 +234,11 @@ class Api extends Member with ApiParseUtil {
   }
 
   void generate(DartGenerator gen) {
+
+    // Set default value for unspecified property
+    setDefaultValue('Instance', 'valueAsStringIsTruncated', 'false');
+    setDefaultValue('InstanceRef', 'valueAsStringIsTruncated', 'false');
+
     gen.out(_headerCode);
     gen.writeln("const String vmServiceVersion = '${serviceVersion}';");
     gen.writeln();
@@ -286,6 +291,12 @@ class Api extends Member with ApiParseUtil {
     gen.writeln();
     gen.writeln('// types');
     types.forEach((t) => t.generate(gen));
+  }
+
+  void setDefaultValue(String typeName, String fieldName, String defaultValue) {
+    types.firstWhere((t) => t.name == typeName)
+      .fields.firstWhere((f) => f.name == fieldName)
+        .defaultValue = defaultValue;
   }
 
   bool isEnumName(String typeName) => enums.any((Enum e) => e.name == typeName);
@@ -475,7 +486,11 @@ class Type extends Member {
     gen.writeln('${name}.fromJson(Map json) ${superCall}{');
     fields.forEach((TypeField field) {
       if (field.type.isSimple) {
-        gen.writeln("${field.generatableName} = json['${field.name}'];");
+        gen.write("${field.generatableName} = json['${field.name}']");
+        if (field.defaultValue != null) {
+          gen.write(' ?? ${field.defaultValue}');
+        }
+        gen.writeln(';');
       } else if (field.type.isEnum) {
         // Parse the enum.
         String enumTypeName = field.type.types.first.name;
@@ -525,6 +540,7 @@ class TypeField extends Member {
   MemberType type = new MemberType();
   String name;
   bool optional = false;
+  String defaultValue;
 
   TypeField(this.parent, this._docs);
 

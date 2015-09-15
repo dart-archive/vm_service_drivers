@@ -1066,7 +1066,7 @@ class InstanceRef extends ObjRef {
     kind = _parseEnum(InstanceKind.values, json['kind']);
     classRef = createObject(json['class']);
     valueAsString = json['valueAsString'];
-    valueAsStringIsTruncated = json['valueAsStringIsTruncated'];
+    valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
     length = json['length'];
     name = json['name'];
     typeClass = createObject(json['typeClass']);
@@ -1122,7 +1122,7 @@ class Instance extends Obj {
     kind = _parseEnum(InstanceKind.values, json['kind']);
     classRef = createObject(json['class']);
     valueAsString = json['valueAsString'];
-    valueAsStringIsTruncated = json['valueAsStringIsTruncated'];
+    valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
     length = json['length'];
     name = json['name'];
     typeClass = createObject(json['typeClass']);
