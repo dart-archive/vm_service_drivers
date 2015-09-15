@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * An [Isolate] object provides information about one isolate in the VM.
  */
-public class Isolate extends Element {
+public class Isolate extends Response {
 
   public Isolate(JsonObject json) {
     super(json);
@@ -43,8 +43,8 @@ public class Isolate extends Element {
   }
 
   /**
-   * The entry function for this isolate. Guaranteed to be initialized when the
-   * IsolateRunnable event fires.
+   * The entry function for this isolate. Guaranteed to be initialized when the IsolateRunnable
+   * event fires.
    */
   public FuncRef getEntry() {
     return new FuncRef((JsonObject) json.get("entry"));
@@ -65,8 +65,8 @@ public class Isolate extends Element {
   }
 
   /**
-   * A list of all libraries for this isolate. Guaranteed to be initialized
-   * when the IsolateRunnable event fires.
+   * A list of all libraries for this isolate. Guaranteed to be initialized when the
+   * IsolateRunnable event fires.
    */
   public List<LibraryRef> getLibraries() {
     JsonArray array = json.getAsJsonArray("libraries");
@@ -100,8 +100,8 @@ public class Isolate extends Element {
   }
 
   /**
-   * The last pause event delivered to the isolate. If the isolate is running,
-   * this will be a resume event.
+   * The last pause event delivered to the isolate. If the isolate is running, this will be a
+   * resume event.
    */
   public Event getPauseEvent() {
     return new Event((JsonObject) json.get("pauseEvent"));
@@ -115,16 +115,16 @@ public class Isolate extends Element {
   }
 
   /**
-   * The root library for this isolate. Guaranteed to be initialized when the
-   * IsolateRunnable event fires.
+   * The root library for this isolate. Guaranteed to be initialized when the IsolateRunnable event
+   * fires.
    */
   public LibraryRef getRootLib() {
     return new LibraryRef((JsonObject) json.get("rootLib"));
   }
 
   /**
-   * The time that the VM started in milliseconds since the epoch. Suitable to
-   * pass to DateTime.fromMillisecondsSinceEpoch.
+   * The time that the VM started in milliseconds since the epoch. Suitable to pass to
+   * DateTime.fromMillisecondsSinceEpoch.
    */
   public int getStartTime() {
     return json.get("startTime").getAsInt();

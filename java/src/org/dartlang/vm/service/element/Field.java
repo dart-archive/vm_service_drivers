@@ -20,15 +20,15 @@ import com.google.gson.JsonObject;
 /**
  * A [Field] provides information about a Dart language field or variable.
  */
-public class Field extends Element {
+public class Field extends Obj {
 
   public Field(JsonObject json) {
     super(json);
   }
 
   /**
-   * The declared type of this field. The value will always be of one of the
-   * kinds: Type, TypeRef, TypeParameter, BoundedType.
+   * The declared type of this field. The value will always be of one of the kinds: Type, TypeRef,
+   * TypeParameter, BoundedType.
    */
   public InstanceRef getDeclaredType() {
     return new InstanceRef((JsonObject) json.get("declaredType"));

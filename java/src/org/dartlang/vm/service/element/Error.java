@@ -18,18 +18,16 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * An [Error] represents a Dart language level error. This is distinct from an
- * rpc error.
+ * An [Error] represents a Dart language level error. This is distinct from an rpc error.
  */
-public class Error extends Element {
+public class Error extends Obj {
 
   public Error(JsonObject json) {
     super(json);
   }
 
   /**
-   * If this error is due to an unhandled exception, this is the exception
-   * thrown.
+   * If this error is due to an unhandled exception, this is the exception thrown.
    */
   public InstanceRef getException() {
     return new InstanceRef((JsonObject) json.get("exception"));
@@ -50,8 +48,7 @@ public class Error extends Element {
   }
 
   /**
-   * If this error is due to an unhandled exception, this is the stacktrace
-   * object.
+   * If this error is due to an unhandled exception, this is the stacktrace object.
    */
   public InstanceRef getStacktrace() {
     return new InstanceRef((JsonObject) json.get("stacktrace"));

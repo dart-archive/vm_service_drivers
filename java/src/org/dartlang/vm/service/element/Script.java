@@ -21,17 +21,10 @@ import java.util.List;
 /**
  * A [Script] provides information about a Dart language script.
  */
-public class Script extends Element {
+public class Script extends Obj {
 
   public Script(JsonObject json) {
     super(json);
-  }
-
-  /**
-   * The id of this script.
-   */
-  public String getId() {
-    return json.get("id").getAsString();
   }
 
   /**
@@ -42,8 +35,8 @@ public class Script extends Element {
   }
 
   /**
-   * The source code for this script. For certain built-in scripts, this may be
-   * reconstructed without source comments.
+   * The source code for this script. For certain built-in scripts, this may be reconstructed
+   * without source comments.
    */
   public String getSource() {
     return json.get("source").getAsString();

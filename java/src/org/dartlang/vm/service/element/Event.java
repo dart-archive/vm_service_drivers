@@ -21,36 +21,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An [Event] is an asynchronous notification from the VM. It is delivered only
- * when the client has subscribed to an event stream using the streamListen
- * RPC.
+ * An [Event] is an asynchronous notification from the VM. It is delivered only when the client has
+ * subscribed to an event stream using the streamListen RPC.
  */
-public class Event extends Element {
+public class Event extends Response {
 
   public Event(JsonObject json) {
     super(json);
   }
 
   /**
-   * The breakpoint which was added, removed, or resolved. This is provided for
-   * the event kinds: PauseBreakpoint BreakpointAdded BreakpointRemoved
-   * BreakpointResolved
+   * The breakpoint which was added, removed, or resolved. This is provided for the event kinds:
+   * PauseBreakpoint BreakpointAdded BreakpointRemoved BreakpointResolved
    */
   public Breakpoint getBreakpoint() {
     return new Breakpoint((JsonObject) json.get("breakpoint"));
   }
 
   /**
-   * An array of bytes, encoded as a base64 string. This is provided for the
-   * WriteEvent event.
+   * An array of bytes, encoded as a base64 string. This is provided for the WriteEvent event.
    */
   public String getBytes() {
     return json.get("bytes").getAsString();
   }
 
   /**
-   * The exception associated with this event, if this is a PauseException
-   * event.
+   * The exception associated with this event, if this is a PauseException event.
    */
   public InstanceRef getException() {
     return new InstanceRef((JsonObject) json.get("exception"));
@@ -71,12 +67,10 @@ public class Event extends Element {
   }
 
   /**
-   * The list of breakpoints at which we are currently paused for a
-   * PauseBreakpoint event. This list may be empty. For example, while
-   * single-stepping, the VM sends a PauseBreakpoint event with no breakpoints.
-   * If there is more than one breakpoint set at the program position, then all
-   * of them will be provided. This is provided for the event kinds:
-   * PauseBreakpoint
+   * The list of breakpoints at which we are currently paused for a PauseBreakpoint event. This
+   * list may be empty. For example, while single-stepping, the VM sends a PauseBreakpoint event
+   * with no breakpoints. If there is more than one breakpoint set at the program position, then
+   * all of them will be provided. This is provided for the event kinds: PauseBreakpoint
    */
   public List<Breakpoint> getPauseBreakpoints() {
     JsonArray array = json.getAsJsonArray("pauseBreakpoints");
@@ -89,21 +83,19 @@ public class Event extends Element {
   }
 
   /**
-   * The timestamp (in milliseconds since the epoch) associated with this
-   * event. For some isolate pause events, the timestamp is from when the
-   * isolate was paused. For other events, the timestamp is from when the event
-   * was created.
+   * The timestamp (in milliseconds since the epoch) associated with this event. For some isolate
+   * pause events, the timestamp is from when the isolate was paused. For other events, the
+   * timestamp is from when the event was created.
    */
   public int getTimestamp() {
     return json.get("timestamp").getAsInt();
   }
 
   /**
-   * The top stack frame associated with this event, if applicable. This is
-   * provided for the event kinds: PauseBreakpoint PauseInterrupted
-   * PauseException For the Resume event, the top frame is provided at all
-   * times except for the initial resume event that is delivered when an
-   * isolate begins execution.
+   * The top stack frame associated with this event, if applicable. This is provided for the event
+   * kinds: PauseBreakpoint PauseInterrupted PauseException For the Resume event, the top frame is
+   * provided at all times except for the initial resume event that is delivered when an isolate
+   * begins execution.
    */
   public Frame getTopFrame() {
     return new Frame((JsonObject) json.get("topFrame"));

@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * A [Sentinel] is used to indicate that the normal response is not available.
  */
-public class Sentinel extends Element {
+public class Sentinel extends Response {
 
   public Sentinel(JsonObject json) {
     super(json);

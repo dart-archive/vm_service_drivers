@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * A [Func] represents a Dart language function.
  */
-public class Func extends Element {
+public class Func extends Obj {
 
   public Func(JsonObject json) {
     super(json);

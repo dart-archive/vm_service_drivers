@@ -20,17 +20,10 @@ import com.google.gson.JsonObject;
 /**
  * [LibraryRef] is a reference to a [Library].
  */
-public class LibraryRef extends Element {
+public class LibraryRef extends ObjRef {
 
   public LibraryRef(JsonObject json) {
     super(json);
-  }
-
-  /**
-   * The id of this library.
-   */
-  public String getId() {
-    return json.get("id").getAsString();
   }
 
   /**

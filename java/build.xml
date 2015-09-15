@@ -4,31 +4,48 @@
   </target>
 
   <target name="init">
-    <!-- TODO: implement -->
+    <mkdir dir="build"/>
+    <mkdir dir="dist"/>
 
+    <property environment="env"/>
+    <property file="version.txt" prefix="service"/>
+
+    <property
+        name="path"
+        value="third_party/gson/gson-2.2.4.jar;third_party/guava/guava-13.0.1.jar;third_party/weberknecht/weberknecht-0.1.5.jar"/>
   </target>
 
   <target name="compile" depends="init">
+    <!-- compile library source -->
     <mkdir dir="build/classes"/>
     <javac srcdir="src" destdir="build/classes" includeantruntime="false"
-        classpath="third_party/gson/gson-2.2.4.jar;third_party/guava/guava-13.0.1.jar;third_party/weberknecht/weberknecht-0.1.5.jar"/>
+        classpath="${path}"/>
 
-    <!-- TODO: compile tests -->
+    <!-- compile tests -->
+    <mkdir dir="build/test"/>
+    <javac srcdir="test" destdir="build/test" includeantruntime="false"
+        classpath="${path};build/classes"/>
   </target>
 
   <target name="jar" depends="compile">
-    <!-- TODO: implement -->
-    <!-- mkdir dir="build/jar"/>
-    <jar destfile="build/jar/HelloWorld.jar" basedir="build/classes"/ -->
+    <copy file="version.txt" todir="build/classes"/>
+    <jar destfile="build/vm_service_lib.jar" basedir="build/classes"/>
   </target>
 
-  <target name="test">
-    <!-- TODO: implement -->
-
+  <target name="test" depends="compile">
+    <java classname="org.dartlang.vm.service.VMServiceTest"
+        fork="true" failonerror="true">
+      <arg value="${env.DART_SDK}"/>
+      <classpath>
+        <pathelement path="${path}"/>
+        <pathelement location="build/classes"/>
+        <pathelement location="build/test"/>
+      </classpath>
+    </java>
   </target>
 
   <target name="dist" depends="jar,test">
-    <!-- TODO: implement -->
-
+    <!-- copy and rename the library -->
+    <copy file="build/vm_service_lib.jar" tofile="dest/vm_service_lib-${service.version}.jar"/>
   </target>
 </project>

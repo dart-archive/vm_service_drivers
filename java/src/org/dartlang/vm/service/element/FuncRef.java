@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * An [FuncRef] is a reference to a [Func].
  */
-public class FuncRef extends Element {
+public class FuncRef extends ObjRef {
 
   public FuncRef(JsonObject json) {
     super(json);

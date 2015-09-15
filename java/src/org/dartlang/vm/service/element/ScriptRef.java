@@ -20,17 +20,10 @@ import com.google.gson.JsonObject;
 /**
  * [ScriptRef] is a reference to a [Script].
  */
-public class ScriptRef extends Element {
+public class ScriptRef extends ObjRef {
 
   public ScriptRef(JsonObject json) {
     super(json);
-  }
-
-  /**
-   * The id of this script.
-   */
-  public String getId() {
-    return json.get("id").getAsString();
   }
 
   /**

@@ -18,9 +18,8 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * Every non-error response returned by the Service Protocol extends
- * [Response]. By using the [type] property, the client can determine which
- * type of response has been provided.
+ * Every non-error response returned by the Service Protocol extends [Response]. By using the
+ * [type] property, the client can determine which type of response has been provided.
  */
 public class Response extends Element {
 
@@ -29,8 +28,8 @@ public class Response extends Element {
   }
 
   /**
-   * Every response returned by the VM Service has the type property. This
-   * allows the client distinguish between different kinds of responses.
+   * Every response returned by the VM Service has the type property. This allows the client
+   * distinguish between different kinds of responses.
    */
   public String getType() {
     return json.get("type").getAsString();

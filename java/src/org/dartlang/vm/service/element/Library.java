@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * A [Library] provides information about a Dart language library.
  */
-public class Library extends Element {
+public class Library extends Obj {
 
   public Library(JsonObject json) {
     super(json);
@@ -73,13 +73,6 @@ public class Library extends Element {
       result.add(new FuncRef((JsonObject) array.get(index)));
     }
     return result;
-  }
-
-  /**
-   * The id of this library.
-   */
-  public String getId() {
-    return json.get("id").getAsString();
   }
 
   /**

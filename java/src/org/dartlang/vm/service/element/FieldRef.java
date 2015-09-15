@@ -20,15 +20,15 @@ import com.google.gson.JsonObject;
 /**
  * An [FieldRef] is a reference to a [Field].
  */
-public class FieldRef extends Element {
+public class FieldRef extends ObjRef {
 
   public FieldRef(JsonObject json) {
     super(json);
   }
 
   /**
-   * The declared type of this field. The value will always be of one of the
-   * kinds: Type, TypeRef, TypeParameter, BoundedType.
+   * The declared type of this field. The value will always be of one of the kinds: Type, TypeRef,
+   * TypeParameter, BoundedType.
    */
   public InstanceRef getDeclaredType() {
     return new InstanceRef((JsonObject) json.get("declaredType"));

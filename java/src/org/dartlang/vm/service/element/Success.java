@@ -18,10 +18,9 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * The [Success] type is used to indicate that an operation completed
- * successfully.
+ * The [Success] type is used to indicate that an operation completed successfully.
  */
-public class Success extends Element {
+public class Success extends Response {
 
   public Success(JsonObject json) {
     super(json);

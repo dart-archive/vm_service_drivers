@@ -19,8 +19,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
- * A [BoundField] represents a field bound to a particular value in an
- * [Instance].
+ * A [BoundField] represents a field bound to a particular value in an [Instance].
  */
 public class BoundField extends Element {
 
@@ -33,7 +32,7 @@ public class BoundField extends Element {
   }
 
   /**
-   * [value] can be one of [InstanceRef] or [Sentinel].
+   * @return one of <code>InstanceRef</code> or <code>Sentinel</code>
    */
   public InstanceRef getValue() {
     JsonElement elem = json.get("value");

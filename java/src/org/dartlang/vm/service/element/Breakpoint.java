@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * A [Breakpoint] describes a debugger breakpoint.
  */
-public class Breakpoint extends Element {
+public class Breakpoint extends Obj {
 
   public Breakpoint(JsonObject json) {
     super(json);

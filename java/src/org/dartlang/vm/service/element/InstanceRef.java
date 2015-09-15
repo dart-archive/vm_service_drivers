@@ -21,7 +21,7 @@ import com.google.gson.JsonObject;
 /**
  * [InstanceRef] is a reference to an [Instance].
  */
-public class InstanceRef extends Element {
+public class InstanceRef extends ObjRef {
 
   public InstanceRef(JsonObject json) {
     super(json);
@@ -35,13 +35,6 @@ public class InstanceRef extends Element {
   }
 
   /**
-   * The id of this instance.
-   */
-  public String getId() {
-    return json.get("id").getAsString();
-  }
-
-  /**
    * What kind of instance is this?
    */
   public InstanceKind getKind() {
@@ -49,10 +42,9 @@ public class InstanceRef extends Element {
   }
 
   /**
-   * The length of a List instance. Provided for instance kinds: List Map
-   * Uint8ClampedList Uint8List Uint16List Uint32List Uint64List Int8List
-   * Int16List Int32List Int64List Float32List Float64List Int32x4List
-   * Float32x4List Float64x2List
+   * The length of a List instance. Provided for instance kinds: List Map Uint8ClampedList
+   * Uint8List Uint16List Uint32List Uint64List Int8List Int16List Int32List Int64List Float32List
+   * Float64List Int32x4List Float32x4List Float64x2List
    */
   public int getLength() {
     return json.get("length").getAsInt();
@@ -66,8 +58,7 @@ public class InstanceRef extends Element {
   }
 
   /**
-   * The parameterized class of a type parameter: Provided for instance kinds:
-   * TypeParameter
+   * The parameterized class of a type parameter: Provided for instance kinds: TypeParameter
    */
   public ClassRef getParameterizedClass() {
     return new ClassRef((JsonObject) json.get("parameterizedClass"));
@@ -81,26 +72,24 @@ public class InstanceRef extends Element {
   }
 
   /**
-   * The corresponding Class if this Type is canonical. Provided for instance
-   * kinds: Type
+   * The corresponding Class if this Type is canonical. Provided for instance kinds: Type
    */
   public ClassRef getTypeClass() {
     return new ClassRef((JsonObject) json.get("typeClass"));
   }
 
   /**
-   * The value of this instance as a string. Provided for the instance kinds:
-   * Null (null) Bool (true or false) Double (suitable for passing to
-   * Double.parse()) Int (suitable for passing to int.parse()) String (value
-   * may be truncated) Float32x4 Float64x2 Int32x4 StackTrace
+   * The value of this instance as a string. Provided for the instance kinds: Null (null) Bool
+   * (true or false) Double (suitable for passing to Double.parse()) Int (suitable for passing to
+   * int.parse()) String (value may be truncated) Float32x4 Float64x2 Int32x4 StackTrace
    */
   public String getValueAsString() {
     return json.get("valueAsString").getAsString();
   }
 
   /**
-   * The valueAsString for String references may be truncated. If so, this
-   * property is added with the value 'true'.
+   * The valueAsString for String references may be truncated. If so, this property is added with
+   * the value 'true'.
    */
   public boolean getValueAsStringIsTruncated() {
     JsonElement elem = json.get("valueAsStringIsTruncated");

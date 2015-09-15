@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * A [FlagList] represents the complete set of VM command line flags.
  */
-public class FlagList extends Element {
+public class FlagList extends Response {
 
   public FlagList(JsonObject json) {
     super(json);

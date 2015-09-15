@@ -20,15 +20,14 @@ import com.google.gson.JsonObject;
 /**
  * [ObjRef] is a reference to a [Obj].
  */
-public class ObjRef extends Element {
+public class ObjRef extends Response {
 
   public ObjRef(JsonObject json) {
     super(json);
   }
 
   /**
-   * A unique identifier for an Object. Passed to the getObject RPC to load
-   * this Object.
+   * A unique identifier for an Object. Passed to the getObject RPC to load this Object.
    */
   public String getId() {
     return json.get("id").getAsString();
