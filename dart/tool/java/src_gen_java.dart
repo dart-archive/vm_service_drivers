@@ -66,7 +66,14 @@ class JavaMethodArg {
 }
 
 class StatementWriter {
+  final TypeWriter typeWriter;
   final StringBuffer _content = new StringBuffer();
+
+  StatementWriter(this.typeWriter);
+
+  void addImport(String typeName) {
+    typeWriter.addImport(typeName);
+  }
 
   void addLine(String line) {
     _content.writeln('    $line');
@@ -131,7 +138,7 @@ class TypeWriter {
     _content.write(')');
     if (write != null) {
       _content.writeln(' {');
-      StatementWriter writer = new StatementWriter();
+      StatementWriter writer = new StatementWriter(this);
       write(writer);
       _content.write(writer.toSource());
       _content.writeln('  }');
@@ -214,7 +221,7 @@ class TypeWriter {
     mthDecl.write(')');
     if (write != null) {
       mthDecl.writeln(' {');
-      StatementWriter writer = new StatementWriter();
+      StatementWriter writer = new StatementWriter(this);
       write(writer);
       mthDecl.write(writer.toSource());
       mthDecl.writeln('  }');

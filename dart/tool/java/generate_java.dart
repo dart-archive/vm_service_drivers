@@ -714,13 +714,6 @@ class TypeField extends Member {
 
     if (type.types.first.isArray) {
       writer.addImport('java.util.List');
-      if (type.types.first.name != 'int') {
-        writer.addImport('com.google.gson.JsonArray');
-        writer.addImport('java.util.ArrayList');
-      }
-    }
-    if (type.isValueAndSentinel || defaultValue != null) {
-      writer.addImport('com.google.gson.JsonElement');
     }
     writer.addMethod(accessorName, [], (StatementWriter writer) {
       type.valueType.generateAccessStatements(writer, name,
@@ -805,6 +798,7 @@ class TypeRef {
         print('skipped accessor body for $propertyName');
       } else {
         if (defaultValue != null) {
+          writer.addImport('com.google.gson.JsonElement');
           writer.addLine('JsonElement elem = json.get("$propertyName");');
           writer.addLine(
               'return elem != null ? elem.getAsBoolean() : $defaultValue;');
@@ -837,6 +831,9 @@ class TypeRef {
       if (arrayDepth > 1) {
         print('skipped accessor body for $propertyName');
       } else if (arrayDepth == 1) {
+        writer.addImport('java.util.List');
+        writer.addImport('java.util.ArrayList');
+        writer.addImport('com.google.gson.JsonArray');
         writer
             .addLine('JsonArray array = json.getAsJsonArray("$propertyName");');
         writer.addLine('int size = array.size();');
@@ -849,6 +846,7 @@ class TypeRef {
         writer.addLine('return result;');
       } else {
         if (canBeSentinel) {
+          writer.addImport('com.google.gson.JsonElement');
           writer.addLine('JsonElement elem = json.get("$propertyName");');
           writer.addLine('if (!elem.isJsonObject()) return null;');
           writer.addLine('JsonObject child = elem.getAsJsonObject();');
