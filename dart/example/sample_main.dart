@@ -5,7 +5,7 @@
 void main(List<String> args) {
   String local1 = 'abcd';
   int local2 = 2;
-  var simpleList = [1, "hello"];
+  var longList = [1, "hello", 3, 5, 7, 11, 13, 14, 15, 16, 17, 18, 19, 20];
   var deepList = [3, [[[[[7]]], "end"]]];
 
   print('hello from main');
@@ -15,7 +15,7 @@ void main(List<String> args) {
   foo(3);
   foo(local1.length);
 
-  print(simpleList);
+  print(longList);
   print(deepList);
   print('exiting...');
 }

@@ -61,18 +61,17 @@ public class InstanceRefToString {
     masterLatch.opWorking();
 
     final ResultLatch<Instance> instLatch = new ResultLatch<Instance>();
-    service.getInstance(isolate.getId(), ref.getId(),
-        new GetInstanceConsumer() {
-          @Override
-          public void onError(RPCError error) {
-            instLatch.setValue(null);
-          }
+    service.getInstance(isolate.getId(), ref.getId(), new GetInstanceConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        instLatch.setValue(null);
+      }
 
-          @Override
-          public void received(Instance instance) {
-            instLatch.setValue(instance);
-          }
-        });
+      @Override
+      public void received(Instance instance) {
+        instLatch.setValue(instance);
+      }
+    });
     return instLatch.getValue();
   }
 
@@ -102,9 +101,17 @@ public class InstanceRefToString {
       case Int:
       case Int32x4:
       case Null:
-      case String:
       case StackTrace:
         result.append(ref.getValueAsString());
+        return;
+      case String:
+        result.append("'");
+        // Should escape chars such as newline before printing
+        result.append(ref.getValueAsString());
+        if (ref.getValueAsStringIsTruncated()) {
+          result.append("...");
+        }
+        result.append("'");
         return;
       case List:
         printList(result, ref, maxDepth);
@@ -156,6 +163,18 @@ public class InstanceRefToString {
       result.append("?error?]");
       return;
     }
-    result.append(list.getLength() + " elements]");
+    int count = 0;
+    for (InstanceRef elem : list.getElements()) {
+      if (count > 10) {
+        result.append(", ...");
+        break;
+      }
+      if (count > 0) {
+        result.append(", ");
+      }
+      ++count;
+      printInstance(result, elem, maxDepth - 1);
+    }
+    result.append("]");
   }
 }
