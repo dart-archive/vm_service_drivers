@@ -16,6 +16,8 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import org.dartlang.vm.service.internal.VmServiceConst;
+
 /**
  * When an RPC encounters an error, it is provided in the _error_ property of the response object.
  * JSON-RPC errors always provide _code_, _message_, and _data_ properties. <br/>
@@ -50,7 +52,28 @@ import com.google.gson.JsonObject;
  * 104 | Stream not subscribed | The client is not subscribed to the specified _streamId_
  * </pre>
  */
-public class RPCError extends Element {
+public class RPCError extends Element implements VmServiceConst {
+
+  /**
+   * The response code used by the client when it receives a response from the server that it did
+   * not expect. For example, it requested a library element but received a list.
+   */
+  public static final int UNEXPECTED_RESPONSE = 5;
+
+  public static RPCError unexpected(String expectedType, Response response) {
+    String errMsg = "Expected type " + expectedType + " but received " + response.getType();
+    if (response instanceof Sentinel) {
+      errMsg += ": " + ((Sentinel) response).getKind();
+    }
+    JsonObject json = new JsonObject();
+    json.addProperty("code", UNEXPECTED_RESPONSE);
+    json.addProperty("message", errMsg);
+    JsonObject data = new JsonObject();
+    data.addProperty("details", errMsg);
+    data.add("response", response.getJson());
+    json.add("data", data);
+    return new RPCError(json);
+  }
 
   public RPCError(JsonObject json) {
     super(json);

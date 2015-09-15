@@ -20,7 +20,7 @@ import org.dartlang.vm.service.logging.Logging;
 /**
  * A {@link RequestSink} that reports with an error to each request.
  */
-public class ErrorRequestSink implements RequestSink, ObservatoryConst {
+public class ErrorRequestSink implements RequestSink, VmServiceConst {
   /**
    * The {@link ResponseSink} to send error responses to.
    */

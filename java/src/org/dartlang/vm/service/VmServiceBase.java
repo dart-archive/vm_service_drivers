@@ -29,10 +29,14 @@ import org.dartlang.vm.service.consumer.GetInstanceConsumer;
 import org.dartlang.vm.service.consumer.GetLibraryConsumer;
 import org.dartlang.vm.service.consumer.GetObjectConsumer;
 import org.dartlang.vm.service.consumer.VersionConsumer;
+import org.dartlang.vm.service.element.Instance;
+import org.dartlang.vm.service.element.Library;
+import org.dartlang.vm.service.element.Obj;
 import org.dartlang.vm.service.element.RPCError;
+import org.dartlang.vm.service.element.Sentinel;
 import org.dartlang.vm.service.element.Version;
-import org.dartlang.vm.service.internal.ObservatoryConst;
 import org.dartlang.vm.service.internal.RequestSink;
+import org.dartlang.vm.service.internal.VmServiceConst;
 import org.dartlang.vm.service.internal.WebSocketRequestSink;
 import org.dartlang.vm.service.logging.Logging;
 
@@ -47,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Internal {@link VmService} base class containing non-generated code.
  */
-abstract class VmServiceBase implements ObservatoryConst {
+abstract class VmServiceBase implements VmServiceConst {
 
   /**
    * Connect to the VM observatory service via the specified URI
@@ -118,9 +122,8 @@ abstract class VmServiceBase implements ObservatoryConst {
     vmService.getVersion(new VersionConsumer() {
       @Override
       public void onError(RPCError error) {
-        String msg = "Failed to determine protocol version: " + error.getCode()
-            + "\n  message: " + error.getMessage() + "\n  details: "
-            + error.getDetails();
+        String msg = "Failed to determine protocol version: " + error.getCode() + "\n  message: "
+            + error.getMessage() + "\n  details: " + error.getDetails();
         Logging.getLogger().logInformation(msg);
         errMsg[0] = msg;
       }
@@ -129,16 +132,15 @@ abstract class VmServiceBase implements ObservatoryConst {
       public void received(Version response) {
         if (response.getMajor() != VmService.versionMajor
             || response.getMinor() < VmService.versionMinor) {
-          String msg = "Incompatible protocol version: client="
-              + VmService.versionMajor + "." + VmService.versionMinor + " vm="
-              + response.getMajor() + "." + response.getMinor();
+          String msg = "Incompatible protocol version: client=" + VmService.versionMajor + "."
+              + VmService.versionMinor + " vm=" + response.getMajor() + "." + response.getMinor();
           Logging.getLogger().logError(msg);
           errMsg[0] = msg;
         } else if (response.getMinor() != VmService.versionMinor) {
           Logging.getLogger().logInformation(
-              "Minor difference in protocol version: client="
-                  + VmService.versionMajor + "." + VmService.versionMinor
-                  + " vm=" + response.getMajor() + "." + response.getMinor());
+              "Minor difference in protocol version: client=" + VmService.versionMajor + "."
+                  + VmService.versionMinor + " vm=" + response.getMajor() + "."
+                  + response.getMinor());
         }
         latch.countDown();
       }
@@ -197,21 +199,58 @@ abstract class VmServiceBase implements ObservatoryConst {
   /**
    * Return the instance with the given identifier.
    */
-  public void getInstance(String isolateId, String instanceId,
-      GetInstanceConsumer consumer) {
-    getObject(isolateId, instanceId, consumer);
+  public void getInstance(String isolateId, String instanceId, final GetInstanceConsumer consumer) {
+    getObject(isolateId, instanceId, new GetObjectConsumer() {
+
+      @Override
+      public void onError(RPCError error) {
+        consumer.onError(error);
+      }
+
+      @Override
+      public void received(Obj response) {
+        if (response instanceof Instance) {
+          consumer.received((Instance) response);
+        } else {
+          onError(RPCError.unexpected("Instance", response));
+        }
+      }
+
+      @Override
+      public void received(Sentinel response) {
+        onError(RPCError.unexpected("Instance", response));
+      }
+    });
   }
 
   /**
    * Return the library with the given identifier.
    */
-  public void getLibrary(String isolateId, String libraryId,
-      GetLibraryConsumer consumer) {
-    getObject(isolateId, libraryId, consumer);
+  public void getLibrary(String isolateId, String libraryId, final GetLibraryConsumer consumer) {
+    getObject(isolateId, libraryId, new GetObjectConsumer() {
+
+      @Override
+      public void onError(RPCError error) {
+        consumer.onError(error);
+      }
+
+      @Override
+      public void received(Obj response) {
+        if (response instanceof Library) {
+          consumer.received((Library) response);
+        } else {
+          onError(RPCError.unexpected("Library", response));
+        }
+      }
+
+      @Override
+      public void received(Sentinel response) {
+        onError(RPCError.unexpected("Library", response));
+      }
+    });
   }
 
-  public abstract void getObject(String isolateId, String objectId,
-      GetObjectConsumer consumer);
+  public abstract void getObject(String isolateId, String objectId, GetObjectConsumer consumer);
 
   /**
    * Sends the request and associates the request with the passed {@link Consumer}.
@@ -272,8 +311,7 @@ abstract class VmServiceBase implements ObservatoryConst {
     }
     Consumer consumer = consumerMap.remove(id);
     if (consumer == null) {
-      Logging.getLogger().logError(
-          "No consumer associated with " + ID + ": " + id);
+      Logging.getLogger().logError("No consumer associated with " + ID + ": " + id);
       return;
     }
 

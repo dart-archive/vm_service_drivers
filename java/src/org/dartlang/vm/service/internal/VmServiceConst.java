@@ -3,7 +3,7 @@ package org.dartlang.vm.service.internal;
 /**
  * JSON constants used when communicating with the VM observatory service.
  */
-public interface ObservatoryConst {
+public interface VmServiceConst {
   public static final String CODE = "code";
   public static final String ERROR = "error";
   public static final String ID = "id";
