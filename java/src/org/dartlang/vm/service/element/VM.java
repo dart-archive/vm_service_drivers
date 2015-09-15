@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VM extends Element {
+public class VM extends Response {
 
   public VM(JsonObject json) {
     super(json);

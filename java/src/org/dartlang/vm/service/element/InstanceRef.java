@@ -21,7 +21,7 @@ import com.google.gson.JsonObject;
 /**
  * [InstanceRef] is a reference to an [Instance].
  */
-public class InstanceRef extends Element {
+public class InstanceRef extends ObjRef {
 
   public InstanceRef(JsonObject json) {
     super(json);
@@ -32,13 +32,6 @@ public class InstanceRef extends Element {
    */
   public ClassRef getClassRef() {
     return new ClassRef((JsonObject) json.get("class"));
-  }
-
-  /**
-   * The id of this instance.
-   */
-  public String getId() {
-    return json.get("id").getAsString();
   }
 
   /**

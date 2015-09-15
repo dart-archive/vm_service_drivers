@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * An [Isolate] object provides information about one isolate in the VM.
  */
-public class Isolate extends Element {
+public class Isolate extends Response {
 
   public Isolate(JsonObject json) {
     super(json);

@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * A [Code] object represents compiled code in the Dart VM.
  */
-public class Code extends Element {
+public class Code extends ObjRef {
 
   public Code(JsonObject json) {
     super(json);

@@ -17,7 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonObject;
 
-public class Message extends Element {
+public class Message extends Response {
 
   public Message(JsonObject json) {
     super(json);

@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * An [FieldRef] is a reference to a [Field].
  */
-public class FieldRef extends Element {
+public class FieldRef extends ObjRef {
 
   public FieldRef(JsonObject json) {
     super(json);

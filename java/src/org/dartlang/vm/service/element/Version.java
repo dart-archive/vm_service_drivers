@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * See Versioning.
  */
-public class Version extends Element {
+public class Version extends Response {
 
   public Version(JsonObject json) {
     super(json);

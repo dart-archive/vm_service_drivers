@@ -24,7 +24,7 @@ import java.util.List;
  * An [Event] is an asynchronous notification from the VM. It is delivered only when the client has
  * subscribed to an event stream using the streamListen RPC.
  */
-public class Event extends Element {
+public class Event extends Response {
 
   public Event(JsonObject json) {
     super(json);

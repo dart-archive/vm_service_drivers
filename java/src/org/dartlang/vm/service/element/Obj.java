@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * An [Obj] is a persistent object that is owned by some isolate.
  */
-public class Obj extends Element {
+public class Obj extends Response {
 
   public Obj(JsonObject json) {
     super(json);

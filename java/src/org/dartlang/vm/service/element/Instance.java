@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * An [Instance] represents an instance of the Dart language class [Obj].
  */
-public class Instance extends Element {
+public class Instance extends Obj {
 
   public Instance(JsonObject json) {
     super(json);
@@ -102,13 +102,6 @@ public class Instance extends Element {
    */
   public BoundField getFields() {
     return new BoundField((JsonObject) json.get("fields"));
-  }
-
-  /**
-   * The id of this instance.
-   */
-  public String getId() {
-    return json.get("id").getAsString();
   }
 
   /**

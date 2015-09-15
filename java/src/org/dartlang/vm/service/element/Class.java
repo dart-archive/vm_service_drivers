@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * A [Class] provides information about a Dart language class.
  */
-public class Class extends Element {
+public class Class extends Obj {
 
   public Class(JsonObject json) {
     super(json);

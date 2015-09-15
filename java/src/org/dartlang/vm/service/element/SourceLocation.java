@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * The [SourceLocation] class is used to designate a position or range in some script.
  */
-public class SourceLocation extends Element {
+public class SourceLocation extends Response {
 
   public SourceLocation(JsonObject json) {
     super(json);

@@ -85,14 +85,6 @@ class Api extends Member with ApiParseUtil {
   void generate(JavaGenerator gen) {
     _setFileHeader();
 
-    // Add undocumented "id" property
-    addProperty('InstanceRef', 'id', javadoc: 'The id of this instance.');
-    addProperty('Instance', 'id', javadoc: 'The id of this instance.');
-    addProperty('LibraryRef', 'id', javadoc: 'The id of this library.');
-    addProperty('Library', 'id', javadoc: 'The id of this library.');
-    addProperty('ScriptRef', 'id', javadoc: 'The id of this script.');
-    addProperty('Script', 'id', javadoc: 'The id of this script.');
-
     // Add additional object return types
     addReturnType('getObject', 'Library');
     addReturnType('getObject', 'Instance');
@@ -605,7 +597,7 @@ class Type extends Member {
       }
       writer.addImport('com.google.gson.JsonObject');
       writer.javadoc = docs;
-      writer.superclassName = 'Element';
+      writer.superclassName = superName ?? 'Element';
       writer.addConstructor(<JavaMethodArg>[
         new JavaMethodArg('json', 'com.google.gson.JsonObject')
       ], (StatementWriter writer) {

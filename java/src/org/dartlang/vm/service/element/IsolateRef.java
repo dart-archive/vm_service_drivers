@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * [IsolateRef] is a reference to an [Isolate] object.
  */
-public class IsolateRef extends Element {
+public class IsolateRef extends Response {
 
   public IsolateRef(JsonObject json) {
     super(json);

@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * An [Error] represents a Dart language level error. This is distinct from an rpc error.
  */
-public class Error extends Element {
+public class Error extends Obj {
 
   public Error(JsonObject json) {
     super(json);

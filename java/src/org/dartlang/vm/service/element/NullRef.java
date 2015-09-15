@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * [NullRef] is a reference to an a [Null].
  */
-public class NullRef extends Element {
+public class NullRef extends InstanceRef {
 
   public NullRef(JsonObject json) {
     super(json);

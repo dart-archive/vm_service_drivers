@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * A [TypeArguments] object represents the type argument vector for some instantiated generic type.
  */
-public class TypeArguments extends Element {
+public class TypeArguments extends Obj {
 
   public TypeArguments(JsonObject json) {
     super(json);

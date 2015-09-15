@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * [TypeArgumentsRef] is a reference to a [TypeArguments] object.
  */
-public class TypeArgumentsRef extends Element {
+public class TypeArgumentsRef extends ObjRef {
 
   public TypeArgumentsRef(JsonObject json) {
     super(json);

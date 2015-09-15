@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 /**
  * [ErrorRef] is a reference to an [Error].
  */
-public class ErrorRef extends Element {
+public class ErrorRef extends ObjRef {
 
   public ErrorRef(JsonObject json) {
     super(json);
