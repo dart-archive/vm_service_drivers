@@ -243,6 +243,10 @@ public class VmService extends VmServiceBase {
         ((EvaluateConsumer) consumer).received(new InstanceRef(json));
         return;
       }
+      if (responseType.equals("NullRef")) {
+        ((EvaluateConsumer) consumer).received(new NullRef(json));
+        return;
+      }
       if (responseType.equals("Sentinel")) {
         ((EvaluateConsumer) consumer).received(new Sentinel(json));
         return;
@@ -257,6 +261,10 @@ public class VmService extends VmServiceBase {
         ((EvaluateInFrameConsumer) consumer).received(new InstanceRef(json));
         return;
       }
+      if (responseType.equals("NullRef")) {
+        ((EvaluateInFrameConsumer) consumer).received(new NullRef(json));
+        return;
+      }
     }
     if (consumer instanceof FlagListConsumer) {
       if (responseType.equals("FlagList")) {
@@ -265,6 +273,18 @@ public class VmService extends VmServiceBase {
       }
     }
     if (consumer instanceof GetObjectConsumer) {
+      if (responseType.equals("Breakpoint")) {
+        ((GetObjectConsumer) consumer).received(new Breakpoint(json));
+        return;
+      }
+      if (responseType.equals("Field")) {
+        ((GetObjectConsumer) consumer).received(new Field(json));
+        return;
+      }
+      if (responseType.equals("Func")) {
+        ((GetObjectConsumer) consumer).received(new Func(json));
+        return;
+      }
       if (responseType.equals("Instance")) {
         ((GetObjectConsumer) consumer).received(new Instance(json));
         return;
@@ -273,12 +293,24 @@ public class VmService extends VmServiceBase {
         ((GetObjectConsumer) consumer).received(new Library(json));
         return;
       }
+      if (responseType.equals("Null")) {
+        ((GetObjectConsumer) consumer).received(new Null(json));
+        return;
+      }
       if (responseType.equals("Obj")) {
         ((GetObjectConsumer) consumer).received(new Obj(json));
         return;
       }
+      if (responseType.equals("Script")) {
+        ((GetObjectConsumer) consumer).received(new Script(json));
+        return;
+      }
       if (responseType.equals("Sentinel")) {
         ((GetObjectConsumer) consumer).received(new Sentinel(json));
+        return;
+      }
+      if (responseType.equals("TypeArguments")) {
+        ((GetObjectConsumer) consumer).received(new TypeArguments(json));
         return;
       }
     }

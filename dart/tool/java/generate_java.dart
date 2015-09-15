@@ -77,17 +77,8 @@ class Api extends Member with ApiParseUtil {
     print('added $propertyName field to $typeName');
   }
 
-  void addReturnType(String methodName, String newReturnTypeName) {
-    var m = methods.firstWhere((m) => m.name == methodName);
-    m.returnType.types.add(new TypeRef(newReturnTypeName));
-  }
-
   void generate(JavaGenerator gen) {
     _setFileHeader();
-
-    // Add additional object return types
-    addReturnType('getObject', 'Library');
-    addReturnType('getObject', 'Instance');
 
     // Set default value for unspecified property
     setDefaultValue('Instance', 'valueAsStringIsTruncated');
@@ -407,9 +398,17 @@ class Method extends Member {
   void generateVmServiceForward(StatementWriter writer) {
     var consumerName = classNameFor(consumerTypeName);
     writer.addLine('if (consumer instanceof $consumerName) {');
-    var types = returnType.types.toList()
-      ..sort((t1, t2) => t1.name.compareTo(t2.name));
+    List<Type> types = returnType.types.map((ref) => ref.type).toList();
+    for (int index = 0; index < types.length; ++index) {
+      types.addAll(types[index].subtypes);
+    }
+    types.sort((t1, t2) => t1.name.compareTo(t2.name));
     for (var t in types) {
+
+      // TODO(danrubel) rename classes to prevent collision
+      // with common java types. e.g. "Class" --> "DartClass"
+      if (t.name == 'Class' || t.name == 'Error') continue;
+
       var jsonType = t.name;
       var responseName = classNameFor(t.elementTypeName);
       writer.addLine('  if (responseType.equals("$jsonType")) {');
@@ -582,6 +581,11 @@ class Type extends Member {
     _parse(new Tokenizer(definition).tokenize());
   }
 
+  String get elementTypeName {
+    if (isSimple) return null;
+    return '$servicePackage.element.$name';
+  }
+
   bool get isRef => name.endsWith('Ref');
 
   bool get isResponse {
@@ -589,6 +593,11 @@ class Type extends Member {
     if (name == 'Response' || superName == 'Response') return true;
     return parent.getType(superName).isResponse;
   }
+
+  bool get isSimple => name == 'int' || name == 'String' || name == 'bool';
+
+  Iterable<Type> get subtypes =>
+      api.types.toList()..retainWhere((t) => t.superName == name);
 
   void generateElement(JavaGenerator gen) {
     gen.writeType('$servicePackage.element.$name', (TypeWriter writer) {
@@ -790,6 +799,8 @@ class TypeRef {
     if (arrayDepth == 1) return 'List<${javaBoxedName}>';
     return javaUnboxedName;
   }
+
+  Type get type => api.types.firstWhere((t) => t.name == name);
 
   void generateAccessStatements(StatementWriter writer, String propertyName,
       {bool canBeSentinel: false, String defaultValue}) {

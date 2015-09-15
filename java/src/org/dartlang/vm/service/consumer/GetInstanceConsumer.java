@@ -13,30 +13,8 @@
  */
 package org.dartlang.vm.service.consumer;
 
-import org.dartlang.vm.service.element.Element;
-import org.dartlang.vm.service.element.Library;
-import org.dartlang.vm.service.element.Obj;
-import org.dartlang.vm.service.element.RPCError;
-import org.dartlang.vm.service.element.Sentinel;
+import org.dartlang.vm.service.element.Instance;
 
-public abstract class GetInstanceConsumer implements GetObjectConsumer {
-
-  @Override
-  public void received(Library response) {
-    onError(newRPCError(response));
-  }
-
-  @Override
-  public void received(Obj response) {
-    onError(newRPCError(response));
-  }
-
-  @Override
-  public void received(Sentinel response) {
-    onError(newRPCError(response));
-  }
-
-  private RPCError newRPCError(Element response) {
-    throw new RuntimeException("not implemented yet");
-  }
+public interface GetInstanceConsumer extends Consumer {
+  public void received(Instance response);
 }

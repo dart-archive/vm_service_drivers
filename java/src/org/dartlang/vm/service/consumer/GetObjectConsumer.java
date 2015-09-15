@@ -15,16 +15,10 @@ package org.dartlang.vm.service.consumer;
 
 // This is a generated file.
 
-import org.dartlang.vm.service.element.Instance;
-import org.dartlang.vm.service.element.Library;
 import org.dartlang.vm.service.element.Obj;
 import org.dartlang.vm.service.element.Sentinel;
 
 public interface GetObjectConsumer extends Consumer {
-
-  public void received(Instance response);
-
-  public void received(Library response);
 
   public void received(Obj response);
 
