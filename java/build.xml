@@ -9,6 +9,8 @@
 
     <property environment="env"/>
     <property file="version.txt" prefix="service"/>
+    <property name="build.id" value="-dev.1"/>
+
 
     <property
         name="path"
@@ -47,7 +49,7 @@
 
   <target name="dist" depends="jar,test">
     <!-- copy and rename the library -->
-    <copy file="build/vm_service_lib.jar" tofile="dist/vm_service_lib-${service.version}.jar"/>
-    <copy file="build/vm_service_lib_src.jar" tofile="dist/vm_service_lib_src-${service.version}.jar"/>
+    <copy file="build/vm_service_lib.jar" tofile="dist/vm_service_lib-${service.version}${build.id}.jar"/>
+    <copy file="build/vm_service_lib_src.jar" tofile="dist/vm_service_lib_src-${service.version}${build.id}.jar"/>
   </target>
 </project>
