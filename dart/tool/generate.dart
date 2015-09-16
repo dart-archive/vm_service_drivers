@@ -64,7 +64,7 @@ void _generateJava(String appDirPath, List<Node> nodes) {
   // Generate a version file.
   Version version = ApiParseUtil.parseVersionSemVer(nodes);
   File file = new File(join('..', 'java', 'version.txt'));
-  file.writeAsStringSync('${version.major}.${version.minor}');
+  file.writeAsStringSync('version=${version.major}.${version.minor}\n');
 
   print('Wrote Java to $srcDirPath.');
 }
