@@ -30,6 +30,7 @@
   <target name="jar" depends="compile">
     <copy file="version.txt" todir="build/classes"/>
     <jar destfile="build/vm_service_lib.jar" basedir="build/classes"/>
+    <jar destfile="build/vm_service_lib_src.jar" basedir="src"/>
   </target>
 
   <target name="test" depends="compile">
@@ -47,5 +48,6 @@
   <target name="dist" depends="jar,test">
     <!-- copy and rename the library -->
     <copy file="build/vm_service_lib.jar" tofile="dist/vm_service_lib-${service.version}.jar"/>
+    <copy file="build/vm_service_lib_src.jar" tofile="dist/vm_service_lib_src-${service.version}.jar"/>
   </target>
 </project>
