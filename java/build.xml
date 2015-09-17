@@ -11,7 +11,6 @@
     <property file="version.txt" prefix="service"/>
     <property name="build.id" value="-dev.1"/>
 
-
     <property
         name="path"
         value="third_party/gson/gson-2.2.4.jar;third_party/guava/guava-13.0.1.jar;third_party/weberknecht/weberknecht-0.1.5.jar"/>
@@ -50,6 +49,6 @@
   <target name="dist" depends="jar,test">
     <!-- copy and rename the library -->
     <copy file="build/vm_service_lib.jar" tofile="dist/vm_service_lib-${service.version}${build.id}.jar"/>
-    <copy file="build/vm_service_lib-src.jar" tofile="dist/vm_service_lib-src-${service.version}${build.id}.jar"/>
+    <copy file="build/vm_service_lib-src.jar" tofile="dist/vm_service_lib-${service.version}${build.id}-src.jar"/>
   </target>
 </project>
