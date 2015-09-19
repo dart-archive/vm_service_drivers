@@ -684,6 +684,12 @@ class MethodParser extends Parser {
     }
 
     expect(')');
+
+    method.args.sort((MethodArg a, MethodArg b) {
+      if (!a.optional && b.optional) return -1;
+      if (a.optional && !b.optional) return 1;
+      return 0;
+    });
   }
 }
 
