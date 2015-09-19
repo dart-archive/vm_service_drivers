@@ -102,8 +102,8 @@ final String _implCode = r'''
       } else {
         _log.severe('unknown message type: ${message}');
       }
-    } catch (e) {
-      _log.severe('unable to decode message: ${message}, ${e}');
+    } catch (e, s) {
+      _log.severe('unable to decode message: ${message}, ${e}\n${s}');
     }
   }
 ''';
@@ -420,7 +420,7 @@ class TypeRef {
 
   bool get isArray => arrayDepth > 0;
 
-  bool get isSimple => name == 'int' || name == 'String' || name == 'bool';
+  bool get isSimple => name == 'int' || name == 'num' || name == 'String' || name == 'bool';
 
   String toString() => ref;
 }

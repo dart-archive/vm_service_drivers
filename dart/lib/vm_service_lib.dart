@@ -272,8 +272,8 @@ class VmService {
       } else {
         _log.severe('unknown message type: ${message}');
       }
-    } catch (e) {
-      _log.severe('unable to decode message: ${message}, ${e}');
+    } catch (e, s) {
+      _log.severe('unable to decode message: ${message}, ${e}\n${s}');
     }
   }
 }
@@ -815,7 +815,7 @@ class Event extends Response {
   /// event. For some isolate pause events, the timestamp is from when the
   /// isolate was paused. For other events, the timestamp is from when the event
   /// was created.
-  int timestamp;
+  num timestamp;
 
   /// The breakpoint which was added, removed, or resolved. This is provided for
   /// the event kinds: PauseBreakpoint BreakpointAdded BreakpointRemoved
@@ -1301,7 +1301,7 @@ class Isolate extends Response {
 
   /// The time that the VM started in milliseconds since the epoch. Suitable to
   /// pass to DateTime.fromMillisecondsSinceEpoch.
-  int startTime;
+  num startTime;
 
   /// The number of live ports for this isolate.
   int livePorts;
@@ -1776,7 +1776,7 @@ class VM extends Response {
 
   /// The time that the VM started in milliseconds since the epoch. Suitable to
   /// pass to DateTime.fromMillisecondsSinceEpoch.
-  int startTime;
+  num startTime;
 
   /// A list of isolates running in the VM.
   List<IsolateRef> isolates;

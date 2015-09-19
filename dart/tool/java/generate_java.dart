@@ -723,7 +723,7 @@ class TypeField extends Member {
     writer.addMethod(accessorName, [], (StatementWriter writer) {
       type.valueType.generateAccessStatements(writer, name,
           canBeSentinel: type.isValueAndSentinel, defaultValue: defaultValue);
-    }, javadoc: docs, returnType: type.types.first.ref);
+    }, javadoc: docs, returnType: type.valueType.ref);
   }
 }
 
@@ -784,11 +784,16 @@ class TypeRef {
 
   String get javaBoxedName {
     if (name == 'bool') return 'Boolean';
+    if (name == 'num') return 'BigDecimal';
     if (name == 'int') return 'Integer';
     return name;
   }
 
-  String get javaUnboxedName => name == 'bool' ? 'boolean' : name;
+  String get javaUnboxedName {
+    if (name == 'bool') return 'boolean';
+    if (name == 'num') return 'BigDecimal';
+    return name;
+  }
 
   String get ref {
     if (isSimple) {
@@ -828,6 +833,13 @@ class TypeRef {
       } else {
         writer.addLine('return json.get("$propertyName").getAsInt();');
       }
+    } else if (name == 'num') {
+      if (isArray) {
+        print('skipped accessor body for $propertyName');
+      } else {
+        writer.addImport('java.math.BigDecimal');
+        writer.addLine('return json.get("$propertyName").getAsBigDecimal();');
+      }
     } else if (name == 'String') {
       if (isArray) {
         print('skipped accessor body for $propertyName');
@@ -846,10 +858,13 @@ class TypeRef {
         print('skipped accessor body for $propertyName');
       } else if (arrayDepth == 1) {
         writer.addImport('com.google.gson.JsonArray');
-        writer.addLine('return new ElementList<$javaBoxedName>(json.get("$propertyName").getAsJsonArray()) {');
+        writer.addLine(
+            'return new ElementList<$javaBoxedName>(json.get("$propertyName").getAsJsonArray()) {');
         writer.addLine('  @Override');
-        writer.addLine('  protected $javaBoxedName basicGet(JsonArray array, int index) {');
-        writer.addLine('    return new $javaBoxedName(array.get(index).getAsJsonObject());');
+        writer.addLine(
+            '  protected $javaBoxedName basicGet(JsonArray array, int index) {');
+        writer.addLine(
+            '    return new $javaBoxedName(array.get(index).getAsJsonObject());');
         writer.addLine('  }');
         writer.addLine('};');
       } else {

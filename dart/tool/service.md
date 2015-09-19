@@ -962,7 +962,7 @@ class Event extends Response {
   // The timestamp (in milliseconds since the epoch) associated with this event.
   // For some isolate pause events, the timestamp is from when the isolate was
   // paused. For other events, the timestamp is from when the event was created.
-  int timestamp;
+  num timestamp;
 
   // The breakpoint which was added, removed, or resolved.
   //
@@ -1599,7 +1599,7 @@ class Isolate extends Response {
   // The time that the VM started in milliseconds since the epoch.
   //
   // Suitable to pass to DateTime.fromMillisecondsSinceEpoch.
-  int startTime;
+  num startTime;
 
   // The number of live ports for this isolate.
   int livePorts;
@@ -2008,7 +2008,7 @@ class VM extends Response {
   // The time that the VM started in milliseconds since the epoch.
   //
   // Suitable to pass to DateTime.fromMillisecondsSinceEpoch.
-  int startTime;
+  num startTime;
 
   // A list of isolates running in the VM.
   @Isolate[] isolates;

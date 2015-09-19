@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.math.BigDecimal;
 
 /**
  * An [Event] is an asynchronous notification from the VM. It is delivered only when the client has
@@ -84,8 +85,8 @@ public class Event extends Response {
    * pause events, the timestamp is from when the isolate was paused. For other events, the
    * timestamp is from when the event was created.
    */
-  public int getTimestamp() {
-    return json.get("timestamp").getAsInt();
+  public BigDecimal getTimestamp() {
+    return json.get("timestamp").getAsBigDecimal();
   }
 
   /**
