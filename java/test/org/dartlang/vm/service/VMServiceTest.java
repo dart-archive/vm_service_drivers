@@ -287,6 +287,7 @@ public class VMServiceTest {
         System.out.println("  Id: " + response.getId());
         System.out.println("  Name: " + response.getName());
         System.out.println("  Number: " + response.getNumber());
+        System.out.println("  Start Time: " + response.getStartTime());
         System.out.println("  RootLib Id: " + response.getRootLib().getId());
         System.out.println("  RootLib Uri: " + response.getRootLib().getUri());
         System.out.println("  RootLib Name: " + response.getRootLib().getName());

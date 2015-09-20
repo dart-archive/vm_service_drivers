@@ -24,6 +24,7 @@ import de.roderick.weberknecht.WebSocketEventHandler;
 import de.roderick.weberknecht.WebSocketException;
 import de.roderick.weberknecht.WebSocketMessage;
 
+import org.dartlang.vm.service.consumer.BreakpointConsumer;
 import org.dartlang.vm.service.consumer.Consumer;
 import org.dartlang.vm.service.consumer.GetInstanceConsumer;
 import org.dartlang.vm.service.consumer.GetLibraryConsumer;
@@ -130,17 +131,19 @@ abstract class VmServiceBase implements VmServiceConst {
 
       @Override
       public void received(Version response) {
-        if (response.getMajor() != VmService.versionMajor
-            || response.getMinor() < VmService.versionMinor) {
-          String msg = "Incompatible protocol version: client=" + VmService.versionMajor + "."
-              + VmService.versionMinor + " vm=" + response.getMajor() + "." + response.getMinor();
-          Logging.getLogger().logError(msg);
-          errMsg[0] = msg;
-        } else if (response.getMinor() != VmService.versionMinor) {
-          Logging.getLogger().logInformation(
-              "Minor difference in protocol version: client=" + VmService.versionMajor + "."
-                  + VmService.versionMinor + " vm=" + response.getMajor() + "."
-                  + response.getMinor());
+        int major = response.getMajor();
+        int minor = response.getMinor();
+        if (major != VmService.versionMajor || minor != VmService.versionMinor) {
+          if ((major == 2 && minor == 1) || (major == 3 && minor == 0)) {
+            Logging.getLogger().logInformation(
+                "Difference in protocol version: client=" + VmService.versionMajor + "."
+                    + VmService.versionMinor + " vm=" + major + "." + minor);
+          } else {
+            String msg = "Incompatible protocol version: client=" + VmService.versionMajor + "."
+                + VmService.versionMinor + " vm=" + major + "." + minor;
+            Logging.getLogger().logError(msg);
+            errMsg[0] = msg;
+          }
         }
         latch.countDown();
       }
@@ -188,6 +191,18 @@ abstract class VmServiceBase implements VmServiceConst {
    * The channel through which observatory requests are made.
    */
   RequestSink requestSink;
+
+  /**
+   * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script. This
+   * call works for protocol versions 2.1 and 3.0
+   */
+  public void addBreakpoint(String isolateId, String scriptId, int line, BreakpointConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("scriptId", scriptId);
+    params.addProperty("line", line);
+    request("addBreakpoint", params, consumer);
+  }
 
   /**
    * Disconnect from the VM observatory service.
