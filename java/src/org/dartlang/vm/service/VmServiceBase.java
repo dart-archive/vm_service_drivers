@@ -134,7 +134,7 @@ abstract class VmServiceBase implements VmServiceConst {
         int major = response.getMajor();
         int minor = response.getMinor();
         if (major != VmService.versionMajor || minor != VmService.versionMinor) {
-          if ((major == 2 && minor == 1) || (major == 3 && minor == 0)) {
+          if (major == 2 || major == 3) {
             Logging.getLogger().logInformation(
                 "Difference in protocol version: client=" + VmService.versionMajor + "."
                     + VmService.versionMinor + " vm=" + major + "." + minor);
