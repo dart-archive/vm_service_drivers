@@ -19,7 +19,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /**
- * A [FlagList] represents the complete set of VM command line flags.
+ * A {@link FlagList} represents the complete set of VM command line flags.
  */
 public class FlagList extends Response {
 

@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * A [Func] represents a Dart language function.
+ * A {@link Func} represents a Dart language function.
  */
 public class Func extends Obj {
 

@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * [LibraryRef] is a reference to a [Library].
+ * {@link LibraryRef} is a reference to a {@link Library}.
  */
 public class LibraryRef extends ObjRef {
 

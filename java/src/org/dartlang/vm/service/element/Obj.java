@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * An [Obj] is a persistent object that is owned by some isolate.
+ * An {@link Obj} is a persistent object that is owned by some isolate.
  */
 public class Obj extends Response {
 

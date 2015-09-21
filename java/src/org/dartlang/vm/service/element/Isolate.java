@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 
 /**
- * An [Isolate] object provides information about one isolate in the VM.
+ * An {@link Isolate} object provides information about one isolate in the VM.
  */
 public class Isolate extends Response {
 
@@ -51,8 +51,8 @@ public class Isolate extends Response {
   /**
    * The error that is causing this isolate to exit, if applicable.
    */
-  public Error getError() {
-    return new Error((JsonObject) json.get("error"));
+  public ErrorObj getError() {
+    return new ErrorObj((JsonObject) json.get("error"));
   }
 
   /**

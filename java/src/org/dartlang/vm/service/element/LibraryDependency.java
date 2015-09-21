@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * A [LibraryDependency] provides information about an import or export.
+ * A {@link LibraryDependency} provides information about an import or export.
  */
 public class LibraryDependency extends Element {
 

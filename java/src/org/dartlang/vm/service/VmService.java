@@ -277,6 +277,14 @@ public class VmService extends VmServiceBase {
         ((GetObjectConsumer) consumer).received(new Breakpoint(json));
         return;
       }
+      if (responseType.equals("Class")) {
+        ((GetObjectConsumer) consumer).received(new ClassObj(json));
+        return;
+      }
+      if (responseType.equals("Error")) {
+        ((GetObjectConsumer) consumer).received(new ErrorObj(json));
+        return;
+      }
       if (responseType.equals("Field")) {
         ((GetObjectConsumer) consumer).received(new Field(json));
         return;

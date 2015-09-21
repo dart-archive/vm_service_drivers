@@ -19,7 +19,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /**
- * A [Library] provides information about a Dart language library.
+ * A {@link Library} provides information about a Dart language library.
  */
 public class Library extends Obj {
 

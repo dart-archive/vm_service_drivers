@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * A [Field] provides information about a Dart language field or variable.
+ * A {@link Field} provides information about a Dart language field or variable.
  */
 public class Field extends Obj {
 
@@ -32,27 +32,6 @@ public class Field extends Obj {
    */
   public InstanceRef getDeclaredType() {
     return new InstanceRef((JsonObject) json.get("declaredType"));
-  }
-
-  /**
-   * Is this field const?
-   */
-  public boolean getIsConst() {
-    return json.get("const").getAsBoolean();
-  }
-
-  /**
-   * Is this field final?
-   */
-  public boolean getIsFinal() {
-    return json.get("final").getAsBoolean();
-  }
-
-  /**
-   * Is this field static?
-   */
-  public boolean getIsStatic() {
-    return json.get("static").getAsBoolean();
   }
 
   /**
@@ -81,5 +60,26 @@ public class Field extends Obj {
    */
   public InstanceRef getStaticValue() {
     return new InstanceRef((JsonObject) json.get("staticValue"));
+  }
+
+  /**
+   * Is this field const?
+   */
+  public boolean isConst() {
+    return json.get("const").getAsBoolean();
+  }
+
+  /**
+   * Is this field final?
+   */
+  public boolean isFinal() {
+    return json.get("final").getAsBoolean();
+  }
+
+  /**
+   * Is this field static?
+   */
+  public boolean isStatic() {
+    return json.get("static").getAsBoolean();
   }
 }

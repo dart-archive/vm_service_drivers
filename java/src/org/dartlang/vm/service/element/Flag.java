@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * A [Flag] represents a single VM command line flag.
+ * A {@link Flag} represents a single VM command line flag.
  */
 public class Flag extends Element {
 

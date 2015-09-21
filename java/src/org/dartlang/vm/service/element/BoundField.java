@@ -19,7 +19,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
- * A [BoundField] represents a field bound to a particular value in an [Instance].
+ * A {@link BoundField} represents a field bound to a particular value in an {@link Instance}.
  */
 public class BoundField extends Element {
 

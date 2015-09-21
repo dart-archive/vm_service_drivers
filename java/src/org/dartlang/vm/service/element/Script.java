@@ -19,7 +19,7 @@ import com.google.gson.JsonObject;
 import java.util.List;
 
 /**
- * A [Script] provides information about a Dart language script.
+ * A {@link Script} provides information about a Dart language script.
  */
 public class Script extends Obj {
 

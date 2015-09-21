@@ -15,6 +15,13 @@ export 'src_gen_java.dart' show JavaGenerator;
 
 const String servicePackage = 'org.dartlang.vm.service';
 
+const List<String> simpleTypes = const [
+  'BigDecimal',
+  'boolean',
+  'int',
+  'String'
+];
+
 const vmServiceJavadoc = '''
 {@link VmService} allows control of and access to information in a running
 Dart VM instance.
@@ -39,13 +46,43 @@ from within any {@link Consumer} method.
 
 Api api;
 
+/// Convert documentation references
+/// from spec style of [className] to javadoc style {@link className}
+String convertDocLinks(String doc) {
+  if (doc == null) return null;
+  var sb = new StringBuffer();
+  int start = 0;
+  int end = doc.indexOf('[');
+  while (end != -1) {
+    sb.write(doc.substring(start, end));
+    start = end;
+    end = doc.indexOf(']', start);
+    if (end == -1) break;
+    if (end == start + 1) {
+      sb.write('[]');
+    } else {
+      sb.write('{@link ');
+      sb.write(doc.substring(start + 1, end));
+      sb.write('}');
+    }
+    start = end + 1;
+    end = doc.indexOf('[', start);
+  }
+  sb.write(doc.substring(start));
+  return sb.toString();
+}
+
 String _coerceRefType(String typeName) {
+  if (typeName == 'Class') typeName = 'ClassObj';
+  if (typeName == 'Error') typeName = 'ErrorObj';
   if (typeName == 'Object') typeName = 'Obj';
   if (typeName == '@Object') typeName = 'ObjRef';
   if (typeName == 'Function') typeName = 'Func';
   if (typeName == '@Function') typeName = 'FuncRef';
   if (typeName.startsWith('@')) typeName = typeName.substring(1) + 'Ref';
   if (typeName == 'string') typeName = 'String';
+  if (typeName == 'bool') typeName = 'boolean';
+  if (typeName == 'num') typeName = 'BigDecimal';
   return typeName;
 }
 
@@ -254,7 +291,7 @@ class Enum extends Member {
 
   void generateEnum(JavaGenerator gen) {
     gen.writeType(elementTypeName, (TypeWriter writer) {
-      writer.javadoc = docs;
+      writer.javadoc = convertDocLinks(docs);
       writer.isEnum = true;
       int count = 0;
       for (var value in enums) {
@@ -384,7 +421,7 @@ class Method extends Member {
 
   void generateConsumerInterface(JavaGenerator gen) {
     gen.writeType(consumerTypeName, (TypeWriter writer) {
-      writer.javadoc = returnType.docs;
+      writer.javadoc = convertDocLinks(returnType.docs);
       writer.interfaceNames.add('$servicePackage.consumer.Consumer');
       writer.isInterface = true;
       for (var t in returnType.types) {
@@ -404,11 +441,7 @@ class Method extends Member {
     }
     types.sort((t1, t2) => t1.name.compareTo(t2.name));
     for (var t in types) {
-      // TODO(danrubel) rename classes to prevent collision
-      // with common java types. e.g. "Class" --> "DartClass"
-      if (t.name == 'Class' || t.name == 'Error') continue;
-
-      var jsonType = t.name;
+      var jsonType = t.jsonTypeName;
       var responseName = classNameFor(t.elementTypeName);
       writer.addLine('  if (responseType.equals("$jsonType")) {');
       writer.addLine(
@@ -455,13 +488,10 @@ class Method extends Member {
       for (MethodArg arg in args) {
         var name = arg.name;
         String op = arg.optional ? 'if (${name} != null) ' : '';
-        if (arg.type == 'String' || arg.type == 'int' || arg.type == 'bool') {
-          writer.addLine('${op}params.addProperty("$name", $name);');
-        } else if (arg.isEnumType) {
+        if (arg.isEnumType) {
           writer.addLine('${op}params.addProperty("$name", $name.name());');
         } else {
-          print('skipped addProperty ${name} in VmService method $name');
-          writer.addLine('// ${name} ${arg.type}');
+          writer.addLine('${op}params.addProperty("$name", $name);');
         }
       }
       writer.addLine('request("$name", params, consumer);');
@@ -482,8 +512,7 @@ class MethodArg extends Member {
 
   MethodArg(this.parent, this.type, this.name);
 
-  get asJavaMethodArg =>
-      new JavaMethodArg(name, type == 'bool' ? 'boolean' : type);
+  get asJavaMethodArg => new JavaMethodArg(name, type);
 
   /// Hacked enum arg type determination
   bool get isEnumType => name == 'step';
@@ -593,7 +622,13 @@ class Type extends Member {
     return parent.getType(superName).isResponse;
   }
 
-  bool get isSimple => name == 'int' || name == 'String' || name == 'bool';
+  bool get isSimple => simpleTypes.contains(name);
+
+  get jsonTypeName {
+    if (name == 'ClassObj') return 'Class';
+    if (name == 'ErrorObj') return 'Error';
+    return name;
+  }
 
   Iterable<Type> get subtypes =>
       api.types.toList()..retainWhere((t) => t.superName == name);
@@ -604,7 +639,7 @@ class Type extends Member {
         writer.addImport('com.google.gson.JsonObject');
       }
       writer.addImport('com.google.gson.JsonObject');
-      writer.javadoc = docs;
+      writer.javadoc = convertDocLinks(docs);
       writer.superclassName = superName ?? 'Element';
       writer.addConstructor(<JavaMethodArg>[
         new JavaMethodArg('json', 'com.google.gson.JsonObject')
@@ -616,39 +651,6 @@ class Type extends Member {
         field.generateAccessor(writer);
       }
     });
-//        if (field.type.isSimple) {
-//          writer.addMethod(name, args, write)
-//        gen.writeln("${field.generatableName} = json['${field.name}'];");
-//      } else if (field.type.isEnum) {
-//        // Parse the enum.
-//        String enumTypeName = field.type.types.first.name;
-//        gen.writeln(
-//            "${field.generatableName} = _parseEnum(${enumTypeName}.values, json['${field.name}']);");
-//        } else {
-//        gen.writeln(
-//            "${field.generatableName} = createObject(json['${field.name}']);");
-//        }
-
-//    gen.writeln('}');
-//    gen.writeln();
-//    fields.forEach((TypeField field) => field.generate(gen));
-//
-//    List<TypeField> allFields = getAllFields();
-//    if (allFields.length <= 7) {
-//      String properties = allFields
-//          .map(
-//              (TypeField f) => "${f.generatableName}: \${${f.generatableName}}")
-//          .join(', ');
-//      if (properties.length > 70) {
-//        gen.writeln("String toString() => '[${name} ' //\n'${properties}]';");
-//      } else {
-//        gen.writeln("String toString() => '[${name} ${properties}]';");
-//      }
-//    } else {
-//      gen.writeln("String toString() => '[${name}]';");
-//    }
-//
-//    gen.writeln('}');
   }
 
   List<TypeField> getAllFields() {
@@ -696,7 +698,15 @@ class TypeField extends Member {
 
   TypeField(this.parent, this._docs);
 
-  String get accessorName => 'get${titleCase(generatableName)}';
+  String get accessorName {
+    var remappedName = _nameRemap[name];
+    if (remappedName != null) {
+      if (remappedName.startsWith('is')) return remappedName;
+    } else {
+      remappedName = name;
+    }
+    return 'get${titleCase(remappedName)}';
+  }
 
   String get docs {
     String str = _docs == null ? '' : _docs;
@@ -706,10 +716,6 @@ class TypeField extends Member {
       str = str.trim();
     }
     return str;
-  }
-
-  String get generatableName {
-    return _nameRemap[name] != null ? _nameRemap[name] : name;
   }
 
   void generateAccessor(TypeWriter writer) {
@@ -780,18 +786,11 @@ class TypeRef {
   /// Hacked enum determination
   bool get isEnum => name.endsWith('Kind');
 
-  bool get isSimple => name == 'int' || name == 'String' || name == 'bool';
+  bool get isSimple => simpleTypes.contains(name);
 
   String get javaBoxedName {
-    if (name == 'bool') return 'Boolean';
-    if (name == 'num') return 'BigDecimal';
+    if (name == 'boolean') return 'Boolean';
     if (name == 'int') return 'Integer';
-    return name;
-  }
-
-  String get javaUnboxedName {
-    if (name == 'bool') return 'boolean';
-    if (name == 'num') return 'BigDecimal';
     return name;
   }
 
@@ -803,14 +802,14 @@ class TypeRef {
       if (arrayDepth == 2) return 'ElementList<ElementList<${javaBoxedName}>>';
       if (arrayDepth == 1) return 'ElementList<${javaBoxedName}>';
     }
-    return javaUnboxedName;
+    return name;
   }
 
   Type get type => api.types.firstWhere((t) => t.name == name);
 
   void generateAccessStatements(StatementWriter writer, String propertyName,
       {bool canBeSentinel: false, String defaultValue}) {
-    if (name == 'bool') {
+    if (name == 'boolean') {
       if (isArray) {
         print('skipped accessor body for $propertyName');
       } else {
@@ -833,7 +832,7 @@ class TypeRef {
       } else {
         writer.addLine('return json.get("$propertyName").getAsInt();');
       }
-    } else if (name == 'num') {
+    } else if (name == 'BigDecimal') {
       if (isArray) {
         print('skipped accessor body for $propertyName');
       } else {
@@ -851,7 +850,7 @@ class TypeRef {
         print('skipped accessor body for $propertyName');
       } else {
         writer.addLine(
-            'return $javaUnboxedName.valueOf(json.get("$propertyName").getAsString());');
+            'return $name.valueOf(json.get("$propertyName").getAsString());');
       }
     } else {
       if (arrayDepth > 1) {

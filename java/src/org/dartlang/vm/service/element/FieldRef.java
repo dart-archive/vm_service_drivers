@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * An [FieldRef] is a reference to a [Field].
+ * An {@link FieldRef} is a reference to a {@link Field}.
  */
 public class FieldRef extends ObjRef {
 
@@ -35,27 +35,6 @@ public class FieldRef extends ObjRef {
   }
 
   /**
-   * Is this field const?
-   */
-  public boolean getIsConst() {
-    return json.get("const").getAsBoolean();
-  }
-
-  /**
-   * Is this field final?
-   */
-  public boolean getIsFinal() {
-    return json.get("final").getAsBoolean();
-  }
-
-  /**
-   * Is this field static?
-   */
-  public boolean getIsStatic() {
-    return json.get("static").getAsBoolean();
-  }
-
-  /**
    * The name of this field.
    */
   public String getName() {
@@ -67,5 +46,26 @@ public class FieldRef extends ObjRef {
    */
   public ObjRef getOwner() {
     return new ObjRef((JsonObject) json.get("owner"));
+  }
+
+  /**
+   * Is this field const?
+   */
+  public boolean isConst() {
+    return json.get("const").getAsBoolean();
+  }
+
+  /**
+   * Is this field final?
+   */
+  public boolean isFinal() {
+    return json.get("final").getAsBoolean();
+  }
+
+  /**
+   * Is this field static?
+   */
+  public boolean isStatic() {
+    return json.get("static").getAsBoolean();
   }
 }

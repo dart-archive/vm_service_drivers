@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * A [Null] object represents the Dart language value null.
+ * A {@link Null} object represents the Dart language value null.
  */
 public class Null extends Instance {
 

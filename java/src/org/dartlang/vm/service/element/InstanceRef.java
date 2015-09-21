@@ -19,7 +19,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
- * [InstanceRef] is a reference to an [Instance].
+ * {@link InstanceRef} is a reference to an {@link Instance}.
  */
 public class InstanceRef extends ObjRef {
 

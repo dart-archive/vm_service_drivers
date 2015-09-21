@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * A [Code] object represents compiled code in the Dart VM.
+ * A {@link Code} object represents compiled code in the Dart VM.
  */
 public class Code extends ObjRef {
 

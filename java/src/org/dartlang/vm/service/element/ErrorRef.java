@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * [ErrorRef] is a reference to an [Error].
+ * {@link ErrorRef} is a reference to an {@link ErrorObj}.
  */
 public class ErrorRef extends ObjRef {
 

@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * [IsolateRef] is a reference to an [Isolate] object.
+ * {@link IsolateRef} is a reference to an {@link Isolate} object.
  */
 public class IsolateRef extends Response {
 

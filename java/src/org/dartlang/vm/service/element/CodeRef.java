@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * [CodeRef] is a reference to a [Code] object.
+ * {@link CodeRef} is a reference to a {@link Code} object.
  */
 public class CodeRef extends ObjRef {
 

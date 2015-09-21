@@ -16,8 +16,8 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 /**
- * Adding new values to [EventKind] is considered a backwards compatible change. Clients should
- * ignore unrecognized events.
+ * Adding new values to {@link EventKind} is considered a backwards compatible change. Clients
+ * should ignore unrecognized events.
  */
 public enum EventKind {
 

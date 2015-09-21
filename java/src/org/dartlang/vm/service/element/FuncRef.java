@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * An [FuncRef] is a reference to a [Func].
+ * An {@link FuncRef} is a reference to a {@link Func}.
  */
 public class FuncRef extends ObjRef {
 
@@ -27,23 +27,23 @@ public class FuncRef extends ObjRef {
   }
 
   /**
+   * The name of this function.
+   */
+  public String getName() {
+    return json.get("name").getAsString();
+  }
+
+  /**
    * Is this function const?
    */
-  public boolean getIsConst() {
+  public boolean isConst() {
     return json.get("const").getAsBoolean();
   }
 
   /**
    * Is this function static?
    */
-  public boolean getIsStatic() {
+  public boolean isStatic() {
     return json.get("static").getAsBoolean();
-  }
-
-  /**
-   * The name of this function.
-   */
-  public String getName() {
-    return json.get("name").getAsString();
   }
 }

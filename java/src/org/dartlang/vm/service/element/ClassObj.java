@@ -19,11 +19,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /**
- * A [Class] provides information about a Dart language class.
+ * A {@link ClassObj} provides information about a Dart language class.
  */
-public class Class extends Obj {
+public class ClassObj extends Obj {
 
-  public Class(JsonObject json) {
+  public ClassObj(JsonObject json) {
     super(json);
   }
 
@@ -71,20 +71,6 @@ public class Class extends Obj {
   }
 
   /**
-   * Is this an abstract class?
-   */
-  public boolean getIsAbstract() {
-    return json.get("abstract").getAsBoolean();
-  }
-
-  /**
-   * Is this a const class?
-   */
-  public boolean getIsConst() {
-    return json.get("const").getAsBoolean();
-  }
-
-  /**
    * The library which contains this class.
    */
   public LibraryRef getLibrary() {
@@ -122,5 +108,19 @@ public class Class extends Obj {
    */
   public ClassRef getSuperClass() {
     return new ClassRef((JsonObject) json.get("super"));
+  }
+
+  /**
+   * Is this an abstract class?
+   */
+  public boolean isAbstract() {
+    return json.get("abstract").getAsBoolean();
+  }
+
+  /**
+   * Is this a const class?
+   */
+  public boolean isConst() {
+    return json.get("const").getAsBoolean();
   }
 }

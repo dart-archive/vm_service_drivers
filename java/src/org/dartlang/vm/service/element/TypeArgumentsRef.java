@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * [TypeArgumentsRef] is a reference to a [TypeArguments] object.
+ * {@link TypeArgumentsRef} is a reference to a {@link TypeArguments} object.
  */
 public class TypeArgumentsRef extends ObjRef {
 

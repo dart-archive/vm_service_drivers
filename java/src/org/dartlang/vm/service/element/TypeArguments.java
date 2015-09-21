@@ -19,7 +19,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /**
- * A [TypeArguments] object represents the type argument vector for some instantiated generic type.
+ * A {@link TypeArguments} object represents the type argument vector for some instantiated generic
+ * type.
  */
 public class TypeArguments extends Obj {
 

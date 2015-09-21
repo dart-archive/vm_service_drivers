@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * [NullRef] is a reference to an a [Null].
+ * {@link NullRef} is a reference to an a {@link Null}.
  */
 public class NullRef extends InstanceRef {
 

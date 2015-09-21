@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * [ScriptRef] is a reference to a [Script].
+ * {@link ScriptRef} is a reference to a {@link Script}.
  */
 public class ScriptRef extends ObjRef {
 

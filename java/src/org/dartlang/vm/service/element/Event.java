@@ -20,8 +20,8 @@ import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 
 /**
- * An [Event] is an asynchronous notification from the VM. It is delivered only when the client has
- * subscribed to an event stream using the streamListen RPC.
+ * An {@link Event} is an asynchronous notification from the VM. It is delivered only when the
+ * client has subscribed to an event stream using the streamListen RPC.
  */
 public class Event extends Response {
 

@@ -16,7 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 /**
- * A [SentinelKind] is used to distinguish different kinds of [Sentinel] objects.
+ * A {@link SentinelKind} is used to distinguish different kinds of {@link Sentinel} objects.
  */
 public enum SentinelKind {
 

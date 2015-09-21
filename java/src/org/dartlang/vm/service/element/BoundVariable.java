@@ -19,7 +19,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
- * A [BoundVariable] represents a local variable bound to a particular value in a [Frame].
+ * A {@link BoundVariable} represents a local variable bound to a particular value in a {@link
+ * Frame}.
  */
 public class BoundVariable extends Element {
 

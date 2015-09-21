@@ -18,8 +18,8 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * Every non-error response returned by the Service Protocol extends [Response]. By using the
- * [type] property, the client can determine which type of response has been provided.
+ * Every non-error response returned by the Service Protocol extends {@link Response}. By using the
+ * {@link type} property, the client can determine which type of response has been provided.
  */
 public class Response extends Element {
 

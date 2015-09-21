@@ -18,11 +18,11 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * An [Error] represents a Dart language level error. This is distinct from an rpc error.
+ * An {@link ErrorObj} represents a Dart language level error. This is distinct from an rpc error.
  */
-public class Error extends Obj {
+public class ErrorObj extends Obj {
 
-  public Error(JsonObject json) {
+  public ErrorObj(JsonObject json) {
     super(json);
   }
 

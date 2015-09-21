@@ -16,8 +16,8 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 /**
- * Adding new values to [InstanceKind] is considered a backwards compatible change. Clients should
- * treat unrecognized instance kinds as [PlainInstance].
+ * Adding new values to {@link InstanceKind} is considered a backwards compatible change. Clients
+ * should treat unrecognized instance kinds as {@link PlainInstance}.
  */
 public enum InstanceKind {
 

@@ -18,7 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * A [Breakpoint] describes a debugger breakpoint.
+ * A {@link Breakpoint} describes a debugger breakpoint.
  */
 public class Breakpoint extends Obj {
 
