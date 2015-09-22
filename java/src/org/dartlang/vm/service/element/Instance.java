@@ -97,8 +97,13 @@ public class Instance extends Obj {
   /**
    * The fields of this Instance.
    */
-  public BoundField getFields() {
-    return new BoundField((JsonObject) json.get("fields"));
+  public ElementList<BoundField> getFields() {
+    return new ElementList<BoundField>(json.get("fields").getAsJsonArray()) {
+      @Override
+      protected BoundField basicGet(JsonArray array, int index) {
+        return new BoundField(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**

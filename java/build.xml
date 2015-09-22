@@ -35,7 +35,7 @@
   </target>
 
   <target name="test" depends="compile">
-    <java classname="org.dartlang.vm.service.VMServiceTest"
+    <java classname="org.dartlang.vm.service.VmServiceTest"
         fork="true" failonerror="true">
       <arg value="${env.DART_SDK}"/>
       <classpath>

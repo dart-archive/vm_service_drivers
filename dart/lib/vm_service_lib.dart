@@ -1178,7 +1178,7 @@ class Instance extends Obj {
   @optional ClassRef parameterizedClass;
 
   /// The fields of this Instance.
-  @optional BoundField fields;
+  @optional List<BoundField> fields;
 
   /// The elements of a List instance. Provided for instance kinds: List
   ///

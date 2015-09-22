@@ -14,6 +14,8 @@
 package org.dartlang.vm.service;
 
 import org.dartlang.vm.service.consumer.GetInstanceConsumer;
+import org.dartlang.vm.service.element.BoundField;
+import org.dartlang.vm.service.element.ClassRef;
 import org.dartlang.vm.service.element.Instance;
 import org.dartlang.vm.service.element.InstanceKind;
 import org.dartlang.vm.service.element.InstanceRef;
@@ -116,6 +118,9 @@ public class InstanceRefToString {
       case List:
         printList(result, ref, maxDepth);
         return;
+      case PlainInstance:
+        printPlainInstance(result, ref, maxDepth);
+        return;
       case BoundedType:
       case Closure:
       case Float32List:
@@ -129,7 +134,6 @@ public class InstanceRefToString {
       case Int8List:
       case Map:
       case MirrorReference:
-      case PlainInstance:
       case RegExp:
       case Type:
       case TypeParameter:
@@ -176,5 +180,35 @@ public class InstanceRefToString {
       printInstance(result, elem, maxDepth - 1);
     }
     result.append("]");
+  }
+
+  /**
+   * Convert the given instance into a human readable string.
+   * 
+   * @param result the buffer to which the human readable string is added
+   * @param ref an instance reference of type "PlainInstance" (not {@code null})
+   * @param maxDepth the maximum number of recursions this method can make on itself to determine
+   *          human readable strings for child objects
+   */
+  private void printPlainInstance(StringBuilder result, InstanceRef ref, int maxDepth) {
+    ClassRef classRef = ref.getClassRef();
+    String className = classRef.getName();
+    if (maxDepth == 0) {
+      result.append("a " + className);
+      return;
+    }
+    result.append(className);
+    result.append("(");
+    Instance inst = getInstance(ref);
+    boolean first = true;
+    for (BoundField field : inst.getFields()) {
+      if (first) {
+        first = false;
+      } else {
+        result.append(", ");
+      }
+      printInstance(result, field.getValue(), maxDepth - 1);
+    }
+    result.append(")");
   }
 }

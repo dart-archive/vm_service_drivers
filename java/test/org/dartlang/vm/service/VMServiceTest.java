@@ -46,7 +46,7 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VMServiceTest {
+public class VmServiceTest {
 
   private static File dartVm;
   private static File sampleDart;
@@ -174,7 +174,7 @@ public class VMServiceTest {
     System.out.println(errMsg);
     System.out.flush();
     sleep(10);
-    System.out.println("Usage: VMServiceTest /path/to/Dart/SDK");
+    System.out.println("Usage: VmServiceTest /path/to/Dart/SDK");
     System.exit(1);
   }
 

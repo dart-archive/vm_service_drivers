@@ -6,7 +6,7 @@ void main(List<String> args) {
   String local1 = 'abcd';
   int local2 = 2;
   var longList = [1, "hello", 3, 5, 7, 11, 13, 14, 15, 16, 17, 18, 19, 20];
-  var deepList = [3, [[[[[7]]], "end"]]];
+  var deepList = [new Bar(), [[[[[7]]], "end"]]];
 
   print('hello from main');
 
@@ -22,4 +22,12 @@ void main(List<String> args) {
 
 void foo(int val) {
   print('val: ${val}');
+}
+
+class Bar extends FooBar {
+  String field1 = "my string";
+}
+
+class FooBar {
+  int field2 = 47;
 }
