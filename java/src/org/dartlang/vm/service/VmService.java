@@ -42,6 +42,16 @@ import org.dartlang.vm.service.element.*;
  */
 public class VmService extends VmServiceBase {
 
+  public static final String DEBUG_STREAM_ID = "Debug";
+
+  public static final String GC_STREAM_ID = "GC";
+
+  public static final String ISOLATE_STREAM_ID = "Isolate";
+
+  public static final String STDERR_STREAM_ID = "Stderr";
+
+  public static final String STDOUT_STREAM_ID = "Stdout";
+
   /**
    * The major version number of the protocol supported by this client.
    */

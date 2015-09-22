@@ -9,7 +9,7 @@
 
     <property environment="env"/>
     <property file="version.txt" prefix="service"/>
-    <property name="build.id" value="-dev.1"/>
+    <property name="build.id" value="-dev.2"/>
 
     <property
         name="path"

@@ -20,23 +20,7 @@ import org.dartlang.vm.service.consumer.StackConsumer;
 import org.dartlang.vm.service.consumer.SuccessConsumer;
 import org.dartlang.vm.service.consumer.VMConsumer;
 import org.dartlang.vm.service.consumer.VersionConsumer;
-import org.dartlang.vm.service.element.BoundVariable;
-import org.dartlang.vm.service.element.Breakpoint;
-import org.dartlang.vm.service.element.ElementList;
-import org.dartlang.vm.service.element.Frame;
-import org.dartlang.vm.service.element.InstanceRef;
-import org.dartlang.vm.service.element.Isolate;
-import org.dartlang.vm.service.element.IsolateRef;
-import org.dartlang.vm.service.element.Library;
-import org.dartlang.vm.service.element.LibraryRef;
-import org.dartlang.vm.service.element.Message;
-import org.dartlang.vm.service.element.RPCError;
-import org.dartlang.vm.service.element.ScriptRef;
-import org.dartlang.vm.service.element.Stack;
-import org.dartlang.vm.service.element.StepOption;
-import org.dartlang.vm.service.element.Success;
-import org.dartlang.vm.service.element.VM;
-import org.dartlang.vm.service.element.Version;
+import org.dartlang.vm.service.element.*;
 import org.dartlang.vm.service.logging.Logger;
 import org.dartlang.vm.service.logging.Logging;
 
@@ -55,14 +39,20 @@ public class VmServiceTest {
   private static VmService vmService;
   private static SampleOutPrinter sampleOut;
   private static SampleOutPrinter sampleErr;
+  private static SampleVmServiceListener vmListener;
+  private static int actualVmServiceVersionMajor;
 
   public static void main(String[] args) {
     setupLogging();
     parseArgs(args);
     try {
       startSample();
-      sleep(500);
+      sleep(100);
       vmConnect();
+      vmListener = new SampleVmServiceListener();
+      vmService.addVmServiceListener(vmListener);
+      vmStreamListen(VmService.DEBUG_STREAM_ID);
+      vmStreamListen(VmService.ISOLATE_STREAM_ID);
       vmGetVersion();
       ElementList<IsolateRef> isolates = vmGetVmIsolates();
       Isolate sampleIsolate = vmGetIsolate(isolates.get(0));
@@ -70,9 +60,10 @@ public class VmServiceTest {
 
       // Run to breakpoint on line "foo(1);"
       vmAddBreakpoint(sampleIsolate, rootLib.getScripts().get(0), 13);
+      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.BreakpointAdded);
       vmResume(isolates.get(0), null);
-      sampleOut.waitFor("hello");
-      sleep(200);
+      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.Resume);
+      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.PauseBreakpoint);
       sampleOut.assertLastLine("hello");
 
       // Get stack trace
@@ -80,13 +71,21 @@ public class VmServiceTest {
 
       // Step over line "foo(1);"
       vmResume(isolates.get(0), StepOption.Over);
-      sampleOut.waitFor("val: 1");
-      sleep(200);
+      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.Resume);
+      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.PauseBreakpoint);
       sampleOut.assertLastLine("val: 1");
 
       // Finish execution
       vmResume(isolates.get(0), null);
-      sampleOut.waitFor("exiting");
+      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.Resume);
+
+      // VM pauses on exit and must be resumed to cleanly terminate process
+      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.PauseExit);
+      vmResume(isolates.get(0), null);
+      vmListener.waitFor(VmService.ISOLATE_STREAM_ID, EventKind.IsolateExit);
+      waitForProcessExit();
+
+      sampleOut.assertLastLine("exiting");
       sampleErr.assertLastLine(null);
       process = null;
       System.out.println("Test Complete");
@@ -359,7 +358,8 @@ public class VmServiceTest {
       @Override
       public void received(Version response) {
         System.out.println("Received Version response");
-        System.out.println("  Major: " + response.getMajor());
+        actualVmServiceVersionMajor = response.getMajor();
+        System.out.println("  Major: " + actualVmServiceVersionMajor);
         System.out.println("  Minor: " + response.getMinor());
         System.out.println(response.getJson());
         latch.opComplete();
@@ -412,5 +412,42 @@ public class VmServiceTest {
       }
     });
     // Do not wait for confirmation, but display error if it occurs
+  }
+
+  private static void vmStreamListen(String streamId) {
+    final OpLatch latch = new OpLatch();
+    vmService.streamListen(streamId, new SuccessConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        showRPCError(error);
+      }
+
+      @Override
+      public void received(Success response) {
+        System.out.println("Subscribed to debug event stream");
+        latch.opComplete();
+      }
+    });
+    latch.waitAndAssertOpComplete();
+  }
+
+  private static void waitForProcessExit() {
+    if (actualVmServiceVersionMajor == 2) {
+      // Don't wait for VM 1.12 - protocol 2.1
+      return;
+    }
+    long end = System.currentTimeMillis() + 5000;
+    while (true) {
+      try {
+        System.out.println("Exit code: " + process.exitValue());
+        return;
+      } catch (IllegalThreadStateException e) {
+        // fall through to wait for exit
+      }
+      if (System.currentTimeMillis() >= end) {
+        throw new RuntimeException("Expected child process to finish");
+      }
+      sleep(10);
+    }
   }
 }

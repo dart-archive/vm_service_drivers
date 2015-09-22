@@ -17,7 +17,6 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 
 import de.roderick.weberknecht.WebSocket;
 import de.roderick.weberknecht.WebSocketEventHandler;
@@ -30,6 +29,7 @@ import org.dartlang.vm.service.consumer.GetInstanceConsumer;
 import org.dartlang.vm.service.consumer.GetLibraryConsumer;
 import org.dartlang.vm.service.consumer.GetObjectConsumer;
 import org.dartlang.vm.service.consumer.VersionConsumer;
+import org.dartlang.vm.service.element.Event;
 import org.dartlang.vm.service.element.Instance;
 import org.dartlang.vm.service.element.Library;
 import org.dartlang.vm.service.element.Obj;
@@ -44,6 +44,8 @@ import org.dartlang.vm.service.logging.Logging;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -188,6 +190,11 @@ abstract class VmServiceBase implements VmServiceConst {
   private final AtomicInteger nextId = new AtomicInteger();
 
   /**
+   * A list of objects to which {@link Event}s from the VM are forwarded.
+   */
+  private final List<VmServiceListener> vmListeners = new ArrayList<VmServiceListener>();
+
+  /**
    * The channel through which observatory requests are made.
    */
   RequestSink requestSink;
@@ -202,6 +209,13 @@ abstract class VmServiceBase implements VmServiceConst {
     params.addProperty("scriptId", scriptId);
     params.addProperty("line", line);
     request("addBreakpoint", params, consumer);
+  }
+
+  /**
+   * Add a listener to receive {@link Event}s from the VM.
+   */
+  public void addVmServiceListener(VmServiceListener listener) {
+    vmListeners.add(listener);
   }
 
   /**
@@ -288,6 +302,16 @@ abstract class VmServiceBase implements VmServiceConst {
     requestSink.add(request);
   }
 
+  private void forwardEvent(String streamId, Event event) {
+    for (VmServiceListener listener : vmListeners) {
+      try {
+        listener.received(streamId, event);
+      } catch (Exception e) {
+        Logging.getLogger().logError("Exception processing event: " + streamId + ", " + event.getJson(), e);
+      }
+    }
+  }
+
   abstract void forwardResponse(Consumer consumer, String type, JsonObject json);
 
   void logUnknownResponse(Consumer consumer, JsonObject json) {
@@ -306,20 +330,62 @@ abstract class VmServiceBase implements VmServiceConst {
    * with the response id.
    */
   void processResponse(String jsonText) {
+    if (jsonText == null || jsonText.isEmpty()) {
+      return;
+    }
 
     // Decode the JSON
     JsonObject json;
     try {
       json = (JsonObject) new JsonParser().parse(jsonText);
-    } catch (JsonSyntaxException e) {
-      Logging.getLogger().logError("Parse response failed", e);
+    } catch (Exception e) {
+      Logging.getLogger().logError("Parse response failed: " + jsonText, e);
+      return;
+    }
+
+    // Forward events
+    JsonElement idElem = json.get(ID);
+    if (idElem == null) {
+      String method;
+      try {
+        method = json.get(METHOD).getAsString();
+      } catch (Exception e) {
+        Logging.getLogger().logError("Event missing " + METHOD, e);
+        return;
+      }
+      if (!"streamNotify".equals(method)) {
+        Logging.getLogger().logError("Unkown event " + METHOD + ": " + method);
+        return;
+      }
+      JsonObject params;
+      try {
+        params = json.get(PARAMS).getAsJsonObject();
+      } catch (Exception e) {
+        Logging.getLogger().logError("Event missing " + PARAMS, e);
+        return;
+      }
+      String streamId;
+      try {
+        streamId = params.get(STREAM_ID).getAsString();
+      } catch (Exception e) {
+        Logging.getLogger().logError("Event missing " + STREAM_ID, e);
+        return;
+      }
+      Event event;
+      try {
+        event = new Event(params.get(EVENT).getAsJsonObject());
+      } catch (Exception e) {
+        Logging.getLogger().logError("Event missing " + EVENT, e);
+        return;
+      }
+      forwardEvent(streamId, event);
       return;
     }
 
     // Get the consumer associated with this response
     String id;
     try {
-      id = json.get(ID).getAsString();
+      id = idElem.getAsString();
     } catch (Exception e) {
       Logging.getLogger().logError("Response missing " + ID, e);
       return;
@@ -331,11 +397,11 @@ abstract class VmServiceBase implements VmServiceConst {
     }
 
     // Forward the response if the request was successfully executed
-    JsonElement elem = json.get(RESULT);
-    if (elem != null) {
+    JsonElement resultElem = json.get(RESULT);
+    if (resultElem != null) {
       JsonObject result;
       try {
-        result = elem.getAsJsonObject();
+        result = resultElem.getAsJsonObject();
       } catch (Exception e) {
         Logging.getLogger().logError("Response has invalid " + RESULT, e);
         return;
@@ -352,11 +418,11 @@ abstract class VmServiceBase implements VmServiceConst {
     }
 
     // Forward an error if the request failed
-    elem = json.get(ERROR);
-    if (elem != null) {
+    resultElem = json.get(ERROR);
+    if (resultElem != null) {
       JsonObject error;
       try {
-        error = elem.getAsJsonObject();
+        error = resultElem.getAsJsonObject();
       } catch (Exception e) {
         Logging.getLogger().logError("Response has invalid " + RESULT, e);
         return;
