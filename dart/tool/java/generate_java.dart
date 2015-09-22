@@ -93,6 +93,7 @@ class Api extends Member with ApiParseUtil {
   List<Method> methods = [];
   List<Enum> enums = [];
   List<Type> types = [];
+  Map<String, List<String>> streamIdMap = {};
 
   String get docs => null;
 
@@ -144,6 +145,13 @@ class Api extends Member with ApiParseUtil {
       writer.addImport('$servicePackage.element.*');
       writer.javadoc = vmServiceJavadoc;
       writer.superclassName = '$servicePackage.VmServiceBase';
+
+      for (String streamId in streamIdMap.keys.toList()..sort()) {
+        writer.addField('${streamId.toUpperCase()}_STREAM_ID', 'String',
+            modifiers: 'public static final',
+            value: '"$streamId"');
+      }
+
       writer.addField('versionMajor', 'int',
           modifiers: 'public static final',
           value: '$serviceMajor',
@@ -157,6 +165,7 @@ class Api extends Member with ApiParseUtil {
       for (var m in methods) {
         m.generateVmServiceMethod(writer);
       }
+
       writer.addMethod('forwardResponse', [
         new JavaMethodArg('consumer', 'Consumer'),
         new JavaMethodArg('responseType', 'String'),
@@ -222,6 +231,14 @@ class Api extends Member with ApiParseUtil {
         h3Name = textForElement(node);
       } else if (isHeader(node)) {
         h3Name = null;
+      } else if (isPara(node)) {
+        var children = (node as Element).children;
+        if (children.isNotEmpty && children.first is Text) {
+          var text = children.first.text;
+          if (text.startsWith('streamId |')) {
+            _parseStreamIds(text);
+          }
+        }
       }
     }
   }
@@ -245,6 +262,21 @@ class Api extends Member with ApiParseUtil {
       enums.add(new Enum(name, definition, docs));
     } else {
       throw 'unexpected entity: ${name}, ${definition}';
+    }
+  }
+
+  void _parseStreamIds(String text) {
+    for (String line in text.split('\n')) {
+      if (line.startsWith('streamId |')) continue;
+      if (line.startsWith('---')) continue;
+      var index = line.indexOf('|');
+      var streamId = line.substring(0, index).trim();
+      var eventTypes = line
+          .substring(index + 1)
+          .split(',')
+          .map((t) => t.trim())
+          .toList()..sort();
+      streamIdMap[streamId] = eventTypes;
     }
   }
 

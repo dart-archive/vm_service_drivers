@@ -75,24 +75,4 @@ public class SampleOutPrinter {
       }
     }
   }
-
-  /**
-   * Wait for output from the sample program that contains the given text.
-   */
-  public void waitFor(String text) {
-    long start = System.currentTimeMillis();
-    synchronized (currentLineLock) {
-      while (System.currentTimeMillis() - start < 5000) {
-        if (currentLine != null && currentLine.contains(text)) {
-          return;
-        }
-        try {
-          currentLineLock.wait(5000);
-        } catch (InterruptedException e) {
-          // ignored
-        }
-      }
-    }
-    throw new RuntimeException("Expected output: " + text);
-  }
 }
