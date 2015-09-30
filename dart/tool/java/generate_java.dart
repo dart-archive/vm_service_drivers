@@ -39,6 +39,10 @@ Once the VM is running, instantiate a new {@link VmService}
 to connect to that VM via {@link VmService#connect(String)}
 or {@link VmService#localConnect(int)}.
 <br/>
+{@link VmService} is not thread safe and should only be accessed from
+a single thread. In addition, a given VM should only be accessed from
+a single instance of {@link VmService}.
+<br/>
 Calls to {@link VmService} should not be nested.
 More specifically, you should not make any calls to {@link VmService}
 from within any {@link Consumer} method.
