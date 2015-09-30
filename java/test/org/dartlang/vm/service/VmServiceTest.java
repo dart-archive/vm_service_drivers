@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VmServiceTest {
-
   private static File dartVm;
   private static File sampleDart;
   private static int vmPort;
@@ -107,6 +106,10 @@ public class VmServiceTest {
     return -1;
   }
 
+  private static boolean isWindows() {
+    return System.getProperty("os.name").startsWith("Win");
+  }
+
   private static void parseArgs(String[] args) {
     if (args.length != 1) {
       showErrorAndExit("Expected absolute path to Dart SDK");
@@ -116,7 +119,7 @@ public class VmServiceTest {
       showErrorAndExit("Specified directory does not exist: " + sdkDir);
     }
     File binDir = new File(sdkDir, "bin");
-    dartVm = new File(binDir, "dart");
+    dartVm = new File(binDir, isWindows() ? "dart.exe" : "dart");
     if (!dartVm.isFile()) {
       showErrorAndExit("Cannot find Dart VM in SDK: " + dartVm);
     }
