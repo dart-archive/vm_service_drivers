@@ -9,7 +9,7 @@
 
     <property environment="env"/>
     <property file="version.txt" prefix="service"/>
-    <property name="build.id" value="-dev.2"/>
+    <property name="build.id" value="-dev.3"/>
 
     <property
         name="path"
@@ -20,7 +20,7 @@
     <!-- compile library source -->
     <mkdir dir="build/classes"/>
     <javac srcdir="src" destdir="build/classes" includeantruntime="false"
-        classpath="${path}"/>
+        classpath="${path}" debug="true"/>
 
     <!-- compile tests -->
     <mkdir dir="build/test"/>
