@@ -18,7 +18,6 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.List;
 
 /**
  * An {@link Instance} represents an instance of the Dart language class {@link Obj}.
@@ -51,12 +50,12 @@ public class Instance extends Obj {
   }
 
   /**
-   * The bytes of a TypedData instance. Provided for instance kinds: Uint8ClampedList Uint8List
-   * Uint16List Uint32List Uint64List Int8List Int16List Int32List Int64List Float32List
-   * Float64List Int32x4List Float32x4List Float64x2List
+   * The bytes of a TypedData instance. The data is provided as a Base64 encoded string. Provided
+   * for instance kinds: Uint8ClampedList Uint8List Uint16List Uint32List Uint64List Int8List
+   * Int16List Int32List Int64List Float32List Float64List Int32x4List Float32x4List Float64x2List
    */
-  public List<Integer> getBytes() {
-    return getListInt("bytes");
+  public String getBytes() {
+    return json.get("bytes").getAsString();
   }
 
   /**
@@ -69,8 +68,8 @@ public class Instance extends Obj {
   /**
    * The context associated with a Closure instance. Provided for instance kinds: Closure
    */
-  public FuncRef getClosureContext() {
-    return new FuncRef((JsonObject) json.get("closureContext"));
+  public ContextRef getClosureContext() {
+    return new ContextRef((JsonObject) json.get("closureContext"));
   }
 
   /**

@@ -36,6 +36,10 @@ import org.dartlang.vm.service.element.*;
  * to connect to that VM via {@link VmService#connect(String)}
  * or {@link VmService#localConnect(int)}.
  * <br/>
+ * {@link VmService} is not thread safe and should only be accessed from
+ * a single thread. In addition, a given VM should only be accessed from
+ * a single instance of {@link VmService}.
+ * <br/>
  * Calls to {@link VmService} should not be nested.
  * More specifically, you should not make any calls to {@link VmService}
  * from within any {@link Consumer} method.
@@ -55,7 +59,7 @@ public class VmService extends VmServiceBase {
   /**
    * The major version number of the protocol supported by this client.
    */
-  public static final int versionMajor = 2;
+  public static final int versionMajor = 3;
 
   /**
    * The minor version number of the protocol supported by this client.
@@ -65,11 +69,12 @@ public class VmService extends VmServiceBase {
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
    */
-  public void addBreakpoint(String isolateId, String scriptId, int line, BreakpointConsumer consumer) {
+  public void addBreakpoint(String isolateId, String scriptId, int line, int column, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("scriptId", scriptId);
     params.addProperty("line", line);
+    params.addProperty("column", column);
     request("addBreakpoint", params, consumer);
   }
 
@@ -81,6 +86,20 @@ public class VmService extends VmServiceBase {
     params.addProperty("isolateId", isolateId);
     params.addProperty("functionId", functionId);
     request("addBreakpointAtEntry", params, consumer);
+  }
+
+  /**
+   * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script. This
+   * RPC is useful when a script has not yet been assigned an id, for example, if a script is in a
+   * deferred library which has not yet been loaded.
+   */
+  public void addBreakpointWithScriptUri(String isolateId, String scriptUri, int line, int column, BreakpointConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("scriptUri", scriptUri);
+    params.addProperty("line", line);
+    params.addProperty("column", column);
+    request("addBreakpointWithScriptUri", params, consumer);
   }
 
   /**
@@ -119,7 +138,7 @@ public class VmService extends VmServiceBase {
   /**
    * The [getIsolate] RPC is used to lookup an [Isolate] object by its [id].
    */
-  public void getIsolate(String isolateId, IsolateConsumer consumer) {
+  public void getIsolate(String isolateId, GetIsolateConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     request("getIsolate", params, consumer);
@@ -282,6 +301,16 @@ public class VmService extends VmServiceBase {
         return;
       }
     }
+    if (consumer instanceof GetIsolateConsumer) {
+      if (responseType.equals("Isolate")) {
+        ((GetIsolateConsumer) consumer).received(new Isolate(json));
+        return;
+      }
+      if (responseType.equals("Sentinel")) {
+        ((GetIsolateConsumer) consumer).received(new Sentinel(json));
+        return;
+      }
+    }
     if (consumer instanceof GetObjectConsumer) {
       if (responseType.equals("Breakpoint")) {
         ((GetObjectConsumer) consumer).received(new Breakpoint(json));
@@ -289,6 +318,10 @@ public class VmService extends VmServiceBase {
       }
       if (responseType.equals("Class")) {
         ((GetObjectConsumer) consumer).received(new ClassObj(json));
+        return;
+      }
+      if (responseType.equals("Context")) {
+        ((GetObjectConsumer) consumer).received(new Context(json));
         return;
       }
       if (responseType.equals("Error")) {
@@ -329,12 +362,6 @@ public class VmService extends VmServiceBase {
       }
       if (responseType.equals("TypeArguments")) {
         ((GetObjectConsumer) consumer).received(new TypeArguments(json));
-        return;
-      }
-    }
-    if (consumer instanceof IsolateConsumer) {
-      if (responseType.equals("Isolate")) {
-        ((IsolateConsumer) consumer).received(new Isolate(json));
         return;
       }
     }

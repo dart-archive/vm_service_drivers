@@ -18,7 +18,10 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-public class Context extends Element {
+/**
+ * A {@link Context} is a data structure which holds the captured variables for some closure.
+ */
+public class Context extends Obj {
 
   public Context(JsonObject json) {
     super(json);

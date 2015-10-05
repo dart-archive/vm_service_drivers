@@ -17,7 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.math.BigDecimal;
 
 /**
  * An {@link Isolate} object provides information about one isolate in the VM.
@@ -38,14 +37,6 @@ public class Isolate extends Response {
         return new Breakpoint(array.get(index).getAsJsonObject());
       }
     };
-  }
-
-  /**
-   * The entry function for this isolate. Guaranteed to be initialized when the IsolateRunnable
-   * event fires.
-   */
-  public FuncRef getEntry() {
-    return new FuncRef((JsonObject) json.get("entry"));
   }
 
   /**
@@ -123,7 +114,7 @@ public class Isolate extends Response {
    * The time that the VM started in milliseconds since the epoch. Suitable to pass to
    * DateTime.fromMillisecondsSinceEpoch.
    */
-  public BigDecimal getStartTime() {
-    return json.get("startTime").getAsBigDecimal();
+  public int getStartTime() {
+    return json.get("startTime").getAsInt();
   }
 }

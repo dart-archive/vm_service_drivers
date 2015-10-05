@@ -18,27 +18,27 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * The [UnresolvedSourceLocation] class is used to refer to an unresolved
- * breakpoint location. As such, it is meant to approximate the final location
- * of the breakpoint but it is not exact.
+ * The {@link UnresolvedSourceLocation} class is used to refer to an unresolved breakpoint
+ * location. As such, it is meant to approximate the final location of the breakpoint but it is not
+ * exact.
  */
-public class UnresolvedSourceLocation extends Element {
+public class UnresolvedSourceLocation extends Response {
 
   public UnresolvedSourceLocation(JsonObject json) {
     super(json);
   }
 
   /**
-   * An approximate column number for the source location. This may change when
-   * the location is resolved.
+   * An approximate column number for the source location. This may change when the location is
+   * resolved.
    */
   public int getColumn() {
     return json.get("column").getAsInt();
   }
 
   /**
-   * An approximate line number for the source location. This may change when
-   * the location is resolved.
+   * An approximate line number for the source location. This may change when the location is
+   * resolved.
    */
   public int getLine() {
     return json.get("line").getAsInt();
@@ -52,16 +52,15 @@ public class UnresolvedSourceLocation extends Element {
   }
 
   /**
-   * The uri of the script containing the source location if the script has yet
-   * to be loaded.
+   * The uri of the script containing the source location if the script has yet to be loaded.
    */
   public String getScriptUri() {
     return json.get("scriptUri").getAsString();
   }
 
   /**
-   * An approximate token position for the source location. This may change
-   * when the location is resolved.
+   * An approximate token position for the source location. This may change when the location is
+   * resolved.
    */
   public int getTokenPos() {
     return json.get("tokenPos").getAsInt();

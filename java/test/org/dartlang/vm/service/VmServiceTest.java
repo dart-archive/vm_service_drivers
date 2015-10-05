@@ -13,13 +13,7 @@
  */
 package org.dartlang.vm.service;
 
-import org.dartlang.vm.service.consumer.BreakpointConsumer;
-import org.dartlang.vm.service.consumer.GetLibraryConsumer;
-import org.dartlang.vm.service.consumer.IsolateConsumer;
-import org.dartlang.vm.service.consumer.StackConsumer;
-import org.dartlang.vm.service.consumer.SuccessConsumer;
-import org.dartlang.vm.service.consumer.VMConsumer;
-import org.dartlang.vm.service.consumer.VersionConsumer;
+import org.dartlang.vm.service.consumer.*;
 import org.dartlang.vm.service.element.*;
 import org.dartlang.vm.service.logging.Logger;
 import org.dartlang.vm.service.logging.Logging;
@@ -188,6 +182,12 @@ public class VmServiceTest {
     System.out.println("  Request: " + error.getRequest());
   }
 
+  private static void showSentinel(Sentinel sentinel) {
+    System.out.println(">>> Received sentinel response");
+    System.out.println("  Sentinel kind: " + sentinel.getKind());
+    System.out.println("  Sentinel value: " + sentinel.getValueAsString());
+  }
+
   private static void sleep(int milliseconds) {
     try {
       Thread.sleep(milliseconds);
@@ -197,14 +197,27 @@ public class VmServiceTest {
   }
 
   private static void startSample() {
+    // Echo Dart VM version
+    List<String> processArgs = new ArrayList<>();
+    processArgs.add(dartVm.getAbsolutePath());
+    processArgs.add("--version");
+    ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
+    try {
+      process = processBuilder.start();
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to launch Dart VM", e);
+    }
+    new SampleOutPrinter("Version", process.getInputStream());
+    new SampleOutPrinter("Version", process.getErrorStream());
+
     vmPort = findUnusedPort();
-    List<String> processArgs = new ArrayList<String>();
+    processArgs = new ArrayList<>();
     processArgs.add(dartVm.getAbsolutePath());
     processArgs.add("--pause_isolates_on_start");
     processArgs.add("--observe");
     processArgs.add("--enable-vm-service=" + vmPort);
     processArgs.add(sampleDart.getAbsolutePath());
-    ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
+    processBuilder = new ProcessBuilder(processArgs);
     try {
       process = processBuilder.start();
     } catch (IOException e) {
@@ -277,7 +290,7 @@ public class VmServiceTest {
 
   private static Isolate vmGetIsolate(IsolateRef isolate) {
     final ResultLatch<Isolate> latch = new ResultLatch<Isolate>();
-    vmService.getIsolate(isolate.getId(), new IsolateConsumer() {
+    vmService.getIsolate(isolate.getId(), new GetIsolateConsumer() {
       @Override
       public void onError(RPCError error) {
         showRPCError(error);
@@ -296,6 +309,11 @@ public class VmServiceTest {
         System.out.println("  RootLib Json: " + response.getRootLib().getJson());
         System.out.println("  Isolate: " + response);
         latch.setValue(response);
+      }
+
+      @Override
+      public void received(Sentinel response) {
+        showSentinel(response);
       }
     });
     return latch.getValue();

@@ -152,8 +152,7 @@ class Api extends Member with ApiParseUtil {
 
       for (String streamId in streamIdMap.keys.toList()..sort()) {
         writer.addField('${streamId.toUpperCase()}_STREAM_ID', 'String',
-            modifiers: 'public static final',
-            value: '"$streamId"');
+            modifiers: 'public static final', value: '"$streamId"');
       }
 
       writer.addField('versionMajor', 'int',
@@ -503,7 +502,7 @@ class Method extends Member {
     for (var a in args) {
       var paramDoc = new StringBuffer(a.docs ?? '');
       if (paramDoc.isEmpty) {}
-      if (a.optional) {
+      if (a.optional && a.type != 'int') {
         if (paramDoc.isNotEmpty) paramDoc.write(' ');
         paramDoc.write('This parameter is optional and may be null.');
       }
@@ -523,7 +522,8 @@ class Method extends Member {
       writer.addLine('JsonObject params = new JsonObject();');
       for (MethodArg arg in args) {
         var name = arg.name;
-        String op = arg.optional ? 'if (${name} != null) ' : '';
+        String op =
+            arg.optional && arg.type != 'int' ? 'if (${name} != null) ' : '';
         if (arg.isEnumType) {
           writer.addLine('${op}params.addProperty("$name", $name.name());');
         } else {

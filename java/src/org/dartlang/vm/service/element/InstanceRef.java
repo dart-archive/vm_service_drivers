@@ -65,10 +65,11 @@ public class InstanceRef extends ObjRef {
   }
 
   /**
-   * The pattern of a RegExp instance. Provided for instance kinds: RegExp
+   * The pattern of a RegExp instance. The pattern is always an instance of kind String. Provided
+   * for instance kinds: RegExp
    */
-  public String getPattern() {
-    return json.get("pattern").getAsString();
+  public InstanceRef getPattern() {
+    return new InstanceRef((JsonObject) json.get("pattern"));
   }
 
   /**
