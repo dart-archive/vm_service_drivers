@@ -17,7 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.math.BigDecimal;
 
 /**
  * An {@link Event} is an asynchronous notification from the VM. It is delivered only when the
@@ -85,15 +84,16 @@ public class Event extends Response {
    * pause events, the timestamp is from when the isolate was paused. For other events, the
    * timestamp is from when the event was created.
    */
-  public BigDecimal getTimestamp() {
-    return json.get("timestamp").getAsBigDecimal();
+  public int getTimestamp() {
+    return json.get("timestamp").getAsInt();
   }
 
   /**
    * The top stack frame associated with this event, if applicable. This is provided for the event
-   * kinds: PauseBreakpoint PauseInterrupted PauseException For the Resume event, the top frame is
-   * provided at all times except for the initial resume event that is delivered when an isolate
-   * begins execution.
+   * kinds: PauseBreakpoint PauseInterrupted PauseException For PauseInterrupted events, there will
+   * be no top frame if the isolate is idle (waiting in the message loop). For the Resume event,
+   * the top frame is provided at all times except for the initial resume event that is delivered
+   * when an isolate begins execution.
    */
   public Frame getTopFrame() {
     return new Frame((JsonObject) json.get("topFrame"));

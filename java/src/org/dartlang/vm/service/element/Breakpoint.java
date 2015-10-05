@@ -26,14 +26,16 @@ public class Breakpoint extends Obj {
     super(json);
   }
 
+  /**
+   * A number identifying this breakpoint to the user.
+   */
   public int getBreakpointNumber() {
     return json.get("breakpointNumber").getAsInt();
   }
 
-  public SourceLocation getLocation() {
-    return new SourceLocation((JsonObject) json.get("location"));
-  }
-
+  /**
+   * Has this breakpoint been assigned to a specific program location?
+   */
   public boolean getResolved() {
     return json.get("resolved").getAsBoolean();
   }

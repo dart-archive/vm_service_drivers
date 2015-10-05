@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.0
+- Upgraded the library to the 3.0 version of the service protocol
+
 ## 2.0.0
 - Upgraded the library to the 2.0 version of the service protocol
 

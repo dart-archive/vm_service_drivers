@@ -204,12 +204,11 @@ abstract class VmServiceBase implements VmServiceConst {
    * call works for protocol versions 2.1 and 3.0
    */
   public void addBreakpoint(String isolateId, String scriptId, int line, BreakpointConsumer consumer) {
-    JsonObject params = new JsonObject();
-    params.addProperty("isolateId", isolateId);
-    params.addProperty("scriptId", scriptId);
-    params.addProperty("line", line);
-    request("addBreakpoint", params, consumer);
+    addBreakpoint(isolateId, scriptId, line, 1, consumer);
   }
+
+  public abstract void addBreakpoint(
+      String isolateId, String scriptId, int line, int column, BreakpointConsumer consumer);
 
   /**
    * Add a listener to receive {@link Event}s from the VM.

@@ -16,8 +16,11 @@ package org.dartlang.vm.service.consumer;
 // This is a generated file.
 
 import org.dartlang.vm.service.element.Isolate;
+import org.dartlang.vm.service.element.Sentinel;
 
-public interface IsolateConsumer extends Consumer {
+public interface GetIsolateConsumer extends Consumer {
 
   public void received(Isolate response);
+
+  public void received(Sentinel response);
 }

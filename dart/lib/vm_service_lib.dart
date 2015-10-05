@@ -6,7 +6,7 @@ library vm_service_lib;
 import 'dart:async';
 import 'dart:convert' show JSON, JsonCodec;
 
-const String vmServiceVersion = '2.0.0';
+const String vmServiceVersion = '3.0.0';
 
 /// @optional
 const String optional = 'optional';
@@ -46,6 +46,7 @@ Map<String, Function> _typeFactories = {
   'Null': Null.parse,
   '@Object': ObjRef.parse,
   'Object': Obj.parse,
+  'Response': Response.parse,
   'Sentinel': Sentinel.parse,
   '@Script': ScriptRef.parse,
   'Script': Script.parse,
@@ -54,7 +55,7 @@ Map<String, Function> _typeFactories = {
   'Success': Success.parse,
   '@TypeArguments': TypeArgumentsRef.parse,
   'TypeArguments': TypeArguments.parse,
-  'Response': Response.parse,
+  'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
   'Version': Version.parse,
   'VM': VM.parse
 };
@@ -90,10 +91,23 @@ class VmService {
 
   /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
   /// some script.
-  Future<Breakpoint> addBreakpoint(
-      String isolateId, String scriptId, int line) {
-    return _call('addBreakpoint',
-        {'isolateId': isolateId, 'scriptId': scriptId, 'line': line});
+  Future<Breakpoint> addBreakpoint(String isolateId, String scriptId, int line,
+      [int column]) {
+    Map m = {'isolateId': isolateId, 'scriptId': scriptId, 'line': line};
+    if (column != null) m['column'] = column;
+    return _call('addBreakpoint', m);
+  }
+
+  /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
+  /// some script. This RPC is useful when a script has not yet been assigned an
+  /// id, for example, if a script is in a deferred library which has not yet
+  /// been loaded.
+  Future<Breakpoint> addBreakpointWithScriptUri(
+      String isolateId, String scriptUri, int line,
+      [int column]) {
+    Map m = {'isolateId': isolateId, 'scriptUri': scriptUri, 'line': line};
+    if (column != null) m['column'] = column;
+    return _call('addBreakpointWithScriptUri', m);
   }
 
   /// The [addBreakpointAtEntry] RPC is used to add a breakpoint at the
@@ -135,7 +149,9 @@ class VmService {
   Future<FlagList> getFlagList() => _call('getFlagList');
 
   /// The [getIsolate] RPC is used to lookup an [Isolate] object by its [id].
-  Future<Isolate> getIsolate(String isolateId) {
+  ///
+  /// The return value can be one of [Isolate] or [Sentinel].
+  Future<dynamic> getIsolate(String isolateId) {
     return _call('getIsolate', {'isolateId': isolateId});
   }
 
@@ -551,11 +567,17 @@ class Breakpoint extends Obj {
     location = createObject(json['location']);
   }
 
+  /// A number identifying this breakpoint to the user.
   int breakpointNumber;
 
+  /// Has this breakpoint been assigned to a specific program location?
   bool resolved;
 
-  SourceLocation location;
+  /// SourceLocation when breakpoint is resolved, UnresolvedSourceLocation when
+  /// a breakpoint is not resolved.
+  ///
+  /// [location] can be one of [SourceLocation] or [UnresolvedSourceLocation].
+  dynamic location;
 
   String toString() => '[Breakpoint ' //
       'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, breakpointNumber: ${breakpointNumber}, resolved: ${resolved}, location: ${location}]';
@@ -686,25 +708,28 @@ class Code extends ObjRef {
       '[Code type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
 }
 
-class ContextRef {
+class ContextRef extends ObjRef {
   static ContextRef parse(Map json) => new ContextRef.fromJson(json);
 
   ContextRef();
-  ContextRef.fromJson(Map json) {
+  ContextRef.fromJson(Map json) : super.fromJson(json) {
     length = json['length'];
   }
 
   /// The number of variables in this context.
   int length;
 
-  String toString() => '[ContextRef length: ${length}]';
+  String toString() =>
+      '[ContextRef type: ${type}, id: ${id}, length: ${length}]';
 }
 
-class Context {
+/// A [Context] is a data structure which holds the captured variables for some
+/// closure.
+class Context extends Obj {
   static Context parse(Map json) => new Context.fromJson(json);
 
   Context();
-  Context.fromJson(Map json) {
+  Context.fromJson(Map json) : super.fromJson(json) {
     length = json['length'];
     parent = createObject(json['parent']);
     variables = createObject(json['variables']);
@@ -719,8 +744,8 @@ class Context {
   /// The variables in this context object.
   List<ContextElement> variables;
 
-  String toString() =>
-      '[Context length: ${length}, parent: ${parent}, variables: ${variables}]';
+  String toString() => '[Context ' //
+      'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, length: ${length}, parent: ${parent}, variables: ${variables}]';
 }
 
 class ContextElement {
@@ -815,7 +840,7 @@ class Event extends Response {
   /// event. For some isolate pause events, the timestamp is from when the
   /// isolate was paused. For other events, the timestamp is from when the event
   /// was created.
-  num timestamp;
+  int timestamp;
 
   /// The breakpoint which was added, removed, or resolved. This is provided for
   /// the event kinds: PauseBreakpoint BreakpointAdded BreakpointRemoved
@@ -832,9 +857,10 @@ class Event extends Response {
 
   /// The top stack frame associated with this event, if applicable. This is
   /// provided for the event kinds: PauseBreakpoint PauseInterrupted
-  /// PauseException For the Resume event, the top frame is provided at all
-  /// times except for the initial resume event that is delivered when an
-  /// isolate begins execution.
+  /// PauseException For PauseInterrupted events, there will be no top frame if
+  /// the isolate is idle (waiting in the message loop). For the Resume event,
+  /// the top frame is provided at all times except for the initial resume event
+  /// that is delivered when an isolate begins execution.
   @optional Frame topFrame;
 
   /// The exception associated with this event, if this is a PauseException
@@ -1071,7 +1097,7 @@ class InstanceRef extends ObjRef {
     name = json['name'];
     typeClass = createObject(json['typeClass']);
     parameterizedClass = createObject(json['parameterizedClass']);
-    pattern = json['pattern'];
+    pattern = createObject(json['pattern']);
   }
 
   /// What kind of instance is this?
@@ -1107,8 +1133,9 @@ class InstanceRef extends ObjRef {
   /// TypeParameter
   @optional ClassRef parameterizedClass;
 
-  /// The pattern of a RegExp instance. Provided for instance kinds: RegExp
-  @optional String pattern;
+  /// The pattern of a RegExp instance. The pattern is always an instance of
+  /// kind String. Provided for instance kinds: RegExp
+  @optional InstanceRef pattern;
 
   String toString() => '[InstanceRef]';
 }
@@ -1188,11 +1215,11 @@ class Instance extends Obj {
   /// The elements of a List instance. Provided for instance kinds: Map
   @optional List<MapAssociation> associations;
 
-  /// The bytes of a TypedData instance. Provided for instance kinds:
-  /// Uint8ClampedList Uint8List Uint16List Uint32List Uint64List Int8List
-  /// Int16List Int32List Int64List Float32List Float64List Int32x4List
-  /// Float32x4List Float64x2List
-  @optional List<int> bytes;
+  /// The bytes of a TypedData instance. The data is provided as a Base64
+  /// encoded string. Provided for instance kinds: Uint8ClampedList Uint8List
+  /// Uint16List Uint32List Uint64List Int8List Int16List Int32List Int64List
+  /// Float32List Float64List Int32x4List Float32x4List Float64x2List
+  @optional String bytes;
 
   /// The function associated with a Closure instance. Provided for instance
   /// kinds: Closure
@@ -1200,7 +1227,7 @@ class Instance extends Obj {
 
   /// The context associated with a Closure instance. Provided for instance
   /// kinds: Closure
-  @optional FuncRef closureContext;
+  @optional ContextRef closureContext;
 
   /// The referent of a MirrorReference instance. Provided for instance kinds:
   /// MirrorReference
@@ -1283,7 +1310,6 @@ class Isolate extends Response {
     livePorts = json['livePorts'];
     pauseOnExit = json['pauseOnExit'];
     pauseEvent = createObject(json['pauseEvent']);
-    entry = createObject(json['entry']);
     rootLib = createObject(json['rootLib']);
     libraries = createObject(json['libraries']);
     breakpoints = createObject(json['breakpoints']);
@@ -1301,7 +1327,7 @@ class Isolate extends Response {
 
   /// The time that the VM started in milliseconds since the epoch. Suitable to
   /// pass to DateTime.fromMillisecondsSinceEpoch.
-  num startTime;
+  int startTime;
 
   /// The number of live ports for this isolate.
   int livePorts;
@@ -1312,10 +1338,6 @@ class Isolate extends Response {
   /// The last pause event delivered to the isolate. If the isolate is running,
   /// this will be a resume event.
   Event pauseEvent;
-
-  /// The entry function for this isolate. Guaranteed to be initialized when the
-  /// IsolateRunnable event fires.
-  @optional FuncRef entry;
 
   /// The root library for this isolate. Guaranteed to be initialized when the
   /// IsolateRunnable event fires.
@@ -1444,6 +1466,8 @@ class MapAssociation {
   String toString() => '[MapAssociation key: ${key}, value: ${value}]';
 }
 
+/// A [Message] provides information about a pending isolate message and the
+/// function that will be invoked to handle it.
 class Message extends Response {
   static Message parse(Map json) => new Message.fromJson(json);
 
@@ -1457,16 +1481,24 @@ class Message extends Response {
     location = createObject(json['location']);
   }
 
+  /// The index in the isolate's message queue. The 0th message being the next
+  /// message to be processed.
   int index;
 
+  /// An advisory name describing this message.
   String name;
 
+  /// An instance id for the decoded message. This id can be passed to other
+  /// RPCs, for example, getObject or evaluate.
   String messageObjectId;
 
+  /// The size (bytes) of the encoded message.
   int size;
 
+  /// A reference to the function that will be invoked to handle this message.
   @optional FuncRef handler;
 
+  /// The source location of handler.
   @optional SourceLocation location;
 
   String toString() => '[Message ' //
@@ -1548,6 +1580,24 @@ class Obj extends Response {
 
   String toString() =>
       '[Obj type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}]';
+}
+
+/// Every non-error response returned by the Service Protocol extends
+/// [Response]. By using the [type] property, the client can determine which
+/// type of response has been provided.
+class Response {
+  static Response parse(Map json) => new Response.fromJson(json);
+
+  Response();
+  Response.fromJson(Map json) {
+    type = json['type'];
+  }
+
+  /// Every response returned by the VM Service has the type property. This
+  /// allows the client distinguish between different kinds of responses.
+  String type;
+
+  String toString() => '[Response type: ${type}]';
 }
 
 /// A [Sentinel] is used to indicate that the normal response is not available.
@@ -1705,22 +1755,43 @@ class TypeArguments extends Obj {
       'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, name: ${name}, types: ${types}]';
 }
 
-/// Every non-error response returned by the Service Protocol extends
-/// [Response]. By using the [type] property, the client can determine which
-/// type of response has been provided.
-class Response {
-  static Response parse(Map json) => new Response.fromJson(json);
+/// The [UnresolvedSourceLocation] class is used to refer to an unresolved
+/// breakpoint location. As such, it is meant to approximate the final location
+/// of the breakpoint but it is not exact.
+class UnresolvedSourceLocation extends Response {
+  static UnresolvedSourceLocation parse(Map json) =>
+      new UnresolvedSourceLocation.fromJson(json);
 
-  Response();
-  Response.fromJson(Map json) {
-    type = json['type'];
+  UnresolvedSourceLocation();
+  UnresolvedSourceLocation.fromJson(Map json) : super.fromJson(json) {
+    script = createObject(json['script']);
+    scriptUri = json['scriptUri'];
+    tokenPos = json['tokenPos'];
+    line = json['line'];
+    column = json['column'];
   }
 
-  /// Every response returned by the VM Service has the type property. This
-  /// allows the client distinguish between different kinds of responses.
-  String type;
+  /// The script containing the source location if the script has been loaded.
+  @optional ScriptRef script;
 
-  String toString() => '[Response type: ${type}]';
+  /// The uri of the script containing the source location if the script has yet
+  /// to be loaded.
+  @optional String scriptUri;
+
+  /// An approximate token position for the source location. This may change
+  /// when the location is resolved.
+  @optional int tokenPos;
+
+  /// An approximate line number for the source location. This may change when
+  /// the location is resolved.
+  @optional int line;
+
+  /// An approximate column number for the source location. This may change when
+  /// the location is resolved.
+  @optional int column;
+
+  String toString() => '[UnresolvedSourceLocation ' //
+      'type: ${type}, script: ${script}, scriptUri: ${scriptUri}, tokenPos: ${tokenPos}, line: ${line}, column: ${column}]';
 }
 
 /// See Versioning.
@@ -1772,11 +1843,11 @@ class VM extends Response {
   String version;
 
   /// The process id for the VM.
-  String pid;
+  int pid;
 
   /// The time that the VM started in milliseconds since the epoch. Suitable to
   /// pass to DateTime.fromMillisecondsSinceEpoch.
-  num startTime;
+  int startTime;
 
   /// A list of isolates running in the VM.
   List<IsolateRef> isolates;

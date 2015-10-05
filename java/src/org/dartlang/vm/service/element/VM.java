@@ -17,7 +17,6 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.math.BigDecimal;
 
 public class VM extends Response {
 
@@ -54,16 +53,16 @@ public class VM extends Response {
   /**
    * The process id for the VM.
    */
-  public String getPid() {
-    return json.get("pid").getAsString();
+  public int getPid() {
+    return json.get("pid").getAsInt();
   }
 
   /**
    * The time that the VM started in milliseconds since the epoch. Suitable to pass to
    * DateTime.fromMillisecondsSinceEpoch.
    */
-  public BigDecimal getStartTime() {
-    return json.get("startTime").getAsBigDecimal();
+  public int getStartTime() {
+    return json.get("startTime").getAsInt();
   }
 
   /**
