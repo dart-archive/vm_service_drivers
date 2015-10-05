@@ -210,7 +210,8 @@ public class VmServiceTest {
     new SampleOutPrinter("Version", process.getInputStream());
     new SampleOutPrinter("Version", process.getErrorStream());
 
-    vmPort = findUnusedPort();
+    // Hardcode port to keep travis happy
+    vmPort = 7575; // findUnusedPort();
     processArgs = new ArrayList<>();
     processArgs.add(dartVm.getAbsolutePath());
     processArgs.add("--pause_isolates_on_start");
