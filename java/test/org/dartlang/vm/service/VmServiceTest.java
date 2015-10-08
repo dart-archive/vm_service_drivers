@@ -20,7 +20,6 @@ import org.dartlang.vm.service.logging.Logging;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +31,6 @@ public class VmServiceTest {
   private static VmService vmService;
   private static SampleOutPrinter sampleOut;
   private static SampleOutPrinter sampleErr;
-  private static SampleVmServiceListener vmListener;
   private static int actualVmServiceVersionMajor;
 
   public static void main(String[] args) {
@@ -42,7 +40,7 @@ public class VmServiceTest {
       startSample();
       sleep(100);
       vmConnect();
-      vmListener = new SampleVmServiceListener();
+      SampleVmServiceListener vmListener = new SampleVmServiceListener();
       vmService.addVmServiceListener(vmListener);
       vmStreamListen(VmService.DEBUG_STREAM_ID);
       vmStreamListen(VmService.ISOLATE_STREAM_ID);
@@ -61,6 +59,9 @@ public class VmServiceTest {
 
       // Get stack trace
       vmGetStack(sampleIsolate);
+
+      // Evaluate
+      vmEvaluateInFrame(sampleIsolate, 0, "deepList[0]");
 
       // Step over line "foo(1);"
       vmResume(isolates.get(0), StepOption.Over);
@@ -88,18 +89,6 @@ public class VmServiceTest {
     }
   }
 
-  private static int findUnusedPort() {
-    try {
-      ServerSocket ss = new ServerSocket(0);
-      int port = ss.getLocalPort();
-      ss.close();
-      return port;
-    } catch (IOException ioe) {
-      //$FALL-THROUGH$
-    }
-    return -1;
-  }
-
   private static boolean isWindows() {
     return System.getProperty("os.name").startsWith("Win");
   }
@@ -124,6 +113,7 @@ public class VmServiceTest {
       projDir = projDir.getParentFile();
       if (projDir == null) {
         showErrorAndExit("Cannot find project " + projName + " from " + currentDir);
+        return;
       }
     }
     sampleDart = new File(projDir, "dart/example/sample_main.dart".replace("/", File.separator));
@@ -211,7 +201,7 @@ public class VmServiceTest {
     new SampleOutPrinter("Version", process.getErrorStream());
 
     // Hardcode port to keep travis happy
-    vmPort = 7575; // findUnusedPort();
+    vmPort = 7575;
     processArgs = new ArrayList<>();
     processArgs.add(dartVm.getAbsolutePath());
     processArgs.add("--pause_isolates_on_start");
@@ -289,8 +279,36 @@ public class VmServiceTest {
     }
   }
 
+  private static void vmEvaluateInFrame(Isolate isolate, int frameIndex, String expression) {
+    System.out.println("Evaluating: " + expression);
+    final ResultLatch<InstanceRef> latch = new ResultLatch<>();
+    vmService.evaluateInFrame(isolate.getId(), frameIndex, expression, new EvaluateInFrameConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        showRPCError(error);
+      }
+
+      @Override
+      public void received(ErrorRef response) {
+        showErrorAndExit(response.getMessage());
+      }
+
+      @Override
+      public void received(InstanceRef response) {
+        System.out.println("Received InstanceRef response");
+        System.out.println("  Id: " + response.getId());
+        System.out.println("  Kind: " + response.getKind());
+        System.out.println("  Json: " + response.getJson());
+        latch.setValue(response);
+      }
+    });
+    InstanceRef instanceRef = latch.getValue();
+    InstanceRefToString convert = new InstanceRefToString(isolate, vmService, latch);
+    System.out.println("Result: " + convert.toString(instanceRef));
+  }
+
   private static Isolate vmGetIsolate(IsolateRef isolate) {
-    final ResultLatch<Isolate> latch = new ResultLatch<Isolate>();
+    final ResultLatch<Isolate> latch = new ResultLatch<>();
     vmService.getIsolate(isolate.getId(), new GetIsolateConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -321,7 +339,7 @@ public class VmServiceTest {
   }
 
   private static Library vmGetLibrary(Isolate isolateId, LibraryRef library) {
-    final ResultLatch<Library> latch = new ResultLatch<Library>();
+    final ResultLatch<Library> latch = new ResultLatch<>();
     vmService.getLibrary(isolateId.getId(), library.getId(), new GetLibraryConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -339,7 +357,7 @@ public class VmServiceTest {
   }
 
   private static void vmGetStack(Isolate isolate) {
-    final ResultLatch<Stack> latch = new ResultLatch<Stack>();
+    final ResultLatch<Stack> latch = new ResultLatch<>();
     vmService.getStack(isolate.getId(), new StackConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -391,7 +409,7 @@ public class VmServiceTest {
   }
 
   private static ElementList<IsolateRef> vmGetVmIsolates() {
-    final ResultLatch<ElementList<IsolateRef>> latch = new ResultLatch<ElementList<IsolateRef>>();
+    final ResultLatch<ElementList<IsolateRef>> latch = new ResultLatch<>();
     vmService.getVM(new VMConsumer() {
       @Override
       public void onError(RPCError error) {
