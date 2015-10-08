@@ -1225,7 +1225,7 @@ class Instance extends Obj {
 
   /// The elements of a List instance. Provided for instance kinds: List
   ///
-  /// [elements] can be one of [InstanceRef] or [List<Sentinel>].
+  /// [elements] can be one of [List<InstanceRef>] or [List<Sentinel>].
   @optional dynamic elements;
 
   /// The elements of a List instance. Provided for instance kinds: Map

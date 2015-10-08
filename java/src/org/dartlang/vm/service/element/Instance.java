@@ -82,15 +82,15 @@ public class Instance extends Obj {
   /**
    * The elements of a List instance. Provided for instance kinds: List
    * 
-   * @return one of <code>InstanceRef</code> or <code>ElementList<Sentinel></code>
+   * @return one of <code>ElementList<InstanceRef></code> or <code>ElementList<Sentinel></code>
    */
-  public InstanceRef getElements() {
-    JsonElement elem = json.get("elements");
-    if (!elem.isJsonObject()) return null;
-    JsonObject child = elem.getAsJsonObject();
-    String type = child.get("type").getAsString();
-    if ("Sentinel".equals(type)) return null;
-    return new InstanceRef(child);
+  public ElementList<InstanceRef> getElements() {
+    return new ElementList<InstanceRef>(json.get("elements").getAsJsonArray()) {
+      @Override
+      protected InstanceRef basicGet(JsonArray array, int index) {
+        return new InstanceRef(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   /**
