@@ -51,7 +51,8 @@ public class Event extends Response {
   }
 
   /**
-   * The isolate with which this event is associated.
+   * The isolate with which this event is associated. This is provided for all event kinds except
+   * for: VMUpdate
    */
   public IsolateRef getIsolate() {
     return new IsolateRef((JsonObject) json.get("isolate"));
@@ -97,5 +98,12 @@ public class Event extends Response {
    */
   public Frame getTopFrame() {
     return new Frame((JsonObject) json.get("topFrame"));
+  }
+
+  /**
+   * The vm with which this event is associated. This is provided for the event kind: VMUpdate
+   */
+  public VMRef getVm() {
+    return new VMRef((JsonObject) json.get("vm"));
   }
 }
