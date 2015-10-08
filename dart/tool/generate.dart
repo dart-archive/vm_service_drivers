@@ -12,6 +12,8 @@ import 'common/generate_common.dart';
 import 'dart/generate_dart.dart' as dart show Api, api, DartGenerator;
 import 'java/generate_java.dart' as java show Api, api, JavaGenerator;
 
+final bool _stampPubspecVersion = false;
+
 /// Parse the 'service.md' into a model and generate both Dart and Java
 /// libraries.
 main(List<String> args) {
@@ -42,12 +44,14 @@ void _generateDart(String appDirPath, List<Node> nodes) {
   outputFile.writeAsStringSync(generator.toString());
   Process.runSync('dartfmt', ['-w', outDirPath]);
 
-  // Update the pubspec file.
-  Version version = ApiParseUtil.parseVersionSemVer(nodes);
-  _stampPubspec(version);
+  if (_stampPubspecVersion) {
+    // Update the pubspec file.
+    Version version = ApiParseUtil.parseVersionSemVer(nodes);
+    _stampPubspec(version);
 
-  // Validate that the changelog contains an entry for the current version.
-  _checkUpdateChangelog(version);
+    // Validate that the changelog contains an entry for the current version.
+    _checkUpdateChangelog(version);
+  }
 
   print('Wrote Dart to ${outputFile.path}.');
 }
