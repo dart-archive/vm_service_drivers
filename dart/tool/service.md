@@ -2162,6 +2162,14 @@ class VM extends Response {
 }
 ```
 
+TODO: Added to satisfy a missing reference to an @VM reference.
+
+```
+class @VM extends Response {
+
+}
+```
+
 ## Revision History
 
 version | comments

@@ -18,6 +18,9 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+/**
+ * TODO: Added to satisfy a missing reference to an @VM reference.
+ */
 public class VM extends Response {
 
   public VM(JsonObject json) {

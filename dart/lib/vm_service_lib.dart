@@ -57,7 +57,8 @@ Map<String, Function> _typeFactories = {
   'TypeArguments': TypeArguments.parse,
   'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
   'Version': Version.parse,
-  'VM': VM.parse
+  'VM': VM.parse,
+  '@VM': VMRef.parse
 };
 
 class VmService {
@@ -1831,6 +1832,7 @@ class Version extends Response {
       '[Version type: ${type}, major: ${major}, minor: ${minor}]';
 }
 
+/// TODO: Added to satisfy a missing reference to an @VM reference.
 class VM extends Response {
   static VM parse(Map json) => new VM.fromJson(json);
 
@@ -1868,4 +1870,13 @@ class VM extends Response {
   List<IsolateRef> isolates;
 
   String toString() => '[VM]';
+}
+
+class VMRef extends Response {
+  static VMRef parse(Map json) => new VMRef.fromJson(json);
+
+  VMRef();
+  VMRef.fromJson(Map json) : super.fromJson(json) {}
+
+  String toString() => '[VMRef type: ${type}]';
 }
