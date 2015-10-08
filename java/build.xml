@@ -20,6 +20,7 @@
     <!-- compile library source -->
     <mkdir dir="build/classes"/>
     <javac srcdir="src" destdir="build/classes" includeantruntime="false"
+        source="1.6" target="1.6"
         classpath="${path}" debug="true"/>
 
     <!-- compile tests -->
