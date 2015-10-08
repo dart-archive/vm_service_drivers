@@ -48,6 +48,7 @@ public class VmServiceTest {
       ElementList<IsolateRef> isolates = vmGetVmIsolates();
       Isolate sampleIsolate = vmGetIsolate(isolates.get(0));
       Library rootLib = vmGetLibrary(sampleIsolate, sampleIsolate.getRootLib());
+      vmGetScript(sampleIsolate, rootLib.getScripts().get(0));
 
       // Run to breakpoint on line "foo(1);"
       vmAddBreakpoint(sampleIsolate, rootLib.getScripts().get(0), 13);
@@ -354,6 +355,39 @@ public class VmServiceTest {
       }
     });
     return latch.getValue();
+  }
+
+  private static void vmGetScript(Isolate isolate, ScriptRef scriptRef) {
+    final ResultLatch<Script> latch = new ResultLatch<>();
+    vmService.getObject(isolate.getId(), scriptRef.getId(), new GetObjectConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        showRPCError(error);
+      }
+
+      @Override
+      public void received(Obj response) {
+        if (response instanceof Script) {
+          latch.setValue((Script) response);
+        } else {
+          RPCError.unexpected("Script", response);
+        }
+      }
+
+      @Override
+      public void received(Sentinel response) {
+        RPCError.unexpected("Script", response);
+      }
+    });
+    Script script = latch.getValue();
+    System.out.println("Received Script");
+    System.out.println("  Id: " + script.getId());
+    System.out.println("  Uri: " + script.getUri());
+    System.out.println("  Source: " + script.getSource());
+    System.out.println("  TokenPosTable: " + script.getTokenPosTable());
+    if (script.getTokenPosTable() == null) {
+      showErrorAndExit("Expected TokenPosTable to be non-null");
+    }
   }
 
   private static void vmGetStack(Isolate isolate) {

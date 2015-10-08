@@ -37,16 +37,16 @@ public class Element {
   List<List<Integer>> getListListInt(String memberName) {
     JsonArray array = json.getAsJsonArray(memberName);
     int size = array.size();
-    List<List<Integer>> result = new ArrayList<List<Integer>>();
+    List<List<Integer>> result = new ArrayList<>();
     for (int index = 0; index < size; ++index) {
       result.add(jsonArrayToListInt(array.get(index).getAsJsonArray()));
     }
-    return null;
+    return result;
   }
 
   private List<Integer> jsonArrayToListInt(JsonArray array) {
     int size = array.size();
-    List<Integer> result = new ArrayList<Integer>();
+    List<Integer> result = new ArrayList<>();
     for (int index = 0; index < size; ++index) {
       result.add(array.get(index).getAsInt());
     }
