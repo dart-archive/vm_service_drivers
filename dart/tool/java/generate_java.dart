@@ -476,9 +476,8 @@ class Method extends Member {
     }
     types.sort((t1, t2) => t1.name.compareTo(t2.name));
     for (var t in types) {
-      var jsonType = t.jsonTypeName;
       var responseName = classNameFor(t.elementTypeName);
-      writer.addLine('  if (responseType.equals("$jsonType")) {');
+      writer.addLine('  if (responseType.equals("${t.rawName}")) {');
       writer.addLine(
           '    (($consumerName) consumer).received(new $responseName(json));');
       writer.addLine('    return;');

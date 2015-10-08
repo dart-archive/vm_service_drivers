@@ -62,7 +62,7 @@ public class InstanceRefToString {
     // Request master latch extend its timeout because we are making another call to VmService
     masterLatch.opWorking();
 
-    final ResultLatch<Instance> instLatch = new ResultLatch<Instance>();
+    final ResultLatch<Instance> instLatch = new ResultLatch<>();
     service.getInstance(isolate.getId(), ref.getId(), new GetInstanceConsumer() {
       @Override
       public void onError(RPCError error) {
