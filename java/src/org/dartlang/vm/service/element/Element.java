@@ -37,7 +37,7 @@ public class Element {
   List<List<Integer>> getListListInt(String memberName) {
     JsonArray array = json.getAsJsonArray(memberName);
     int size = array.size();
-    List<List<Integer>> result = new ArrayList<>();
+    List<List<Integer>> result = new ArrayList<List<Integer>>();
     for (int index = 0; index < size; ++index) {
       result.add(jsonArrayToListInt(array.get(index).getAsJsonArray()));
     }
@@ -46,7 +46,7 @@ public class Element {
 
   private List<Integer> jsonArrayToListInt(JsonArray array) {
     int size = array.size();
-    List<Integer> result = new ArrayList<>();
+    List<Integer> result = new ArrayList<Integer>();
     for (int index = 0; index < size; ++index) {
       result.add(array.get(index).getAsInt());
     }

@@ -189,7 +189,7 @@ public class VmServiceTest {
 
   private static void startSample() {
     // Echo Dart VM version
-    List<String> processArgs = new ArrayList<>();
+    List<String> processArgs = new ArrayList<String>();
     processArgs.add(dartVm.getAbsolutePath());
     processArgs.add("--version");
     ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
@@ -203,7 +203,7 @@ public class VmServiceTest {
 
     // Hardcode port to keep travis happy
     vmPort = 7575;
-    processArgs = new ArrayList<>();
+    processArgs = new ArrayList<String>();
     processArgs.add(dartVm.getAbsolutePath());
     processArgs.add("--pause_isolates_on_start");
     processArgs.add("--observe");
@@ -282,7 +282,7 @@ public class VmServiceTest {
 
   private static void vmEvaluateInFrame(Isolate isolate, int frameIndex, String expression) {
     System.out.println("Evaluating: " + expression);
-    final ResultLatch<InstanceRef> latch = new ResultLatch<>();
+    final ResultLatch<InstanceRef> latch = new ResultLatch<InstanceRef>();
     vmService.evaluateInFrame(isolate.getId(), frameIndex, expression, new EvaluateInFrameConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -309,7 +309,7 @@ public class VmServiceTest {
   }
 
   private static Isolate vmGetIsolate(IsolateRef isolate) {
-    final ResultLatch<Isolate> latch = new ResultLatch<>();
+    final ResultLatch<Isolate> latch = new ResultLatch<Isolate>();
     vmService.getIsolate(isolate.getId(), new GetIsolateConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -340,7 +340,7 @@ public class VmServiceTest {
   }
 
   private static Library vmGetLibrary(Isolate isolateId, LibraryRef library) {
-    final ResultLatch<Library> latch = new ResultLatch<>();
+    final ResultLatch<Library> latch = new ResultLatch<Library>();
     vmService.getLibrary(isolateId.getId(), library.getId(), new GetLibraryConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -358,7 +358,7 @@ public class VmServiceTest {
   }
 
   private static void vmGetScript(Isolate isolate, ScriptRef scriptRef) {
-    final ResultLatch<Script> latch = new ResultLatch<>();
+    final ResultLatch<Script> latch = new ResultLatch<Script>();
     vmService.getObject(isolate.getId(), scriptRef.getId(), new GetObjectConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -391,7 +391,7 @@ public class VmServiceTest {
   }
 
   private static void vmGetStack(Isolate isolate) {
-    final ResultLatch<Stack> latch = new ResultLatch<>();
+    final ResultLatch<Stack> latch = new ResultLatch<Stack>();
     vmService.getStack(isolate.getId(), new StackConsumer() {
       @Override
       public void onError(RPCError error) {
@@ -443,7 +443,7 @@ public class VmServiceTest {
   }
 
   private static ElementList<IsolateRef> vmGetVmIsolates() {
-    final ResultLatch<ElementList<IsolateRef>> latch = new ResultLatch<>();
+    final ResultLatch<ElementList<IsolateRef>> latch = new ResultLatch<ElementList<IsolateRef>>();
     vmService.getVM(new VMConsumer() {
       @Override
       public void onError(RPCError error) {
