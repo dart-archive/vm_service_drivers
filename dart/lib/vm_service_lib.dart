@@ -57,6 +57,7 @@ Map<String, Function> _typeFactories = {
   'TypeArguments': TypeArguments.parse,
   'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
   'Version': Version.parse,
+  '@VM': VMRef.parse,
   'VM': VM.parse
 };
 
@@ -70,6 +71,7 @@ class VmService {
   StreamController _onSend = new StreamController.broadcast();
   StreamController _onReceive = new StreamController.broadcast();
 
+  StreamController<Event> _vmController = new StreamController.broadcast();
   StreamController<Event> _isolateController = new StreamController.broadcast();
   StreamController<Event> _debugController = new StreamController.broadcast();
   StreamController<Event> _gcController = new StreamController.broadcast();
@@ -83,6 +85,7 @@ class VmService {
     _log = log == null ? new _NullLog() : log;
   }
 
+  Stream<Event> get onVMEvent => _vmController.stream;
   Stream<Event> get onIsolateEvent => _isolateController.stream;
   Stream<Event> get onDebugEvent => _debugController.stream;
   Stream<Event> get onGcEvent => _gcController.stream;
@@ -196,11 +199,6 @@ class VmService {
     return _call('resume', m);
   }
 
-  /// The [setName] RPC is used to change the debugging name for an isolate.
-  Future<Success> setName(String isolateId, String name) {
-    return _call('setName', {'isolateId': isolateId, 'name': name});
-  }
-
   /// The [setLibraryDebuggable] RPC is used to enable or disable whether
   /// breakpoints and stepping work for a given library.
   Future<Success> setLibraryDebuggable(
@@ -210,6 +208,16 @@ class VmService {
       'libraryId': libraryId,
       'isDebuggable': isDebuggable
     });
+  }
+
+  /// The [setName] RPC is used to change the debugging name for an isolate.
+  Future<Success> setName(String isolateId, String name) {
+    return _call('setName', {'isolateId': isolateId, 'name': name});
+  }
+
+  /// The [setVMName] RPC is used to change the debugging name for the vm.
+  Future<Success> setVMName(String name) {
+    return _call('setVMName', {'name': name});
   }
 
   /// The [streamCancel] RPC cancels a stream subscription in the VM.
@@ -255,7 +263,9 @@ class VmService {
         String streamId = params['streamId'];
 
         // TODO: These could be generated from a list.
-        if (streamId == 'Isolate') {
+        if (streamId == 'VM') {
+          _vmController.add(createObject(params['event']));
+        } else if (streamId == 'Isolate') {
           _isolateController.add(createObject(params['event']));
         } else if (streamId == 'Debug') {
           _debugController.add(createObject(params['event']));
@@ -822,6 +832,7 @@ class Event extends Response {
   Event.fromJson(Map json) : super.fromJson(json) {
     kind = _parseEnum(EventKind.values, json['kind']);
     isolate = createObject(json['isolate']);
+    vm = createObject(json['vm']);
     timestamp = json['timestamp'];
     breakpoint = createObject(json['breakpoint']);
     pauseBreakpoints = createObject(json['pauseBreakpoints']);
@@ -833,8 +844,13 @@ class Event extends Response {
   /// What kind of event is this?
   EventKind kind;
 
-  /// The isolate with which this event is associated.
-  IsolateRef isolate;
+  /// The isolate with which this event is associated. This is provided for all
+  /// event kinds except for: VMUpdate
+  @optional IsolateRef isolate;
+
+  /// The vm with which this event is associated. This is provided for the event
+  /// kind: VMUpdate
+  @optional VMRef vm;
 
   /// The timestamp (in milliseconds since the epoch) associated with this
   /// event. For some isolate pause events, the timestamp is from when the
@@ -1814,6 +1830,21 @@ class Version extends Response {
 
   String toString() =>
       '[Version type: ${type}, major: ${major}, minor: ${minor}]';
+}
+
+/// [VMRef] is a reference to a [VM] object.
+class VMRef extends Response {
+  static VMRef parse(Map json) => new VMRef.fromJson(json);
+
+  VMRef();
+  VMRef.fromJson(Map json) : super.fromJson(json) {
+    name = json['name'];
+  }
+
+  /// A name identifying this vm. Not guaranteed to be unique.
+  String name;
+
+  String toString() => '[VMRef type: ${type}, name: ${name}]';
 }
 
 class VM extends Response {

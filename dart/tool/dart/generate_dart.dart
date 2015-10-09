@@ -70,7 +70,9 @@ final String _implCode = r'''
         String streamId = params['streamId'];
 
         // TODO: These could be generated from a list.
-        if (streamId == 'Isolate') {
+        if (streamId == 'VM') {
+          _vmController.add(createObject(params['event']));
+        } else if (streamId == 'Isolate') {
           _isolateController.add(createObject(params['event']));
         } else if (streamId == 'Debug') {
           _debugController.add(createObject(params['event']));
@@ -262,6 +264,7 @@ class Api extends Member with ApiParseUtil {
     gen.writeln("StreamController _onSend = new StreamController.broadcast();");
     gen.writeln("StreamController _onReceive = new StreamController.broadcast();");
     gen.writeln();
+    gen.writeln("StreamController<Event> _vmController = new StreamController.broadcast();");
     gen.writeln("StreamController<Event> _isolateController = new StreamController.broadcast();");
     gen.writeln("StreamController<Event> _debugController = new StreamController.broadcast();");
     gen.writeln("StreamController<Event> _gcController = new StreamController.broadcast();");
@@ -275,6 +278,7 @@ class Api extends Member with ApiParseUtil {
     gen.writeStatement('_log = log == null ? new _NullLog() : log;');
     gen.writeln('}');
     gen.writeln();
+    gen.writeln("Stream<Event> get onVMEvent => _vmController.stream;");
     gen.writeln("Stream<Event> get onIsolateEvent => _isolateController.stream;");
     gen.writeln("Stream<Event> get onDebugEvent => _debugController.stream;");
     gen.writeln("Stream<Event> get onGcEvent => _gcController.stream;");

@@ -56,6 +56,8 @@ public class VmService extends VmServiceBase {
 
   public static final String STDOUT_STREAM_ID = "Stdout";
 
+  public static final String VM_STREAM_ID = "VM";
+
   /**
    * The major version number of the protocol supported by this client.
    */
@@ -234,6 +236,15 @@ public class VmService extends VmServiceBase {
     params.addProperty("isolateId", isolateId);
     params.addProperty("name", name);
     request("setName", params, consumer);
+  }
+
+  /**
+   * The [setVMName] RPC is used to change the debugging name for the vm.
+   */
+  public void setVMName(String name, SuccessConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("name", name);
+    request("setVMName", params, consumer);
   }
 
   /**
