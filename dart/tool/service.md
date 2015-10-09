@@ -2136,6 +2136,15 @@ See [Versioning](#versioning).
 ### VM
 
 ```
+class @VM extends Response {
+  // A name identifying this vm. Not guaranteed to be unique.
+  string name;
+}
+```
+
+_@VM_ is a reference to a _VM_ object.
+
+```
 class VM extends Response {
   // Word length on target architecture (e.g. 32, 64).
   int architectureBits;
@@ -2159,14 +2168,6 @@ class VM extends Response {
 
   // A list of isolates running in the VM.
   @Isolate[] isolates;
-}
-```
-
-TODO: Added to satisfy a missing reference to an @VM reference.
-
-```
-class @VM extends Response {
-
 }
 ```
 

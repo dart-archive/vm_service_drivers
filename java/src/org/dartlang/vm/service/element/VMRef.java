@@ -17,9 +17,19 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonObject;
 
+/**
+ * {@link VMRef} is a reference to a {@link VM} object.
+ */
 public class VMRef extends Response {
 
   public VMRef(JsonObject json) {
     super(json);
+  }
+
+  /**
+   * A name identifying this vm. Not guaranteed to be unique.
+   */
+  public String getName() {
+    return json.get("name").getAsString();
   }
 }
