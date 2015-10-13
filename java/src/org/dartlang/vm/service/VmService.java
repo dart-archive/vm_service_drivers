@@ -226,7 +226,7 @@ public class VmService extends VmServiceBase {
   public void setExceptionPauseMode(String isolateId, ExceptionPauseMode mode, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
-    params.addProperty("mode", mode);
+    params.addProperty("mode", mode.name());
     request("setExceptionPauseMode", params, consumer);
   }
 
