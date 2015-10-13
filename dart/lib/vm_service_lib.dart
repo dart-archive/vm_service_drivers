@@ -199,6 +199,14 @@ class VmService {
     return _call('resume', m);
   }
 
+  /// The [setExceptionPauseMode] RPC is used to control if an isolate pauses
+  /// when an exception is thrown.
+  Future<Success> setExceptionPauseMode(
+      String isolateId, ExceptionPauseMode mode) {
+    return _call(
+        'setExceptionPauseMode', {'isolateId': isolateId, 'mode': mode});
+  }
+
   /// The [setLibraryDebuggable] RPC is used to enable or disable whether
   /// breakpoints and stepping work for a given library.
   Future<Success> setLibraryDebuggable(
@@ -521,6 +529,10 @@ enum SentinelKind {
   /// Reserved for future use.
   Free
 }
+
+/// An [ExceptionPauseMode] indicates how the isolate pauses when an exception
+/// is thrown.
+enum ExceptionPauseMode { None, Unhandled, All }
 
 /// A [StepOption] indicates which form of stepping is requested in a resume
 /// RPC.
@@ -1224,9 +1236,7 @@ class Instance extends Obj {
   @optional List<BoundField> fields;
 
   /// The elements of a List instance. Provided for instance kinds: List
-  ///
-  /// [elements] can be one of [List<InstanceRef>] or [List<Sentinel>].
-  @optional dynamic elements;
+  @optional List<dynamic> elements;
 
   /// The elements of a List instance. Provided for instance kinds: Map
   @optional List<MapAssociation> associations;

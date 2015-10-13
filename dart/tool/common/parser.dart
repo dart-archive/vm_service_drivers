@@ -120,7 +120,8 @@ abstract class Parser {
     }
   }
 
-  Token peek() => current.eof ? current : current.next;
+  Token peek() =>
+      current == null ? startToken : current.eof ? current : current.next;
 
   Token expectName() {
     Token t = advance();

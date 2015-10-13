@@ -385,15 +385,32 @@ class MemberType extends Member {
 
   void parse(Parser parser) {
     // foo|bar[]|baz
+    // (@Instance|Sentinel)[]
     bool loop = true;
+
     while (loop) {
-      Token t = parser.expectName();
-      TypeRef ref = new TypeRef(_coerceRefType(t.text));
-      while (parser.consume('[')) {
-        parser.expect(']');
-        ref.arrayDepth++;
+      if (parser.consume('(')) {
+        while (parser.peek().text != ')') {
+          // @Instance | Sentinel
+          parser.advance();
+        }
+        parser.consume(')');
+        TypeRef ref = new TypeRef('dynamic');
+        while (parser.consume('[')) {
+          parser.expect(']');
+          ref.arrayDepth++;
+        }
+        types.add(ref);
+      } else {
+        Token t = parser.expectName();
+        TypeRef ref = new TypeRef(_coerceRefType(t.text));
+        while (parser.consume('[')) {
+          parser.expect(']');
+          ref.arrayDepth++;
+        }
+        types.add(ref);
       }
-      types.add(ref);
+
       loop = parser.consume('|');
     }
   }
