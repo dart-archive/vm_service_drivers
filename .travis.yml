@@ -10,7 +10,3 @@ script:
 branches:
   only:
     - master
-
-cache:
-  directories:
-  - $HOME/.pub-cache
