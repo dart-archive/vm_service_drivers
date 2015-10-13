@@ -87,11 +87,18 @@ class VmService {
     _log = log == null ? new _NullLog() : log;
   }
 
+  // VMUpdate
   Stream<Event> get onVMEvent => _vmController.stream;
+  // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate
   Stream<Event> get onIsolateEvent => _isolateController.stream;
+  // PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException,
+  // Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect
   Stream<Event> get onDebugEvent => _debugController.stream;
-  Stream<Event> get onGcEvent => _gcController.stream;
+  // GC
+  Stream<Event> get onGCEvent => _gcController.stream;
+  // WriteEvent
   Stream<Event> get onStdoutEvent => _stdoutController.stream;
+  // WriteEvent
   Stream<Event> get onStderrEvent => _stderrController.stream;
 
   /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
