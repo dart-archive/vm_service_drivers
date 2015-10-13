@@ -28,6 +28,10 @@ String textForCode(Node node) => textForElement((node as Element).children.first
 String titleCase(String str) =>
     str.substring(0, 1).toUpperCase() + str.substring(1);
 
+/// FooBar ==> fooBar
+String lowerTitleCase(String str) =>
+    str.substring(0, 1).toLowerCase() + str.substring(1);
+
 String joinLast(Iterable<String> strs, String join, [String last]) {
   if (strs.isEmpty) return '';
   List list = strs.toList();
