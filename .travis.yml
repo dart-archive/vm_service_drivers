@@ -2,7 +2,8 @@ language: dart
 sudo: false
 dart:
   - dev
-  - stable
+# TODO(devoncarew): Restore this once 1.13 goes stable.
+#  - stable
 script:
   - (cd dart; ./tool/travis.sh)
   - (cd java; ant -f build.xml)

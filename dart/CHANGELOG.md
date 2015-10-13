@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.2
+- added the `setExceptionPauseMode` method
+- fixed an issue with enum parsing
+
 ## 0.0.1
 - first publish
 - Upgraded the library to the 3.0 version of the service protocol
