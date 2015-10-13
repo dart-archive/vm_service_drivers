@@ -415,15 +415,26 @@ class MemberType extends Member {
 
   void parse(Parser parser) {
     // foo|bar[]|baz
+    // (@Instance|Sentinel)[]
     bool loop = true;
+    bool isMulti = false;
+
     while (loop) {
+      parser.consume('(');
       Token t = parser.expectName();
+      if (parser.consume(')')) isMulti = true;
       TypeRef ref = new TypeRef(_coerceRefType(t.text));
+      types.add(ref);
+
       while (parser.consume('[')) {
         parser.expect(']');
-        ref.arrayDepth++;
+        if (isMulti) {
+          types.forEach((t) => t.arrayDepth++);
+        } else {
+          ref.arrayDepth++;
+        }
       }
-      types.add(ref);
+
       loop = parser.consume('|');
     }
   }
