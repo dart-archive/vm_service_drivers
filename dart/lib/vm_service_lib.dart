@@ -4,7 +4,7 @@
 library vm_service_lib;
 
 import 'dart:async';
-import 'dart:convert' show JSON, JsonCodec;
+import 'dart:convert' show BASE64, JSON, JsonCodec;
 
 const String vmServiceVersion = '3.0.0';
 
@@ -60,6 +60,8 @@ Map<String, Function> _typeFactories = {
   '@VM': VMRef.parse,
   'VM': VM.parse
 };
+
+String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
 
 class VmService {
   StreamSubscription _streamSub;

@@ -32,7 +32,7 @@ final String _headerCode = r'''
 library vm_service_lib;
 
 import 'dart:async';
-import 'dart:convert' show JSON, JsonCodec;
+import 'dart:convert' show BASE64, JSON, JsonCodec;
 
 ''';
 
@@ -249,6 +249,11 @@ class Api extends Member with ApiParseUtil {
     });
     gen.writeln('};');
     gen.writeln();
+
+    gen.writeStatement('String decodeBase64(String str) => '
+        'new String.fromCharCodes(BASE64.decode(str));');
+    gen.writeln();
+
     gen.writeStatement('class VmService {');
     gen.writeStatement('StreamSubscription _streamSub;');
     gen.writeStatement('Function _writeMessage;');
