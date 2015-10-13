@@ -58,7 +58,7 @@ main(List<String> args) async {
 
   serviceClient.onIsolateEvent.listen((e) => print('onIsolateEvent: ${e}'));
   serviceClient.onDebugEvent.listen((e) => print('onDebugEvent: ${e}'));
-  serviceClient.onGcEvent.listen((e) => print('onGcEvent: ${e}'));
+  serviceClient.onGCEvent.listen((e) => print('onGCEvent: ${e}'));
   serviceClient.onStdoutEvent.listen((e) => print('onStdoutEvent: ${e}'));
   serviceClient.onStderrEvent.listen((e) => print('onStderrEvent: ${e}'));
 

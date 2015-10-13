@@ -32,7 +32,7 @@ final String _headerCode = r'''
 library vm_service_lib;
 
 import 'dart:async';
-import 'dart:convert' show JSON, JsonCodec;
+import 'dart:convert' show BASE64, JSON, JsonCodec;
 
 ''';
 
@@ -127,11 +127,6 @@ Object createObject(dynamic json) {
     // Handle simple types.
     return json;
   }
-}
-
-Object _parseEnum(Iterable itor, String valueName) {
-  if (valueName == null) return null;
-  return itor.firstWhere((i) => i.toString() == valueName, orElse: () => null);
 }
 
 class RPCError {
@@ -254,6 +249,11 @@ class Api extends Member with ApiParseUtil {
     });
     gen.writeln('};');
     gen.writeln();
+
+    gen.writeStatement('String decodeBase64(String str) => '
+        'new String.fromCharCodes(BASE64.decode(str));');
+    gen.writeln();
+
     gen.writeStatement('class VmService {');
     gen.writeStatement('StreamSubscription _streamSub;');
     gen.writeStatement('Function _writeMessage;');
@@ -278,11 +278,18 @@ class Api extends Member with ApiParseUtil {
     gen.writeStatement('_log = log == null ? new _NullLog() : log;');
     gen.writeln('}');
     gen.writeln();
+    gen.writeln("// VMUpdate");
     gen.writeln("Stream<Event> get onVMEvent => _vmController.stream;");
+    gen.writeln("// IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate");
     gen.writeln("Stream<Event> get onIsolateEvent => _isolateController.stream;");
+    gen.writeln("// PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException,");
+    gen.writeln("// Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect");
     gen.writeln("Stream<Event> get onDebugEvent => _debugController.stream;");
-    gen.writeln("Stream<Event> get onGcEvent => _gcController.stream;");
+    gen.writeln("// GC");
+    gen.writeln("Stream<Event> get onGCEvent => _gcController.stream;");
+    gen.writeln("// WriteEvent");
     gen.writeln("Stream<Event> get onStdoutEvent => _stdoutController.stream;");
+    gen.writeln("// WriteEvent");
     gen.writeln("Stream<Event> get onStderrEvent => _stderrController.stream;");
     gen.writeln();
     methods.forEach((m) => m.generate(gen));
@@ -516,7 +523,7 @@ class Type extends Member {
         // Parse the enum.
         String enumTypeName = field.type.types.first.name;
         gen.writeln(
-          "${field.generatableName} = _parseEnum(${enumTypeName}.values, json['${field.name}']);");
+          "${field.generatableName} = _${lowerTitleCase(enumTypeName)}[json['${field.name}']];");
       } else {
         gen.writeln("${field.generatableName} = createObject(json['${field.name}']);");
       }
@@ -525,10 +532,10 @@ class Type extends Member {
     gen.writeln();
     fields.forEach((TypeField field) => field.generate(gen));
 
-    List<TypeField> allFields = getAllFields();
-    if (allFields.length <= 7) {
-      String properties = allFields.map(
-        (TypeField f) => "${f.generatableName}: \${${f.generatableName}}").join(', ');
+    Iterable<TypeField> toStringFields = getAllFields().where((f) => !f.optional);
+    if (toStringFields.length <= 7) {
+      String properties = toStringFields.map((TypeField f) =>
+          "${f.generatableName}: \${${f.generatableName}}").join(', ');
       if (properties.length > 70) {
         gen.writeln("String toString() => '[${name} ' //\n'${properties}]';");
       } else {
@@ -597,12 +604,24 @@ class Enum extends Member {
     _parse(new Tokenizer(definition).tokenize());
   }
 
+  String get mapRef => '_${lowerTitleCase(name)}';
+
   void generate(DartGenerator gen) {
     gen.writeln();
     if (docs != null) gen.writeDocs(docs);
     gen.writeStatement('enum ${name} {');
     enums.forEach((EnumValue val) => val.generate(gen));
     gen.writeStatement('}');
+
+    // final Map<String, ErrorKind> _errorKind = {
+    //   'UnhandledException': ErrorKind.UnhandledException
+    // };
+
+    gen.writeln();
+    gen.writeStatement('final Map<String, ${name}> ${mapRef} = {');
+    gen.writeStatement(
+        enums.map((e) => "'${e.name}': ${name}.${e.name}").join(', '));
+    gen.writeStatement('};');
   }
 
   void _parse(Token token) {

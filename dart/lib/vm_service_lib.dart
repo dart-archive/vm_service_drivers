@@ -4,7 +4,7 @@
 library vm_service_lib;
 
 import 'dart:async';
-import 'dart:convert' show JSON, JsonCodec;
+import 'dart:convert' show BASE64, JSON, JsonCodec;
 
 const String vmServiceVersion = '3.0.0';
 
@@ -61,6 +61,8 @@ Map<String, Function> _typeFactories = {
   'VM': VM.parse
 };
 
+String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
+
 class VmService {
   StreamSubscription _streamSub;
   Function _writeMessage;
@@ -85,11 +87,18 @@ class VmService {
     _log = log == null ? new _NullLog() : log;
   }
 
+  // VMUpdate
   Stream<Event> get onVMEvent => _vmController.stream;
+  // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate
   Stream<Event> get onIsolateEvent => _isolateController.stream;
+  // PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException,
+  // Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect
   Stream<Event> get onDebugEvent => _debugController.stream;
-  Stream<Event> get onGcEvent => _gcController.stream;
+  // GC
+  Stream<Event> get onGCEvent => _gcController.stream;
+  // WriteEvent
   Stream<Event> get onStdoutEvent => _stdoutController.stream;
+  // WriteEvent
   Stream<Event> get onStderrEvent => _stderrController.stream;
 
   /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
@@ -330,11 +339,6 @@ Object createObject(dynamic json) {
   }
 }
 
-Object _parseEnum(Iterable itor, String valueName) {
-  if (valueName == null) return null;
-  return itor.firstWhere((i) => i.toString() == valueName, orElse: () => null);
-}
-
 class RPCError {
   static RPCError parse(dynamic json) {
     return new RPCError(json['code'], json['message'], json['data']);
@@ -363,6 +367,14 @@ class _NullLog implements Log {
 
 enum CodeKind { Dart, Native, Stub, Tag, Collected }
 
+final Map<String, CodeKind> _codeKind = {
+  'Dart': CodeKind.Dart,
+  'Native': CodeKind.Native,
+  'Stub': CodeKind.Stub,
+  'Tag': CodeKind.Tag,
+  'Collected': CodeKind.Collected
+};
+
 enum ErrorKind {
   /// The isolate has encountered an unhandled Dart exception.
   UnhandledException,
@@ -377,6 +389,13 @@ enum ErrorKind {
   /// The isolate has been terminated by an external source.
   TerminationError
 }
+
+final Map<String, ErrorKind> _errorKind = {
+  'UnhandledException': ErrorKind.UnhandledException,
+  'LanguageError': ErrorKind.LanguageError,
+  'InternalError': ErrorKind.InternalError,
+  'TerminationError': ErrorKind.TerminationError
+};
 
 /// Adding new values to [EventKind] is considered a backwards compatible
 /// change. Clients should ignore unrecognized events.
@@ -427,6 +446,24 @@ enum EventKind {
   /// Notification of bytes written, for example, to stdout/stderr.
   WriteEvent
 }
+
+final Map<String, EventKind> _eventKind = {
+  'IsolateStart': EventKind.IsolateStart,
+  'IsolateRunnable': EventKind.IsolateRunnable,
+  'IsolateExit': EventKind.IsolateExit,
+  'IsolateUpdate': EventKind.IsolateUpdate,
+  'PauseStart': EventKind.PauseStart,
+  'PauseExit': EventKind.PauseExit,
+  'PauseBreakpoint': EventKind.PauseBreakpoint,
+  'PauseInterrupted': EventKind.PauseInterrupted,
+  'PauseException': EventKind.PauseException,
+  'Resume': EventKind.Resume,
+  'BreakpointAdded': EventKind.BreakpointAdded,
+  'BreakpointResolved': EventKind.BreakpointResolved,
+  'BreakpointRemoved': EventKind.BreakpointRemoved,
+  'GC': EventKind.GC,
+  'WriteEvent': EventKind.WriteEvent
+};
 
 /// Adding new values to [InstanceKind] is considered a backwards compatible
 /// change. Clients should treat unrecognized instance kinds as [PlainInstance].
@@ -508,6 +545,43 @@ enum InstanceKind {
   BoundedType
 }
 
+final Map<String, InstanceKind> _instanceKind = {
+  'PlainInstance': InstanceKind.PlainInstance,
+  'Null': InstanceKind.Null,
+  'Bool': InstanceKind.Bool,
+  'Double': InstanceKind.Double,
+  'Int': InstanceKind.Int,
+  'String': InstanceKind.String,
+  'List': InstanceKind.List,
+  'Map': InstanceKind.Map,
+  'Float32x4': InstanceKind.Float32x4,
+  'Float64x2': InstanceKind.Float64x2,
+  'Int32x4': InstanceKind.Int32x4,
+  'Uint8ClampedList': InstanceKind.Uint8ClampedList,
+  'Uint8List': InstanceKind.Uint8List,
+  'Uint16List': InstanceKind.Uint16List,
+  'Uint32List': InstanceKind.Uint32List,
+  'Uint64List': InstanceKind.Uint64List,
+  'Int8List': InstanceKind.Int8List,
+  'Int16List': InstanceKind.Int16List,
+  'Int32List': InstanceKind.Int32List,
+  'Int64List': InstanceKind.Int64List,
+  'Float32List': InstanceKind.Float32List,
+  'Float64List': InstanceKind.Float64List,
+  'Int32x4List': InstanceKind.Int32x4List,
+  'Float32x4List': InstanceKind.Float32x4List,
+  'Float64x2List': InstanceKind.Float64x2List,
+  'StackTrace': InstanceKind.StackTrace,
+  'Closure': InstanceKind.Closure,
+  'MirrorReference': InstanceKind.MirrorReference,
+  'RegExp': InstanceKind.RegExp,
+  'WeakProperty': InstanceKind.WeakProperty,
+  'Type': InstanceKind.Type,
+  'TypeParameter': InstanceKind.TypeParameter,
+  'TypeRef': InstanceKind.TypeRef,
+  'BoundedType': InstanceKind.BoundedType
+};
+
 /// A [SentinelKind] is used to distinguish different kinds of [Sentinel]
 /// objects.
 enum SentinelKind {
@@ -530,13 +604,34 @@ enum SentinelKind {
   Free
 }
 
+final Map<String, SentinelKind> _sentinelKind = {
+  'Collected': SentinelKind.Collected,
+  'Expired': SentinelKind.Expired,
+  'NotInitialized': SentinelKind.NotInitialized,
+  'BeingInitialized': SentinelKind.BeingInitialized,
+  'OptimizedOut': SentinelKind.OptimizedOut,
+  'Free': SentinelKind.Free
+};
+
 /// An [ExceptionPauseMode] indicates how the isolate pauses when an exception
 /// is thrown.
 enum ExceptionPauseMode { None, Unhandled, All }
 
+final Map<String, ExceptionPauseMode> _exceptionPauseMode = {
+  'None': ExceptionPauseMode.None,
+  'Unhandled': ExceptionPauseMode.Unhandled,
+  'All': ExceptionPauseMode.All
+};
+
 /// A [StepOption] indicates which form of stepping is requested in a resume
 /// RPC.
 enum StepOption { Into, Over, Out }
+
+final Map<String, StepOption> _stepOption = {
+  'Into': StepOption.Into,
+  'Over': StepOption.Over,
+  'Out': StepOption.Out
+};
 
 // types
 
@@ -602,7 +697,7 @@ class Breakpoint extends Obj {
   dynamic location;
 
   String toString() => '[Breakpoint ' //
-      'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, breakpointNumber: ${breakpointNumber}, resolved: ${resolved}, location: ${location}]';
+      'type: ${type}, id: ${id}, breakpointNumber: ${breakpointNumber}, resolved: ${resolved}, location: ${location}]';
 }
 
 /// [ClassRef] is a reference to a [Class].
@@ -697,7 +792,7 @@ class CodeRef extends ObjRef {
   CodeRef();
   CodeRef.fromJson(Map json) : super.fromJson(json) {
     name = json['name'];
-    kind = _parseEnum(CodeKind.values, json['kind']);
+    kind = _codeKind[json['kind']];
   }
 
   /// A name for this code object.
@@ -717,7 +812,7 @@ class Code extends ObjRef {
   Code();
   Code.fromJson(Map json) : super.fromJson(json) {
     name = json['name'];
-    kind = _parseEnum(CodeKind.values, json['kind']);
+    kind = _codeKind[json['kind']];
   }
 
   /// A name for this code object.
@@ -766,8 +861,8 @@ class Context extends Obj {
   /// The variables in this context object.
   List<ContextElement> variables;
 
-  String toString() => '[Context ' //
-      'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, length: ${length}, parent: ${parent}, variables: ${variables}]';
+  String toString() =>
+      '[Context type: ${type}, id: ${id}, length: ${length}, variables: ${variables}]';
 }
 
 class ContextElement {
@@ -790,7 +885,7 @@ class ErrorRef extends ObjRef {
 
   ErrorRef();
   ErrorRef.fromJson(Map json) : super.fromJson(json) {
-    kind = _parseEnum(ErrorKind.values, json['kind']);
+    kind = _errorKind[json['kind']];
     message = json['message'];
   }
 
@@ -811,7 +906,7 @@ class Error extends Obj {
 
   Error();
   Error.fromJson(Map json) : super.fromJson(json) {
-    kind = _parseEnum(ErrorKind.values, json['kind']);
+    kind = _errorKind[json['kind']];
     message = json['message'];
     exception = createObject(json['exception']);
     stacktrace = createObject(json['stacktrace']);
@@ -831,7 +926,8 @@ class Error extends Obj {
   /// object.
   @optional InstanceRef stacktrace;
 
-  String toString() => '[Error]';
+  String toString() =>
+      '[Error type: ${type}, id: ${id}, kind: ${kind}, message: ${message}]';
 }
 
 /// An [Event] is an asynchronous notification from the VM. It is delivered only
@@ -842,7 +938,7 @@ class Event extends Response {
 
   Event();
   Event.fromJson(Map json) : super.fromJson(json) {
-    kind = _parseEnum(EventKind.values, json['kind']);
+    kind = _eventKind[json['kind']];
     isolate = createObject(json['isolate']);
     vm = createObject(json['vm']);
     timestamp = json['timestamp'];
@@ -899,7 +995,8 @@ class Event extends Response {
   /// WriteEvent event.
   @optional String bytes;
 
-  String toString() => '[Event]';
+  String toString() =>
+      '[Event type: ${type}, kind: ${kind}, timestamp: ${timestamp}]';
 }
 
 /// An [FieldRef] is a reference to a [Field].
@@ -1007,8 +1104,8 @@ class Flag {
   /// value of the flag was NULL.
   @optional String valueAsString;
 
-  String toString() => '[Flag ' //
-      'name: ${name}, comment: ${comment}, modified: ${modified}, valueAsString: ${valueAsString}]';
+  String toString() =>
+      '[Flag name: ${name}, comment: ${comment}, modified: ${modified}]';
 }
 
 /// A [FlagList] represents the complete set of VM command line flags.
@@ -1108,7 +1205,8 @@ class Func extends Obj {
   /// The compiled code associated with this function.
   @optional CodeRef code;
 
-  String toString() => '[Func]';
+  String toString() =>
+      '[Func type: ${type}, id: ${id}, name: ${name}, owner: ${owner}]';
 }
 
 /// [InstanceRef] is a reference to an [Instance].
@@ -1117,7 +1215,7 @@ class InstanceRef extends ObjRef {
 
   InstanceRef();
   InstanceRef.fromJson(Map json) : super.fromJson(json) {
-    kind = _parseEnum(InstanceKind.values, json['kind']);
+    kind = _instanceKind[json['kind']];
     classRef = createObject(json['class']);
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
@@ -1165,7 +1263,8 @@ class InstanceRef extends ObjRef {
   /// kind String. Provided for instance kinds: RegExp
   @optional InstanceRef pattern;
 
-  String toString() => '[InstanceRef]';
+  String toString() =>
+      '[InstanceRef type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
 
 /// An [Instance] represents an instance of the Dart language class [Obj].
@@ -1174,7 +1273,7 @@ class Instance extends Obj {
 
   Instance();
   Instance.fromJson(Map json) : super.fromJson(json) {
-    kind = _parseEnum(InstanceKind.values, json['kind']);
+    kind = _instanceKind[json['kind']];
     classRef = createObject(json['class']);
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
@@ -1296,7 +1395,8 @@ class Instance extends Obj {
   /// instance kinds: BoundedType TypeParameter
   @optional InstanceRef bound;
 
-  String toString() => '[Instance]';
+  String toString() =>
+      '[Instance type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
 
 /// [IsolateRef] is a reference to an [Isolate] object.
@@ -1528,7 +1628,7 @@ class Message extends Response {
   @optional SourceLocation location;
 
   String toString() => '[Message ' //
-      'type: ${type}, index: ${index}, name: ${name}, messageObjectId: ${messageObjectId}, size: ${size}, handler: ${handler}, location: ${location}]';
+      'type: ${type}, index: ${index}, name: ${name}, messageObjectId: ${messageObjectId}, size: ${size}]';
 }
 
 /// [NullRef] is a reference to an a [Null].
@@ -1543,7 +1643,8 @@ class NullRef extends InstanceRef {
   /// Always 'null'.
   String valueAsString;
 
-  String toString() => '[NullRef]';
+  String toString() => '[NullRef ' //
+      'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, valueAsString: ${valueAsString}]';
 }
 
 /// A [Null] object represents the Dart language value null.
@@ -1558,7 +1659,8 @@ class Null extends Instance {
   /// Always 'null'.
   String valueAsString;
 
-  String toString() => '[Null]';
+  String toString() => '[Null ' //
+      'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, valueAsString: ${valueAsString}]';
 }
 
 /// [ObjRef] is a reference to a [Obj].
@@ -1604,8 +1706,7 @@ class Obj extends Response {
   /// which are stored entirely within their object pointers.
   @optional int size;
 
-  String toString() =>
-      '[Obj type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}]';
+  String toString() => '[Obj type: ${type}, id: ${id}]';
 }
 
 /// Every non-error response returned by the Service Protocol extends
@@ -1632,7 +1733,7 @@ class Sentinel extends Response {
 
   Sentinel();
   Sentinel.fromJson(Map json) : super.fromJson(json) {
-    kind = _parseEnum(SentinelKind.values, json['kind']);
+    kind = _sentinelKind[json['kind']];
     valueAsString = json['valueAsString'];
   }
 
@@ -1686,7 +1787,8 @@ class Script extends Obj {
   /// A table encoding a mapping from token position to line and column.
   List<List<int>> tokenPosTable;
 
-  String toString() => '[Script]';
+  String toString() => '[Script ' //
+      'type: ${type}, id: ${id}, uri: ${uri}, library: ${library}, source: ${source}, tokenPosTable: ${tokenPosTable}]';
 }
 
 /// The [SourceLocation] class is used to designate a position or range in some
@@ -1710,8 +1812,8 @@ class SourceLocation extends Response {
   /// The last token of the location if this is a range.
   @optional int endTokenPos;
 
-  String toString() => '[SourceLocation ' //
-      'type: ${type}, script: ${script}, tokenPos: ${tokenPos}, endTokenPos: ${endTokenPos}]';
+  String toString() =>
+      '[SourceLocation type: ${type}, script: ${script}, tokenPos: ${tokenPos}]';
 }
 
 class Stack extends Response {
@@ -1777,8 +1879,8 @@ class TypeArguments extends Obj {
   /// TypeParameter, BoundedType.
   List<InstanceRef> types;
 
-  String toString() => '[TypeArguments ' //
-      'type: ${type}, id: ${id}, classRef: ${classRef}, size: ${size}, name: ${name}, types: ${types}]';
+  String toString() =>
+      '[TypeArguments type: ${type}, id: ${id}, name: ${name}, types: ${types}]';
 }
 
 /// The [UnresolvedSourceLocation] class is used to refer to an unresolved
@@ -1816,8 +1918,7 @@ class UnresolvedSourceLocation extends Response {
   /// the location is resolved.
   @optional int column;
 
-  String toString() => '[UnresolvedSourceLocation ' //
-      'type: ${type}, script: ${script}, scriptUri: ${scriptUri}, tokenPos: ${tokenPos}, line: ${line}, column: ${column}]';
+  String toString() => '[UnresolvedSourceLocation type: ${type}]';
 }
 
 /// See Versioning.
