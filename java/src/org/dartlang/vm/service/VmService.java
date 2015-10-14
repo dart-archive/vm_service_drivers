@@ -149,12 +149,10 @@ public class VmService extends VmServiceBase {
   /**
    * The [getObject] RPC is used to lookup an [object] from some isolate by its [id].
    */
-  public void getObject(String isolateId, String objectId, int offset, int count, GetObjectConsumer consumer) {
+  public void getObject(String isolateId, String objectId, GetObjectConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("objectId", objectId);
-    params.addProperty("offset", offset);
-    params.addProperty("count", count);
     request("getObject", params, consumer);
   }
 

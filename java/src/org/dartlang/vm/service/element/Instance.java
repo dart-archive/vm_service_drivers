@@ -80,16 +80,6 @@ public class Instance extends Obj {
   }
 
   /**
-   * The number of elements or associations returned. This is only provided when it is less than
-   * length. Provided for instance kinds: List Map Uint8ClampedList Uint8List Uint16List Uint32List
-   * Uint64List Int8List Int16List Int32List Int64List Float32List Float64List Int32x4List
-   * Float32x4List Float64x2List
-   */
-  public int getCount() {
-    return json.get("count").getAsInt();
-  }
-
-  /**
    * The elements of a List instance. Provided for instance kinds: List
    * 
    * @return one of <code>ElementList<InstanceRef></code> or <code>ElementList<Sentinel></code>
@@ -137,9 +127,9 @@ public class Instance extends Obj {
   }
 
   /**
-   * The length of a List or the number of associations in a Map. Provided for instance kinds: List
-   * Map Uint8ClampedList Uint8List Uint16List Uint32List Uint64List Int8List Int16List Int32List
-   * Int64List Float32List Float64List Int32x4List Float32x4List Float64x2List
+   * The length of a List instance. Provided for instance kinds: List Map Uint8ClampedList
+   * Uint8List Uint16List Uint32List Uint64List Int8List Int16List Int32List Int64List Float32List
+   * Float64List Int32x4List Float32x4List Float64x2List
    */
   public int getLength() {
     return json.get("length").getAsInt();
@@ -157,16 +147,6 @@ public class Instance extends Obj {
    */
   public String getName() {
     return json.get("name").getAsString();
-  }
-
-  /**
-   * The index of the first element or association returned. This is only provided when it is
-   * non-zero. Provided for instance kinds: List Map Uint8ClampedList Uint8List Uint16List
-   * Uint32List Uint64List Int8List Int16List Int32List Int64List Float32List Float64List
-   * Int32x4List Float32x4List Float64x2List
-   */
-  public int getOffset() {
-    return json.get("offset").getAsInt();
   }
 
   /**
