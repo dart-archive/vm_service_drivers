@@ -22,6 +22,12 @@ package org.dartlang.vm.service.element;
 public enum EventKind {
 
   /**
+   * Notification that VM identifying information has changed. Currently used to notify of changes
+   * to the VM debugging name via setVMName.
+   */
+  VMUpdate,
+
+  /**
    * Notification that a new isolate has started.
    */
   IsolateStart,

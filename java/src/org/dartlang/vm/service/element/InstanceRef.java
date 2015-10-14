@@ -42,9 +42,9 @@ public class InstanceRef extends ObjRef {
   }
 
   /**
-   * The length of a List instance. Provided for instance kinds: List Map Uint8ClampedList
-   * Uint8List Uint16List Uint32List Uint64List Int8List Int16List Int32List Int64List Float32List
-   * Float64List Int32x4List Float32x4List Float64x2List
+   * The length of a List or the number of associations in a Map. Provided for instance kinds: List
+   * Map Uint8ClampedList Uint8List Uint16List Uint32List Uint64List Int8List Int16List Int32List
+   * Int64List Float32List Float64List Int32x4List Float32x4List Float64x2List
    */
   public int getLength() {
     return json.get("length").getAsInt();
