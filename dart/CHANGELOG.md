@@ -1,7 +1,8 @@
 # Changelog
 
-## unreleased
+## 0.0.3
 - update to use a custom enum class
+- upgrade to the latest service protocol spec
 
 ## 0.0.2
 - added the `setExceptionPauseMode` method
