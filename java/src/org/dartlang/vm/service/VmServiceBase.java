@@ -283,7 +283,7 @@ abstract class VmServiceBase implements VmServiceConst {
     });
   }
 
-  public void getObject(String isolateId, String objectId, int offset, int count, GetObjectConsumer consumer);
+  public void getObject(String isolateId, String objectId, GetObjectConsumer consumer);
 
   /**
    * Sends the request and associates the request with the passed {@link Consumer}.
