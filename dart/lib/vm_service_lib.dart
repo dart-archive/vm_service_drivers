@@ -171,8 +171,12 @@ class VmService {
   /// [id].
   ///
   /// The return value can be one of [Obj] or [Sentinel].
-  Future<dynamic> getObject(String isolateId, String objectId) {
-    return _call('getObject', {'isolateId': isolateId, 'objectId': objectId});
+  Future<dynamic> getObject(String isolateId, String objectId,
+      [int offset, int count]) {
+    Map m = {'isolateId': isolateId, 'objectId': objectId};
+    if (offset != null) m['offset'] = offset;
+    if (count != null) m['count'] = count;
+    return _call('getObject', m);
   }
 
   /// The [getStack] RPC is used to retrieve the current execution stack and
@@ -414,6 +418,10 @@ class ErrorKind extends Enum {
 /// change. Clients should ignore unrecognized events.
 class EventKind extends Enum {
   static final Map<String, EventKind> _enums = {};
+
+  /// Notification that VM identifying information has changed. Currently used
+  /// to notify of changes to the VM debugging name via setVMName.
+  static EventKind VMUpdate = new EventKind._('VMUpdate');
 
   /// Notification that a new isolate has started.
   static EventKind IsolateStart = new EventKind._('IsolateStart');
@@ -1229,10 +1237,10 @@ class InstanceRef extends ObjRef {
   /// property is added with the value 'true'.
   @optional bool valueAsStringIsTruncated;
 
-  /// The length of a List instance. Provided for instance kinds: List Map
-  /// Uint8ClampedList Uint8List Uint16List Uint32List Uint64List Int8List
-  /// Int16List Int32List Int64List Float32List Float64List Int32x4List
-  /// Float32x4List Float64x2List
+  /// The length of a List or the number of associations in a Map. Provided for
+  /// instance kinds: List Map Uint8ClampedList Uint8List Uint16List Uint32List
+  /// Uint64List Int8List Int16List Int32List Int64List Float32List Float64List
+  /// Int32x4List Float32x4List Float64x2List
   @optional int length;
 
   /// The name of a Type instance. Provided for instance kinds: Type
@@ -1265,6 +1273,8 @@ class Instance extends Obj {
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
     length = json['length'];
+    offset = json['offset'];
+    count = json['count'];
     name = json['name'];
     typeClass = createObject(json['typeClass']);
     parameterizedClass = createObject(json['parameterizedClass']);
@@ -1301,11 +1311,25 @@ class Instance extends Obj {
   /// property is added with the value 'true'.
   @optional bool valueAsStringIsTruncated;
 
-  /// The length of a List instance. Provided for instance kinds: List Map
+  /// The length of a List or the number of associations in a Map. Provided for
+  /// instance kinds: List Map Uint8ClampedList Uint8List Uint16List Uint32List
+  /// Uint64List Int8List Int16List Int32List Int64List Float32List Float64List
+  /// Int32x4List Float32x4List Float64x2List
+  @optional int length;
+
+  /// The index of the first element or association returned. This is only
+  /// provided when it is non-zero. Provided for instance kinds: List Map
   /// Uint8ClampedList Uint8List Uint16List Uint32List Uint64List Int8List
   /// Int16List Int32List Int64List Float32List Float64List Int32x4List
   /// Float32x4List Float64x2List
-  @optional int length;
+  @optional int offset;
+
+  /// The number of elements or associations returned. This is only provided
+  /// when it is less than length. Provided for instance kinds: List Map
+  /// Uint8ClampedList Uint8List Uint16List Uint32List Uint64List Int8List
+  /// Int16List Int32List Int64List Float32List Float64List Int32x4List
+  /// Float32x4List Float64x2List
+  @optional int count;
 
   /// The name of a Type instance. Provided for instance kinds: Type
   @optional String name;
