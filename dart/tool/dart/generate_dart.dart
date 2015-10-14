@@ -298,6 +298,12 @@ class Api extends Member with ApiParseUtil {
     gen.writeln();
     gen.writeln(_rpcError);
     gen.writeln('// enums');
+    gen.writeln();
+    gen.writeStatement('abstract class Enum {');
+    gen.writeStatement('final String name;');
+    gen.writeStatement('Enum(this.name);');
+    gen.writeStatement('String toString() => name;');
+    gen.writeStatement('}');
     enums.forEach((e) => e.generate(gen));
     gen.writeln();
     gen.writeln('// types');
@@ -364,7 +370,7 @@ class Method extends Member {
         args.where((MethodArg a) => a.optional).forEach((MethodArg arg) {
           String valueRef = arg.name;
           if (api.isEnumName(arg.type)) {
-            valueRef = '${arg.name}.toString()';
+            valueRef = '${arg.name}';
           }
           gen.writeln("if (${arg.name} != null) m['${arg.name}'] = ${valueRef};");
         });
@@ -523,7 +529,7 @@ class Type extends Member {
         // Parse the enum.
         String enumTypeName = field.type.types.first.name;
         gen.writeln(
-          "${field.generatableName} = _${lowerTitleCase(enumTypeName)}[json['${field.name}']];");
+          "${field.generatableName} = ${enumTypeName}.parse(json['${field.name}']);");
       } else {
         gen.writeln("${field.generatableName} = createObject(json['${field.name}']);");
       }
@@ -604,24 +610,18 @@ class Enum extends Member {
     _parse(new Tokenizer(definition).tokenize());
   }
 
-  String get mapRef => '_${lowerTitleCase(name)}';
-
   void generate(DartGenerator gen) {
     gen.writeln();
     if (docs != null) gen.writeDocs(docs);
-    gen.writeStatement('enum ${name} {');
-    enums.forEach((EnumValue val) => val.generate(gen));
-    gen.writeStatement('}');
-
-    // final Map<String, ErrorKind> _errorKind = {
-    //   'UnhandledException': ErrorKind.UnhandledException
-    // };
-
+    gen.writeStatement('class ${name} extends Enum {');
+    gen.writeStatement('static final Map<String, ${name}> _enums = {};');
     gen.writeln();
-    gen.writeStatement('final Map<String, ${name}> ${mapRef} = {');
-    gen.writeStatement(
-        enums.map((e) => "'${e.name}': ${name}.${e.name}").join(', '));
-    gen.writeStatement('};');
+    enums.forEach((e) => e.generate(gen));
+    gen.writeln();
+    gen.writeStatement('static ${name} parse(String name) => _enums[name];');
+    gen.writeln();
+    gen.writeStatement('${name}._(String name) : super(name) { _enums[name] = this; }');
+    gen.writeStatement('}');
   }
 
   void _parse(Token token) {
@@ -640,9 +640,9 @@ class EnumValue extends Member {
 
   void generate(DartGenerator gen) {
     if (docs != null) gen.writeDocs(docs);
-    gen.write('${name}');
-    if (!isLast) gen.write(',');
-    gen.writeln();
+    String tempName = name;
+    if (parent.name == 'InstanceKind') tempName += 'Kind';
+    gen.writeStatement("static ${parent.name} ${tempName} = new ${parent.name}._('${name}');");
   }
 }
 
