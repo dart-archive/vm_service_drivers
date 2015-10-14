@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.4
+- enum redux
+
 ## 0.0.3
 - update to use a custom enum class
 - upgrade to the latest service protocol spec
