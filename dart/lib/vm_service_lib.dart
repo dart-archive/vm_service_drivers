@@ -206,7 +206,7 @@ class VmService {
   }
 
   /// The [resume] RPC is used to resume execution of a paused isolate.
-  Future<Success> resume(String isolateId, [StepOption step]) {
+  Future<Success> resume(String isolateId, [/*StepOption*/ String step]) {
     Map m = {'isolateId': isolateId};
     if (step != null) m['step'] = step;
     return _call('resume', m);
@@ -369,263 +369,199 @@ class _NullLog implements Log {
 
 // enums
 
-abstract class Enum {
-  final String name;
-  Enum(this.name);
-  String toString() => name;
+class CodeKind {
+  static const String Dart = 'Dart';
+  static const String Native = 'Native';
+  static const String Stub = 'Stub';
+  static const String Tag = 'Tag';
+  static const String Collected = 'Collected';
 }
 
-class CodeKind extends Enum {
-  static final Map<String, CodeKind> _enums = {};
-
-  static CodeKind Dart = new CodeKind._('Dart');
-  static CodeKind Native = new CodeKind._('Native');
-  static CodeKind Stub = new CodeKind._('Stub');
-  static CodeKind Tag = new CodeKind._('Tag');
-  static CodeKind Collected = new CodeKind._('Collected');
-
-  static CodeKind parse(String name) => _enums[name];
-
-  CodeKind._(String name) : super(name) {
-    _enums[name] = this;
-  }
-}
-
-class ErrorKind extends Enum {
-  static final Map<String, ErrorKind> _enums = {};
-
+class ErrorKind {
   /// The isolate has encountered an unhandled Dart exception.
-  static ErrorKind UnhandledException = new ErrorKind._('UnhandledException');
+  static const String UnhandledException = 'UnhandledException';
 
   /// The isolate has encountered a Dart language error in the program.
-  static ErrorKind LanguageError = new ErrorKind._('LanguageError');
+  static const String LanguageError = 'LanguageError';
 
   /// The isolate has encounted an internal error. These errors should be
   /// reported as bugs.
-  static ErrorKind InternalError = new ErrorKind._('InternalError');
+  static const String InternalError = 'InternalError';
 
   /// The isolate has been terminated by an external source.
-  static ErrorKind TerminationError = new ErrorKind._('TerminationError');
-
-  static ErrorKind parse(String name) => _enums[name];
-
-  ErrorKind._(String name) : super(name) {
-    _enums[name] = this;
-  }
+  static const String TerminationError = 'TerminationError';
 }
 
 /// Adding new values to [EventKind] is considered a backwards compatible
 /// change. Clients should ignore unrecognized events.
-class EventKind extends Enum {
-  static final Map<String, EventKind> _enums = {};
-
+class EventKind {
   /// Notification that VM identifying information has changed. Currently used
   /// to notify of changes to the VM debugging name via setVMName.
-  static EventKind VMUpdate = new EventKind._('VMUpdate');
+  static const String VMUpdate = 'VMUpdate';
 
   /// Notification that a new isolate has started.
-  static EventKind IsolateStart = new EventKind._('IsolateStart');
+  static const String IsolateStart = 'IsolateStart';
 
   /// Notification that an isolate is ready to run.
-  static EventKind IsolateRunnable = new EventKind._('IsolateRunnable');
+  static const String IsolateRunnable = 'IsolateRunnable';
 
   /// Notification that an isolate has exited.
-  static EventKind IsolateExit = new EventKind._('IsolateExit');
+  static const String IsolateExit = 'IsolateExit';
 
   /// Notification that isolate identifying information has changed. Currently
   /// used to notify of changes to the isolate debugging name via setName.
-  static EventKind IsolateUpdate = new EventKind._('IsolateUpdate');
+  static const String IsolateUpdate = 'IsolateUpdate';
 
   /// An isolate has paused at start, before executing code.
-  static EventKind PauseStart = new EventKind._('PauseStart');
+  static const String PauseStart = 'PauseStart';
 
   /// An isolate has paused at exit, before terminating.
-  static EventKind PauseExit = new EventKind._('PauseExit');
+  static const String PauseExit = 'PauseExit';
 
   /// An isolate has paused at a breakpoint or due to stepping.
-  static EventKind PauseBreakpoint = new EventKind._('PauseBreakpoint');
+  static const String PauseBreakpoint = 'PauseBreakpoint';
 
   /// An isolate has paused due to interruption via pause.
-  static EventKind PauseInterrupted = new EventKind._('PauseInterrupted');
+  static const String PauseInterrupted = 'PauseInterrupted';
 
   /// An isolate has paused due to an exception.
-  static EventKind PauseException = new EventKind._('PauseException');
+  static const String PauseException = 'PauseException';
 
   /// An isolate has started or resumed execution.
-  static EventKind Resume = new EventKind._('Resume');
+  static const String Resume = 'Resume';
 
   /// A breakpoint has been added for an isolate.
-  static EventKind BreakpointAdded = new EventKind._('BreakpointAdded');
+  static const String BreakpointAdded = 'BreakpointAdded';
 
   /// An unresolved breakpoint has been resolved for an isolate.
-  static EventKind BreakpointResolved = new EventKind._('BreakpointResolved');
+  static const String BreakpointResolved = 'BreakpointResolved';
 
   /// A breakpoint has been removed.
-  static EventKind BreakpointRemoved = new EventKind._('BreakpointRemoved');
+  static const String BreakpointRemoved = 'BreakpointRemoved';
 
   /// A garbage collection event.
-  static EventKind GC = new EventKind._('GC');
+  static const String GC = 'GC';
 
   /// Notification of bytes written, for example, to stdout/stderr.
-  static EventKind WriteEvent = new EventKind._('WriteEvent');
-
-  static EventKind parse(String name) => _enums[name];
-
-  EventKind._(String name) : super(name) {
-    _enums[name] = this;
-  }
+  static const String WriteEvent = 'WriteEvent';
 }
 
 /// Adding new values to [InstanceKind] is considered a backwards compatible
 /// change. Clients should treat unrecognized instance kinds as [PlainInstance].
-class InstanceKind extends Enum {
-  static final Map<String, InstanceKind> _enums = {};
-
+class InstanceKind {
   /// A general instance of the Dart class Object.
-  static InstanceKind PlainInstanceKind = new InstanceKind._('PlainInstance');
+  static const String PlainInstanceKind = 'PlainInstance';
 
   /// null instance.
-  static InstanceKind NullKind = new InstanceKind._('Null');
+  static const String NullKind = 'Null';
 
   /// true or false.
-  static InstanceKind BoolKind = new InstanceKind._('Bool');
+  static const String BoolKind = 'Bool';
 
   /// An instance of the Dart class double.
-  static InstanceKind DoubleKind = new InstanceKind._('Double');
+  static const String DoubleKind = 'Double';
 
   /// An instance of the Dart class int.
-  static InstanceKind IntKind = new InstanceKind._('Int');
+  static const String IntKind = 'Int';
 
   /// An instance of the Dart class String.
-  static InstanceKind StringKind = new InstanceKind._('String');
+  static const String StringKind = 'String';
 
   /// An instance of the built-in VM List implementation. User-defined Lists
   /// will be PlainInstance.
-  static InstanceKind ListKind = new InstanceKind._('List');
+  static const String ListKind = 'List';
 
   /// An instance of the built-in VM Map implementation. User-defined Maps will
   /// be PlainInstance.
-  static InstanceKind MapKind = new InstanceKind._('Map');
+  static const String MapKind = 'Map';
 
   /// Vector instance kinds.
-  static InstanceKind Float32x4Kind = new InstanceKind._('Float32x4');
-  static InstanceKind Float64x2Kind = new InstanceKind._('Float64x2');
-  static InstanceKind Int32x4Kind = new InstanceKind._('Int32x4');
+  static const String Float32x4Kind = 'Float32x4';
+  static const String Float64x2Kind = 'Float64x2';
+  static const String Int32x4Kind = 'Int32x4';
 
   /// An instance of the built-in VM TypedData implementations. User-defined
   /// TypedDatas will be PlainInstance.
-  static InstanceKind Uint8ClampedListKind =
-      new InstanceKind._('Uint8ClampedList');
-  static InstanceKind Uint8ListKind = new InstanceKind._('Uint8List');
-  static InstanceKind Uint16ListKind = new InstanceKind._('Uint16List');
-  static InstanceKind Uint32ListKind = new InstanceKind._('Uint32List');
-  static InstanceKind Uint64ListKind = new InstanceKind._('Uint64List');
-  static InstanceKind Int8ListKind = new InstanceKind._('Int8List');
-  static InstanceKind Int16ListKind = new InstanceKind._('Int16List');
-  static InstanceKind Int32ListKind = new InstanceKind._('Int32List');
-  static InstanceKind Int64ListKind = new InstanceKind._('Int64List');
-  static InstanceKind Float32ListKind = new InstanceKind._('Float32List');
-  static InstanceKind Float64ListKind = new InstanceKind._('Float64List');
-  static InstanceKind Int32x4ListKind = new InstanceKind._('Int32x4List');
-  static InstanceKind Float32x4ListKind = new InstanceKind._('Float32x4List');
-  static InstanceKind Float64x2ListKind = new InstanceKind._('Float64x2List');
+  static const String Uint8ClampedListKind = 'Uint8ClampedList';
+  static const String Uint8ListKind = 'Uint8List';
+  static const String Uint16ListKind = 'Uint16List';
+  static const String Uint32ListKind = 'Uint32List';
+  static const String Uint64ListKind = 'Uint64List';
+  static const String Int8ListKind = 'Int8List';
+  static const String Int16ListKind = 'Int16List';
+  static const String Int32ListKind = 'Int32List';
+  static const String Int64ListKind = 'Int64List';
+  static const String Float32ListKind = 'Float32List';
+  static const String Float64ListKind = 'Float64List';
+  static const String Int32x4ListKind = 'Int32x4List';
+  static const String Float32x4ListKind = 'Float32x4List';
+  static const String Float64x2ListKind = 'Float64x2List';
 
   /// An instance of the Dart class StackTrace.
-  static InstanceKind StackTraceKind = new InstanceKind._('StackTrace');
+  static const String StackTraceKind = 'StackTrace';
 
   /// An instance of the built-in VM Closure implementation. User-defined
   /// Closures will be PlainInstance.
-  static InstanceKind ClosureKind = new InstanceKind._('Closure');
+  static const String ClosureKind = 'Closure';
 
   /// An instance of the Dart class MirrorReference.
-  static InstanceKind MirrorReferenceKind =
-      new InstanceKind._('MirrorReference');
+  static const String MirrorReferenceKind = 'MirrorReference';
 
   /// An instance of the Dart class RegExp.
-  static InstanceKind RegExpKind = new InstanceKind._('RegExp');
+  static const String RegExpKind = 'RegExp';
 
   /// An instance of the Dart class WeakProperty.
-  static InstanceKind WeakPropertyKind = new InstanceKind._('WeakProperty');
+  static const String WeakPropertyKind = 'WeakProperty';
 
   /// An instance of the Dart class Type
-  static InstanceKind TypeKind = new InstanceKind._('Type');
+  static const String TypeKind = 'Type';
 
   /// An instance of the Dart class TypeParamer
-  static InstanceKind TypeParameterKind = new InstanceKind._('TypeParameter');
+  static const String TypeParameterKind = 'TypeParameter';
 
   /// An instance of the Dart class TypeRef
-  static InstanceKind TypeRefKind = new InstanceKind._('TypeRef');
+  static const String TypeRefKind = 'TypeRef';
 
   /// An instance of the Dart class BoundedType
-  static InstanceKind BoundedTypeKind = new InstanceKind._('BoundedType');
-
-  static InstanceKind parse(String name) => _enums[name];
-
-  InstanceKind._(String name) : super(name) {
-    _enums[name] = this;
-  }
+  static const String BoundedTypeKind = 'BoundedType';
 }
 
 /// A [SentinelKind] is used to distinguish different kinds of [Sentinel]
 /// objects.
-class SentinelKind extends Enum {
-  static final Map<String, SentinelKind> _enums = {};
-
+class SentinelKind {
   /// Indicates that the object referred to has been collected by the GC.
-  static SentinelKind Collected = new SentinelKind._('Collected');
+  static const String Collected = 'Collected';
 
   /// Indicates that an object id has expired.
-  static SentinelKind Expired = new SentinelKind._('Expired');
+  static const String Expired = 'Expired';
 
   /// Indicates that a variable or field has not been initialized.
-  static SentinelKind NotInitialized = new SentinelKind._('NotInitialized');
+  static const String NotInitialized = 'NotInitialized';
 
   /// Indicates that a variable or field is in the process of being initialized.
-  static SentinelKind BeingInitialized = new SentinelKind._('BeingInitialized');
+  static const String BeingInitialized = 'BeingInitialized';
 
   /// Indicates that a variable has been eliminated by the optimizing compiler.
-  static SentinelKind OptimizedOut = new SentinelKind._('OptimizedOut');
+  static const String OptimizedOut = 'OptimizedOut';
 
   /// Reserved for future use.
-  static SentinelKind Free = new SentinelKind._('Free');
-
-  static SentinelKind parse(String name) => _enums[name];
-
-  SentinelKind._(String name) : super(name) {
-    _enums[name] = this;
-  }
+  static const String Free = 'Free';
 }
 
 /// An [ExceptionPauseMode] indicates how the isolate pauses when an exception
 /// is thrown.
-class ExceptionPauseMode extends Enum {
-  static final Map<String, ExceptionPauseMode> _enums = {};
-
-  static ExceptionPauseMode None = new ExceptionPauseMode._('None');
-  static ExceptionPauseMode Unhandled = new ExceptionPauseMode._('Unhandled');
-  static ExceptionPauseMode All = new ExceptionPauseMode._('All');
-
-  static ExceptionPauseMode parse(String name) => _enums[name];
-
-  ExceptionPauseMode._(String name) : super(name) {
-    _enums[name] = this;
-  }
+class ExceptionPauseMode {
+  static const String None = 'None';
+  static const String Unhandled = 'Unhandled';
+  static const String All = 'All';
 }
 
 /// A [StepOption] indicates which form of stepping is requested in a resume
 /// RPC.
-class StepOption extends Enum {
-  static final Map<String, StepOption> _enums = {};
-
-  static StepOption Into = new StepOption._('Into');
-  static StepOption Over = new StepOption._('Over');
-  static StepOption Out = new StepOption._('Out');
-
-  static StepOption parse(String name) => _enums[name];
-
-  StepOption._(String name) : super(name) {
-    _enums[name] = this;
-  }
+class StepOption {
+  static const String Into = 'Into';
+  static const String Over = 'Over';
+  static const String Out = 'Out';
 }
 
 // types
@@ -787,14 +723,14 @@ class CodeRef extends ObjRef {
   CodeRef();
   CodeRef.fromJson(Map json) : super.fromJson(json) {
     name = json['name'];
-    kind = CodeKind.parse(json['kind']);
+    kind = json['kind'];
   }
 
   /// A name for this code object.
   String name;
 
   /// What kind of code object is this?
-  CodeKind kind;
+  /*CodeKind*/ String kind;
 
   String toString() =>
       '[CodeRef type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
@@ -807,14 +743,14 @@ class Code extends ObjRef {
   Code();
   Code.fromJson(Map json) : super.fromJson(json) {
     name = json['name'];
-    kind = CodeKind.parse(json['kind']);
+    kind = json['kind'];
   }
 
   /// A name for this code object.
   String name;
 
   /// What kind of code object is this?
-  CodeKind kind;
+  /*CodeKind*/ String kind;
 
   String toString() =>
       '[Code type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
@@ -880,12 +816,12 @@ class ErrorRef extends ObjRef {
 
   ErrorRef();
   ErrorRef.fromJson(Map json) : super.fromJson(json) {
-    kind = ErrorKind.parse(json['kind']);
+    kind = json['kind'];
     message = json['message'];
   }
 
   /// What kind of error is this?
-  ErrorKind kind;
+  /*ErrorKind*/ String kind;
 
   /// A description of the error.
   String message;
@@ -901,14 +837,14 @@ class Error extends Obj {
 
   Error();
   Error.fromJson(Map json) : super.fromJson(json) {
-    kind = ErrorKind.parse(json['kind']);
+    kind = json['kind'];
     message = json['message'];
     exception = createObject(json['exception']);
     stacktrace = createObject(json['stacktrace']);
   }
 
   /// What kind of error is this?
-  ErrorKind kind;
+  /*ErrorKind*/ String kind;
 
   /// A description of the error.
   String message;
@@ -933,7 +869,7 @@ class Event extends Response {
 
   Event();
   Event.fromJson(Map json) : super.fromJson(json) {
-    kind = EventKind.parse(json['kind']);
+    kind = json['kind'];
     isolate = createObject(json['isolate']);
     vm = createObject(json['vm']);
     timestamp = json['timestamp'];
@@ -945,7 +881,7 @@ class Event extends Response {
   }
 
   /// What kind of event is this?
-  EventKind kind;
+  /*EventKind*/ String kind;
 
   /// The isolate with which this event is associated. This is provided for all
   /// event kinds except for: VMUpdate
@@ -1210,7 +1146,7 @@ class InstanceRef extends ObjRef {
 
   InstanceRef();
   InstanceRef.fromJson(Map json) : super.fromJson(json) {
-    kind = InstanceKind.parse(json['kind']);
+    kind = json['kind'];
     classRef = createObject(json['class']);
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
@@ -1222,7 +1158,7 @@ class InstanceRef extends ObjRef {
   }
 
   /// What kind of instance is this?
-  InstanceKind kind;
+  /*InstanceKind*/ String kind;
 
   /// Instance references always include their class.
   ClassRef classRef;
@@ -1268,7 +1204,7 @@ class Instance extends Obj {
 
   Instance();
   Instance.fromJson(Map json) : super.fromJson(json) {
-    kind = InstanceKind.parse(json['kind']);
+    kind = json['kind'];
     classRef = createObject(json['class']);
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
@@ -1297,7 +1233,7 @@ class Instance extends Obj {
   }
 
   /// What kind of instance is this?
-  InstanceKind kind;
+  /*InstanceKind*/ String kind;
 
   /// Instance references always include their class.
   ClassRef classRef;
@@ -1744,12 +1680,12 @@ class Sentinel extends Response {
 
   Sentinel();
   Sentinel.fromJson(Map json) : super.fromJson(json) {
-    kind = SentinelKind.parse(json['kind']);
+    kind = json['kind'];
     valueAsString = json['valueAsString'];
   }
 
   /// What kind of sentinel is this?
-  SentinelKind kind;
+  /*SentinelKind*/ String kind;
 
   /// A reasonable string representation of this sentinel.
   String valueAsString;

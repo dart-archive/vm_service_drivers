@@ -6,7 +6,7 @@ dart:
 #  - stable
 script:
   - (cd dart; ./tool/travis.sh)
-  - (cd java; ant -f build.xml)
+#  - (cd java; ant -f build.xml)
 
 branches:
   only:

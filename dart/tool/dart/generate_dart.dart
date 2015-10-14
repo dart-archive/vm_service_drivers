@@ -298,12 +298,6 @@ class Api extends Member with ApiParseUtil {
     gen.writeln();
     gen.writeln(_rpcError);
     gen.writeln('// enums');
-    gen.writeln();
-    gen.writeStatement('abstract class Enum {');
-    gen.writeStatement('final String name;');
-    gen.writeStatement('Enum(this.name);');
-    gen.writeStatement('String toString() => name;');
-    gen.writeStatement('}');
     enums.forEach((e) => e.generate(gen));
     gen.writeln();
     gen.writeln('// types');
@@ -352,9 +346,9 @@ class Method extends Member {
       gen.write(args.map((MethodArg arg) {
         if (arg.optional && !startedOptional) {
           startedOptional = true;
-          return '[${arg.type} ${arg.name}';
+          return '[${arg.paramType} ${arg.name}';
         } else {
-          return '${arg.type} ${arg.name}';
+          return '${arg.paramType} ${arg.name}';
         }
       }).join(', '));
       if (startedOptional) gen.write(']');
@@ -467,7 +461,11 @@ class MethodArg extends Member {
 
   MethodArg(this.parent, this.type, this.name);
 
-  void generate(DartGenerator gen) => gen.write('${type} ${name}');
+  String get paramType => type == 'StepOption' ? '/*${type}*/ String' : type;
+
+  void generate(DartGenerator gen) {
+    gen.write('${type} ${name}');
+  }
 }
 
 class Type extends Member {
@@ -527,9 +525,9 @@ class Type extends Member {
         gen.writeln(';');
       } else if (field.type.isEnum) {
         // Parse the enum.
-        String enumTypeName = field.type.types.first.name;
+        //String enumTypeName = field.type.types.first.name;
         gen.writeln(
-          "${field.generatableName} = ${enumTypeName}.parse(json['${field.name}']);");
+          "${field.generatableName} = json['${field.name}'];");
       } else {
         gen.writeln("${field.generatableName} = createObject(json['${field.name}']);");
       }
@@ -595,7 +593,11 @@ class TypeField extends Member {
   void generate(DartGenerator gen) {
     if (docs.isNotEmpty) gen.writeDocs(docs);
     if (optional) gen.write('@optional ');
-    gen.writeStatement('${type.name} ${generatableName};');
+    if (type.isEnum) {
+      gen.writeStatement('/*${type.name}*/ String ${generatableName};');
+    } else {
+      gen.writeStatement('${type.name} ${generatableName};');
+    }
     if (parent.fields.any((field) => field.hasDocs)) gen.writeln();
   }
 }
@@ -613,14 +615,8 @@ class Enum extends Member {
   void generate(DartGenerator gen) {
     gen.writeln();
     if (docs != null) gen.writeDocs(docs);
-    gen.writeStatement('class ${name} extends Enum {');
-    gen.writeStatement('static final Map<String, ${name}> _enums = {};');
-    gen.writeln();
+    gen.writeStatement('class ${name} {');
     enums.forEach((e) => e.generate(gen));
-    gen.writeln();
-    gen.writeStatement('static ${name} parse(String name) => _enums[name];');
-    gen.writeln();
-    gen.writeStatement('${name}._(String name) : super(name) { _enums[name] = this; }');
     gen.writeStatement('}');
   }
 
@@ -642,7 +638,7 @@ class EnumValue extends Member {
     if (docs != null) gen.writeDocs(docs);
     String tempName = name;
     if (parent.name == 'InstanceKind') tempName += 'Kind';
-    gen.writeStatement("static ${parent.name} ${tempName} = new ${parent.name}._('${name}');");
+    gen.writeStatement("static const String ${tempName} = '${name}';");
   }
 }
 
