@@ -36,53 +36,53 @@ Object _createObject(dynamic json) {
 }
 
 Map<String, Function> _typeFactories = {
-  'BoundField': BoundField.parse,
-  'BoundVariable': BoundVariable.parse,
-  'Breakpoint': Breakpoint.parse,
-  '@Class': ClassRef.parse,
-  'Class': Class.parse,
-  'ClassList': ClassList.parse,
-  '@Code': CodeRef.parse,
-  'Code': Code.parse,
-  '@Context': ContextRef.parse,
-  'Context': Context.parse,
-  'ContextElement': ContextElement.parse,
-  '@Error': ErrorRef.parse,
-  'Error': Error.parse,
-  'Event': Event.parse,
-  '@Field': FieldRef.parse,
-  'Field': Field.parse,
-  'Flag': Flag.parse,
-  'FlagList': FlagList.parse,
-  'Frame': Frame.parse,
-  '@Function': FuncRef.parse,
-  'Function': Func.parse,
-  '@Instance': InstanceRef.parse,
-  'Instance': Instance.parse,
-  '@Isolate': IsolateRef.parse,
-  'Isolate': Isolate.parse,
-  '@Library': LibraryRef.parse,
-  'Library': Library.parse,
-  'LibraryDependency': LibraryDependency.parse,
-  'MapAssociation': MapAssociation.parse,
-  'Message': Message.parse,
-  '@Null': NullRef.parse,
-  'Null': Null.parse,
-  '@Object': ObjRef.parse,
-  'Object': Obj.parse,
-  'Response': Response.parse,
-  'Sentinel': Sentinel.parse,
-  '@Script': ScriptRef.parse,
-  'Script': Script.parse,
-  'SourceLocation': SourceLocation.parse,
-  'Stack': Stack.parse,
-  'Success': Success.parse,
-  '@TypeArguments': TypeArgumentsRef.parse,
-  'TypeArguments': TypeArguments.parse,
-  'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
-  'Version': Version.parse,
-  '@VM': VMRef.parse,
-  'VM': VM.parse
+  'BoundField': BoundField._parse,
+  'BoundVariable': BoundVariable._parse,
+  'Breakpoint': Breakpoint._parse,
+  '@Class': ClassRef._parse,
+  'Class': Class._parse,
+  'ClassList': ClassList._parse,
+  '@Code': CodeRef._parse,
+  'Code': Code._parse,
+  '@Context': ContextRef._parse,
+  'Context': Context._parse,
+  'ContextElement': ContextElement._parse,
+  '@Error': ErrorRef._parse,
+  'Error': Error._parse,
+  'Event': Event._parse,
+  '@Field': FieldRef._parse,
+  'Field': Field._parse,
+  'Flag': Flag._parse,
+  'FlagList': FlagList._parse,
+  'Frame': Frame._parse,
+  '@Function': FuncRef._parse,
+  'Function': Func._parse,
+  '@Instance': InstanceRef._parse,
+  'Instance': Instance._parse,
+  '@Isolate': IsolateRef._parse,
+  'Isolate': Isolate._parse,
+  '@Library': LibraryRef._parse,
+  'Library': Library._parse,
+  'LibraryDependency': LibraryDependency._parse,
+  'MapAssociation': MapAssociation._parse,
+  'Message': Message._parse,
+  '@Null': NullRef._parse,
+  'Null': Null._parse,
+  '@Object': ObjRef._parse,
+  'Object': Obj._parse,
+  'Response': Response._parse,
+  'Sentinel': Sentinel._parse,
+  '@Script': ScriptRef._parse,
+  'Script': Script._parse,
+  'SourceLocation': SourceLocation._parse,
+  'Stack': Stack._parse,
+  'Success': Success._parse,
+  '@TypeArguments': TypeArgumentsRef._parse,
+  'TypeArguments': TypeArguments._parse,
+  'UnresolvedSourceLocation': UnresolvedSourceLocation._parse,
+  'Version': Version._parse,
+  '@VM': VMRef._parse,
+  'VM': VM._parse
 };
 
 class VmService {
@@ -753,10 +753,10 @@ class StepOption {
 /// If the field is being initialized, the [value] will be the
 /// [BeingInitialized] Sentinel.
 class BoundField {
-  static BoundField parse(Map json) => new BoundField.fromJson(json);
+  static BoundField _parse(Map json) => new BoundField._fromJson(json);
 
   BoundField();
-  BoundField.fromJson(Map json) {
+  BoundField._fromJson(Map json) {
     decl = _createObject(json['decl']);
     value = _createObject(json['value']);
   }
@@ -781,10 +781,10 @@ class BoundField {
 /// If the variable has been optimized out by the compiler, the [value] will be
 /// the [OptimizedOut] Sentinel.
 class BoundVariable {
-  static BoundVariable parse(Map json) => new BoundVariable.fromJson(json);
+  static BoundVariable _parse(Map json) => new BoundVariable._fromJson(json);
 
   BoundVariable();
-  BoundVariable.fromJson(Map json) {
+  BoundVariable._fromJson(Map json) {
     name = json['name'];
     value = _createObject(json['value']);
   }
@@ -804,10 +804,10 @@ class BoundVariable {
 /// yet been compiled or in a library which has not been loaded (i.e. a deferred
 /// library).
 class Breakpoint extends Obj {
-  static Breakpoint parse(Map json) => new Breakpoint.fromJson(json);
+  static Breakpoint _parse(Map json) => new Breakpoint._fromJson(json);
 
   Breakpoint();
-  Breakpoint.fromJson(Map json) : super.fromJson(json) {
+  Breakpoint._fromJson(Map json) : super._fromJson(json) {
     breakpointNumber = json['breakpointNumber'];
     resolved = json['resolved'];
     location = _createObject(json['location']);
@@ -831,10 +831,10 @@ class Breakpoint extends Obj {
 
 /// [ClassRef] is a reference to a [Class].
 class ClassRef extends ObjRef {
-  static ClassRef parse(Map json) => new ClassRef.fromJson(json);
+  static ClassRef _parse(Map json) => new ClassRef._fromJson(json);
 
   ClassRef();
-  ClassRef.fromJson(Map json) : super.fromJson(json) {
+  ClassRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
   }
 
@@ -846,10 +846,10 @@ class ClassRef extends ObjRef {
 
 /// A [Class] provides information about a Dart language class.
 class Class extends Obj {
-  static Class parse(Map json) => new Class.fromJson(json);
+  static Class _parse(Map json) => new Class._fromJson(json);
 
   Class();
-  Class.fromJson(Map json) : super.fromJson(json) {
+  Class._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     error = _createObject(json['error']);
     isAbstract = json['abstract'];
@@ -903,10 +903,10 @@ class Class extends Obj {
 }
 
 class ClassList extends Response {
-  static ClassList parse(Map json) => new ClassList.fromJson(json);
+  static ClassList _parse(Map json) => new ClassList._fromJson(json);
 
   ClassList();
-  ClassList.fromJson(Map json) : super.fromJson(json) {
+  ClassList._fromJson(Map json) : super._fromJson(json) {
     classes = _createObject(json['classes']);
   }
 
@@ -917,10 +917,10 @@ class ClassList extends Response {
 
 /// [CodeRef] is a reference to a [Code] object.
 class CodeRef extends ObjRef {
-  static CodeRef parse(Map json) => new CodeRef.fromJson(json);
+  static CodeRef _parse(Map json) => new CodeRef._fromJson(json);
 
   CodeRef();
-  CodeRef.fromJson(Map json) : super.fromJson(json) {
+  CodeRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     kind = json['kind'];
   }
@@ -937,10 +937,10 @@ class CodeRef extends ObjRef {
 
 /// A [Code] object represents compiled code in the Dart VM.
 class Code extends ObjRef {
-  static Code parse(Map json) => new Code.fromJson(json);
+  static Code _parse(Map json) => new Code._fromJson(json);
 
   Code();
-  Code.fromJson(Map json) : super.fromJson(json) {
+  Code._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     kind = json['kind'];
   }
@@ -956,10 +956,10 @@ class Code extends ObjRef {
 }
 
 class ContextRef extends ObjRef {
-  static ContextRef parse(Map json) => new ContextRef.fromJson(json);
+  static ContextRef _parse(Map json) => new ContextRef._fromJson(json);
 
   ContextRef();
-  ContextRef.fromJson(Map json) : super.fromJson(json) {
+  ContextRef._fromJson(Map json) : super._fromJson(json) {
     length = json['length'];
   }
 
@@ -973,10 +973,10 @@ class ContextRef extends ObjRef {
 /// A [Context] is a data structure which holds the captured variables for some
 /// closure.
 class Context extends Obj {
-  static Context parse(Map json) => new Context.fromJson(json);
+  static Context _parse(Map json) => new Context._fromJson(json);
 
   Context();
-  Context.fromJson(Map json) : super.fromJson(json) {
+  Context._fromJson(Map json) : super._fromJson(json) {
     length = json['length'];
     parent = _createObject(json['parent']);
     variables = _createObject(json['variables']);
@@ -996,10 +996,10 @@ class Context extends Obj {
 }
 
 class ContextElement {
-  static ContextElement parse(Map json) => new ContextElement.fromJson(json);
+  static ContextElement _parse(Map json) => new ContextElement._fromJson(json);
 
   ContextElement();
-  ContextElement.fromJson(Map json) {
+  ContextElement._fromJson(Map json) {
     value = _createObject(json['value']);
   }
 
@@ -1011,10 +1011,10 @@ class ContextElement {
 
 /// [ErrorRef] is a reference to an [Error].
 class ErrorRef extends ObjRef {
-  static ErrorRef parse(Map json) => new ErrorRef.fromJson(json);
+  static ErrorRef _parse(Map json) => new ErrorRef._fromJson(json);
 
   ErrorRef();
-  ErrorRef.fromJson(Map json) : super.fromJson(json) {
+  ErrorRef._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
     message = json['message'];
   }
@@ -1032,10 +1032,10 @@ class ErrorRef extends ObjRef {
 /// An [Error] represents a Dart language level error. This is distinct from an
 /// rpc error.
 class Error extends Obj {
-  static Error parse(Map json) => new Error.fromJson(json);
+  static Error _parse(Map json) => new Error._fromJson(json);
 
   Error();
-  Error.fromJson(Map json) : super.fromJson(json) {
+  Error._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
     message = json['message'];
     exception = _createObject(json['exception']);
@@ -1066,10 +1066,10 @@ class Error extends Obj {
 ///
 /// For more information, see events.
 class Event extends Response {
-  static Event parse(Map json) => new Event.fromJson(json);
+  static Event _parse(Map json) => new Event._fromJson(json);
 
   Event();
-  Event.fromJson(Map json) : super.fromJson(json) {
+  Event._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
     isolate = _createObject(json['isolate']);
     vm = _createObject(json['vm']);
@@ -1154,10 +1154,10 @@ class Event extends Response {
 
 /// An [FieldRef] is a reference to a [Field].
 class FieldRef extends ObjRef {
-  static FieldRef parse(Map json) => new FieldRef.fromJson(json);
+  static FieldRef _parse(Map json) => new FieldRef._fromJson(json);
 
   FieldRef();
-  FieldRef.fromJson(Map json) : super.fromJson(json) {
+  FieldRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     owner = _createObject(json['owner']);
     declaredType = _createObject(json['declaredType']);
@@ -1192,10 +1192,10 @@ class FieldRef extends ObjRef {
 
 /// A [Field] provides information about a Dart language field or variable.
 class Field extends Obj {
-  static Field parse(Map json) => new Field.fromJson(json);
+  static Field _parse(Map json) => new Field._fromJson(json);
 
   Field();
-  Field.fromJson(Map json) : super.fromJson(json) {
+  Field._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     owner = _createObject(json['owner']);
     declaredType = _createObject(json['declaredType']);
@@ -1238,10 +1238,10 @@ class Field extends Obj {
 
 /// A [Flag] represents a single VM command line flag.
 class Flag {
-  static Flag parse(Map json) => new Flag.fromJson(json);
+  static Flag _parse(Map json) => new Flag._fromJson(json);
 
   Flag();
-  Flag.fromJson(Map json) {
+  Flag._fromJson(Map json) {
     name = json['name'];
     comment = json['comment'];
     modified = json['modified'];
@@ -1268,10 +1268,10 @@ class Flag {
 
 /// A [FlagList] represents the complete set of VM command line flags.
 class FlagList extends Response {
-  static FlagList parse(Map json) => new FlagList.fromJson(json);
+  static FlagList _parse(Map json) => new FlagList._fromJson(json);
 
   FlagList();
-  FlagList.fromJson(Map json) : super.fromJson(json) {
+  FlagList._fromJson(Map json) : super._fromJson(json) {
     flags = _createObject(json['flags']);
   }
 
@@ -1282,10 +1282,10 @@ class FlagList extends Response {
 }
 
 class Frame extends Response {
-  static Frame parse(Map json) => new Frame.fromJson(json);
+  static Frame _parse(Map json) => new Frame._fromJson(json);
 
   Frame();
-  Frame.fromJson(Map json) : super.fromJson(json) {
+  Frame._fromJson(Map json) : super._fromJson(json) {
     index = json['index'];
     function = _createObject(json['function']);
     code = _createObject(json['code']);
@@ -1309,10 +1309,10 @@ class Frame extends Response {
 
 /// An [FuncRef] is a reference to a [Func].
 class FuncRef extends ObjRef {
-  static FuncRef parse(Map json) => new FuncRef.fromJson(json);
+  static FuncRef _parse(Map json) => new FuncRef._fromJson(json);
 
   FuncRef();
-  FuncRef.fromJson(Map json) : super.fromJson(json) {
+  FuncRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     owner = _createObject(json['owner']);
     isStatic = json['static'];
@@ -1322,7 +1322,7 @@ class FuncRef extends ObjRef {
   /// The name of this function.
   String name;
 
-  /// The owner of this field, which can be a Library, Class, or a Function.
+  /// The owner of this function, which can be a Library, Class, or a Function.
   ///
   /// [owner] can be one of [LibraryRef], [ClassRef] or [FuncRef].
   dynamic owner;
@@ -1339,10 +1339,10 @@ class FuncRef extends ObjRef {
 
 /// A [Func] represents a Dart language function.
 class Func extends Obj {
-  static Func parse(Map json) => new Func.fromJson(json);
+  static Func _parse(Map json) => new Func._fromJson(json);
 
   Func();
-  Func.fromJson(Map json) : super.fromJson(json) {
+  Func._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     owner = _createObject(json['owner']);
     location = _createObject(json['location']);
@@ -1352,7 +1352,7 @@ class Func extends Obj {
   /// The name of this function.
   String name;
 
-  /// The owner of this field, which can be a Library, Class, or a Function.
+  /// The owner of this function, which can be a Library, Class, or a Function.
   ///
   /// [owner] can be one of [LibraryRef], [ClassRef] or [FuncRef].
   dynamic owner;
@@ -1369,10 +1369,10 @@ class Func extends Obj {
 
 /// [InstanceRef] is a reference to an [Instance].
 class InstanceRef extends ObjRef {
-  static InstanceRef parse(Map json) => new InstanceRef.fromJson(json);
+  static InstanceRef _parse(Map json) => new InstanceRef._fromJson(json);
 
   InstanceRef();
-  InstanceRef.fromJson(Map json) : super.fromJson(json) {
+  InstanceRef._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
     classRef = _createObject(json['class']);
     valueAsString = json['valueAsString'];
@@ -1461,10 +1461,10 @@ class InstanceRef extends ObjRef {
 
 /// An [Instance] represents an instance of the Dart language class [Obj].
 class Instance extends Obj {
-  static Instance parse(Map json) => new Instance.fromJson(json);
+  static Instance _parse(Map json) => new Instance._fromJson(json);
 
   Instance();
-  Instance.fromJson(Map json) : super.fromJson(json) {
+  Instance._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
     classRef = _createObject(json['class']);
     valueAsString = json['valueAsString'];
@@ -1718,10 +1718,10 @@ class Instance extends Obj {
 
 /// [IsolateRef] is a reference to an [Isolate] object.
 class IsolateRef extends Response {
-  static IsolateRef parse(Map json) => new IsolateRef.fromJson(json);
+  static IsolateRef _parse(Map json) => new IsolateRef._fromJson(json);
 
   IsolateRef();
-  IsolateRef.fromJson(Map json) : super.fromJson(json) {
+  IsolateRef._fromJson(Map json) : super._fromJson(json) {
     id = json['id'];
     number = json['number'];
     name = json['name'];
@@ -1742,10 +1742,10 @@ class IsolateRef extends Response {
 
 /// An [Isolate] object provides information about one isolate in the VM.
 class Isolate extends Response {
-  static Isolate parse(Map json) => new Isolate.fromJson(json);
+  static Isolate _parse(Map json) => new Isolate._fromJson(json);
 
   Isolate();
-  Isolate.fromJson(Map json) : super.fromJson(json) {
+  Isolate._fromJson(Map json) : super._fromJson(json) {
     id = json['id'];
     number = json['number'];
     name = json['name'];
@@ -1804,10 +1804,10 @@ class Isolate extends Response {
 
 /// [LibraryRef] is a reference to a [Library].
 class LibraryRef extends ObjRef {
-  static LibraryRef parse(Map json) => new LibraryRef.fromJson(json);
+  static LibraryRef _parse(Map json) => new LibraryRef._fromJson(json);
 
   LibraryRef();
-  LibraryRef.fromJson(Map json) : super.fromJson(json) {
+  LibraryRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     uri = json['uri'];
   }
@@ -1826,10 +1826,10 @@ class LibraryRef extends ObjRef {
 ///
 /// See setLibraryDebuggable.
 class Library extends Obj {
-  static Library parse(Map json) => new Library.fromJson(json);
+  static Library _parse(Map json) => new Library._fromJson(json);
 
   Library();
-  Library.fromJson(Map json) : super.fromJson(json) {
+  Library._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     uri = json['uri'];
     debuggable = json['debuggable'];
@@ -1869,11 +1869,11 @@ class Library extends Obj {
 
 /// A [LibraryDependency] provides information about an import or export.
 class LibraryDependency {
-  static LibraryDependency parse(Map json) =>
-      new LibraryDependency.fromJson(json);
+  static LibraryDependency _parse(Map json) =>
+      new LibraryDependency._fromJson(json);
 
   LibraryDependency();
-  LibraryDependency.fromJson(Map json) {
+  LibraryDependency._fromJson(Map json) {
     isImport = json['isImport'];
     isDeferred = json['isDeferred'];
     prefix = json['prefix'];
@@ -1897,10 +1897,10 @@ class LibraryDependency {
 }
 
 class MapAssociation {
-  static MapAssociation parse(Map json) => new MapAssociation.fromJson(json);
+  static MapAssociation _parse(Map json) => new MapAssociation._fromJson(json);
 
   MapAssociation();
-  MapAssociation.fromJson(Map json) {
+  MapAssociation._fromJson(Map json) {
     key = _createObject(json['key']);
     value = _createObject(json['value']);
   }
@@ -1917,10 +1917,10 @@ class MapAssociation {
 /// A [Message] provides information about a pending isolate message and the
 /// function that will be invoked to handle it.
 class Message extends Response {
-  static Message parse(Map json) => new Message.fromJson(json);
+  static Message _parse(Map json) => new Message._fromJson(json);
 
   Message();
-  Message.fromJson(Map json) : super.fromJson(json) {
+  Message._fromJson(Map json) : super._fromJson(json) {
     index = json['index'];
     name = json['name'];
     messageObjectId = json['messageObjectId'];
@@ -1955,10 +1955,10 @@ class Message extends Response {
 
 /// [NullRef] is a reference to an a [Null].
 class NullRef extends InstanceRef {
-  static NullRef parse(Map json) => new NullRef.fromJson(json);
+  static NullRef _parse(Map json) => new NullRef._fromJson(json);
 
   NullRef();
-  NullRef.fromJson(Map json) : super.fromJson(json) {
+  NullRef._fromJson(Map json) : super._fromJson(json) {
     valueAsString = json['valueAsString'];
   }
 
@@ -1971,10 +1971,10 @@ class NullRef extends InstanceRef {
 
 /// A [Null] object represents the Dart language value null.
 class Null extends Instance {
-  static Null parse(Map json) => new Null.fromJson(json);
+  static Null _parse(Map json) => new Null._fromJson(json);
 
   Null();
-  Null.fromJson(Map json) : super.fromJson(json) {
+  Null._fromJson(Map json) : super._fromJson(json) {
     valueAsString = json['valueAsString'];
   }
 
@@ -1987,10 +1987,10 @@ class Null extends Instance {
 
 /// [ObjRef] is a reference to a [Obj].
 class ObjRef extends Response {
-  static ObjRef parse(Map json) => new ObjRef.fromJson(json);
+  static ObjRef _parse(Map json) => new ObjRef._fromJson(json);
 
   ObjRef();
-  ObjRef.fromJson(Map json) : super.fromJson(json) {
+  ObjRef._fromJson(Map json) : super._fromJson(json) {
     id = json['id'];
   }
 
@@ -2003,10 +2003,10 @@ class ObjRef extends Response {
 
 /// An [Obj] is a persistent object that is owned by some isolate.
 class Obj extends Response {
-  static Obj parse(Map json) => new Obj.fromJson(json);
+  static Obj _parse(Map json) => new Obj._fromJson(json);
 
   Obj();
-  Obj.fromJson(Map json) : super.fromJson(json) {
+  Obj._fromJson(Map json) : super._fromJson(json) {
     id = json['id'];
     classRef = _createObject(json['class']);
     size = json['size'];
@@ -2044,10 +2044,10 @@ class Obj extends Response {
 /// [Response]. By using the [type] property, the client can determine which
 /// type of response has been provided.
 class Response {
-  static Response parse(Map json) => new Response.fromJson(json);
+  static Response _parse(Map json) => new Response._fromJson(json);
 
   Response();
-  Response.fromJson(Map json) {
+  Response._fromJson(Map json) {
     type = json['type'];
   }
 
@@ -2063,10 +2063,10 @@ class Response {
 /// We use a [Sentinel] instead of an error for these cases because they do not
 /// represent a problematic condition. They are normal.
 class Sentinel extends Response {
-  static Sentinel parse(Map json) => new Sentinel.fromJson(json);
+  static Sentinel _parse(Map json) => new Sentinel._fromJson(json);
 
   Sentinel();
-  Sentinel.fromJson(Map json) : super.fromJson(json) {
+  Sentinel._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
     valueAsString = json['valueAsString'];
   }
@@ -2083,10 +2083,10 @@ class Sentinel extends Response {
 
 /// [ScriptRef] is a reference to a [Script].
 class ScriptRef extends ObjRef {
-  static ScriptRef parse(Map json) => new ScriptRef.fromJson(json);
+  static ScriptRef _parse(Map json) => new ScriptRef._fromJson(json);
 
   ScriptRef();
-  ScriptRef.fromJson(Map json) : super.fromJson(json) {
+  ScriptRef._fromJson(Map json) : super._fromJson(json) {
     uri = json['uri'];
   }
 
@@ -2101,10 +2101,10 @@ class ScriptRef extends ObjRef {
 /// The [tokenPosTable] is an array of int arrays. Each subarray consists of a
 /// line number followed by [(tokenPos, columnNumber)] pairs:
 class Script extends Obj {
-  static Script parse(Map json) => new Script.fromJson(json);
+  static Script _parse(Map json) => new Script._fromJson(json);
 
   Script();
-  Script.fromJson(Map json) : super.fromJson(json) {
+  Script._fromJson(Map json) : super._fromJson(json) {
     uri = json['uri'];
     library = _createObject(json['library']);
     source = json['source'];
@@ -2131,10 +2131,10 @@ class Script extends Obj {
 /// The [SourceLocation] class is used to designate a position or range in some
 /// script.
 class SourceLocation extends Response {
-  static SourceLocation parse(Map json) => new SourceLocation.fromJson(json);
+  static SourceLocation _parse(Map json) => new SourceLocation._fromJson(json);
 
   SourceLocation();
-  SourceLocation.fromJson(Map json) : super.fromJson(json) {
+  SourceLocation._fromJson(Map json) : super._fromJson(json) {
     script = _createObject(json['script']);
     tokenPos = json['tokenPos'];
     endTokenPos = json['endTokenPos'];
@@ -2154,10 +2154,10 @@ class SourceLocation extends Response {
 }
 
 class Stack extends Response {
-  static Stack parse(Map json) => new Stack.fromJson(json);
+  static Stack _parse(Map json) => new Stack._fromJson(json);
 
   Stack();
-  Stack.fromJson(Map json) : super.fromJson(json) {
+  Stack._fromJson(Map json) : super._fromJson(json) {
     frames = _createObject(json['frames']);
     messages = _createObject(json['messages']);
   }
@@ -2173,21 +2173,21 @@ class Stack extends Response {
 /// The [Success] type is used to indicate that an operation completed
 /// successfully.
 class Success extends Response {
-  static Success parse(Map json) => new Success.fromJson(json);
+  static Success _parse(Map json) => new Success._fromJson(json);
 
   Success();
-  Success.fromJson(Map json) : super.fromJson(json) {}
+  Success._fromJson(Map json) : super._fromJson(json) {}
 
   String toString() => '[Success type: ${type}]';
 }
 
 /// [TypeArgumentsRef] is a reference to a [TypeArguments] object.
 class TypeArgumentsRef extends ObjRef {
-  static TypeArgumentsRef parse(Map json) =>
-      new TypeArgumentsRef.fromJson(json);
+  static TypeArgumentsRef _parse(Map json) =>
+      new TypeArgumentsRef._fromJson(json);
 
   TypeArgumentsRef();
-  TypeArgumentsRef.fromJson(Map json) : super.fromJson(json) {
+  TypeArgumentsRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
   }
 
@@ -2201,10 +2201,10 @@ class TypeArgumentsRef extends ObjRef {
 /// A [TypeArguments] object represents the type argument vector for some
 /// instantiated generic type.
 class TypeArguments extends Obj {
-  static TypeArguments parse(Map json) => new TypeArguments.fromJson(json);
+  static TypeArguments _parse(Map json) => new TypeArguments._fromJson(json);
 
   TypeArguments();
-  TypeArguments.fromJson(Map json) : super.fromJson(json) {
+  TypeArguments._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     types = _createObject(json['types']);
   }
@@ -2233,11 +2233,11 @@ class TypeArguments extends Obj {
 /// The [column] field will only be present when the breakpoint was specified
 /// with a specific column number.
 class UnresolvedSourceLocation extends Response {
-  static UnresolvedSourceLocation parse(Map json) =>
-      new UnresolvedSourceLocation.fromJson(json);
+  static UnresolvedSourceLocation _parse(Map json) =>
+      new UnresolvedSourceLocation._fromJson(json);
 
   UnresolvedSourceLocation();
-  UnresolvedSourceLocation.fromJson(Map json) : super.fromJson(json) {
+  UnresolvedSourceLocation._fromJson(Map json) : super._fromJson(json) {
     script = _createObject(json['script']);
     scriptUri = json['scriptUri'];
     tokenPos = json['tokenPos'];
@@ -2269,10 +2269,10 @@ class UnresolvedSourceLocation extends Response {
 
 /// See Versioning.
 class Version extends Response {
-  static Version parse(Map json) => new Version.fromJson(json);
+  static Version _parse(Map json) => new Version._fromJson(json);
 
   Version();
-  Version.fromJson(Map json) : super.fromJson(json) {
+  Version._fromJson(Map json) : super._fromJson(json) {
     major = json['major'];
     minor = json['minor'];
   }
@@ -2291,10 +2291,10 @@ class Version extends Response {
 
 /// [VMRef] is a reference to a [VM] object.
 class VMRef extends Response {
-  static VMRef parse(Map json) => new VMRef.fromJson(json);
+  static VMRef _parse(Map json) => new VMRef._fromJson(json);
 
   VMRef();
-  VMRef.fromJson(Map json) : super.fromJson(json) {
+  VMRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
   }
 
@@ -2305,10 +2305,10 @@ class VMRef extends Response {
 }
 
 class VM extends Response {
-  static VM parse(Map json) => new VM.fromJson(json);
+  static VM _parse(Map json) => new VM._fromJson(json);
 
   VM();
-  VM.fromJson(Map json) : super.fromJson(json) {
+  VM._fromJson(Map json) : super._fromJson(json) {
     architectureBits = json['architectureBits'];
     targetCPU = json['targetCPU'];
     hostCPU = json['hostCPU'];

@@ -1321,8 +1321,7 @@ class @Function extends @Object {
   // The name of this function.
   string name;
 
-  // The owner of this field, which can be a Library, Class, or a
-  // Function.
+  // The owner of this function, which can be a Library, Class, or a Function.
   @Library|@Class|@Function owner;
 
   // Is this function static?
@@ -1341,8 +1340,7 @@ class Function extends Object {
   // The name of this function.
   string name;
 
-  // The owner of this field, which can be a Library, Class, or a
-  // Function.
+  // The owner of this function, which can be a Library, Class, or a Function.
   @Library|@Class|@Function owner;
 
   // The location of this function in the source code.
