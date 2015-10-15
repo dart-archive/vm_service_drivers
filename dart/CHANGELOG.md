@@ -1,5 +1,8 @@
 # Changelog
 
+## unreleased
+- added more dartdocs
+
 ## 0.0.4
 - enum redux
 
