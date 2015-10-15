@@ -213,7 +213,7 @@ class Api extends Member with ApiParseUtil {
 
     // Look for h3 nodes
     // the pre following it is the definition
-    // the optional p following that is the dcumentation
+    // the optional p following that is the documentation
 
     String h3Name = null;
 
