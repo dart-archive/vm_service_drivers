@@ -155,7 +155,13 @@ abstract class Parser {
       }
     }
 
-    return buf.isEmpty ? null : buf.toString().trim();
+    if (buf.isEmpty) return null;
+    return buf
+        .toString()
+        .split('\n')
+        .map((line) => line.trimRight())
+        .join('\n')
+        .trim();
   }
 
   void validate(bool result, String message) {

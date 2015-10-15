@@ -29,6 +29,8 @@ final String _headerCode = r'''
 // This is a generated file.
 
 /// A library to access the VM Service API.
+///
+/// The main entry-point for this library is the [VmService] class.
 library vm_service_lib;
 
 import 'dart:async';
@@ -71,17 +73,17 @@ final String _implCode = r'''
 
         // TODO: These could be generated from a list.
         if (streamId == 'VM') {
-          _vmController.add(createObject(params['event']));
+          _vmController.add(_createObject(params['event']));
         } else if (streamId == 'Isolate') {
-          _isolateController.add(createObject(params['event']));
+          _isolateController.add(_createObject(params['event']));
         } else if (streamId == 'Debug') {
-          _debugController.add(createObject(params['event']));
+          _debugController.add(_createObject(params['event']));
         } else if (streamId == 'GC') {
-          _gcController.add(createObject(params['event']));
+          _gcController.add(_createObject(params['event']));
         } else if (streamId == 'Stdout') {
-          _stdoutController.add(createObject(params['event']));
+          _stdoutController.add(_createObject(params['event']));
         } else if (streamId == 'Stderr') {
-          _stderrController.add(createObject(params['event']));
+          _stderrController.add(_createObject(params['event']));
         } else {
           _log.warning('unknown streamId: ${streamId}');
         }
@@ -98,7 +100,7 @@ final String _implCode = r'''
           if (_typeFactories[type] == null) {
             completer.completeError(new RPCError(0, 'unknown response type ${type}'));
           } else {
-            completer.complete(createObject(result));
+            completer.complete(_createObject(result));
           }
         }
       } else {
@@ -111,24 +113,6 @@ final String _implCode = r'''
 ''';
 
 final String _rpcError = r'''
-Object createObject(dynamic json) {
-  if (json == null) return null;
-
-  if (json is List) {
-    return (json as List).map((e) => createObject(e)).toList();
-  } else if (json is Map) {
-    String type = json['type'];
-    if (_typeFactories[type] == null) {
-      return null;
-    } else {
-      return _typeFactories[type](json);
-    }
-  } else {
-    // Handle simple types.
-    return json;
-  }
-}
-
 class RPCError {
   static RPCError parse(dynamic json) {
     return new RPCError(json['code'], json['message'], json['data']);
@@ -143,8 +127,13 @@ class RPCError {
   String toString() => '${code}: ${message}';
 }
 
+/// A logging handler you can pass to a [VmService] instance in order to get
+/// notifications of non-fatal service protcol warnings and errors.
 abstract class Log {
+  /// Log a warning level message.
   void warning(String message);
+
+  /// Log an error level message.
   void severe(String message);
 }
 
@@ -189,7 +178,6 @@ class Api extends Member with ApiParseUtil {
         while (i + 1 < nodes.length && isPara(nodes[i + 1])) {
           Element p = nodes[++i];
           String str = TextOutputVisitor.printText(p);
-          // TODO: Look for `See Success.` type comments.
           if (!str.contains('|')) str = collapseWhitespace(str);
           docs = '${docs}\n\n${str}';
         }
@@ -237,7 +225,6 @@ class Api extends Member with ApiParseUtil {
   }
 
   void generate(DartGenerator gen) {
-
     // Set default value for unspecified property
     setDefaultValue('Instance', 'valueAsStringIsTruncated', 'false');
     setDefaultValue('InstanceRef', 'valueAsStringIsTruncated', 'false');
@@ -245,8 +232,32 @@ class Api extends Member with ApiParseUtil {
     gen.out(_headerCode);
     gen.writeln("const String vmServiceVersion = '${serviceVersion}';");
     gen.writeln();
-    gen.writeln('/// @optional');
-    gen.writeln("const String optional = 'optional';");
+    gen.writeln('''
+/// @optional
+const String optional = 'optional';
+
+/// Decode a string in Base64 encoding into the equivalent non-encoded string.
+/// This is useful for handling the results of the Stdout or Stderr events.
+String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
+
+Object _createObject(dynamic json) {
+  if (json == null) return null;
+
+  if (json is List) {
+    return (json as List).map((e) => _createObject(e)).toList();
+  } else if (json is Map) {
+    String type = json['type'];
+    if (_typeFactories[type] == null) {
+      return null;
+    } else {
+      return _typeFactories[type](json);
+    }
+  } else {
+    // Handle simple types.
+    return json;
+  }
+}
+''');
     gen.writeln();
     gen.write('Map<String, Function> _typeFactories = {');
     types.forEach((Type type) {
@@ -255,11 +266,6 @@ class Api extends Member with ApiParseUtil {
     });
     gen.writeln('};');
     gen.writeln();
-
-    gen.writeStatement('String decodeBase64(String str) => '
-        'new String.fromCharCodes(BASE64.decode(str));');
-    gen.writeln();
-
     gen.writeStatement('class VmService {');
     gen.writeStatement('StreamSubscription _streamSub;');
     gen.writeStatement('Function _writeMessage;');
@@ -535,7 +541,7 @@ class Type extends Member {
         gen.writeln(
           "${field.generatableName} = json['${field.name}'];");
       } else {
-        gen.writeln("${field.generatableName} = createObject(json['${field.name}']);");
+        gen.writeln("${field.generatableName} = _createObject(json['${field.name}']);");
       }
     });
     gen.writeln('}');

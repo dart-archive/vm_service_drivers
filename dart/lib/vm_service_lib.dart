@@ -1,6 +1,8 @@
 // This is a generated file.
 
 /// A library to access the VM Service API.
+///
+/// The main entry-point for this library is the [VmService] class.
 library vm_service_lib;
 
 import 'dart:async';
@@ -10,6 +12,28 @@ const String vmServiceVersion = '3.0.0';
 
 /// @optional
 const String optional = 'optional';
+
+/// Decode a string in Base64 encoding into the equivalent non-encoded string.
+/// This is useful for handling the results of the Stdout or Stderr events.
+String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
+
+Object _createObject(dynamic json) {
+  if (json == null) return null;
+
+  if (json is List) {
+    return (json as List).map((e) => _createObject(e)).toList();
+  } else if (json is Map) {
+    String type = json['type'];
+    if (_typeFactories[type] == null) {
+      return null;
+    } else {
+      return _typeFactories[type](json);
+    }
+  } else {
+    // Handle simple types.
+    return json;
+  }
+}
 
 Map<String, Function> _typeFactories = {
   'BoundField': BoundField.parse,
@@ -60,8 +84,6 @@ Map<String, Function> _typeFactories = {
   '@VM': VMRef.parse,
   'VM': VM.parse
 };
-
-String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
 
 class VmService {
   StreamSubscription _streamSub;
@@ -451,17 +473,17 @@ class VmService {
 
         // TODO: These could be generated from a list.
         if (streamId == 'VM') {
-          _vmController.add(createObject(params['event']));
+          _vmController.add(_createObject(params['event']));
         } else if (streamId == 'Isolate') {
-          _isolateController.add(createObject(params['event']));
+          _isolateController.add(_createObject(params['event']));
         } else if (streamId == 'Debug') {
-          _debugController.add(createObject(params['event']));
+          _debugController.add(_createObject(params['event']));
         } else if (streamId == 'GC') {
-          _gcController.add(createObject(params['event']));
+          _gcController.add(_createObject(params['event']));
         } else if (streamId == 'Stdout') {
-          _stdoutController.add(createObject(params['event']));
+          _stdoutController.add(_createObject(params['event']));
         } else if (streamId == 'Stderr') {
-          _stderrController.add(createObject(params['event']));
+          _stderrController.add(_createObject(params['event']));
         } else {
           _log.warning('unknown streamId: ${streamId}');
         }
@@ -479,7 +501,7 @@ class VmService {
             completer.completeError(
                 new RPCError(0, 'unknown response type ${type}'));
           } else {
-            completer.complete(createObject(result));
+            completer.complete(_createObject(result));
           }
         }
       } else {
@@ -488,24 +510,6 @@ class VmService {
     } catch (e, s) {
       _log.severe('unable to decode message: ${message}, ${e}\n${s}');
     }
-  }
-}
-
-Object createObject(dynamic json) {
-  if (json == null) return null;
-
-  if (json is List) {
-    return (json as List).map((e) => createObject(e)).toList();
-  } else if (json is Map) {
-    String type = json['type'];
-    if (_typeFactories[type] == null) {
-      return null;
-    } else {
-      return _typeFactories[type](json);
-    }
-  } else {
-    // Handle simple types.
-    return json;
   }
 }
 
@@ -523,8 +527,13 @@ class RPCError {
   String toString() => '${code}: ${message}';
 }
 
+/// A logging handler you can pass to a [VmService] instance in order to get
+/// notifications of non-fatal service protcol warnings and errors.
 abstract class Log {
+  /// Log a warning level message.
   void warning(String message);
+
+  /// Log an error level message.
   void severe(String message);
 }
 
@@ -748,8 +757,8 @@ class BoundField {
 
   BoundField();
   BoundField.fromJson(Map json) {
-    decl = createObject(json['decl']);
-    value = createObject(json['value']);
+    decl = _createObject(json['decl']);
+    value = _createObject(json['value']);
   }
 
   FieldRef decl;
@@ -777,7 +786,7 @@ class BoundVariable {
   BoundVariable();
   BoundVariable.fromJson(Map json) {
     name = json['name'];
-    value = createObject(json['value']);
+    value = _createObject(json['value']);
   }
 
   String name;
@@ -801,7 +810,7 @@ class Breakpoint extends Obj {
   Breakpoint.fromJson(Map json) : super.fromJson(json) {
     breakpointNumber = json['breakpointNumber'];
     resolved = json['resolved'];
-    location = createObject(json['location']);
+    location = _createObject(json['location']);
   }
 
   /// A number identifying this breakpoint to the user.
@@ -842,16 +851,16 @@ class Class extends Obj {
   Class();
   Class.fromJson(Map json) : super.fromJson(json) {
     name = json['name'];
-    error = createObject(json['error']);
+    error = _createObject(json['error']);
     isAbstract = json['abstract'];
     isConst = json['const'];
-    library = createObject(json['library']);
-    location = createObject(json['location']);
-    superClass = createObject(json['super']);
-    interfaces = createObject(json['interfaces']);
-    fields = createObject(json['fields']);
-    functions = createObject(json['functions']);
-    subclasses = createObject(json['subclasses']);
+    library = _createObject(json['library']);
+    location = _createObject(json['location']);
+    superClass = _createObject(json['super']);
+    interfaces = _createObject(json['interfaces']);
+    fields = _createObject(json['fields']);
+    functions = _createObject(json['functions']);
+    subclasses = _createObject(json['subclasses']);
   }
 
   /// The name of this class.
@@ -898,7 +907,7 @@ class ClassList extends Response {
 
   ClassList();
   ClassList.fromJson(Map json) : super.fromJson(json) {
-    classes = createObject(json['classes']);
+    classes = _createObject(json['classes']);
   }
 
   List<ClassRef> classes;
@@ -969,8 +978,8 @@ class Context extends Obj {
   Context();
   Context.fromJson(Map json) : super.fromJson(json) {
     length = json['length'];
-    parent = createObject(json['parent']);
-    variables = createObject(json['variables']);
+    parent = _createObject(json['parent']);
+    variables = _createObject(json['variables']);
   }
 
   /// The number of variables in this context.
@@ -991,7 +1000,7 @@ class ContextElement {
 
   ContextElement();
   ContextElement.fromJson(Map json) {
-    value = createObject(json['value']);
+    value = _createObject(json['value']);
   }
 
   /// [value] can be one of [InstanceRef] or [Sentinel].
@@ -1029,8 +1038,8 @@ class Error extends Obj {
   Error.fromJson(Map json) : super.fromJson(json) {
     kind = json['kind'];
     message = json['message'];
-    exception = createObject(json['exception']);
-    stacktrace = createObject(json['stacktrace']);
+    exception = _createObject(json['exception']);
+    stacktrace = _createObject(json['stacktrace']);
   }
 
   /// What kind of error is this?
@@ -1062,13 +1071,13 @@ class Event extends Response {
   Event();
   Event.fromJson(Map json) : super.fromJson(json) {
     kind = json['kind'];
-    isolate = createObject(json['isolate']);
-    vm = createObject(json['vm']);
+    isolate = _createObject(json['isolate']);
+    vm = _createObject(json['vm']);
     timestamp = json['timestamp'];
-    breakpoint = createObject(json['breakpoint']);
-    pauseBreakpoints = createObject(json['pauseBreakpoints']);
-    topFrame = createObject(json['topFrame']);
-    exception = createObject(json['exception']);
+    breakpoint = _createObject(json['breakpoint']);
+    pauseBreakpoints = _createObject(json['pauseBreakpoints']);
+    topFrame = _createObject(json['topFrame']);
+    exception = _createObject(json['exception']);
     bytes = json['bytes'];
   }
 
@@ -1150,8 +1159,8 @@ class FieldRef extends ObjRef {
   FieldRef();
   FieldRef.fromJson(Map json) : super.fromJson(json) {
     name = json['name'];
-    owner = createObject(json['owner']);
-    declaredType = createObject(json['declaredType']);
+    owner = _createObject(json['owner']);
+    declaredType = _createObject(json['declaredType']);
     isConst = json['const'];
     isFinal = json['final'];
     isStatic = json['static'];
@@ -1188,13 +1197,13 @@ class Field extends Obj {
   Field();
   Field.fromJson(Map json) : super.fromJson(json) {
     name = json['name'];
-    owner = createObject(json['owner']);
-    declaredType = createObject(json['declaredType']);
+    owner = _createObject(json['owner']);
+    declaredType = _createObject(json['declaredType']);
     isConst = json['const'];
     isFinal = json['final'];
     isStatic = json['static'];
-    staticValue = createObject(json['staticValue']);
-    location = createObject(json['location']);
+    staticValue = _createObject(json['staticValue']);
+    location = _createObject(json['location']);
   }
 
   /// The name of this field.
@@ -1263,7 +1272,7 @@ class FlagList extends Response {
 
   FlagList();
   FlagList.fromJson(Map json) : super.fromJson(json) {
-    flags = createObject(json['flags']);
+    flags = _createObject(json['flags']);
   }
 
   /// A list of all flags in the VM.
@@ -1278,10 +1287,10 @@ class Frame extends Response {
   Frame();
   Frame.fromJson(Map json) : super.fromJson(json) {
     index = json['index'];
-    function = createObject(json['function']);
-    code = createObject(json['code']);
-    location = createObject(json['location']);
-    vars = createObject(json['vars']);
+    function = _createObject(json['function']);
+    code = _createObject(json['code']);
+    location = _createObject(json['location']);
+    vars = _createObject(json['vars']);
   }
 
   int index;
@@ -1305,7 +1314,7 @@ class FuncRef extends ObjRef {
   FuncRef();
   FuncRef.fromJson(Map json) : super.fromJson(json) {
     name = json['name'];
-    owner = createObject(json['owner']);
+    owner = _createObject(json['owner']);
     isStatic = json['static'];
     isConst = json['const'];
   }
@@ -1335,9 +1344,9 @@ class Func extends Obj {
   Func();
   Func.fromJson(Map json) : super.fromJson(json) {
     name = json['name'];
-    owner = createObject(json['owner']);
-    location = createObject(json['location']);
-    code = createObject(json['code']);
+    owner = _createObject(json['owner']);
+    location = _createObject(json['location']);
+    code = _createObject(json['code']);
   }
 
   /// The name of this function.
@@ -1365,14 +1374,14 @@ class InstanceRef extends ObjRef {
   InstanceRef();
   InstanceRef.fromJson(Map json) : super.fromJson(json) {
     kind = json['kind'];
-    classRef = createObject(json['class']);
+    classRef = _createObject(json['class']);
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
     length = json['length'];
     name = json['name'];
-    typeClass = createObject(json['typeClass']);
-    parameterizedClass = createObject(json['parameterizedClass']);
-    pattern = createObject(json['pattern']);
+    typeClass = _createObject(json['typeClass']);
+    parameterizedClass = _createObject(json['parameterizedClass']);
+    pattern = _createObject(json['pattern']);
   }
 
   /// What kind of instance is this?
@@ -1457,31 +1466,31 @@ class Instance extends Obj {
   Instance();
   Instance.fromJson(Map json) : super.fromJson(json) {
     kind = json['kind'];
-    classRef = createObject(json['class']);
+    classRef = _createObject(json['class']);
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
     length = json['length'];
     offset = json['offset'];
     count = json['count'];
     name = json['name'];
-    typeClass = createObject(json['typeClass']);
-    parameterizedClass = createObject(json['parameterizedClass']);
-    fields = createObject(json['fields']);
-    elements = createObject(json['elements']);
-    associations = createObject(json['associations']);
+    typeClass = _createObject(json['typeClass']);
+    parameterizedClass = _createObject(json['parameterizedClass']);
+    fields = _createObject(json['fields']);
+    elements = _createObject(json['elements']);
+    associations = _createObject(json['associations']);
     bytes = json['bytes'];
-    closureFunction = createObject(json['closureFunction']);
-    closureContext = createObject(json['closureContext']);
-    mirrorReferent = createObject(json['mirrorReferent']);
+    closureFunction = _createObject(json['closureFunction']);
+    closureContext = _createObject(json['closureContext']);
+    mirrorReferent = _createObject(json['mirrorReferent']);
     pattern = json['pattern'];
     isCaseSensitive = json['isCaseSensitive'];
     isMultiLine = json['isMultiLine'];
-    propertyKey = createObject(json['propertyKey']);
-    propertyValue = createObject(json['propertyValue']);
-    typeArguments = createObject(json['typeArguments']);
+    propertyKey = _createObject(json['propertyKey']);
+    propertyValue = _createObject(json['propertyValue']);
+    typeArguments = _createObject(json['typeArguments']);
     parameterIndex = json['parameterIndex'];
-    targetType = createObject(json['targetType']);
-    bound = createObject(json['bound']);
+    targetType = _createObject(json['targetType']);
+    bound = _createObject(json['bound']);
   }
 
   /// What kind of instance is this?
@@ -1743,11 +1752,11 @@ class Isolate extends Response {
     startTime = json['startTime'];
     livePorts = json['livePorts'];
     pauseOnExit = json['pauseOnExit'];
-    pauseEvent = createObject(json['pauseEvent']);
-    rootLib = createObject(json['rootLib']);
-    libraries = createObject(json['libraries']);
-    breakpoints = createObject(json['breakpoints']);
-    error = createObject(json['error']);
+    pauseEvent = _createObject(json['pauseEvent']);
+    rootLib = _createObject(json['rootLib']);
+    libraries = _createObject(json['libraries']);
+    breakpoints = _createObject(json['breakpoints']);
+    error = _createObject(json['error']);
   }
 
   /// The id which is passed to the getIsolate RPC to reload this isolate.
@@ -1824,11 +1833,11 @@ class Library extends Obj {
     name = json['name'];
     uri = json['uri'];
     debuggable = json['debuggable'];
-    dependencies = createObject(json['dependencies']);
-    scripts = createObject(json['scripts']);
-    variables = createObject(json['variables']);
-    functions = createObject(json['functions']);
-    classes = createObject(json['classes']);
+    dependencies = _createObject(json['dependencies']);
+    scripts = _createObject(json['scripts']);
+    variables = _createObject(json['variables']);
+    functions = _createObject(json['functions']);
+    classes = _createObject(json['classes']);
   }
 
   /// The name of this library.
@@ -1868,7 +1877,7 @@ class LibraryDependency {
     isImport = json['isImport'];
     isDeferred = json['isDeferred'];
     prefix = json['prefix'];
-    target = createObject(json['target']);
+    target = _createObject(json['target']);
   }
 
   /// Is this dependency an import (rather than an export)?
@@ -1892,8 +1901,8 @@ class MapAssociation {
 
   MapAssociation();
   MapAssociation.fromJson(Map json) {
-    key = createObject(json['key']);
-    value = createObject(json['value']);
+    key = _createObject(json['key']);
+    value = _createObject(json['value']);
   }
 
   /// [key] can be one of [InstanceRef] or [Sentinel].
@@ -1916,8 +1925,8 @@ class Message extends Response {
     name = json['name'];
     messageObjectId = json['messageObjectId'];
     size = json['size'];
-    handler = createObject(json['handler']);
-    location = createObject(json['location']);
+    handler = _createObject(json['handler']);
+    location = _createObject(json['location']);
   }
 
   /// The index in the isolate's message queue. The 0th message being the next
@@ -1999,7 +2008,7 @@ class Obj extends Response {
   Obj();
   Obj.fromJson(Map json) : super.fromJson(json) {
     id = json['id'];
-    classRef = createObject(json['class']);
+    classRef = _createObject(json['class']);
     size = json['size'];
   }
 
@@ -2097,7 +2106,7 @@ class Script extends Obj {
   Script();
   Script.fromJson(Map json) : super.fromJson(json) {
     uri = json['uri'];
-    library = createObject(json['library']);
+    library = _createObject(json['library']);
     source = json['source'];
     tokenPosTable = json['tokenPosTable'];
   }
@@ -2126,7 +2135,7 @@ class SourceLocation extends Response {
 
   SourceLocation();
   SourceLocation.fromJson(Map json) : super.fromJson(json) {
-    script = createObject(json['script']);
+    script = _createObject(json['script']);
     tokenPos = json['tokenPos'];
     endTokenPos = json['endTokenPos'];
   }
@@ -2149,8 +2158,8 @@ class Stack extends Response {
 
   Stack();
   Stack.fromJson(Map json) : super.fromJson(json) {
-    frames = createObject(json['frames']);
-    messages = createObject(json['messages']);
+    frames = _createObject(json['frames']);
+    messages = _createObject(json['messages']);
   }
 
   List<Frame> frames;
@@ -2197,7 +2206,7 @@ class TypeArguments extends Obj {
   TypeArguments();
   TypeArguments.fromJson(Map json) : super.fromJson(json) {
     name = json['name'];
-    types = createObject(json['types']);
+    types = _createObject(json['types']);
   }
 
   /// A name for this type argument list.
@@ -2229,7 +2238,7 @@ class UnresolvedSourceLocation extends Response {
 
   UnresolvedSourceLocation();
   UnresolvedSourceLocation.fromJson(Map json) : super.fromJson(json) {
-    script = createObject(json['script']);
+    script = _createObject(json['script']);
     scriptUri = json['scriptUri'];
     tokenPos = json['tokenPos'];
     line = json['line'];
@@ -2306,7 +2315,7 @@ class VM extends Response {
     version = json['version'];
     pid = json['pid'];
     startTime = json['startTime'];
-    isolates = createObject(json['isolates']);
+    isolates = _createObject(json['isolates']);
   }
 
   /// Word length on target architecture (e.g. 32, 64).
