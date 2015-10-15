@@ -1,7 +1,9 @@
 # Changelog
 
-## unreleased
+## 0.0.5
 - added more dartdocs
+- moved back to using Dart enums
+- changed from optional positional params to optional named params
 
 ## 0.0.4
 - enum redux

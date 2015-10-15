@@ -258,6 +258,14 @@ Object _createObject(dynamic json) {
     return json;
   }
 }
+
+String _printEnum(Object obj) {
+  if (obj == null) return null;
+  String str = obj.toString();
+  int index = str.indexOf('.');
+  return str.substring(index + 1);
+}
+
 ''');
     gen.writeln();
     gen.write('Map<String, Function> _typeFactories = {');
@@ -359,12 +367,12 @@ class Method extends Member {
       gen.write(args.map((MethodArg arg) {
         if (arg.optional && !startedOptional) {
           startedOptional = true;
-          return '[${arg.paramType} ${arg.name}';
+          return '{${arg.paramType} ${arg.name}';
         } else {
           return '${arg.paramType} ${arg.name}';
         }
       }).join(', '));
-      if (startedOptional) gen.write(']');
+      if (startedOptional) gen.write('}');
       gen.write(') ');
       if (!hasArgs) {
         gen.writeStatement("=> _call('${name}');");
@@ -377,7 +385,7 @@ class Method extends Member {
         args.where((MethodArg a) => a.optional).forEach((MethodArg arg) {
           String valueRef = arg.name;
           if (api.isEnumName(arg.type)) {
-            valueRef = '${arg.name}';
+            valueRef = '_printEnum(${arg.name})';
           }
           gen.writeln("if (${arg.name} != null) m['${arg.name}'] = ${valueRef};");
         });
@@ -386,7 +394,13 @@ class Method extends Member {
       } else {
         gen.writeStatement('{');
         gen.write("return _call('${name}', {");
-        gen.write(args.map((arg) => "'${arg.name}': ${arg.name}").join(', '));
+        gen.write(args.map((MethodArg arg) {
+          if (api.isEnumName(arg.type)) {
+            return "'${arg.name}': _printEnum(${arg.name})";
+          } else {
+            return "'${arg.name}': ${arg.name}";
+          }
+        }).join(', '));
         gen.writeStatement('});');
         gen.writeStatement('}');
       }
@@ -474,9 +488,7 @@ class MethodArg extends Member {
 
   MethodArg(this.parent, this.type, this.name);
 
-  String get paramType =>
-    type == 'StepOption' ? '/*${type}*/ String' :
-      type == 'ExceptionPauseMode' ? '/*ExceptionPauseMode*/ String' : type;
+  String get paramType => type;
 
   void generate(DartGenerator gen) {
     gen.write('${type} ${name}');
@@ -540,9 +552,9 @@ class Type extends Member {
         gen.writeln(';');
       } else if (field.type.isEnum) {
         // Parse the enum.
-        //String enumTypeName = field.type.types.first.name;
+        String enumTypeName = field.type.types.first.name;
         gen.writeln(
-          "${field.generatableName} = json['${field.name}'];");
+          "${field.generatableName} = _parse${enumTypeName}[json['${field.name}']];");
       } else {
         gen.writeln("${field.generatableName} = _createObject(json['${field.name}']);");
       }
@@ -555,7 +567,12 @@ class Type extends Member {
     if (toStringFields.length <= 7) {
       String properties = toStringFields.map((TypeField f) =>
           "${f.generatableName}: \${${f.generatableName}}").join(', ');
-      if (properties.length > 70) {
+      if (properties.length > 60) {
+        int index = properties.indexOf(', ', 55);
+        if (index != -1) {
+          properties = properties.substring(0, index + 2) +
+              "' //\n'" + properties.substring(index + 2);
+        }
         gen.writeln("String toString() => '[${name} ' //\n'${properties}]';");
       } else {
         gen.writeln("String toString() => '[${name} ${properties}]';");
@@ -608,11 +625,7 @@ class TypeField extends Member {
   void generate(DartGenerator gen) {
     if (docs.isNotEmpty) gen.writeDocs(docs);
     if (optional) gen.write('@optional ');
-    if (type.isEnum) {
-      gen.writeStatement('/*${type.name}*/ String ${generatableName};');
-    } else {
-      gen.writeStatement('${type.name} ${generatableName};');
-    }
+    gen.writeStatement('${type.name} ${generatableName};');
     if (parent.fields.any((field) => field.hasDocs)) gen.writeln();
   }
 }
@@ -630,9 +643,16 @@ class Enum extends Member {
   void generate(DartGenerator gen) {
     gen.writeln();
     if (docs != null) gen.writeDocs(docs);
-    gen.writeStatement('class ${name} {');
+    gen.writeStatement('enum ${name} {');
     enums.forEach((e) => e.generate(gen));
     gen.writeStatement('}');
+
+    gen.writeln();
+    gen.writeStatement('Map<String, ${name}> _parse${name} = {');
+    gen.writeStatement(enums.map((EnumValue e) {
+      return "'${e.name}': ${e.parent.name}.${e.name}";
+    }).join(', '));
+    gen.writeStatement('};');
   }
 
   void _parse(Token token) {
@@ -651,9 +671,9 @@ class EnumValue extends Member {
 
   void generate(DartGenerator gen) {
     if (docs != null) gen.writeDocs(docs);
-    String tempName = name;
-    if (parent.name == 'InstanceKind') tempName += 'Kind';
-    gen.writeStatement("static const String ${tempName} = '${name}';");
+    String suffix = ',';
+    if (parent.enums.last == this) suffix = '';
+    gen.writeStatement("${name}${suffix}");
   }
 }
 
