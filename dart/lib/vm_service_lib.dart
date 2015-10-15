@@ -363,7 +363,7 @@ class VmService {
   /// Unhandled | Pause isolate on unhandled exceptions
   /// All  | Pause isolate on all thrown exceptions
   Future<Success> setExceptionPauseMode(
-      String isolateId, ExceptionPauseMode mode) {
+      String isolateId, /*ExceptionPauseMode*/ String mode) {
     return _call(
         'setExceptionPauseMode', {'isolateId': isolateId, 'mode': mode});
   }
@@ -2103,14 +2103,12 @@ class ScriptRef extends ObjRef {
 ///
 /// ```
 /// [lineNumber, (tokenPos, columnNumber)*]
-///
 /// ```
 ///
 /// For example, a `tokenPosTable` with the value...
 ///
 /// ```
 /// [[1, 100, 5, 101, 8],[2, 102, 7]]
-///
 /// ```
 ///
 /// ...encodes the mapping:

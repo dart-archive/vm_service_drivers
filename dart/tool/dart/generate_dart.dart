@@ -474,7 +474,9 @@ class MethodArg extends Member {
 
   MethodArg(this.parent, this.type, this.name);
 
-  String get paramType => type == 'StepOption' ? '/*${type}*/ String' : type;
+  String get paramType =>
+    type == 'StepOption' ? '/*${type}*/ String' :
+      type == 'ExceptionPauseMode' ? '/*ExceptionPauseMode*/ String' : type;
 
   void generate(DartGenerator gen) {
     gen.write('${type} ${name}');
@@ -665,18 +667,9 @@ class TextOutputVisitor implements NodeVisitor {
   StringBuffer buf = new StringBuffer();
   bool _em = false;
   bool _href = false;
+  bool _blockquote = false;
 
   TextOutputVisitor();
-
-  void visitText(Text text) {
-    String t = text.text;
-    if (_em) {
-      t = _coerceRefType(t);
-    } else  if (_href) {
-      t = '[${_coerceRefType(t)}]';
-    }
-    buf.write(t);
-  }
 
   bool visitElementBefore(Element element) {
     if (element.tag == 'em') {
@@ -686,6 +679,7 @@ class TextOutputVisitor implements NodeVisitor {
       // Nothing to do.
     } else if (element.tag == 'blockquote') {
       buf.write('```\n');
+      _blockquote = true;
     } else if (element.tag == 'a') {
       _href = true;
     } else {
@@ -696,13 +690,29 @@ class TextOutputVisitor implements NodeVisitor {
     return true;
   }
 
+  void visitText(Text text) {
+    String t = text.text;
+    if (_em) {
+      t = _coerceRefType(t);
+    } else  if (_href) {
+      t = '[${_coerceRefType(t)}]';
+    }
+
+    if (_blockquote) {
+      buf.write('${t}\n```');
+    } else {
+      buf.write(t);
+    }
+  }
+
   void visitElementAfter(Element element) {
     if (element.tag == 'p') {
       buf.write('\n\n');
     } else if (element.tag == 'a') {
       _href = false;
     } else if (element.tag == 'blockquote') {
-      buf.write('```\n');
+      //buf.write('```\n');
+      _blockquote = false;
     } else if (element.tag == 'em') {
       buf.write('`');
       _em = false;
