@@ -17,6 +17,7 @@ String collapseWhitespace(String str) => str.replaceAll(_wsRegexp, ' ');
 
 bool isEmphasis(Node node) => node is Element && node.tag == 'em';
 bool isPara(Node node) => node is Element && node.tag == 'p';
+bool isBlockquote(Node node) => node is Element && node.tag == 'blockquote';
 bool isPre(Node node) => node is Element && node.tag == 'pre';
 bool isH1(Node node) => node is Element && node.tag == 'h1';
 bool isH3(Node node) => node is Element && node.tag == 'h3';

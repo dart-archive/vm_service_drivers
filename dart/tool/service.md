@@ -467,7 +467,7 @@ some target.
 _targetId_ may refer to a [Library](#library), [Class](#class), or
 [Instance](#instance).
 
-If _targetId_ is a temporary id which has expired, then then _Expired_
+If _targetId_ is a temporary id which has expired, then the _Expired_
 [Sentinel](#sentinel) is returned.
 
 If _targetId_ refers to an object which has been collected by the VM's
@@ -535,7 +535,7 @@ Object|Sentinel getObject(string isolateId,
 The _getObject_ RPC is used to lookup an _object_ from some isolate by
 its _id_.
 
-If _objectId_ is a temporary id which has expired, then then _Expired_
+If _objectId_ is a temporary id which has expired, then the _Expired_
 [Sentinel](#sentinel) is returned.
 
 If _objectId_ refers to a heap object which has been collected by the VM's
@@ -1321,8 +1321,7 @@ class @Function extends @Object {
   // The name of this function.
   string name;
 
-  // The owner of this field, which can be a Library, Class, or a
-  // Function.
+  // The owner of this function, which can be a Library, Class, or a Function.
   @Library|@Class|@Function owner;
 
   // Is this function static?
@@ -1341,8 +1340,7 @@ class Function extends Object {
   // The name of this function.
   string name;
 
-  // The owner of this field, which can be a Library, Class, or a
-  // Function.
+  // The owner of this function, which can be a Library, Class, or a Function.
   @Library|@Class|@Function owner;
 
   // The location of this function in the source code.
@@ -1732,7 +1730,7 @@ enum InstanceKind {
   // An instance of the Dart class Type.
   Type,
 
-  // An instance of the Dart class TypeParamer.
+  // An instance of the Dart class TypeParameter.
   TypeParameter,
 
   // An instance of the Dart class TypeRef.

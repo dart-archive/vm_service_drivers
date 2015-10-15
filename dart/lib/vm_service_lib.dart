@@ -1,6 +1,8 @@
 // This is a generated file.
 
 /// A library to access the VM Service API.
+///
+/// The main entry-point for this library is the [VmService] class.
 library vm_service_lib;
 
 import 'dart:async';
@@ -11,57 +13,77 @@ const String vmServiceVersion = '3.0.0';
 /// @optional
 const String optional = 'optional';
 
-Map<String, Function> _typeFactories = {
-  'BoundField': BoundField.parse,
-  'BoundVariable': BoundVariable.parse,
-  'Breakpoint': Breakpoint.parse,
-  '@Class': ClassRef.parse,
-  'Class': Class.parse,
-  'ClassList': ClassList.parse,
-  '@Code': CodeRef.parse,
-  'Code': Code.parse,
-  '@Context': ContextRef.parse,
-  'Context': Context.parse,
-  'ContextElement': ContextElement.parse,
-  '@Error': ErrorRef.parse,
-  'Error': Error.parse,
-  'Event': Event.parse,
-  '@Field': FieldRef.parse,
-  'Field': Field.parse,
-  'Flag': Flag.parse,
-  'FlagList': FlagList.parse,
-  'Frame': Frame.parse,
-  '@Function': FuncRef.parse,
-  'Function': Func.parse,
-  '@Instance': InstanceRef.parse,
-  'Instance': Instance.parse,
-  '@Isolate': IsolateRef.parse,
-  'Isolate': Isolate.parse,
-  '@Library': LibraryRef.parse,
-  'Library': Library.parse,
-  'LibraryDependency': LibraryDependency.parse,
-  'MapAssociation': MapAssociation.parse,
-  'Message': Message.parse,
-  '@Null': NullRef.parse,
-  'Null': Null.parse,
-  '@Object': ObjRef.parse,
-  'Object': Obj.parse,
-  'Response': Response.parse,
-  'Sentinel': Sentinel.parse,
-  '@Script': ScriptRef.parse,
-  'Script': Script.parse,
-  'SourceLocation': SourceLocation.parse,
-  'Stack': Stack.parse,
-  'Success': Success.parse,
-  '@TypeArguments': TypeArgumentsRef.parse,
-  'TypeArguments': TypeArguments.parse,
-  'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
-  'Version': Version.parse,
-  '@VM': VMRef.parse,
-  'VM': VM.parse
-};
-
+/// Decode a string in Base64 encoding into the equivalent non-encoded string.
+/// This is useful for handling the results of the Stdout or Stderr events.
 String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
+
+Object _createObject(dynamic json) {
+  if (json == null) return null;
+
+  if (json is List) {
+    return (json as List).map((e) => _createObject(e)).toList();
+  } else if (json is Map) {
+    String type = json['type'];
+    if (_typeFactories[type] == null) {
+      return null;
+    } else {
+      return _typeFactories[type](json);
+    }
+  } else {
+    // Handle simple types.
+    return json;
+  }
+}
+
+Map<String, Function> _typeFactories = {
+  'BoundField': BoundField._parse,
+  'BoundVariable': BoundVariable._parse,
+  'Breakpoint': Breakpoint._parse,
+  '@Class': ClassRef._parse,
+  'Class': Class._parse,
+  'ClassList': ClassList._parse,
+  '@Code': CodeRef._parse,
+  'Code': Code._parse,
+  '@Context': ContextRef._parse,
+  'Context': Context._parse,
+  'ContextElement': ContextElement._parse,
+  '@Error': ErrorRef._parse,
+  'Error': Error._parse,
+  'Event': Event._parse,
+  '@Field': FieldRef._parse,
+  'Field': Field._parse,
+  'Flag': Flag._parse,
+  'FlagList': FlagList._parse,
+  'Frame': Frame._parse,
+  '@Function': FuncRef._parse,
+  'Function': Func._parse,
+  '@Instance': InstanceRef._parse,
+  'Instance': Instance._parse,
+  '@Isolate': IsolateRef._parse,
+  'Isolate': Isolate._parse,
+  '@Library': LibraryRef._parse,
+  'Library': Library._parse,
+  'LibraryDependency': LibraryDependency._parse,
+  'MapAssociation': MapAssociation._parse,
+  'Message': Message._parse,
+  '@Null': NullRef._parse,
+  'Null': Null._parse,
+  '@Object': ObjRef._parse,
+  'Object': Obj._parse,
+  'Response': Response._parse,
+  'Sentinel': Sentinel._parse,
+  '@Script': ScriptRef._parse,
+  'Script': Script._parse,
+  'SourceLocation': SourceLocation._parse,
+  'Stack': Stack._parse,
+  'Success': Success._parse,
+  '@TypeArguments': TypeArgumentsRef._parse,
+  'TypeArguments': TypeArguments._parse,
+  'UnresolvedSourceLocation': UnresolvedSourceLocation._parse,
+  'Version': Version._parse,
+  '@VM': VMRef._parse,
+  'VM': VM._parse
+};
 
 class VmService {
   StreamSubscription _streamSub;
@@ -101,28 +123,28 @@ class VmService {
   // WriteEvent
   Stream<Event> get onStderrEvent => _stderrController.stream;
 
-  /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
+  /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
   /// some script.
   ///
-  /// The [scriptId] parameter is used to specify the target script.
+  /// The `scriptId` parameter is used to specify the target script.
   ///
-  /// The [line] parameter is used to specify the target line for the
+  /// The `line` parameter is used to specify the target line for the
   /// breakpoint. If there are multiple possible breakpoints on the target line,
   /// then the VM will place the breakpoint at the location which would execute
   /// soonest. If it is not possible to set a breakpoint at the target line, the
   /// breakpoint will be added at the next possible breakpoint location within
   /// the same function.
   ///
-  /// The [column] parameter may be optionally specified. This is useful for
+  /// The `column` parameter may be optionally specified. This is useful for
   /// targeting a specific breakpoint on a line with multiple possible
   /// breakpoints.
   ///
-  /// If no breakpoint is possible at that line, the [102] (Cannot add
+  /// If no breakpoint is possible at that line, the `102` (Cannot add
   /// breakpoint) error code is returned.
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
   ///
-  /// See Breakpoint.
+  /// See [Breakpoint].
   Future<Breakpoint> addBreakpoint(String isolateId, String scriptId, int line,
       [int column]) {
     Map m = {'isolateId': isolateId, 'scriptId': scriptId, 'line': line};
@@ -130,30 +152,30 @@ class VmService {
     return _call('addBreakpoint', m);
   }
 
-  /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
+  /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
   /// some script. This RPC is useful when a script has not yet been assigned an
   /// id, for example, if a script is in a deferred library which has not yet
   /// been loaded.
   ///
-  /// The [scriptUri] parameter is used to specify the target script.
+  /// The `scriptUri` parameter is used to specify the target script.
   ///
-  /// The [line] parameter is used to specify the target line for the
+  /// The `line` parameter is used to specify the target line for the
   /// breakpoint. If there are multiple possible breakpoints on the target line,
   /// then the VM will place the breakpoint at the location which would execute
   /// soonest. If it is not possible to set a breakpoint at the target line, the
   /// breakpoint will be added at the next possible breakpoint location within
   /// the same function.
   ///
-  /// The [column] parameter may be optionally specified. This is useful for
+  /// The `column` parameter may be optionally specified. This is useful for
   /// targeting a specific breakpoint on a line with multiple possible
   /// breakpoints.
   ///
-  /// If no breakpoint is possible at that line, the [102] (Cannot add
+  /// If no breakpoint is possible at that line, the `102` (Cannot add
   /// breakpoint) error code is returned.
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
   ///
-  /// See Breakpoint.
+  /// See [Breakpoint].
   Future<Breakpoint> addBreakpointWithScriptUri(
       String isolateId, String scriptUri, int line,
       [int column]) {
@@ -162,13 +184,13 @@ class VmService {
     return _call('addBreakpointWithScriptUri', m);
   }
 
-  /// The [addBreakpointAtEntry] RPC is used to add a breakpoint at the
+  /// The `addBreakpointAtEntry` RPC is used to add a breakpoint at the
   /// entrypoint of some function.
   ///
-  /// If no breakpoint is possible at the function entry, the [102] (Cannot add
+  /// If no breakpoint is possible at the function entry, the `102` (Cannot add
   /// breakpoint) error code is returned.
   ///
-  /// See Breakpoint.
+  /// See [Breakpoint].
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
   Future<Breakpoint> addBreakpointAtEntry(String isolateId, String functionId) {
@@ -176,22 +198,22 @@ class VmService {
         {'isolateId': isolateId, 'functionId': functionId});
   }
 
-  /// The [evaluate] RPC is used to evaluate an expression in the context of
+  /// The `evaluate` RPC is used to evaluate an expression in the context of
   /// some target.
   ///
-  /// [targetId] may refer to a Library, Class, or Instance.
+  /// `targetId` may refer to a [Library], [Class], or [Instance].
   ///
-  /// If [targetId] is a temporary id which has expired, then then [Expired]
-  /// Sentinel is returned.
+  /// If `targetId` is a temporary id which has expired, then the `Expired`
+  /// [Sentinel] is returned.
   ///
-  /// If [targetId] refers to an object which has been collected by the VM's
-  /// garbage collector, then the [Collected] Sentinel is returned.
+  /// If `targetId` refers to an object which has been collected by the VM's
+  /// garbage collector, then the `Collected` [Sentinel] is returned.
   ///
-  /// If an error occurs while evaluating the expression, an @Error reference
+  /// If an error occurs while evaluating the expression, an [ErrorRef]
+  /// reference will be returned.
+  ///
+  /// If the expression is evaluated successfully, an [InstanceRef] reference
   /// will be returned.
-  ///
-  /// If the expression is evaluated successfully, an @Instance reference will
-  /// be returned.
   ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   Future<dynamic> evaluate(
@@ -203,15 +225,15 @@ class VmService {
     });
   }
 
-  /// The [evaluateInFrame] RPC is used to evaluate an expression in the context
-  /// of a particular stack frame. [frameIndex] is the index of the desired
-  /// Frame, with an index of [0] indicating the top (most recent) frame.
+  /// The `evaluateInFrame` RPC is used to evaluate an expression in the context
+  /// of a particular stack frame. `frameIndex` is the index of the desired
+  /// [Frame], with an index of `0` indicating the top (most recent) frame.
   ///
-  /// If an error occurs while evaluating the expression, an @Error reference
+  /// If an error occurs while evaluating the expression, an [ErrorRef]
+  /// reference will be returned.
+  ///
+  /// If the expression is evaluated successfully, an [InstanceRef] reference
   /// will be returned.
-  ///
-  /// If the expression is evaluated successfully, an @Instance reference will
-  /// be returned.
   ///
   /// The return value can be one of [InstanceRef] or [ErrorRef].
   Future<dynamic> evaluateInFrame(
@@ -226,37 +248,37 @@ class VmService {
   /// The _getFlagList RPC returns a list of all command line flags in the VM
   /// along with their current values.
   ///
-  /// See FlagList.
+  /// See [FlagList].
   Future<FlagList> getFlagList() => _call('getFlagList');
 
-  /// The [getIsolate] RPC is used to lookup an [Isolate] object by its [id].
+  /// The `getIsolate` RPC is used to lookup an `Isolate` object by its `id`.
   ///
-  /// If [isolateId] refers to an isolate which has exited, then the [Collected]
-  /// Sentinel is returned.
+  /// If `isolateId` refers to an isolate which has exited, then the `Collected`
+  /// [Sentinel] is returned.
   ///
-  /// See Isolate.
+  /// See [Isolate].
   ///
   /// The return value can be one of [Isolate] or [Sentinel].
   Future<dynamic> getIsolate(String isolateId) {
     return _call('getIsolate', {'isolateId': isolateId});
   }
 
-  /// The [getObject] RPC is used to lookup an [object] from some isolate by its
-  /// [id].
+  /// The `getObject` RPC is used to lookup an `object` from some isolate by its
+  /// `id`.
   ///
-  /// If [objectId] is a temporary id which has expired, then then [Expired]
-  /// Sentinel is returned.
+  /// If `objectId` is a temporary id which has expired, then the `Expired`
+  /// [Sentinel] is returned.
   ///
-  /// If [objectId] refers to a heap object which has been collected by the VM's
-  /// garbage collector, then the [Collected] Sentinel is returned.
+  /// If `objectId` refers to a heap object which has been collected by the VM's
+  /// garbage collector, then the `Collected` [Sentinel] is returned.
   ///
-  /// If [objectId] refers to a non-heap object which has been deleted, then the
-  /// [Collected] Sentinel is returned.
+  /// If `objectId` refers to a non-heap object which has been deleted, then the
+  /// `Collected` [Sentinel] is returned.
   ///
   /// If the object handle has not expired and the object has not been
-  /// collected, then an Object will be returned.
+  /// collected, then an [Obj] will be returned.
   ///
-  /// The [offset] and [count] parameters are used to request subranges of
+  /// The `offset` and `count` parameters are used to request subranges of
   /// Instance objects with the kinds: List, Map, Uint8ClampedList, Uint8List,
   /// Uint16List, Uint32List, Uint64List, Int8List, Int16List, Int32List,
   /// Int64List, Flooat32List, Float64List, Inst32x3List, Float32x4List, and
@@ -271,52 +293,52 @@ class VmService {
     return _call('getObject', m);
   }
 
-  /// The [getStack] RPC is used to retrieve the current execution stack and
+  /// The `getStack` RPC is used to retrieve the current execution stack and
   /// message queue for an isolate. The isolate does not need to be paused.
   ///
-  /// See Stack.
+  /// See [Stack].
   Future<Stack> getStack(String isolateId) {
     return _call('getStack', {'isolateId': isolateId});
   }
 
-  /// The [getVersion] RPC is used to determine what version of the Service
+  /// The `getVersion` RPC is used to determine what version of the Service
   /// Protocol is served by a VM.
   ///
-  /// See Version.
+  /// See [Version].
   Future<Version> getVersion() => _call('getVersion');
 
-  /// The [getVM] RPC returns global information about a Dart virtual machine.
+  /// The `getVM` RPC returns global information about a Dart virtual machine.
   ///
-  /// See VM.
+  /// See [VM].
   Future<VM> getVM() => _call('getVM');
 
-  /// The [pause] RPC is used to interrupt a running isolate. The RPC enqueues
+  /// The `pause` RPC is used to interrupt a running isolate. The RPC enqueues
   /// the interrupt request and potentially returns before the isolate is
   /// paused.
   ///
-  /// When the isolate is paused an event will be sent on the [Debug] stream.
+  /// When the isolate is paused an event will be sent on the `Debug` stream.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> pause(String isolateId) {
     return _call('pause', {'isolateId': isolateId});
   }
 
-  /// The [removeBreakpoint] RPC is used to remove a breakpoint by its [id].
+  /// The `removeBreakpoint` RPC is used to remove a breakpoint by its `id`.
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> removeBreakpoint(String isolateId, String breakpointId) {
     return _call('removeBreakpoint',
         {'isolateId': isolateId, 'breakpointId': breakpointId});
   }
 
-  /// The [resume] RPC is used to resume execution of a paused isolate.
+  /// The `resume` RPC is used to resume execution of a paused isolate.
   ///
-  /// If the [step] parameter is not provided, the program will resume regular
+  /// If the `step` parameter is not provided, the program will resume regular
   /// execution.
   ///
-  /// If the [step] parameter is provided, it indicates what form of
+  /// If the `step` parameter is provided, it indicates what form of
   /// single-stepping to use.
   ///
   /// step | meaning
@@ -325,14 +347,14 @@ class VmService {
   /// Over | Single step, skipping over function calls
   /// Out | Single step until the current function exits
   ///
-  /// See Success, StepOption.
+  /// See [Success], [StepOption].
   Future<Success> resume(String isolateId, [/*StepOption*/ String step]) {
     Map m = {'isolateId': isolateId};
     if (step != null) m['step'] = step;
     return _call('resume', m);
   }
 
-  /// The [setExceptionPauseMode] RPC is used to control if an isolate pauses
+  /// The `setExceptionPauseMode` RPC is used to control if an isolate pauses
   /// when an exception is thrown.
   ///
   /// mode | meaning
@@ -341,15 +363,15 @@ class VmService {
   /// Unhandled | Pause isolate on unhandled exceptions
   /// All  | Pause isolate on all thrown exceptions
   Future<Success> setExceptionPauseMode(
-      String isolateId, ExceptionPauseMode mode) {
+      String isolateId, /*ExceptionPauseMode*/ String mode) {
     return _call(
         'setExceptionPauseMode', {'isolateId': isolateId, 'mode': mode});
   }
 
-  /// The [setLibraryDebuggable] RPC is used to enable or disable whether
+  /// The `setLibraryDebuggable` RPC is used to enable or disable whether
   /// breakpoints and stepping work for a given library.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> setLibraryDebuggable(
       String isolateId, String libraryId, bool isDebuggable) {
     return _call('setLibraryDebuggable', {
@@ -359,37 +381,37 @@ class VmService {
     });
   }
 
-  /// The [setName] RPC is used to change the debugging name for an isolate.
+  /// The `setName` RPC is used to change the debugging name for an isolate.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> setName(String isolateId, String name) {
     return _call('setName', {'isolateId': isolateId, 'name': name});
   }
 
-  /// The [setVMName] RPC is used to change the debugging name for the vm.
+  /// The `setVMName` RPC is used to change the debugging name for the vm.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> setVMName(String name) {
     return _call('setVMName', {'name': name});
   }
 
-  /// The [streamCancel] RPC cancels a stream subscription in the VM.
+  /// The `streamCancel` RPC cancels a stream subscription in the VM.
   ///
-  /// If the client is not subscribed to the stream, the [104] (Stream not
+  /// If the client is not subscribed to the stream, the `104` (Stream not
   /// subscribed) error code is returned.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> streamCancel(String streamId) {
     return _call('streamCancel', {'streamId': streamId});
   }
 
-  /// The [streamListen] RPC subscribes to a stream in the VM. Once subscribed,
+  /// The `streamListen` RPC subscribes to a stream in the VM. Once subscribed,
   /// the client will begin receiving events from the stream.
   ///
-  /// If the client is not subscribed to the stream, the [103] (Stream already
+  /// If the client is not subscribed to the stream, the `103` (Stream already
   /// subscribed) error code is returned.
   ///
-  /// The [streamId] parameter may have the following published values:
+  /// The `streamId` parameter may have the following published values:
   ///
   /// streamId | event types provided
   /// -------- | -----------
@@ -400,7 +422,7 @@ class VmService {
   /// BreakpointRemoved, Inspect
   /// GC | GC
   ///
-  /// Additionally, some embedders provide the [Stdout] and [Stderr] streams.
+  /// Additionally, some embedders provide the `Stdout` and `Stderr` streams.
   /// These streams allow the client to subscribe to writes to stdout and
   /// stderr.
   ///
@@ -409,11 +431,11 @@ class VmService {
   /// Stdout | WriteEvent
   /// Stderr | WriteEvent
   ///
-  /// It is considered a [backwards compatible] change to add a new type of
+  /// It is considered a `backwards compatible` change to add a new type of
   /// event to an existing stream. Clients should be written to handle this
   /// gracefully, perhaps by warning and ignoring.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> streamListen(String streamId) {
     return _call('streamListen', {'streamId': streamId});
   }
@@ -451,17 +473,17 @@ class VmService {
 
         // TODO: These could be generated from a list.
         if (streamId == 'VM') {
-          _vmController.add(createObject(params['event']));
+          _vmController.add(_createObject(params['event']));
         } else if (streamId == 'Isolate') {
-          _isolateController.add(createObject(params['event']));
+          _isolateController.add(_createObject(params['event']));
         } else if (streamId == 'Debug') {
-          _debugController.add(createObject(params['event']));
+          _debugController.add(_createObject(params['event']));
         } else if (streamId == 'GC') {
-          _gcController.add(createObject(params['event']));
+          _gcController.add(_createObject(params['event']));
         } else if (streamId == 'Stdout') {
-          _stdoutController.add(createObject(params['event']));
+          _stdoutController.add(_createObject(params['event']));
         } else if (streamId == 'Stderr') {
-          _stderrController.add(createObject(params['event']));
+          _stderrController.add(_createObject(params['event']));
         } else {
           _log.warning('unknown streamId: ${streamId}');
         }
@@ -479,7 +501,7 @@ class VmService {
             completer.completeError(
                 new RPCError(0, 'unknown response type ${type}'));
           } else {
-            completer.complete(createObject(result));
+            completer.complete(_createObject(result));
           }
         }
       } else {
@@ -488,24 +510,6 @@ class VmService {
     } catch (e, s) {
       _log.severe('unable to decode message: ${message}, ${e}\n${s}');
     }
-  }
-}
-
-Object createObject(dynamic json) {
-  if (json == null) return null;
-
-  if (json is List) {
-    return (json as List).map((e) => createObject(e)).toList();
-  } else if (json is Map) {
-    String type = json['type'];
-    if (_typeFactories[type] == null) {
-      return null;
-    } else {
-      return _typeFactories[type](json);
-    }
-  } else {
-    // Handle simple types.
-    return json;
   }
 }
 
@@ -523,8 +527,13 @@ class RPCError {
   String toString() => '${code}: ${message}';
 }
 
+/// A logging handler you can pass to a [VmService] instance in order to get
+/// notifications of non-fatal service protcol warnings and errors.
 abstract class Log {
+  /// Log a warning level message.
   void warning(String message);
+
+  /// Log an error level message.
   void severe(String message);
 }
 
@@ -558,7 +567,7 @@ class ErrorKind {
   static const String TerminationError = 'TerminationError';
 }
 
-/// Adding new values to [EventKind] is considered a backwards compatible
+/// Adding new values to `EventKind` is considered a backwards compatible
 /// change. Clients should ignore unrecognized events.
 class EventKind {
   /// Notification that VM identifying information has changed. Currently used
@@ -612,8 +621,8 @@ class EventKind {
   static const String WriteEvent = 'WriteEvent';
 }
 
-/// Adding new values to [InstanceKind] is considered a backwards compatible
-/// change. Clients should treat unrecognized instance kinds as [PlainInstance].
+/// Adding new values to `InstanceKind` is considered a backwards compatible
+/// change. Clients should treat unrecognized instance kinds as `PlainInstance`.
 class InstanceKind {
   /// A general instance of the Dart class Object.
   static const String PlainInstanceKind = 'PlainInstance';
@@ -682,7 +691,7 @@ class InstanceKind {
   /// An instance of the Dart class Type.
   static const String TypeKind = 'Type';
 
-  /// An instance of the Dart class TypeParamer.
+  /// An instance of the Dart class TypeParameter.
   static const String TypeParameterKind = 'TypeParameter';
 
   /// An instance of the Dart class TypeRef.
@@ -692,10 +701,10 @@ class InstanceKind {
   static const String BoundedTypeKind = 'BoundedType';
 }
 
-/// A [SentinelKind] is used to distinguish different kinds of [Sentinel]
+/// A `SentinelKind` is used to distinguish different kinds of `Sentinel`
 /// objects.
 ///
-/// Adding new values to [SentinelKind] is considered a backwards compatible
+/// Adding new values to `SentinelKind` is considered a backwards compatible
 /// change. Clients must handle this gracefully.
 class SentinelKind {
   /// Indicates that the object referred to has been collected by the GC.
@@ -717,7 +726,7 @@ class SentinelKind {
   static const String Free = 'Free';
 }
 
-/// An [ExceptionPauseMode] indicates how the isolate pauses when an exception
+/// An `ExceptionPauseMode` indicates how the isolate pauses when an exception
 /// is thrown.
 class ExceptionPauseMode {
   static const String None = 'None';
@@ -725,7 +734,7 @@ class ExceptionPauseMode {
   static const String All = 'All';
 }
 
-/// A [StepOption] indicates which form of stepping is requested in a resume
+/// A `StepOption` indicates which form of stepping is requested in a [resume]
 /// RPC.
 class StepOption {
   static const String Into = 'Into';
@@ -735,21 +744,21 @@ class StepOption {
 
 // types
 
-/// A [BoundField] represents a field bound to a particular value in an
-/// [Instance].
+/// A `BoundField` represents a field bound to a particular value in an
+/// `Instance`.
 ///
-/// If the field is uninitialized, the [value] will be the [NotInitialized]
-/// Sentinel.
+/// If the field is uninitialized, the `value` will be the `NotInitialized`
+/// [Sentinel].
 ///
-/// If the field is being initialized, the [value] will be the
-/// [BeingInitialized] Sentinel.
+/// If the field is being initialized, the `value` will be the
+/// `BeingInitialized` [Sentinel].
 class BoundField {
-  static BoundField parse(Map json) => new BoundField.fromJson(json);
+  static BoundField _parse(Map json) => new BoundField._fromJson(json);
 
   BoundField();
-  BoundField.fromJson(Map json) {
-    decl = createObject(json['decl']);
-    value = createObject(json['value']);
+  BoundField._fromJson(Map json) {
+    decl = _createObject(json['decl']);
+    value = _createObject(json['value']);
   }
 
   FieldRef decl;
@@ -760,24 +769,24 @@ class BoundField {
   String toString() => '[BoundField decl: ${decl}, value: ${value}]';
 }
 
-/// A [BoundVariable] represents a local variable bound to a particular value in
-/// a [Frame].
+/// A `BoundVariable` represents a local variable bound to a particular value in
+/// a `Frame`.
 ///
-/// If the variable is uninitialized, the [value] will be the [NotInitialized]
-/// Sentinel.
+/// If the variable is uninitialized, the `value` will be the `NotInitialized`
+/// [Sentinel].
 ///
-/// If the variable is being initialized, the [value] will be the
-/// [BeingInitialized] Sentinel.
+/// If the variable is being initialized, the `value` will be the
+/// `BeingInitialized` [Sentinel].
 ///
-/// If the variable has been optimized out by the compiler, the [value] will be
-/// the [OptimizedOut] Sentinel.
+/// If the variable has been optimized out by the compiler, the `value` will be
+/// the `OptimizedOut` [Sentinel].
 class BoundVariable {
-  static BoundVariable parse(Map json) => new BoundVariable.fromJson(json);
+  static BoundVariable _parse(Map json) => new BoundVariable._fromJson(json);
 
   BoundVariable();
-  BoundVariable.fromJson(Map json) {
+  BoundVariable._fromJson(Map json) {
     name = json['name'];
-    value = createObject(json['value']);
+    value = _createObject(json['value']);
   }
 
   String name;
@@ -788,20 +797,20 @@ class BoundVariable {
   String toString() => '[BoundVariable name: ${name}, value: ${value}]';
 }
 
-/// A [Breakpoint] describes a debugger breakpoint.
+/// A `Breakpoint` describes a debugger breakpoint.
 ///
-/// A breakpoint is [resolved] when it has been assigned to a specific program
+/// A breakpoint is `resolved` when it has been assigned to a specific program
 /// location. A breakpoint my remain unresolved when it is in code which has not
 /// yet been compiled or in a library which has not been loaded (i.e. a deferred
 /// library).
 class Breakpoint extends Obj {
-  static Breakpoint parse(Map json) => new Breakpoint.fromJson(json);
+  static Breakpoint _parse(Map json) => new Breakpoint._fromJson(json);
 
   Breakpoint();
-  Breakpoint.fromJson(Map json) : super.fromJson(json) {
+  Breakpoint._fromJson(Map json) : super._fromJson(json) {
     breakpointNumber = json['breakpointNumber'];
     resolved = json['resolved'];
-    location = createObject(json['location']);
+    location = _createObject(json['location']);
   }
 
   /// A number identifying this breakpoint to the user.
@@ -820,12 +829,12 @@ class Breakpoint extends Obj {
       'type: ${type}, id: ${id}, breakpointNumber: ${breakpointNumber}, resolved: ${resolved}, location: ${location}]';
 }
 
-/// [ClassRef] is a reference to a [Class].
+/// `ClassRef` is a reference to a `Class`.
 class ClassRef extends ObjRef {
-  static ClassRef parse(Map json) => new ClassRef.fromJson(json);
+  static ClassRef _parse(Map json) => new ClassRef._fromJson(json);
 
   ClassRef();
-  ClassRef.fromJson(Map json) : super.fromJson(json) {
+  ClassRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
   }
 
@@ -835,23 +844,23 @@ class ClassRef extends ObjRef {
   String toString() => '[ClassRef type: ${type}, id: ${id}, name: ${name}]';
 }
 
-/// A [Class] provides information about a Dart language class.
+/// A `Class` provides information about a Dart language class.
 class Class extends Obj {
-  static Class parse(Map json) => new Class.fromJson(json);
+  static Class _parse(Map json) => new Class._fromJson(json);
 
   Class();
-  Class.fromJson(Map json) : super.fromJson(json) {
+  Class._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
-    error = createObject(json['error']);
+    error = _createObject(json['error']);
     isAbstract = json['abstract'];
     isConst = json['const'];
-    library = createObject(json['library']);
-    location = createObject(json['location']);
-    superClass = createObject(json['super']);
-    interfaces = createObject(json['interfaces']);
-    fields = createObject(json['fields']);
-    functions = createObject(json['functions']);
-    subclasses = createObject(json['subclasses']);
+    library = _createObject(json['library']);
+    location = _createObject(json['location']);
+    superClass = _createObject(json['super']);
+    interfaces = _createObject(json['interfaces']);
+    fields = _createObject(json['fields']);
+    functions = _createObject(json['functions']);
+    subclasses = _createObject(json['subclasses']);
   }
 
   /// The name of this class.
@@ -894,11 +903,11 @@ class Class extends Obj {
 }
 
 class ClassList extends Response {
-  static ClassList parse(Map json) => new ClassList.fromJson(json);
+  static ClassList _parse(Map json) => new ClassList._fromJson(json);
 
   ClassList();
-  ClassList.fromJson(Map json) : super.fromJson(json) {
-    classes = createObject(json['classes']);
+  ClassList._fromJson(Map json) : super._fromJson(json) {
+    classes = _createObject(json['classes']);
   }
 
   List<ClassRef> classes;
@@ -906,12 +915,12 @@ class ClassList extends Response {
   String toString() => '[ClassList type: ${type}, classes: ${classes}]';
 }
 
-/// [CodeRef] is a reference to a [Code] object.
+/// `CodeRef` is a reference to a `Code` object.
 class CodeRef extends ObjRef {
-  static CodeRef parse(Map json) => new CodeRef.fromJson(json);
+  static CodeRef _parse(Map json) => new CodeRef._fromJson(json);
 
   CodeRef();
-  CodeRef.fromJson(Map json) : super.fromJson(json) {
+  CodeRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     kind = json['kind'];
   }
@@ -926,12 +935,12 @@ class CodeRef extends ObjRef {
       '[CodeRef type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
 }
 
-/// A [Code] object represents compiled code in the Dart VM.
+/// A `Code` object represents compiled code in the Dart VM.
 class Code extends ObjRef {
-  static Code parse(Map json) => new Code.fromJson(json);
+  static Code _parse(Map json) => new Code._fromJson(json);
 
   Code();
-  Code.fromJson(Map json) : super.fromJson(json) {
+  Code._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     kind = json['kind'];
   }
@@ -947,10 +956,10 @@ class Code extends ObjRef {
 }
 
 class ContextRef extends ObjRef {
-  static ContextRef parse(Map json) => new ContextRef.fromJson(json);
+  static ContextRef _parse(Map json) => new ContextRef._fromJson(json);
 
   ContextRef();
-  ContextRef.fromJson(Map json) : super.fromJson(json) {
+  ContextRef._fromJson(Map json) : super._fromJson(json) {
     length = json['length'];
   }
 
@@ -961,16 +970,16 @@ class ContextRef extends ObjRef {
       '[ContextRef type: ${type}, id: ${id}, length: ${length}]';
 }
 
-/// A [Context] is a data structure which holds the captured variables for some
+/// A `Context` is a data structure which holds the captured variables for some
 /// closure.
 class Context extends Obj {
-  static Context parse(Map json) => new Context.fromJson(json);
+  static Context _parse(Map json) => new Context._fromJson(json);
 
   Context();
-  Context.fromJson(Map json) : super.fromJson(json) {
+  Context._fromJson(Map json) : super._fromJson(json) {
     length = json['length'];
-    parent = createObject(json['parent']);
-    variables = createObject(json['variables']);
+    parent = _createObject(json['parent']);
+    variables = _createObject(json['variables']);
   }
 
   /// The number of variables in this context.
@@ -987,11 +996,11 @@ class Context extends Obj {
 }
 
 class ContextElement {
-  static ContextElement parse(Map json) => new ContextElement.fromJson(json);
+  static ContextElement _parse(Map json) => new ContextElement._fromJson(json);
 
   ContextElement();
-  ContextElement.fromJson(Map json) {
-    value = createObject(json['value']);
+  ContextElement._fromJson(Map json) {
+    value = _createObject(json['value']);
   }
 
   /// [value] can be one of [InstanceRef] or [Sentinel].
@@ -1000,12 +1009,12 @@ class ContextElement {
   String toString() => '[ContextElement value: ${value}]';
 }
 
-/// [ErrorRef] is a reference to an [Error].
+/// `ErrorRef` is a reference to an `Error`.
 class ErrorRef extends ObjRef {
-  static ErrorRef parse(Map json) => new ErrorRef.fromJson(json);
+  static ErrorRef _parse(Map json) => new ErrorRef._fromJson(json);
 
   ErrorRef();
-  ErrorRef.fromJson(Map json) : super.fromJson(json) {
+  ErrorRef._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
     message = json['message'];
   }
@@ -1020,17 +1029,17 @@ class ErrorRef extends ObjRef {
       '[ErrorRef type: ${type}, id: ${id}, kind: ${kind}, message: ${message}]';
 }
 
-/// An [Error] represents a Dart language level error. This is distinct from an
-/// rpc error.
+/// An `Error` represents a Dart language level error. This is distinct from an
+/// [rpc error].
 class Error extends Obj {
-  static Error parse(Map json) => new Error.fromJson(json);
+  static Error _parse(Map json) => new Error._fromJson(json);
 
   Error();
-  Error.fromJson(Map json) : super.fromJson(json) {
+  Error._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
     message = json['message'];
-    exception = createObject(json['exception']);
-    stacktrace = createObject(json['stacktrace']);
+    exception = _createObject(json['exception']);
+    stacktrace = _createObject(json['stacktrace']);
   }
 
   /// What kind of error is this?
@@ -1051,24 +1060,24 @@ class Error extends Obj {
       '[Error type: ${type}, id: ${id}, kind: ${kind}, message: ${message}]';
 }
 
-/// An [Event] is an asynchronous notification from the VM. It is delivered only
-/// when the client has subscribed to an event stream using the streamListen
+/// An `Event` is an asynchronous notification from the VM. It is delivered only
+/// when the client has subscribed to an event stream using the [streamListen]
 /// RPC.
 ///
-/// For more information, see events.
+/// For more information, see [events].
 class Event extends Response {
-  static Event parse(Map json) => new Event.fromJson(json);
+  static Event _parse(Map json) => new Event._fromJson(json);
 
   Event();
-  Event.fromJson(Map json) : super.fromJson(json) {
+  Event._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
-    isolate = createObject(json['isolate']);
-    vm = createObject(json['vm']);
+    isolate = _createObject(json['isolate']);
+    vm = _createObject(json['vm']);
     timestamp = json['timestamp'];
-    breakpoint = createObject(json['breakpoint']);
-    pauseBreakpoints = createObject(json['pauseBreakpoints']);
-    topFrame = createObject(json['topFrame']);
-    exception = createObject(json['exception']);
+    breakpoint = _createObject(json['breakpoint']);
+    pauseBreakpoints = _createObject(json['pauseBreakpoints']);
+    topFrame = _createObject(json['topFrame']);
+    exception = _createObject(json['exception']);
     bytes = json['bytes'];
   }
 
@@ -1143,15 +1152,15 @@ class Event extends Response {
       '[Event type: ${type}, kind: ${kind}, timestamp: ${timestamp}]';
 }
 
-/// An [FieldRef] is a reference to a [Field].
+/// An `FieldRef` is a reference to a `Field`.
 class FieldRef extends ObjRef {
-  static FieldRef parse(Map json) => new FieldRef.fromJson(json);
+  static FieldRef _parse(Map json) => new FieldRef._fromJson(json);
 
   FieldRef();
-  FieldRef.fromJson(Map json) : super.fromJson(json) {
+  FieldRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
-    owner = createObject(json['owner']);
-    declaredType = createObject(json['declaredType']);
+    owner = _createObject(json['owner']);
+    declaredType = _createObject(json['declaredType']);
     isConst = json['const'];
     isFinal = json['final'];
     isStatic = json['static'];
@@ -1181,20 +1190,20 @@ class FieldRef extends ObjRef {
   String toString() => '[FieldRef]';
 }
 
-/// A [Field] provides information about a Dart language field or variable.
+/// A `Field` provides information about a Dart language field or variable.
 class Field extends Obj {
-  static Field parse(Map json) => new Field.fromJson(json);
+  static Field _parse(Map json) => new Field._fromJson(json);
 
   Field();
-  Field.fromJson(Map json) : super.fromJson(json) {
+  Field._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
-    owner = createObject(json['owner']);
-    declaredType = createObject(json['declaredType']);
+    owner = _createObject(json['owner']);
+    declaredType = _createObject(json['declaredType']);
     isConst = json['const'];
     isFinal = json['final'];
     isStatic = json['static'];
-    staticValue = createObject(json['staticValue']);
-    location = createObject(json['location']);
+    staticValue = _createObject(json['staticValue']);
+    location = _createObject(json['location']);
   }
 
   /// The name of this field.
@@ -1227,12 +1236,12 @@ class Field extends Obj {
   String toString() => '[Field]';
 }
 
-/// A [Flag] represents a single VM command line flag.
+/// A `Flag` represents a single VM command line flag.
 class Flag {
-  static Flag parse(Map json) => new Flag.fromJson(json);
+  static Flag _parse(Map json) => new Flag._fromJson(json);
 
   Flag();
-  Flag.fromJson(Map json) {
+  Flag._fromJson(Map json) {
     name = json['name'];
     comment = json['comment'];
     modified = json['modified'];
@@ -1257,13 +1266,13 @@ class Flag {
       '[Flag name: ${name}, comment: ${comment}, modified: ${modified}]';
 }
 
-/// A [FlagList] represents the complete set of VM command line flags.
+/// A `FlagList` represents the complete set of VM command line flags.
 class FlagList extends Response {
-  static FlagList parse(Map json) => new FlagList.fromJson(json);
+  static FlagList _parse(Map json) => new FlagList._fromJson(json);
 
   FlagList();
-  FlagList.fromJson(Map json) : super.fromJson(json) {
-    flags = createObject(json['flags']);
+  FlagList._fromJson(Map json) : super._fromJson(json) {
+    flags = _createObject(json['flags']);
   }
 
   /// A list of all flags in the VM.
@@ -1273,15 +1282,15 @@ class FlagList extends Response {
 }
 
 class Frame extends Response {
-  static Frame parse(Map json) => new Frame.fromJson(json);
+  static Frame _parse(Map json) => new Frame._fromJson(json);
 
   Frame();
-  Frame.fromJson(Map json) : super.fromJson(json) {
+  Frame._fromJson(Map json) : super._fromJson(json) {
     index = json['index'];
-    function = createObject(json['function']);
-    code = createObject(json['code']);
-    location = createObject(json['location']);
-    vars = createObject(json['vars']);
+    function = _createObject(json['function']);
+    code = _createObject(json['code']);
+    location = _createObject(json['location']);
+    vars = _createObject(json['vars']);
   }
 
   int index;
@@ -1298,14 +1307,14 @@ class Frame extends Response {
       'type: ${type}, index: ${index}, function: ${function}, code: ${code}, location: ${location}, vars: ${vars}]';
 }
 
-/// An [FuncRef] is a reference to a [Func].
+/// An `FuncRef` is a reference to a `Func`.
 class FuncRef extends ObjRef {
-  static FuncRef parse(Map json) => new FuncRef.fromJson(json);
+  static FuncRef _parse(Map json) => new FuncRef._fromJson(json);
 
   FuncRef();
-  FuncRef.fromJson(Map json) : super.fromJson(json) {
+  FuncRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
-    owner = createObject(json['owner']);
+    owner = _createObject(json['owner']);
     isStatic = json['static'];
     isConst = json['const'];
   }
@@ -1313,7 +1322,7 @@ class FuncRef extends ObjRef {
   /// The name of this function.
   String name;
 
-  /// The owner of this field, which can be a Library, Class, or a Function.
+  /// The owner of this function, which can be a Library, Class, or a Function.
   ///
   /// [owner] can be one of [LibraryRef], [ClassRef] or [FuncRef].
   dynamic owner;
@@ -1328,22 +1337,22 @@ class FuncRef extends ObjRef {
       'type: ${type}, id: ${id}, name: ${name}, owner: ${owner}, isStatic: ${isStatic}, isConst: ${isConst}]';
 }
 
-/// A [Func] represents a Dart language function.
+/// A `Func` represents a Dart language function.
 class Func extends Obj {
-  static Func parse(Map json) => new Func.fromJson(json);
+  static Func _parse(Map json) => new Func._fromJson(json);
 
   Func();
-  Func.fromJson(Map json) : super.fromJson(json) {
+  Func._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
-    owner = createObject(json['owner']);
-    location = createObject(json['location']);
-    code = createObject(json['code']);
+    owner = _createObject(json['owner']);
+    location = _createObject(json['location']);
+    code = _createObject(json['code']);
   }
 
   /// The name of this function.
   String name;
 
-  /// The owner of this field, which can be a Library, Class, or a Function.
+  /// The owner of this function, which can be a Library, Class, or a Function.
   ///
   /// [owner] can be one of [LibraryRef], [ClassRef] or [FuncRef].
   dynamic owner;
@@ -1358,21 +1367,21 @@ class Func extends Obj {
       '[Func type: ${type}, id: ${id}, name: ${name}, owner: ${owner}]';
 }
 
-/// [InstanceRef] is a reference to an [Instance].
+/// `InstanceRef` is a reference to an `Instance`.
 class InstanceRef extends ObjRef {
-  static InstanceRef parse(Map json) => new InstanceRef.fromJson(json);
+  static InstanceRef _parse(Map json) => new InstanceRef._fromJson(json);
 
   InstanceRef();
-  InstanceRef.fromJson(Map json) : super.fromJson(json) {
+  InstanceRef._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
-    classRef = createObject(json['class']);
+    classRef = _createObject(json['class']);
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
     length = json['length'];
     name = json['name'];
-    typeClass = createObject(json['typeClass']);
-    parameterizedClass = createObject(json['parameterizedClass']);
-    pattern = createObject(json['pattern']);
+    typeClass = _createObject(json['typeClass']);
+    parameterizedClass = _createObject(json['parameterizedClass']);
+    pattern = _createObject(json['pattern']);
   }
 
   /// What kind of instance is this?
@@ -1450,38 +1459,38 @@ class InstanceRef extends ObjRef {
       '[InstanceRef type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
 
-/// An [Instance] represents an instance of the Dart language class [Obj].
+/// An `Instance` represents an instance of the Dart language class `Obj`.
 class Instance extends Obj {
-  static Instance parse(Map json) => new Instance.fromJson(json);
+  static Instance _parse(Map json) => new Instance._fromJson(json);
 
   Instance();
-  Instance.fromJson(Map json) : super.fromJson(json) {
+  Instance._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
-    classRef = createObject(json['class']);
+    classRef = _createObject(json['class']);
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
     length = json['length'];
     offset = json['offset'];
     count = json['count'];
     name = json['name'];
-    typeClass = createObject(json['typeClass']);
-    parameterizedClass = createObject(json['parameterizedClass']);
-    fields = createObject(json['fields']);
-    elements = createObject(json['elements']);
-    associations = createObject(json['associations']);
+    typeClass = _createObject(json['typeClass']);
+    parameterizedClass = _createObject(json['parameterizedClass']);
+    fields = _createObject(json['fields']);
+    elements = _createObject(json['elements']);
+    associations = _createObject(json['associations']);
     bytes = json['bytes'];
-    closureFunction = createObject(json['closureFunction']);
-    closureContext = createObject(json['closureContext']);
-    mirrorReferent = createObject(json['mirrorReferent']);
+    closureFunction = _createObject(json['closureFunction']);
+    closureContext = _createObject(json['closureContext']);
+    mirrorReferent = _createObject(json['mirrorReferent']);
     pattern = json['pattern'];
     isCaseSensitive = json['isCaseSensitive'];
     isMultiLine = json['isMultiLine'];
-    propertyKey = createObject(json['propertyKey']);
-    propertyValue = createObject(json['propertyValue']);
-    typeArguments = createObject(json['typeArguments']);
+    propertyKey = _createObject(json['propertyKey']);
+    propertyValue = _createObject(json['propertyValue']);
+    typeArguments = _createObject(json['typeArguments']);
     parameterIndex = json['parameterIndex'];
-    targetType = createObject(json['targetType']);
-    bound = createObject(json['bound']);
+    targetType = _createObject(json['targetType']);
+    bound = _createObject(json['bound']);
   }
 
   /// What kind of instance is this?
@@ -1707,12 +1716,12 @@ class Instance extends Obj {
       '[Instance type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
 
-/// [IsolateRef] is a reference to an [Isolate] object.
+/// `IsolateRef` is a reference to an `Isolate` object.
 class IsolateRef extends Response {
-  static IsolateRef parse(Map json) => new IsolateRef.fromJson(json);
+  static IsolateRef _parse(Map json) => new IsolateRef._fromJson(json);
 
   IsolateRef();
-  IsolateRef.fromJson(Map json) : super.fromJson(json) {
+  IsolateRef._fromJson(Map json) : super._fromJson(json) {
     id = json['id'];
     number = json['number'];
     name = json['name'];
@@ -1731,23 +1740,23 @@ class IsolateRef extends Response {
       '[IsolateRef type: ${type}, id: ${id}, number: ${number}, name: ${name}]';
 }
 
-/// An [Isolate] object provides information about one isolate in the VM.
+/// An `Isolate` object provides information about one isolate in the VM.
 class Isolate extends Response {
-  static Isolate parse(Map json) => new Isolate.fromJson(json);
+  static Isolate _parse(Map json) => new Isolate._fromJson(json);
 
   Isolate();
-  Isolate.fromJson(Map json) : super.fromJson(json) {
+  Isolate._fromJson(Map json) : super._fromJson(json) {
     id = json['id'];
     number = json['number'];
     name = json['name'];
     startTime = json['startTime'];
     livePorts = json['livePorts'];
     pauseOnExit = json['pauseOnExit'];
-    pauseEvent = createObject(json['pauseEvent']);
-    rootLib = createObject(json['rootLib']);
-    libraries = createObject(json['libraries']);
-    breakpoints = createObject(json['breakpoints']);
-    error = createObject(json['error']);
+    pauseEvent = _createObject(json['pauseEvent']);
+    rootLib = _createObject(json['rootLib']);
+    libraries = _createObject(json['libraries']);
+    breakpoints = _createObject(json['breakpoints']);
+    error = _createObject(json['error']);
   }
 
   /// The id which is passed to the getIsolate RPC to reload this isolate.
@@ -1793,12 +1802,12 @@ class Isolate extends Response {
   String toString() => '[Isolate]';
 }
 
-/// [LibraryRef] is a reference to a [Library].
+/// `LibraryRef` is a reference to a `Library`.
 class LibraryRef extends ObjRef {
-  static LibraryRef parse(Map json) => new LibraryRef.fromJson(json);
+  static LibraryRef _parse(Map json) => new LibraryRef._fromJson(json);
 
   LibraryRef();
-  LibraryRef.fromJson(Map json) : super.fromJson(json) {
+  LibraryRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     uri = json['uri'];
   }
@@ -1813,22 +1822,22 @@ class LibraryRef extends ObjRef {
       '[LibraryRef type: ${type}, id: ${id}, name: ${name}, uri: ${uri}]';
 }
 
-/// A [Library] provides information about a Dart language library.
+/// A `Library` provides information about a Dart language library.
 ///
-/// See setLibraryDebuggable.
+/// See [setLibraryDebuggable].
 class Library extends Obj {
-  static Library parse(Map json) => new Library.fromJson(json);
+  static Library _parse(Map json) => new Library._fromJson(json);
 
   Library();
-  Library.fromJson(Map json) : super.fromJson(json) {
+  Library._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
     uri = json['uri'];
     debuggable = json['debuggable'];
-    dependencies = createObject(json['dependencies']);
-    scripts = createObject(json['scripts']);
-    variables = createObject(json['variables']);
-    functions = createObject(json['functions']);
-    classes = createObject(json['classes']);
+    dependencies = _createObject(json['dependencies']);
+    scripts = _createObject(json['scripts']);
+    variables = _createObject(json['variables']);
+    functions = _createObject(json['functions']);
+    classes = _createObject(json['classes']);
   }
 
   /// The name of this library.
@@ -1858,17 +1867,17 @@ class Library extends Obj {
   String toString() => '[Library]';
 }
 
-/// A [LibraryDependency] provides information about an import or export.
+/// A `LibraryDependency` provides information about an import or export.
 class LibraryDependency {
-  static LibraryDependency parse(Map json) =>
-      new LibraryDependency.fromJson(json);
+  static LibraryDependency _parse(Map json) =>
+      new LibraryDependency._fromJson(json);
 
   LibraryDependency();
-  LibraryDependency.fromJson(Map json) {
+  LibraryDependency._fromJson(Map json) {
     isImport = json['isImport'];
     isDeferred = json['isDeferred'];
     prefix = json['prefix'];
-    target = createObject(json['target']);
+    target = _createObject(json['target']);
   }
 
   /// Is this dependency an import (rather than an export)?
@@ -1888,12 +1897,12 @@ class LibraryDependency {
 }
 
 class MapAssociation {
-  static MapAssociation parse(Map json) => new MapAssociation.fromJson(json);
+  static MapAssociation _parse(Map json) => new MapAssociation._fromJson(json);
 
   MapAssociation();
-  MapAssociation.fromJson(Map json) {
-    key = createObject(json['key']);
-    value = createObject(json['value']);
+  MapAssociation._fromJson(Map json) {
+    key = _createObject(json['key']);
+    value = _createObject(json['value']);
   }
 
   /// [key] can be one of [InstanceRef] or [Sentinel].
@@ -1905,19 +1914,19 @@ class MapAssociation {
   String toString() => '[MapAssociation key: ${key}, value: ${value}]';
 }
 
-/// A [Message] provides information about a pending isolate message and the
+/// A `Message` provides information about a pending isolate message and the
 /// function that will be invoked to handle it.
 class Message extends Response {
-  static Message parse(Map json) => new Message.fromJson(json);
+  static Message _parse(Map json) => new Message._fromJson(json);
 
   Message();
-  Message.fromJson(Map json) : super.fromJson(json) {
+  Message._fromJson(Map json) : super._fromJson(json) {
     index = json['index'];
     name = json['name'];
     messageObjectId = json['messageObjectId'];
     size = json['size'];
-    handler = createObject(json['handler']);
-    location = createObject(json['location']);
+    handler = _createObject(json['handler']);
+    location = _createObject(json['location']);
   }
 
   /// The index in the isolate's message queue. The 0th message being the next
@@ -1944,12 +1953,12 @@ class Message extends Response {
       'type: ${type}, index: ${index}, name: ${name}, messageObjectId: ${messageObjectId}, size: ${size}]';
 }
 
-/// [NullRef] is a reference to an a [Null].
+/// `NullRef` is a reference to an a `Null`.
 class NullRef extends InstanceRef {
-  static NullRef parse(Map json) => new NullRef.fromJson(json);
+  static NullRef _parse(Map json) => new NullRef._fromJson(json);
 
   NullRef();
-  NullRef.fromJson(Map json) : super.fromJson(json) {
+  NullRef._fromJson(Map json) : super._fromJson(json) {
     valueAsString = json['valueAsString'];
   }
 
@@ -1960,12 +1969,12 @@ class NullRef extends InstanceRef {
       'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, valueAsString: ${valueAsString}]';
 }
 
-/// A [Null] object represents the Dart language value null.
+/// A `Null` object represents the Dart language value null.
 class Null extends Instance {
-  static Null parse(Map json) => new Null.fromJson(json);
+  static Null _parse(Map json) => new Null._fromJson(json);
 
   Null();
-  Null.fromJson(Map json) : super.fromJson(json) {
+  Null._fromJson(Map json) : super._fromJson(json) {
     valueAsString = json['valueAsString'];
   }
 
@@ -1976,12 +1985,12 @@ class Null extends Instance {
       'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, valueAsString: ${valueAsString}]';
 }
 
-/// [ObjRef] is a reference to a [Obj].
+/// `ObjRef` is a reference to a `Obj`.
 class ObjRef extends Response {
-  static ObjRef parse(Map json) => new ObjRef.fromJson(json);
+  static ObjRef _parse(Map json) => new ObjRef._fromJson(json);
 
   ObjRef();
-  ObjRef.fromJson(Map json) : super.fromJson(json) {
+  ObjRef._fromJson(Map json) : super._fromJson(json) {
     id = json['id'];
   }
 
@@ -1992,14 +2001,14 @@ class ObjRef extends Response {
   String toString() => '[ObjRef type: ${type}, id: ${id}]';
 }
 
-/// An [Obj] is a persistent object that is owned by some isolate.
+/// An `Obj` is a persistent object that is owned by some isolate.
 class Obj extends Response {
-  static Obj parse(Map json) => new Obj.fromJson(json);
+  static Obj _parse(Map json) => new Obj._fromJson(json);
 
   Obj();
-  Obj.fromJson(Map json) : super.fromJson(json) {
+  Obj._fromJson(Map json) : super._fromJson(json) {
     id = json['id'];
-    classRef = createObject(json['class']);
+    classRef = _createObject(json['class']);
     size = json['size'];
   }
 
@@ -2032,13 +2041,13 @@ class Obj extends Response {
 }
 
 /// Every non-error response returned by the Service Protocol extends
-/// [Response]. By using the [type] property, the client can determine which
-/// type of response has been provided.
+/// `Response`. By using the `type` property, the client can determine which
+/// [type] of response has been provided.
 class Response {
-  static Response parse(Map json) => new Response.fromJson(json);
+  static Response _parse(Map json) => new Response._fromJson(json);
 
   Response();
-  Response.fromJson(Map json) {
+  Response._fromJson(Map json) {
     type = json['type'];
   }
 
@@ -2049,15 +2058,15 @@ class Response {
   String toString() => '[Response type: ${type}]';
 }
 
-/// A [Sentinel] is used to indicate that the normal response is not available.
+/// A `Sentinel` is used to indicate that the normal response is not available.
 ///
-/// We use a [Sentinel] instead of an error for these cases because they do not
-/// represent a problematic condition. They are normal.
+/// We use a `Sentinel` instead of an [error] for these cases because they do
+/// not represent a problematic condition. They are normal.
 class Sentinel extends Response {
-  static Sentinel parse(Map json) => new Sentinel.fromJson(json);
+  static Sentinel _parse(Map json) => new Sentinel._fromJson(json);
 
   Sentinel();
-  Sentinel.fromJson(Map json) : super.fromJson(json) {
+  Sentinel._fromJson(Map json) : super._fromJson(json) {
     kind = json['kind'];
     valueAsString = json['valueAsString'];
   }
@@ -2072,12 +2081,12 @@ class Sentinel extends Response {
       '[Sentinel type: ${type}, kind: ${kind}, valueAsString: ${valueAsString}]';
 }
 
-/// [ScriptRef] is a reference to a [Script].
+/// `ScriptRef` is a reference to a `Script`.
 class ScriptRef extends ObjRef {
-  static ScriptRef parse(Map json) => new ScriptRef.fromJson(json);
+  static ScriptRef _parse(Map json) => new ScriptRef._fromJson(json);
 
   ScriptRef();
-  ScriptRef.fromJson(Map json) : super.fromJson(json) {
+  ScriptRef._fromJson(Map json) : super._fromJson(json) {
     uri = json['uri'];
   }
 
@@ -2087,17 +2096,35 @@ class ScriptRef extends ObjRef {
   String toString() => '[ScriptRef type: ${type}, id: ${id}, uri: ${uri}]';
 }
 
-/// A [Script] provides information about a Dart language script.
+/// A `Script` provides information about a Dart language script.
 ///
-/// The [tokenPosTable] is an array of int arrays. Each subarray consists of a
-/// line number followed by [(tokenPos, columnNumber)] pairs:
+/// The `tokenPosTable` is an array of int arrays. Each subarray consists of a
+/// line number followed by `(tokenPos, columnNumber)` pairs:
+///
+/// ```
+/// [lineNumber, (tokenPos, columnNumber)*]
+/// ```
+///
+/// For example, a `tokenPosTable` with the value...
+///
+/// ```
+/// [[1, 100, 5, 101, 8],[2, 102, 7]]
+/// ```
+///
+/// ...encodes the mapping:
+///
+/// tokenPos | line | column
+/// -------- | ---- | ------
+/// 100 | 1 | 5
+/// 101 | 1 | 8
+/// 102 | 2 | 7
 class Script extends Obj {
-  static Script parse(Map json) => new Script.fromJson(json);
+  static Script _parse(Map json) => new Script._fromJson(json);
 
   Script();
-  Script.fromJson(Map json) : super.fromJson(json) {
+  Script._fromJson(Map json) : super._fromJson(json) {
     uri = json['uri'];
-    library = createObject(json['library']);
+    library = _createObject(json['library']);
     source = json['source'];
     tokenPosTable = json['tokenPosTable'];
   }
@@ -2119,14 +2146,14 @@ class Script extends Obj {
       'type: ${type}, id: ${id}, uri: ${uri}, library: ${library}, source: ${source}, tokenPosTable: ${tokenPosTable}]';
 }
 
-/// The [SourceLocation] class is used to designate a position or range in some
+/// The `SourceLocation` class is used to designate a position or range in some
 /// script.
 class SourceLocation extends Response {
-  static SourceLocation parse(Map json) => new SourceLocation.fromJson(json);
+  static SourceLocation _parse(Map json) => new SourceLocation._fromJson(json);
 
   SourceLocation();
-  SourceLocation.fromJson(Map json) : super.fromJson(json) {
-    script = createObject(json['script']);
+  SourceLocation._fromJson(Map json) : super._fromJson(json) {
+    script = _createObject(json['script']);
     tokenPos = json['tokenPos'];
     endTokenPos = json['endTokenPos'];
   }
@@ -2145,12 +2172,12 @@ class SourceLocation extends Response {
 }
 
 class Stack extends Response {
-  static Stack parse(Map json) => new Stack.fromJson(json);
+  static Stack _parse(Map json) => new Stack._fromJson(json);
 
   Stack();
-  Stack.fromJson(Map json) : super.fromJson(json) {
-    frames = createObject(json['frames']);
-    messages = createObject(json['messages']);
+  Stack._fromJson(Map json) : super._fromJson(json) {
+    frames = _createObject(json['frames']);
+    messages = _createObject(json['messages']);
   }
 
   List<Frame> frames;
@@ -2161,24 +2188,24 @@ class Stack extends Response {
       '[Stack type: ${type}, frames: ${frames}, messages: ${messages}]';
 }
 
-/// The [Success] type is used to indicate that an operation completed
+/// The `Success` type is used to indicate that an operation completed
 /// successfully.
 class Success extends Response {
-  static Success parse(Map json) => new Success.fromJson(json);
+  static Success _parse(Map json) => new Success._fromJson(json);
 
   Success();
-  Success.fromJson(Map json) : super.fromJson(json) {}
+  Success._fromJson(Map json) : super._fromJson(json) {}
 
   String toString() => '[Success type: ${type}]';
 }
 
-/// [TypeArgumentsRef] is a reference to a [TypeArguments] object.
+/// `TypeArgumentsRef` is a reference to a `TypeArguments` object.
 class TypeArgumentsRef extends ObjRef {
-  static TypeArgumentsRef parse(Map json) =>
-      new TypeArgumentsRef.fromJson(json);
+  static TypeArgumentsRef _parse(Map json) =>
+      new TypeArgumentsRef._fromJson(json);
 
   TypeArgumentsRef();
-  TypeArgumentsRef.fromJson(Map json) : super.fromJson(json) {
+  TypeArgumentsRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
   }
 
@@ -2189,15 +2216,15 @@ class TypeArgumentsRef extends ObjRef {
       '[TypeArgumentsRef type: ${type}, id: ${id}, name: ${name}]';
 }
 
-/// A [TypeArguments] object represents the type argument vector for some
+/// A `TypeArguments` object represents the type argument vector for some
 /// instantiated generic type.
 class TypeArguments extends Obj {
-  static TypeArguments parse(Map json) => new TypeArguments.fromJson(json);
+  static TypeArguments _parse(Map json) => new TypeArguments._fromJson(json);
 
   TypeArguments();
-  TypeArguments.fromJson(Map json) : super.fromJson(json) {
+  TypeArguments._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
-    types = createObject(json['types']);
+    types = _createObject(json['types']);
   }
 
   /// A name for this type argument list.
@@ -2213,23 +2240,23 @@ class TypeArguments extends Obj {
       '[TypeArguments type: ${type}, id: ${id}, name: ${name}, types: ${types}]';
 }
 
-/// The [UnresolvedSourceLocation] class is used to refer to an unresolved
+/// The `UnresolvedSourceLocation` class is used to refer to an unresolved
 /// breakpoint location. As such, it is meant to approximate the final location
 /// of the breakpoint but it is not exact.
 ///
-/// Either the [script] or the [scriptUri] field will be present.
+/// Either the `script` or the `scriptUri` field will be present.
 ///
-/// Either the [tokenPos] or the [line] field will be present.
+/// Either the `tokenPos` or the `line` field will be present.
 ///
-/// The [column] field will only be present when the breakpoint was specified
+/// The `column` field will only be present when the breakpoint was specified
 /// with a specific column number.
 class UnresolvedSourceLocation extends Response {
-  static UnresolvedSourceLocation parse(Map json) =>
-      new UnresolvedSourceLocation.fromJson(json);
+  static UnresolvedSourceLocation _parse(Map json) =>
+      new UnresolvedSourceLocation._fromJson(json);
 
   UnresolvedSourceLocation();
-  UnresolvedSourceLocation.fromJson(Map json) : super.fromJson(json) {
-    script = createObject(json['script']);
+  UnresolvedSourceLocation._fromJson(Map json) : super._fromJson(json) {
+    script = _createObject(json['script']);
     scriptUri = json['scriptUri'];
     tokenPos = json['tokenPos'];
     line = json['line'];
@@ -2258,12 +2285,12 @@ class UnresolvedSourceLocation extends Response {
   String toString() => '[UnresolvedSourceLocation type: ${type}]';
 }
 
-/// See Versioning.
+/// See [Versioning].
 class Version extends Response {
-  static Version parse(Map json) => new Version.fromJson(json);
+  static Version _parse(Map json) => new Version._fromJson(json);
 
   Version();
-  Version.fromJson(Map json) : super.fromJson(json) {
+  Version._fromJson(Map json) : super._fromJson(json) {
     major = json['major'];
     minor = json['minor'];
   }
@@ -2280,12 +2307,12 @@ class Version extends Response {
       '[Version type: ${type}, major: ${major}, minor: ${minor}]';
 }
 
-/// [VMRef] is a reference to a [VM] object.
+/// `VMRef` is a reference to a `VM` object.
 class VMRef extends Response {
-  static VMRef parse(Map json) => new VMRef.fromJson(json);
+  static VMRef _parse(Map json) => new VMRef._fromJson(json);
 
   VMRef();
-  VMRef.fromJson(Map json) : super.fromJson(json) {
+  VMRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
   }
 
@@ -2296,17 +2323,17 @@ class VMRef extends Response {
 }
 
 class VM extends Response {
-  static VM parse(Map json) => new VM.fromJson(json);
+  static VM _parse(Map json) => new VM._fromJson(json);
 
   VM();
-  VM.fromJson(Map json) : super.fromJson(json) {
+  VM._fromJson(Map json) : super._fromJson(json) {
     architectureBits = json['architectureBits'];
     targetCPU = json['targetCPU'];
     hostCPU = json['hostCPU'];
     version = json['version'];
     pid = json['pid'];
     startTime = json['startTime'];
-    isolates = createObject(json['isolates']);
+    isolates = _createObject(json['isolates']);
   }
 
   /// Word length on target architecture (e.g. 32, 64).
