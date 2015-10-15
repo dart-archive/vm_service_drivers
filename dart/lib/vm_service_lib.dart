@@ -691,7 +691,7 @@ class InstanceKind {
   /// An instance of the Dart class Type.
   static const String TypeKind = 'Type';
 
-  /// An instance of the Dart class TypeParamer.
+  /// An instance of the Dart class TypeParameter.
   static const String TypeParameterKind = 'TypeParameter';
 
   /// An instance of the Dart class TypeRef.

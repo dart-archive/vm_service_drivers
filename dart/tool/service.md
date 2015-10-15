@@ -1730,7 +1730,7 @@ enum InstanceKind {
   // An instance of the Dart class Type.
   Type,
 
-  // An instance of the Dart class TypeParamer.
+  // An instance of the Dart class TypeParameter.
   TypeParameter,
 
   // An instance of the Dart class TypeRef.
