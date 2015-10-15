@@ -1837,7 +1837,7 @@ class Library extends Obj {
   /// The uri of this library.
   String uri;
 
-  /// Is this library debuggable?  Default true.
+  /// Is this library debuggable? Default true.
   bool debuggable;
 
   /// A list of the imports for this library.
@@ -2243,16 +2243,16 @@ class UnresolvedSourceLocation extends Response {
   /// to be loaded.
   @optional String scriptUri;
 
-  /// An approximate token position for the source location.  This may change
+  /// An approximate token position for the source location. This may change
   /// when the location is resolved.
   @optional int tokenPos;
 
-  /// An approximate line number for the source location.  This may change when
+  /// An approximate line number for the source location. This may change when
   /// the location is resolved.
   @optional int line;
 
-  /// An approximate column number for the source location.  This may change
-  /// when the location is resolved.
+  /// An approximate column number for the source location. This may change when
+  /// the location is resolved.
   @optional int column;
 
   String toString() => '[UnresolvedSourceLocation type: ${type}]';
