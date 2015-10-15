@@ -123,28 +123,28 @@ class VmService {
   // WriteEvent
   Stream<Event> get onStderrEvent => _stderrController.stream;
 
-  /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
+  /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
   /// some script.
   ///
-  /// The [scriptId] parameter is used to specify the target script.
+  /// The `scriptId` parameter is used to specify the target script.
   ///
-  /// The [line] parameter is used to specify the target line for the
+  /// The `line` parameter is used to specify the target line for the
   /// breakpoint. If there are multiple possible breakpoints on the target line,
   /// then the VM will place the breakpoint at the location which would execute
   /// soonest. If it is not possible to set a breakpoint at the target line, the
   /// breakpoint will be added at the next possible breakpoint location within
   /// the same function.
   ///
-  /// The [column] parameter may be optionally specified. This is useful for
+  /// The `column` parameter may be optionally specified. This is useful for
   /// targeting a specific breakpoint on a line with multiple possible
   /// breakpoints.
   ///
-  /// If no breakpoint is possible at that line, the [102] (Cannot add
+  /// If no breakpoint is possible at that line, the `102` (Cannot add
   /// breakpoint) error code is returned.
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
   ///
-  /// See Breakpoint.
+  /// See [Breakpoint].
   Future<Breakpoint> addBreakpoint(String isolateId, String scriptId, int line,
       [int column]) {
     Map m = {'isolateId': isolateId, 'scriptId': scriptId, 'line': line};
@@ -152,30 +152,30 @@ class VmService {
     return _call('addBreakpoint', m);
   }
 
-  /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
+  /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
   /// some script. This RPC is useful when a script has not yet been assigned an
   /// id, for example, if a script is in a deferred library which has not yet
   /// been loaded.
   ///
-  /// The [scriptUri] parameter is used to specify the target script.
+  /// The `scriptUri` parameter is used to specify the target script.
   ///
-  /// The [line] parameter is used to specify the target line for the
+  /// The `line` parameter is used to specify the target line for the
   /// breakpoint. If there are multiple possible breakpoints on the target line,
   /// then the VM will place the breakpoint at the location which would execute
   /// soonest. If it is not possible to set a breakpoint at the target line, the
   /// breakpoint will be added at the next possible breakpoint location within
   /// the same function.
   ///
-  /// The [column] parameter may be optionally specified. This is useful for
+  /// The `column` parameter may be optionally specified. This is useful for
   /// targeting a specific breakpoint on a line with multiple possible
   /// breakpoints.
   ///
-  /// If no breakpoint is possible at that line, the [102] (Cannot add
+  /// If no breakpoint is possible at that line, the `102` (Cannot add
   /// breakpoint) error code is returned.
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
   ///
-  /// See Breakpoint.
+  /// See [Breakpoint].
   Future<Breakpoint> addBreakpointWithScriptUri(
       String isolateId, String scriptUri, int line,
       [int column]) {
@@ -184,13 +184,13 @@ class VmService {
     return _call('addBreakpointWithScriptUri', m);
   }
 
-  /// The [addBreakpointAtEntry] RPC is used to add a breakpoint at the
+  /// The `addBreakpointAtEntry` RPC is used to add a breakpoint at the
   /// entrypoint of some function.
   ///
-  /// If no breakpoint is possible at the function entry, the [102] (Cannot add
+  /// If no breakpoint is possible at the function entry, the `102` (Cannot add
   /// breakpoint) error code is returned.
   ///
-  /// See Breakpoint.
+  /// See [Breakpoint].
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
   Future<Breakpoint> addBreakpointAtEntry(String isolateId, String functionId) {
@@ -198,22 +198,22 @@ class VmService {
         {'isolateId': isolateId, 'functionId': functionId});
   }
 
-  /// The [evaluate] RPC is used to evaluate an expression in the context of
+  /// The `evaluate` RPC is used to evaluate an expression in the context of
   /// some target.
   ///
-  /// [targetId] may refer to a Library, Class, or Instance.
+  /// `targetId` may refer to a [Library], [Class], or [Instance].
   ///
-  /// If [targetId] is a temporary id which has expired, then then [Expired]
-  /// Sentinel is returned.
+  /// If `targetId` is a temporary id which has expired, then the `Expired`
+  /// [Sentinel] is returned.
   ///
-  /// If [targetId] refers to an object which has been collected by the VM's
-  /// garbage collector, then the [Collected] Sentinel is returned.
+  /// If `targetId` refers to an object which has been collected by the VM's
+  /// garbage collector, then the `Collected` [Sentinel] is returned.
   ///
-  /// If an error occurs while evaluating the expression, an @Error reference
+  /// If an error occurs while evaluating the expression, an [ErrorRef]
+  /// reference will be returned.
+  ///
+  /// If the expression is evaluated successfully, an [InstanceRef] reference
   /// will be returned.
-  ///
-  /// If the expression is evaluated successfully, an @Instance reference will
-  /// be returned.
   ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   Future<dynamic> evaluate(
@@ -225,15 +225,15 @@ class VmService {
     });
   }
 
-  /// The [evaluateInFrame] RPC is used to evaluate an expression in the context
-  /// of a particular stack frame. [frameIndex] is the index of the desired
-  /// Frame, with an index of [0] indicating the top (most recent) frame.
+  /// The `evaluateInFrame` RPC is used to evaluate an expression in the context
+  /// of a particular stack frame. `frameIndex` is the index of the desired
+  /// [Frame], with an index of `0` indicating the top (most recent) frame.
   ///
-  /// If an error occurs while evaluating the expression, an @Error reference
+  /// If an error occurs while evaluating the expression, an [ErrorRef]
+  /// reference will be returned.
+  ///
+  /// If the expression is evaluated successfully, an [InstanceRef] reference
   /// will be returned.
-  ///
-  /// If the expression is evaluated successfully, an @Instance reference will
-  /// be returned.
   ///
   /// The return value can be one of [InstanceRef] or [ErrorRef].
   Future<dynamic> evaluateInFrame(
@@ -248,37 +248,37 @@ class VmService {
   /// The _getFlagList RPC returns a list of all command line flags in the VM
   /// along with their current values.
   ///
-  /// See FlagList.
+  /// See [FlagList].
   Future<FlagList> getFlagList() => _call('getFlagList');
 
-  /// The [getIsolate] RPC is used to lookup an [Isolate] object by its [id].
+  /// The `getIsolate` RPC is used to lookup an `Isolate` object by its `id`.
   ///
-  /// If [isolateId] refers to an isolate which has exited, then the [Collected]
-  /// Sentinel is returned.
+  /// If `isolateId` refers to an isolate which has exited, then the `Collected`
+  /// [Sentinel] is returned.
   ///
-  /// See Isolate.
+  /// See [Isolate].
   ///
   /// The return value can be one of [Isolate] or [Sentinel].
   Future<dynamic> getIsolate(String isolateId) {
     return _call('getIsolate', {'isolateId': isolateId});
   }
 
-  /// The [getObject] RPC is used to lookup an [object] from some isolate by its
-  /// [id].
+  /// The `getObject` RPC is used to lookup an `object` from some isolate by its
+  /// `id`.
   ///
-  /// If [objectId] is a temporary id which has expired, then then [Expired]
-  /// Sentinel is returned.
+  /// If `objectId` is a temporary id which has expired, then the `Expired`
+  /// [Sentinel] is returned.
   ///
-  /// If [objectId] refers to a heap object which has been collected by the VM's
-  /// garbage collector, then the [Collected] Sentinel is returned.
+  /// If `objectId` refers to a heap object which has been collected by the VM's
+  /// garbage collector, then the `Collected` [Sentinel] is returned.
   ///
-  /// If [objectId] refers to a non-heap object which has been deleted, then the
-  /// [Collected] Sentinel is returned.
+  /// If `objectId` refers to a non-heap object which has been deleted, then the
+  /// `Collected` [Sentinel] is returned.
   ///
   /// If the object handle has not expired and the object has not been
-  /// collected, then an Object will be returned.
+  /// collected, then an [Obj] will be returned.
   ///
-  /// The [offset] and [count] parameters are used to request subranges of
+  /// The `offset` and `count` parameters are used to request subranges of
   /// Instance objects with the kinds: List, Map, Uint8ClampedList, Uint8List,
   /// Uint16List, Uint32List, Uint64List, Int8List, Int16List, Int32List,
   /// Int64List, Flooat32List, Float64List, Inst32x3List, Float32x4List, and
@@ -293,52 +293,52 @@ class VmService {
     return _call('getObject', m);
   }
 
-  /// The [getStack] RPC is used to retrieve the current execution stack and
+  /// The `getStack` RPC is used to retrieve the current execution stack and
   /// message queue for an isolate. The isolate does not need to be paused.
   ///
-  /// See Stack.
+  /// See [Stack].
   Future<Stack> getStack(String isolateId) {
     return _call('getStack', {'isolateId': isolateId});
   }
 
-  /// The [getVersion] RPC is used to determine what version of the Service
+  /// The `getVersion` RPC is used to determine what version of the Service
   /// Protocol is served by a VM.
   ///
-  /// See Version.
+  /// See [Version].
   Future<Version> getVersion() => _call('getVersion');
 
-  /// The [getVM] RPC returns global information about a Dart virtual machine.
+  /// The `getVM` RPC returns global information about a Dart virtual machine.
   ///
-  /// See VM.
+  /// See [VM].
   Future<VM> getVM() => _call('getVM');
 
-  /// The [pause] RPC is used to interrupt a running isolate. The RPC enqueues
+  /// The `pause` RPC is used to interrupt a running isolate. The RPC enqueues
   /// the interrupt request and potentially returns before the isolate is
   /// paused.
   ///
-  /// When the isolate is paused an event will be sent on the [Debug] stream.
+  /// When the isolate is paused an event will be sent on the `Debug` stream.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> pause(String isolateId) {
     return _call('pause', {'isolateId': isolateId});
   }
 
-  /// The [removeBreakpoint] RPC is used to remove a breakpoint by its [id].
+  /// The `removeBreakpoint` RPC is used to remove a breakpoint by its `id`.
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> removeBreakpoint(String isolateId, String breakpointId) {
     return _call('removeBreakpoint',
         {'isolateId': isolateId, 'breakpointId': breakpointId});
   }
 
-  /// The [resume] RPC is used to resume execution of a paused isolate.
+  /// The `resume` RPC is used to resume execution of a paused isolate.
   ///
-  /// If the [step] parameter is not provided, the program will resume regular
+  /// If the `step` parameter is not provided, the program will resume regular
   /// execution.
   ///
-  /// If the [step] parameter is provided, it indicates what form of
+  /// If the `step` parameter is provided, it indicates what form of
   /// single-stepping to use.
   ///
   /// step | meaning
@@ -347,14 +347,14 @@ class VmService {
   /// Over | Single step, skipping over function calls
   /// Out | Single step until the current function exits
   ///
-  /// See Success, StepOption.
+  /// See [Success], [StepOption].
   Future<Success> resume(String isolateId, [/*StepOption*/ String step]) {
     Map m = {'isolateId': isolateId};
     if (step != null) m['step'] = step;
     return _call('resume', m);
   }
 
-  /// The [setExceptionPauseMode] RPC is used to control if an isolate pauses
+  /// The `setExceptionPauseMode` RPC is used to control if an isolate pauses
   /// when an exception is thrown.
   ///
   /// mode | meaning
@@ -368,10 +368,10 @@ class VmService {
         'setExceptionPauseMode', {'isolateId': isolateId, 'mode': mode});
   }
 
-  /// The [setLibraryDebuggable] RPC is used to enable or disable whether
+  /// The `setLibraryDebuggable` RPC is used to enable or disable whether
   /// breakpoints and stepping work for a given library.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> setLibraryDebuggable(
       String isolateId, String libraryId, bool isDebuggable) {
     return _call('setLibraryDebuggable', {
@@ -381,37 +381,37 @@ class VmService {
     });
   }
 
-  /// The [setName] RPC is used to change the debugging name for an isolate.
+  /// The `setName` RPC is used to change the debugging name for an isolate.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> setName(String isolateId, String name) {
     return _call('setName', {'isolateId': isolateId, 'name': name});
   }
 
-  /// The [setVMName] RPC is used to change the debugging name for the vm.
+  /// The `setVMName` RPC is used to change the debugging name for the vm.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> setVMName(String name) {
     return _call('setVMName', {'name': name});
   }
 
-  /// The [streamCancel] RPC cancels a stream subscription in the VM.
+  /// The `streamCancel` RPC cancels a stream subscription in the VM.
   ///
-  /// If the client is not subscribed to the stream, the [104] (Stream not
+  /// If the client is not subscribed to the stream, the `104` (Stream not
   /// subscribed) error code is returned.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> streamCancel(String streamId) {
     return _call('streamCancel', {'streamId': streamId});
   }
 
-  /// The [streamListen] RPC subscribes to a stream in the VM. Once subscribed,
+  /// The `streamListen` RPC subscribes to a stream in the VM. Once subscribed,
   /// the client will begin receiving events from the stream.
   ///
-  /// If the client is not subscribed to the stream, the [103] (Stream already
+  /// If the client is not subscribed to the stream, the `103` (Stream already
   /// subscribed) error code is returned.
   ///
-  /// The [streamId] parameter may have the following published values:
+  /// The `streamId` parameter may have the following published values:
   ///
   /// streamId | event types provided
   /// -------- | -----------
@@ -422,7 +422,7 @@ class VmService {
   /// BreakpointRemoved, Inspect
   /// GC | GC
   ///
-  /// Additionally, some embedders provide the [Stdout] and [Stderr] streams.
+  /// Additionally, some embedders provide the `Stdout` and `Stderr` streams.
   /// These streams allow the client to subscribe to writes to stdout and
   /// stderr.
   ///
@@ -431,11 +431,11 @@ class VmService {
   /// Stdout | WriteEvent
   /// Stderr | WriteEvent
   ///
-  /// It is considered a [backwards compatible] change to add a new type of
+  /// It is considered a `backwards compatible` change to add a new type of
   /// event to an existing stream. Clients should be written to handle this
   /// gracefully, perhaps by warning and ignoring.
   ///
-  /// See Success.
+  /// See [Success].
   Future<Success> streamListen(String streamId) {
     return _call('streamListen', {'streamId': streamId});
   }
@@ -567,7 +567,7 @@ class ErrorKind {
   static const String TerminationError = 'TerminationError';
 }
 
-/// Adding new values to [EventKind] is considered a backwards compatible
+/// Adding new values to `EventKind` is considered a backwards compatible
 /// change. Clients should ignore unrecognized events.
 class EventKind {
   /// Notification that VM identifying information has changed. Currently used
@@ -621,8 +621,8 @@ class EventKind {
   static const String WriteEvent = 'WriteEvent';
 }
 
-/// Adding new values to [InstanceKind] is considered a backwards compatible
-/// change. Clients should treat unrecognized instance kinds as [PlainInstance].
+/// Adding new values to `InstanceKind` is considered a backwards compatible
+/// change. Clients should treat unrecognized instance kinds as `PlainInstance`.
 class InstanceKind {
   /// A general instance of the Dart class Object.
   static const String PlainInstanceKind = 'PlainInstance';
@@ -701,10 +701,10 @@ class InstanceKind {
   static const String BoundedTypeKind = 'BoundedType';
 }
 
-/// A [SentinelKind] is used to distinguish different kinds of [Sentinel]
+/// A `SentinelKind` is used to distinguish different kinds of `Sentinel`
 /// objects.
 ///
-/// Adding new values to [SentinelKind] is considered a backwards compatible
+/// Adding new values to `SentinelKind` is considered a backwards compatible
 /// change. Clients must handle this gracefully.
 class SentinelKind {
   /// Indicates that the object referred to has been collected by the GC.
@@ -726,7 +726,7 @@ class SentinelKind {
   static const String Free = 'Free';
 }
 
-/// An [ExceptionPauseMode] indicates how the isolate pauses when an exception
+/// An `ExceptionPauseMode` indicates how the isolate pauses when an exception
 /// is thrown.
 class ExceptionPauseMode {
   static const String None = 'None';
@@ -734,7 +734,7 @@ class ExceptionPauseMode {
   static const String All = 'All';
 }
 
-/// A [StepOption] indicates which form of stepping is requested in a resume
+/// A `StepOption` indicates which form of stepping is requested in a [resume]
 /// RPC.
 class StepOption {
   static const String Into = 'Into';
@@ -744,14 +744,14 @@ class StepOption {
 
 // types
 
-/// A [BoundField] represents a field bound to a particular value in an
-/// [Instance].
+/// A `BoundField` represents a field bound to a particular value in an
+/// `Instance`.
 ///
-/// If the field is uninitialized, the [value] will be the [NotInitialized]
-/// Sentinel.
+/// If the field is uninitialized, the `value` will be the `NotInitialized`
+/// [Sentinel].
 ///
-/// If the field is being initialized, the [value] will be the
-/// [BeingInitialized] Sentinel.
+/// If the field is being initialized, the `value` will be the
+/// `BeingInitialized` [Sentinel].
 class BoundField {
   static BoundField _parse(Map json) => new BoundField._fromJson(json);
 
@@ -769,17 +769,17 @@ class BoundField {
   String toString() => '[BoundField decl: ${decl}, value: ${value}]';
 }
 
-/// A [BoundVariable] represents a local variable bound to a particular value in
-/// a [Frame].
+/// A `BoundVariable` represents a local variable bound to a particular value in
+/// a `Frame`.
 ///
-/// If the variable is uninitialized, the [value] will be the [NotInitialized]
-/// Sentinel.
+/// If the variable is uninitialized, the `value` will be the `NotInitialized`
+/// [Sentinel].
 ///
-/// If the variable is being initialized, the [value] will be the
-/// [BeingInitialized] Sentinel.
+/// If the variable is being initialized, the `value` will be the
+/// `BeingInitialized` [Sentinel].
 ///
-/// If the variable has been optimized out by the compiler, the [value] will be
-/// the [OptimizedOut] Sentinel.
+/// If the variable has been optimized out by the compiler, the `value` will be
+/// the `OptimizedOut` [Sentinel].
 class BoundVariable {
   static BoundVariable _parse(Map json) => new BoundVariable._fromJson(json);
 
@@ -797,9 +797,9 @@ class BoundVariable {
   String toString() => '[BoundVariable name: ${name}, value: ${value}]';
 }
 
-/// A [Breakpoint] describes a debugger breakpoint.
+/// A `Breakpoint` describes a debugger breakpoint.
 ///
-/// A breakpoint is [resolved] when it has been assigned to a specific program
+/// A breakpoint is `resolved` when it has been assigned to a specific program
 /// location. A breakpoint my remain unresolved when it is in code which has not
 /// yet been compiled or in a library which has not been loaded (i.e. a deferred
 /// library).
@@ -829,7 +829,7 @@ class Breakpoint extends Obj {
       'type: ${type}, id: ${id}, breakpointNumber: ${breakpointNumber}, resolved: ${resolved}, location: ${location}]';
 }
 
-/// [ClassRef] is a reference to a [Class].
+/// `ClassRef` is a reference to a `Class`.
 class ClassRef extends ObjRef {
   static ClassRef _parse(Map json) => new ClassRef._fromJson(json);
 
@@ -844,7 +844,7 @@ class ClassRef extends ObjRef {
   String toString() => '[ClassRef type: ${type}, id: ${id}, name: ${name}]';
 }
 
-/// A [Class] provides information about a Dart language class.
+/// A `Class` provides information about a Dart language class.
 class Class extends Obj {
   static Class _parse(Map json) => new Class._fromJson(json);
 
@@ -915,7 +915,7 @@ class ClassList extends Response {
   String toString() => '[ClassList type: ${type}, classes: ${classes}]';
 }
 
-/// [CodeRef] is a reference to a [Code] object.
+/// `CodeRef` is a reference to a `Code` object.
 class CodeRef extends ObjRef {
   static CodeRef _parse(Map json) => new CodeRef._fromJson(json);
 
@@ -935,7 +935,7 @@ class CodeRef extends ObjRef {
       '[CodeRef type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
 }
 
-/// A [Code] object represents compiled code in the Dart VM.
+/// A `Code` object represents compiled code in the Dart VM.
 class Code extends ObjRef {
   static Code _parse(Map json) => new Code._fromJson(json);
 
@@ -970,7 +970,7 @@ class ContextRef extends ObjRef {
       '[ContextRef type: ${type}, id: ${id}, length: ${length}]';
 }
 
-/// A [Context] is a data structure which holds the captured variables for some
+/// A `Context` is a data structure which holds the captured variables for some
 /// closure.
 class Context extends Obj {
   static Context _parse(Map json) => new Context._fromJson(json);
@@ -1009,7 +1009,7 @@ class ContextElement {
   String toString() => '[ContextElement value: ${value}]';
 }
 
-/// [ErrorRef] is a reference to an [Error].
+/// `ErrorRef` is a reference to an `Error`.
 class ErrorRef extends ObjRef {
   static ErrorRef _parse(Map json) => new ErrorRef._fromJson(json);
 
@@ -1029,8 +1029,8 @@ class ErrorRef extends ObjRef {
       '[ErrorRef type: ${type}, id: ${id}, kind: ${kind}, message: ${message}]';
 }
 
-/// An [Error] represents a Dart language level error. This is distinct from an
-/// rpc error.
+/// An `Error` represents a Dart language level error. This is distinct from an
+/// [rpc error].
 class Error extends Obj {
   static Error _parse(Map json) => new Error._fromJson(json);
 
@@ -1060,11 +1060,11 @@ class Error extends Obj {
       '[Error type: ${type}, id: ${id}, kind: ${kind}, message: ${message}]';
 }
 
-/// An [Event] is an asynchronous notification from the VM. It is delivered only
-/// when the client has subscribed to an event stream using the streamListen
+/// An `Event` is an asynchronous notification from the VM. It is delivered only
+/// when the client has subscribed to an event stream using the [streamListen]
 /// RPC.
 ///
-/// For more information, see events.
+/// For more information, see [events].
 class Event extends Response {
   static Event _parse(Map json) => new Event._fromJson(json);
 
@@ -1152,7 +1152,7 @@ class Event extends Response {
       '[Event type: ${type}, kind: ${kind}, timestamp: ${timestamp}]';
 }
 
-/// An [FieldRef] is a reference to a [Field].
+/// An `FieldRef` is a reference to a `Field`.
 class FieldRef extends ObjRef {
   static FieldRef _parse(Map json) => new FieldRef._fromJson(json);
 
@@ -1190,7 +1190,7 @@ class FieldRef extends ObjRef {
   String toString() => '[FieldRef]';
 }
 
-/// A [Field] provides information about a Dart language field or variable.
+/// A `Field` provides information about a Dart language field or variable.
 class Field extends Obj {
   static Field _parse(Map json) => new Field._fromJson(json);
 
@@ -1236,7 +1236,7 @@ class Field extends Obj {
   String toString() => '[Field]';
 }
 
-/// A [Flag] represents a single VM command line flag.
+/// A `Flag` represents a single VM command line flag.
 class Flag {
   static Flag _parse(Map json) => new Flag._fromJson(json);
 
@@ -1266,7 +1266,7 @@ class Flag {
       '[Flag name: ${name}, comment: ${comment}, modified: ${modified}]';
 }
 
-/// A [FlagList] represents the complete set of VM command line flags.
+/// A `FlagList` represents the complete set of VM command line flags.
 class FlagList extends Response {
   static FlagList _parse(Map json) => new FlagList._fromJson(json);
 
@@ -1307,7 +1307,7 @@ class Frame extends Response {
       'type: ${type}, index: ${index}, function: ${function}, code: ${code}, location: ${location}, vars: ${vars}]';
 }
 
-/// An [FuncRef] is a reference to a [Func].
+/// An `FuncRef` is a reference to a `Func`.
 class FuncRef extends ObjRef {
   static FuncRef _parse(Map json) => new FuncRef._fromJson(json);
 
@@ -1337,7 +1337,7 @@ class FuncRef extends ObjRef {
       'type: ${type}, id: ${id}, name: ${name}, owner: ${owner}, isStatic: ${isStatic}, isConst: ${isConst}]';
 }
 
-/// A [Func] represents a Dart language function.
+/// A `Func` represents a Dart language function.
 class Func extends Obj {
   static Func _parse(Map json) => new Func._fromJson(json);
 
@@ -1367,7 +1367,7 @@ class Func extends Obj {
       '[Func type: ${type}, id: ${id}, name: ${name}, owner: ${owner}]';
 }
 
-/// [InstanceRef] is a reference to an [Instance].
+/// `InstanceRef` is a reference to an `Instance`.
 class InstanceRef extends ObjRef {
   static InstanceRef _parse(Map json) => new InstanceRef._fromJson(json);
 
@@ -1459,7 +1459,7 @@ class InstanceRef extends ObjRef {
       '[InstanceRef type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
 
-/// An [Instance] represents an instance of the Dart language class [Obj].
+/// An `Instance` represents an instance of the Dart language class `Obj`.
 class Instance extends Obj {
   static Instance _parse(Map json) => new Instance._fromJson(json);
 
@@ -1716,7 +1716,7 @@ class Instance extends Obj {
       '[Instance type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
 
-/// [IsolateRef] is a reference to an [Isolate] object.
+/// `IsolateRef` is a reference to an `Isolate` object.
 class IsolateRef extends Response {
   static IsolateRef _parse(Map json) => new IsolateRef._fromJson(json);
 
@@ -1740,7 +1740,7 @@ class IsolateRef extends Response {
       '[IsolateRef type: ${type}, id: ${id}, number: ${number}, name: ${name}]';
 }
 
-/// An [Isolate] object provides information about one isolate in the VM.
+/// An `Isolate` object provides information about one isolate in the VM.
 class Isolate extends Response {
   static Isolate _parse(Map json) => new Isolate._fromJson(json);
 
@@ -1802,7 +1802,7 @@ class Isolate extends Response {
   String toString() => '[Isolate]';
 }
 
-/// [LibraryRef] is a reference to a [Library].
+/// `LibraryRef` is a reference to a `Library`.
 class LibraryRef extends ObjRef {
   static LibraryRef _parse(Map json) => new LibraryRef._fromJson(json);
 
@@ -1822,9 +1822,9 @@ class LibraryRef extends ObjRef {
       '[LibraryRef type: ${type}, id: ${id}, name: ${name}, uri: ${uri}]';
 }
 
-/// A [Library] provides information about a Dart language library.
+/// A `Library` provides information about a Dart language library.
 ///
-/// See setLibraryDebuggable.
+/// See [setLibraryDebuggable].
 class Library extends Obj {
   static Library _parse(Map json) => new Library._fromJson(json);
 
@@ -1867,7 +1867,7 @@ class Library extends Obj {
   String toString() => '[Library]';
 }
 
-/// A [LibraryDependency] provides information about an import or export.
+/// A `LibraryDependency` provides information about an import or export.
 class LibraryDependency {
   static LibraryDependency _parse(Map json) =>
       new LibraryDependency._fromJson(json);
@@ -1914,7 +1914,7 @@ class MapAssociation {
   String toString() => '[MapAssociation key: ${key}, value: ${value}]';
 }
 
-/// A [Message] provides information about a pending isolate message and the
+/// A `Message` provides information about a pending isolate message and the
 /// function that will be invoked to handle it.
 class Message extends Response {
   static Message _parse(Map json) => new Message._fromJson(json);
@@ -1953,7 +1953,7 @@ class Message extends Response {
       'type: ${type}, index: ${index}, name: ${name}, messageObjectId: ${messageObjectId}, size: ${size}]';
 }
 
-/// [NullRef] is a reference to an a [Null].
+/// `NullRef` is a reference to an a `Null`.
 class NullRef extends InstanceRef {
   static NullRef _parse(Map json) => new NullRef._fromJson(json);
 
@@ -1969,7 +1969,7 @@ class NullRef extends InstanceRef {
       'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, valueAsString: ${valueAsString}]';
 }
 
-/// A [Null] object represents the Dart language value null.
+/// A `Null` object represents the Dart language value null.
 class Null extends Instance {
   static Null _parse(Map json) => new Null._fromJson(json);
 
@@ -1985,7 +1985,7 @@ class Null extends Instance {
       'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, valueAsString: ${valueAsString}]';
 }
 
-/// [ObjRef] is a reference to a [Obj].
+/// `ObjRef` is a reference to a `Obj`.
 class ObjRef extends Response {
   static ObjRef _parse(Map json) => new ObjRef._fromJson(json);
 
@@ -2001,7 +2001,7 @@ class ObjRef extends Response {
   String toString() => '[ObjRef type: ${type}, id: ${id}]';
 }
 
-/// An [Obj] is a persistent object that is owned by some isolate.
+/// An `Obj` is a persistent object that is owned by some isolate.
 class Obj extends Response {
   static Obj _parse(Map json) => new Obj._fromJson(json);
 
@@ -2041,8 +2041,8 @@ class Obj extends Response {
 }
 
 /// Every non-error response returned by the Service Protocol extends
-/// [Response]. By using the [type] property, the client can determine which
-/// type of response has been provided.
+/// `Response`. By using the `type` property, the client can determine which
+/// [type] of response has been provided.
 class Response {
   static Response _parse(Map json) => new Response._fromJson(json);
 
@@ -2058,10 +2058,10 @@ class Response {
   String toString() => '[Response type: ${type}]';
 }
 
-/// A [Sentinel] is used to indicate that the normal response is not available.
+/// A `Sentinel` is used to indicate that the normal response is not available.
 ///
-/// We use a [Sentinel] instead of an error for these cases because they do not
-/// represent a problematic condition. They are normal.
+/// We use a `Sentinel` instead of an [error] for these cases because they do
+/// not represent a problematic condition. They are normal.
 class Sentinel extends Response {
   static Sentinel _parse(Map json) => new Sentinel._fromJson(json);
 
@@ -2081,7 +2081,7 @@ class Sentinel extends Response {
       '[Sentinel type: ${type}, kind: ${kind}, valueAsString: ${valueAsString}]';
 }
 
-/// [ScriptRef] is a reference to a [Script].
+/// `ScriptRef` is a reference to a `Script`.
 class ScriptRef extends ObjRef {
   static ScriptRef _parse(Map json) => new ScriptRef._fromJson(json);
 
@@ -2096,10 +2096,30 @@ class ScriptRef extends ObjRef {
   String toString() => '[ScriptRef type: ${type}, id: ${id}, uri: ${uri}]';
 }
 
-/// A [Script] provides information about a Dart language script.
+/// A `Script` provides information about a Dart language script.
 ///
-/// The [tokenPosTable] is an array of int arrays. Each subarray consists of a
-/// line number followed by [(tokenPos, columnNumber)] pairs:
+/// The `tokenPosTable` is an array of int arrays. Each subarray consists of a
+/// line number followed by `(tokenPos, columnNumber)` pairs:
+///
+/// ```
+/// [lineNumber, (tokenPos, columnNumber)*]
+///
+/// ```
+///
+/// For example, a `tokenPosTable` with the value...
+///
+/// ```
+/// [[1, 100, 5, 101, 8],[2, 102, 7]]
+///
+/// ```
+///
+/// ...encodes the mapping:
+///
+/// tokenPos | line | column
+/// -------- | ---- | ------
+/// 100 | 1 | 5
+/// 101 | 1 | 8
+/// 102 | 2 | 7
 class Script extends Obj {
   static Script _parse(Map json) => new Script._fromJson(json);
 
@@ -2128,7 +2148,7 @@ class Script extends Obj {
       'type: ${type}, id: ${id}, uri: ${uri}, library: ${library}, source: ${source}, tokenPosTable: ${tokenPosTable}]';
 }
 
-/// The [SourceLocation] class is used to designate a position or range in some
+/// The `SourceLocation` class is used to designate a position or range in some
 /// script.
 class SourceLocation extends Response {
   static SourceLocation _parse(Map json) => new SourceLocation._fromJson(json);
@@ -2170,7 +2190,7 @@ class Stack extends Response {
       '[Stack type: ${type}, frames: ${frames}, messages: ${messages}]';
 }
 
-/// The [Success] type is used to indicate that an operation completed
+/// The `Success` type is used to indicate that an operation completed
 /// successfully.
 class Success extends Response {
   static Success _parse(Map json) => new Success._fromJson(json);
@@ -2181,7 +2201,7 @@ class Success extends Response {
   String toString() => '[Success type: ${type}]';
 }
 
-/// [TypeArgumentsRef] is a reference to a [TypeArguments] object.
+/// `TypeArgumentsRef` is a reference to a `TypeArguments` object.
 class TypeArgumentsRef extends ObjRef {
   static TypeArgumentsRef _parse(Map json) =>
       new TypeArgumentsRef._fromJson(json);
@@ -2198,7 +2218,7 @@ class TypeArgumentsRef extends ObjRef {
       '[TypeArgumentsRef type: ${type}, id: ${id}, name: ${name}]';
 }
 
-/// A [TypeArguments] object represents the type argument vector for some
+/// A `TypeArguments` object represents the type argument vector for some
 /// instantiated generic type.
 class TypeArguments extends Obj {
   static TypeArguments _parse(Map json) => new TypeArguments._fromJson(json);
@@ -2222,15 +2242,15 @@ class TypeArguments extends Obj {
       '[TypeArguments type: ${type}, id: ${id}, name: ${name}, types: ${types}]';
 }
 
-/// The [UnresolvedSourceLocation] class is used to refer to an unresolved
+/// The `UnresolvedSourceLocation` class is used to refer to an unresolved
 /// breakpoint location. As such, it is meant to approximate the final location
 /// of the breakpoint but it is not exact.
 ///
-/// Either the [script] or the [scriptUri] field will be present.
+/// Either the `script` or the `scriptUri` field will be present.
 ///
-/// Either the [tokenPos] or the [line] field will be present.
+/// Either the `tokenPos` or the `line` field will be present.
 ///
-/// The [column] field will only be present when the breakpoint was specified
+/// The `column` field will only be present when the breakpoint was specified
 /// with a specific column number.
 class UnresolvedSourceLocation extends Response {
   static UnresolvedSourceLocation _parse(Map json) =>
@@ -2267,7 +2287,7 @@ class UnresolvedSourceLocation extends Response {
   String toString() => '[UnresolvedSourceLocation type: ${type}]';
 }
 
-/// See Versioning.
+/// See [Versioning].
 class Version extends Response {
   static Version _parse(Map json) => new Version._fromJson(json);
 
@@ -2289,7 +2309,7 @@ class Version extends Response {
       '[Version type: ${type}, major: ${major}, minor: ${minor}]';
 }
 
-/// [VMRef] is a reference to a [VM] object.
+/// `VMRef` is a reference to a `VM` object.
 class VMRef extends Response {
   static VMRef _parse(Map json) => new VMRef._fromJson(json);
 

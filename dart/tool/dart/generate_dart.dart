@@ -175,10 +175,11 @@ class Api extends Member with ApiParseUtil {
         String definition = textForCode(node);
         String docs = '';
 
-        while (i + 1 < nodes.length && isPara(nodes[i + 1])) {
+        while (i + 1 < nodes.length &&
+            (isPara(nodes[i + 1]) || isBlockquote(nodes[i + 1]))) {
           Element p = nodes[++i];
           String str = TextOutputVisitor.printText(p);
-          if (!str.contains('|')) str = collapseWhitespace(str);
+          if (!str.contains('|') && !str.contains('``')) str = collapseWhitespace(str);
           docs = '${docs}\n\n${str}';
         }
 
@@ -662,24 +663,31 @@ class TextOutputVisitor implements NodeVisitor {
   }
 
   StringBuffer buf = new StringBuffer();
-  bool _inRef = false;
+  bool _em = false;
+  bool _href = false;
 
   TextOutputVisitor();
 
   void visitText(Text text) {
     String t = text.text;
-    if (_inRef) t = _coerceRefType(t);
+    if (_em) {
+      t = _coerceRefType(t);
+    } else  if (_href) {
+      t = '[${_coerceRefType(t)}]';
+    }
     buf.write(t);
   }
 
   bool visitElementBefore(Element element) {
     if (element.tag == 'em') {
-      buf.write('[');
-      _inRef = true;
+      buf.write('`');
+      _em = true;
     } else if (element.tag == 'p') {
       // Nothing to do.
+    } else if (element.tag == 'blockquote') {
+      buf.write('```\n');
     } else if (element.tag == 'a') {
-      // Nothing to do - we're not writing out <a> refs (they won't resolve).
+      _href = true;
     } else {
       print('unknown tag: ${element.tag}');
       buf.write(renderToHtml([element]));
@@ -691,9 +699,13 @@ class TextOutputVisitor implements NodeVisitor {
   void visitElementAfter(Element element) {
     if (element.tag == 'p') {
       buf.write('\n\n');
+    } else if (element.tag == 'a') {
+      _href = false;
+    } else if (element.tag == 'blockquote') {
+      buf.write('```\n');
     } else if (element.tag == 'em') {
-      buf.write(']');
-      _inRef = false;
+      buf.write('`');
+      _em = false;
     }
   }
 
