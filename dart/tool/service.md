@@ -1696,7 +1696,7 @@ enum InstanceKind {
   Float64x2,
   Int32x4
 
-  // An instance of the built-in VM TypedData implementations.  User-defined
+  // An instance of the built-in VM TypedData implementations. User-defined
   // TypedDatas will be PlainInstance.
   Uint8ClampedList,
   Uint8List,
@@ -1729,16 +1729,16 @@ enum InstanceKind {
   // An instance of the Dart class WeakProperty.
   WeakProperty,
 
-  // An instance of the Dart class Type
+  // An instance of the Dart class Type.
   Type,
 
-  // An instance of the Dart class TypeParamer
+  // An instance of the Dart class TypeParamer.
   TypeParameter,
 
-  // An instance of the Dart class TypeRef
+  // An instance of the Dart class TypeRef.
   TypeRef,
 
-  // An instance of the Dart class BoundedType
+  // An instance of the Dart class BoundedType.
   BoundedType,
 }
 ```
@@ -1833,7 +1833,7 @@ class Library extends Object {
   // The uri of this library.
   string uri;
 
-  // Is this library debuggable?  Default true.
+  // Is this library debuggable? Default true.
   bool debuggable;
 
   // A list of the imports for this library.
@@ -2186,15 +2186,15 @@ class UnresolvedSourceLocation extends Response {
   // has yet to be loaded.
   string scriptUri [optional];
 
-  // An approximate token position for the source location.  This may
+  // An approximate token position for the source location. This may
   // change when the location is resolved.
   int tokenPos [optional];
 
-  // An approximate line number for the source location.  This may
+  // An approximate line number for the source location. This may
   // change when the location is resolved.
   int line [optional];
 
-  // An approximate column number for the source location.  This may
+  // An approximate column number for the source location. This may
   // change when the location is resolved.
   int column [optional];
 

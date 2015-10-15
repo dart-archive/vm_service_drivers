@@ -103,6 +103,26 @@ class VmService {
 
   /// The [addBreakpoint] RPC is used to add a breakpoint at a specific line of
   /// some script.
+  ///
+  /// The [scriptId] parameter is used to specify the target script.
+  ///
+  /// The [line] parameter is used to specify the target line for the
+  /// breakpoint. If there are multiple possible breakpoints on the target line,
+  /// then the VM will place the breakpoint at the location which would execute
+  /// soonest. If it is not possible to set a breakpoint at the target line, the
+  /// breakpoint will be added at the next possible breakpoint location within
+  /// the same function.
+  ///
+  /// The [column] parameter may be optionally specified. This is useful for
+  /// targeting a specific breakpoint on a line with multiple possible
+  /// breakpoints.
+  ///
+  /// If no breakpoint is possible at that line, the [102] (Cannot add
+  /// breakpoint) error code is returned.
+  ///
+  /// Note that breakpoints are added and removed on a per-isolate basis.
+  ///
+  /// See Breakpoint.
   Future<Breakpoint> addBreakpoint(String isolateId, String scriptId, int line,
       [int column]) {
     Map m = {'isolateId': isolateId, 'scriptId': scriptId, 'line': line};
@@ -114,6 +134,26 @@ class VmService {
   /// some script. This RPC is useful when a script has not yet been assigned an
   /// id, for example, if a script is in a deferred library which has not yet
   /// been loaded.
+  ///
+  /// The [scriptUri] parameter is used to specify the target script.
+  ///
+  /// The [line] parameter is used to specify the target line for the
+  /// breakpoint. If there are multiple possible breakpoints on the target line,
+  /// then the VM will place the breakpoint at the location which would execute
+  /// soonest. If it is not possible to set a breakpoint at the target line, the
+  /// breakpoint will be added at the next possible breakpoint location within
+  /// the same function.
+  ///
+  /// The [column] parameter may be optionally specified. This is useful for
+  /// targeting a specific breakpoint on a line with multiple possible
+  /// breakpoints.
+  ///
+  /// If no breakpoint is possible at that line, the [102] (Cannot add
+  /// breakpoint) error code is returned.
+  ///
+  /// Note that breakpoints are added and removed on a per-isolate basis.
+  ///
+  /// See Breakpoint.
   Future<Breakpoint> addBreakpointWithScriptUri(
       String isolateId, String scriptUri, int line,
       [int column]) {
@@ -124,6 +164,13 @@ class VmService {
 
   /// The [addBreakpointAtEntry] RPC is used to add a breakpoint at the
   /// entrypoint of some function.
+  ///
+  /// If no breakpoint is possible at the function entry, the [102] (Cannot add
+  /// breakpoint) error code is returned.
+  ///
+  /// See Breakpoint.
+  ///
+  /// Note that breakpoints are added and removed on a per-isolate basis.
   Future<Breakpoint> addBreakpointAtEntry(String isolateId, String functionId) {
     return _call('addBreakpointAtEntry',
         {'isolateId': isolateId, 'functionId': functionId});
@@ -131,6 +178,20 @@ class VmService {
 
   /// The [evaluate] RPC is used to evaluate an expression in the context of
   /// some target.
+  ///
+  /// [targetId] may refer to a Library, Class, or Instance.
+  ///
+  /// If [targetId] is a temporary id which has expired, then then [Expired]
+  /// Sentinel is returned.
+  ///
+  /// If [targetId] refers to an object which has been collected by the VM's
+  /// garbage collector, then the [Collected] Sentinel is returned.
+  ///
+  /// If an error occurs while evaluating the expression, an @Error reference
+  /// will be returned.
+  ///
+  /// If the expression is evaluated successfully, an @Instance reference will
+  /// be returned.
   ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   Future<dynamic> evaluate(
@@ -146,6 +207,12 @@ class VmService {
   /// of a particular stack frame. [frameIndex] is the index of the desired
   /// Frame, with an index of [0] indicating the top (most recent) frame.
   ///
+  /// If an error occurs while evaluating the expression, an @Error reference
+  /// will be returned.
+  ///
+  /// If the expression is evaluated successfully, an @Instance reference will
+  /// be returned.
+  ///
   /// The return value can be one of [InstanceRef] or [ErrorRef].
   Future<dynamic> evaluateInFrame(
       String isolateId, int frameIndex, String expression) {
@@ -158,9 +225,16 @@ class VmService {
 
   /// The _getFlagList RPC returns a list of all command line flags in the VM
   /// along with their current values.
+  ///
+  /// See FlagList.
   Future<FlagList> getFlagList() => _call('getFlagList');
 
   /// The [getIsolate] RPC is used to lookup an [Isolate] object by its [id].
+  ///
+  /// If [isolateId] refers to an isolate which has exited, then the [Collected]
+  /// Sentinel is returned.
+  ///
+  /// See Isolate.
   ///
   /// The return value can be one of [Isolate] or [Sentinel].
   Future<dynamic> getIsolate(String isolateId) {
@@ -169,6 +243,24 @@ class VmService {
 
   /// The [getObject] RPC is used to lookup an [object] from some isolate by its
   /// [id].
+  ///
+  /// If [objectId] is a temporary id which has expired, then then [Expired]
+  /// Sentinel is returned.
+  ///
+  /// If [objectId] refers to a heap object which has been collected by the VM's
+  /// garbage collector, then the [Collected] Sentinel is returned.
+  ///
+  /// If [objectId] refers to a non-heap object which has been deleted, then the
+  /// [Collected] Sentinel is returned.
+  ///
+  /// If the object handle has not expired and the object has not been
+  /// collected, then an Object will be returned.
+  ///
+  /// The [offset] and [count] parameters are used to request subranges of
+  /// Instance objects with the kinds: List, Map, Uint8ClampedList, Uint8List,
+  /// Uint16List, Uint32List, Uint64List, Int8List, Int16List, Int32List,
+  /// Int64List, Flooat32List, Float64List, Inst32x3List, Float32x4List, and
+  /// Float64x2List. These parameters are otherwise ignored.
   ///
   /// The return value can be one of [Obj] or [Sentinel].
   Future<dynamic> getObject(String isolateId, String objectId,
@@ -181,31 +273,59 @@ class VmService {
 
   /// The [getStack] RPC is used to retrieve the current execution stack and
   /// message queue for an isolate. The isolate does not need to be paused.
+  ///
+  /// See Stack.
   Future<Stack> getStack(String isolateId) {
     return _call('getStack', {'isolateId': isolateId});
   }
 
   /// The [getVersion] RPC is used to determine what version of the Service
   /// Protocol is served by a VM.
+  ///
+  /// See Version.
   Future<Version> getVersion() => _call('getVersion');
 
   /// The [getVM] RPC returns global information about a Dart virtual machine.
+  ///
+  /// See VM.
   Future<VM> getVM() => _call('getVM');
 
   /// The [pause] RPC is used to interrupt a running isolate. The RPC enqueues
   /// the interrupt request and potentially returns before the isolate is
   /// paused.
+  ///
+  /// When the isolate is paused an event will be sent on the [Debug] stream.
+  ///
+  /// See Success.
   Future<Success> pause(String isolateId) {
     return _call('pause', {'isolateId': isolateId});
   }
 
   /// The [removeBreakpoint] RPC is used to remove a breakpoint by its [id].
+  ///
+  /// Note that breakpoints are added and removed on a per-isolate basis.
+  ///
+  /// See Success.
   Future<Success> removeBreakpoint(String isolateId, String breakpointId) {
     return _call('removeBreakpoint',
         {'isolateId': isolateId, 'breakpointId': breakpointId});
   }
 
   /// The [resume] RPC is used to resume execution of a paused isolate.
+  ///
+  /// If the [step] parameter is not provided, the program will resume regular
+  /// execution.
+  ///
+  /// If the [step] parameter is provided, it indicates what form of
+  /// single-stepping to use.
+  ///
+  /// step | meaning
+  /// ---- | -------
+  /// Into | Single step, entering function calls
+  /// Over | Single step, skipping over function calls
+  /// Out | Single step until the current function exits
+  ///
+  /// See Success, StepOption.
   Future<Success> resume(String isolateId, [/*StepOption*/ String step]) {
     Map m = {'isolateId': isolateId};
     if (step != null) m['step'] = step;
@@ -214,6 +334,12 @@ class VmService {
 
   /// The [setExceptionPauseMode] RPC is used to control if an isolate pauses
   /// when an exception is thrown.
+  ///
+  /// mode | meaning
+  /// ---- | -------
+  /// None | Do not pause isolate on thrown exceptions
+  /// Unhandled | Pause isolate on unhandled exceptions
+  /// All  | Pause isolate on all thrown exceptions
   Future<Success> setExceptionPauseMode(
       String isolateId, ExceptionPauseMode mode) {
     return _call(
@@ -222,6 +348,8 @@ class VmService {
 
   /// The [setLibraryDebuggable] RPC is used to enable or disable whether
   /// breakpoints and stepping work for a given library.
+  ///
+  /// See Success.
   Future<Success> setLibraryDebuggable(
       String isolateId, String libraryId, bool isDebuggable) {
     return _call('setLibraryDebuggable', {
@@ -232,22 +360,60 @@ class VmService {
   }
 
   /// The [setName] RPC is used to change the debugging name for an isolate.
+  ///
+  /// See Success.
   Future<Success> setName(String isolateId, String name) {
     return _call('setName', {'isolateId': isolateId, 'name': name});
   }
 
   /// The [setVMName] RPC is used to change the debugging name for the vm.
+  ///
+  /// See Success.
   Future<Success> setVMName(String name) {
     return _call('setVMName', {'name': name});
   }
 
   /// The [streamCancel] RPC cancels a stream subscription in the VM.
+  ///
+  /// If the client is not subscribed to the stream, the [104] (Stream not
+  /// subscribed) error code is returned.
+  ///
+  /// See Success.
   Future<Success> streamCancel(String streamId) {
     return _call('streamCancel', {'streamId': streamId});
   }
 
   /// The [streamListen] RPC subscribes to a stream in the VM. Once subscribed,
   /// the client will begin receiving events from the stream.
+  ///
+  /// If the client is not subscribed to the stream, the [103] (Stream already
+  /// subscribed) error code is returned.
+  ///
+  /// The [streamId] parameter may have the following published values:
+  ///
+  /// streamId | event types provided
+  /// -------- | -----------
+  /// VM | VMUpdate
+  /// Isolate | IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate
+  /// Debug | PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted,
+  /// PauseException, Resume, BreakpointAdded, BreakpointResolved,
+  /// BreakpointRemoved, Inspect
+  /// GC | GC
+  ///
+  /// Additionally, some embedders provide the [Stdout] and [Stderr] streams.
+  /// These streams allow the client to subscribe to writes to stdout and
+  /// stderr.
+  ///
+  /// streamId | event types provided
+  /// -------- | -----------
+  /// Stdout | WriteEvent
+  /// Stderr | WriteEvent
+  ///
+  /// It is considered a [backwards compatible] change to add a new type of
+  /// event to an existing stream. Clients should be written to handle this
+  /// gracefully, perhaps by warning and ignoring.
+  ///
+  /// See Success.
   Future<Success> streamListen(String streamId) {
     return _call('streamListen', {'streamId': streamId});
   }
@@ -513,21 +679,24 @@ class InstanceKind {
   /// An instance of the Dart class WeakProperty.
   static const String WeakPropertyKind = 'WeakProperty';
 
-  /// An instance of the Dart class Type
+  /// An instance of the Dart class Type.
   static const String TypeKind = 'Type';
 
-  /// An instance of the Dart class TypeParamer
+  /// An instance of the Dart class TypeParamer.
   static const String TypeParameterKind = 'TypeParameter';
 
-  /// An instance of the Dart class TypeRef
+  /// An instance of the Dart class TypeRef.
   static const String TypeRefKind = 'TypeRef';
 
-  /// An instance of the Dart class BoundedType
+  /// An instance of the Dart class BoundedType.
   static const String BoundedTypeKind = 'BoundedType';
 }
 
 /// A [SentinelKind] is used to distinguish different kinds of [Sentinel]
 /// objects.
+///
+/// Adding new values to [SentinelKind] is considered a backwards compatible
+/// change. Clients must handle this gracefully.
 class SentinelKind {
   /// Indicates that the object referred to has been collected by the GC.
   static const String Collected = 'Collected';
@@ -568,6 +737,12 @@ class StepOption {
 
 /// A [BoundField] represents a field bound to a particular value in an
 /// [Instance].
+///
+/// If the field is uninitialized, the [value] will be the [NotInitialized]
+/// Sentinel.
+///
+/// If the field is being initialized, the [value] will be the
+/// [BeingInitialized] Sentinel.
 class BoundField {
   static BoundField parse(Map json) => new BoundField.fromJson(json);
 
@@ -587,6 +762,15 @@ class BoundField {
 
 /// A [BoundVariable] represents a local variable bound to a particular value in
 /// a [Frame].
+///
+/// If the variable is uninitialized, the [value] will be the [NotInitialized]
+/// Sentinel.
+///
+/// If the variable is being initialized, the [value] will be the
+/// [BeingInitialized] Sentinel.
+///
+/// If the variable has been optimized out by the compiler, the [value] will be
+/// the [OptimizedOut] Sentinel.
 class BoundVariable {
   static BoundVariable parse(Map json) => new BoundVariable.fromJson(json);
 
@@ -605,6 +789,11 @@ class BoundVariable {
 }
 
 /// A [Breakpoint] describes a debugger breakpoint.
+///
+/// A breakpoint is [resolved] when it has been assigned to a specific program
+/// location. A breakpoint my remain unresolved when it is in code which has not
+/// yet been compiled or in a library which has not been loaded (i.e. a deferred
+/// library).
 class Breakpoint extends Obj {
   static Breakpoint parse(Map json) => new Breakpoint.fromJson(json);
 
@@ -686,8 +875,9 @@ class Class extends Obj {
   /// The superclass of this class, if any.
   @optional ClassRef superClass;
 
-  /// A list of interface types for this class. The value will be of the kind:
-  /// Type.
+  /// A list of interface types for this class.
+  ///
+  /// The value will be of the kind: Type.
   List<InstanceRef> interfaces;
 
   /// A list of fields in this class. Does not include fields from superclasses.
@@ -864,6 +1054,8 @@ class Error extends Obj {
 /// An [Event] is an asynchronous notification from the VM. It is delivered only
 /// when the client has subscribed to an event stream using the streamListen
 /// RPC.
+///
+/// For more information, see events.
 class Event extends Response {
   static Event parse(Map json) => new Event.fromJson(json);
 
@@ -883,12 +1075,16 @@ class Event extends Response {
   /// What kind of event is this?
   /*EventKind*/ String kind;
 
-  /// The isolate with which this event is associated. This is provided for all
-  /// event kinds except for: VMUpdate
+  /// The isolate with which this event is associated.
+  ///
+  /// This is provided for all event kinds except for:
+  ///  - VMUpdate
   @optional IsolateRef isolate;
 
-  /// The vm with which this event is associated. This is provided for the event
-  /// kind: VMUpdate
+  /// The vm with which this event is associated.
+  ///
+  /// This is provided for the event kind:
+  ///  - VMUpdate
   @optional VMRef vm;
 
   /// The timestamp (in milliseconds since the epoch) associated with this
@@ -897,33 +1093,50 @@ class Event extends Response {
   /// was created.
   int timestamp;
 
-  /// The breakpoint which was added, removed, or resolved. This is provided for
-  /// the event kinds: PauseBreakpoint BreakpointAdded BreakpointRemoved
-  /// BreakpointResolved
+  /// The breakpoint which was added, removed, or resolved.
+  ///
+  /// This is provided for the event kinds:
+  ///  - PauseBreakpoint
+  ///  - BreakpointAdded
+  ///  - BreakpointRemoved
+  ///  - BreakpointResolved
   @optional Breakpoint breakpoint;
 
   /// The list of breakpoints at which we are currently paused for a
-  /// PauseBreakpoint event. This list may be empty. For example, while
-  /// single-stepping, the VM sends a PauseBreakpoint event with no breakpoints.
+  /// PauseBreakpoint event.
+  ///
+  /// This list may be empty. For example, while single-stepping, the VM sends a
+  /// PauseBreakpoint event with no breakpoints.
+  ///
   /// If there is more than one breakpoint set at the program position, then all
-  /// of them will be provided. This is provided for the event kinds:
-  /// PauseBreakpoint
+  /// of them will be provided.
+  ///
+  /// This is provided for the event kinds:
+  ///  - PauseBreakpoint
   @optional List<Breakpoint> pauseBreakpoints;
 
-  /// The top stack frame associated with this event, if applicable. This is
-  /// provided for the event kinds: PauseBreakpoint PauseInterrupted
-  /// PauseException For PauseInterrupted events, there will be no top frame if
-  /// the isolate is idle (waiting in the message loop). For the Resume event,
-  /// the top frame is provided at all times except for the initial resume event
-  /// that is delivered when an isolate begins execution.
+  /// The top stack frame associated with this event, if applicable.
+  ///
+  /// This is provided for the event kinds:
+  ///  - PauseBreakpoint
+  ///  - PauseInterrupted
+  ///  - PauseException
+  ///
+  /// For PauseInterrupted events, there will be no top frame if the isolate is
+  /// idle (waiting in the message loop).
+  ///
+  /// For the Resume event, the top frame is provided at all times except for
+  /// the initial resume event that is delivered when an isolate begins
+  /// execution.
   @optional Frame topFrame;
 
   /// The exception associated with this event, if this is a PauseException
   /// event.
   @optional InstanceRef exception;
 
-  /// An array of bytes, encoded as a base64 string. This is provided for the
-  /// WriteEvent event.
+  /// An array of bytes, encoded as a base64 string.
+  ///
+  /// This is provided for the WriteEvent event.
   @optional String bytes;
 
   String toString() =>
@@ -950,8 +1163,10 @@ class FieldRef extends ObjRef {
   /// The owner of this field, which can be either a Library or a Class.
   ObjRef owner;
 
-  /// The declared type of this field. The value will always be of one of the
-  /// kinds: Type, TypeRef, TypeParameter, BoundedType.
+  /// The declared type of this field.
+  ///
+  /// The value will always be of one of the kinds: Type, TypeRef,
+  /// TypeParameter, BoundedType.
   InstanceRef declaredType;
 
   /// Is this field const?
@@ -988,8 +1203,10 @@ class Field extends Obj {
   /// The owner of this field, which can be either a Library or a Class.
   ObjRef owner;
 
-  /// The declared type of this field. The value will always be of one of the
-  /// kinds: Type, TypeRef, TypeParameter, BoundedType.
+  /// The declared type of this field.
+  ///
+  /// The value will always be of one of the kinds: Type, TypeRef,
+  /// TypeParameter, BoundedType.
   InstanceRef declaredType;
 
   /// Is this field const?
@@ -1031,8 +1248,9 @@ class Flag {
   /// Has this flag been modified from its default setting?
   bool modified;
 
-  /// The value of this flag as a string. If this property is absent, then the
-  /// value of the flag was NULL.
+  /// The value of this flag as a string.
+  ///
+  /// If this property is absent, then the value of the flag was NULL.
   @optional String valueAsString;
 
   String toString() =>
@@ -1163,35 +1381,69 @@ class InstanceRef extends ObjRef {
   /// Instance references always include their class.
   ClassRef classRef;
 
-  /// The value of this instance as a string. Provided for the instance kinds:
-  /// Null (null) Bool (true or false) Double (suitable for passing to
-  /// Double.parse()) Int (suitable for passing to int.parse()) String (value
-  /// may be truncated) Float32x4 Float64x2 Int32x4 StackTrace
+  /// The value of this instance as a string.
+  ///
+  /// Provided for the instance kinds:
+  ///  - Null (null)
+  ///  - Bool (true or false)
+  ///  - Double (suitable for passing to Double.parse())
+  ///  - Int (suitable for passing to int.parse())
+  ///  - String (value may be truncated)
+  ///  - Float32x4
+  ///  - Float64x2
+  ///  - Int32x4
+  ///  - StackTrace
   @optional String valueAsString;
 
   /// The valueAsString for String references may be truncated. If so, this
   /// property is added with the value 'true'.
   @optional bool valueAsStringIsTruncated;
 
-  /// The length of a List or the number of associations in a Map. Provided for
-  /// instance kinds: List Map Uint8ClampedList Uint8List Uint16List Uint32List
-  /// Uint64List Int8List Int16List Int32List Int64List Float32List Float64List
-  /// Int32x4List Float32x4List Float64x2List
+  /// The length of a List or the number of associations in a Map.
+  ///
+  /// Provided for instance kinds:
+  ///  - List
+  ///  - Map
+  ///  - Uint8ClampedList
+  ///  - Uint8List
+  ///  - Uint16List
+  ///  - Uint32List
+  ///  - Uint64List
+  ///  - Int8List
+  ///  - Int16List
+  ///  - Int32List
+  ///  - Int64List
+  ///  - Float32List
+  ///  - Float64List
+  ///  - Int32x4List
+  ///  - Float32x4List
+  ///  - Float64x2List
   @optional int length;
 
-  /// The name of a Type instance. Provided for instance kinds: Type
+  /// The name of a Type instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - Type
   @optional String name;
 
-  /// The corresponding Class if this Type is canonical. Provided for instance
-  /// kinds: Type
+  /// The corresponding Class if this Type is canonical.
+  ///
+  /// Provided for instance kinds:
+  ///  - Type
   @optional ClassRef typeClass;
 
-  /// The parameterized class of a type parameter: Provided for instance kinds:
-  /// TypeParameter
+  /// The parameterized class of a type parameter:
+  ///
+  /// Provided for instance kinds:
+  ///  - TypeParameter
   @optional ClassRef parameterizedClass;
 
-  /// The pattern of a RegExp instance. The pattern is always an instance of
-  /// kind String. Provided for instance kinds: RegExp
+  /// The pattern of a RegExp instance.
+  ///
+  /// The pattern is always an instance of kind String.
+  ///
+  /// Provided for instance kinds:
+  ///  - RegExp
   @optional InstanceRef pattern;
 
   String toString() =>
@@ -1238,108 +1490,217 @@ class Instance extends Obj {
   /// Instance references always include their class.
   ClassRef classRef;
 
-  /// The value of this instance as a string. Provided for the instance kinds:
-  /// Bool (true or false) Double (suitable for passing to Double.parse()) Int
-  /// (suitable for passing to int.parse()) String (value may be truncated)
+  /// The value of this instance as a string.
+  ///
+  /// Provided for the instance kinds:
+  ///  - Bool (true or false)
+  ///  - Double (suitable for passing to Double.parse())
+  ///  - Int (suitable for passing to int.parse())
+  ///  - String (value may be truncated)
   @optional String valueAsString;
 
   /// The valueAsString for String references may be truncated. If so, this
   /// property is added with the value 'true'.
   @optional bool valueAsStringIsTruncated;
 
-  /// The length of a List or the number of associations in a Map. Provided for
-  /// instance kinds: List Map Uint8ClampedList Uint8List Uint16List Uint32List
-  /// Uint64List Int8List Int16List Int32List Int64List Float32List Float64List
-  /// Int32x4List Float32x4List Float64x2List
+  /// The length of a List or the number of associations in a Map.
+  ///
+  /// Provided for instance kinds:
+  ///  - List
+  ///  - Map
+  ///  - Uint8ClampedList
+  ///  - Uint8List
+  ///  - Uint16List
+  ///  - Uint32List
+  ///  - Uint64List
+  ///  - Int8List
+  ///  - Int16List
+  ///  - Int32List
+  ///  - Int64List
+  ///  - Float32List
+  ///  - Float64List
+  ///  - Int32x4List
+  ///  - Float32x4List
+  ///  - Float64x2List
   @optional int length;
 
   /// The index of the first element or association returned. This is only
-  /// provided when it is non-zero. Provided for instance kinds: List Map
-  /// Uint8ClampedList Uint8List Uint16List Uint32List Uint64List Int8List
-  /// Int16List Int32List Int64List Float32List Float64List Int32x4List
-  /// Float32x4List Float64x2List
+  /// provided when it is non-zero.
+  ///
+  /// Provided for instance kinds:
+  ///  - List
+  ///  - Map
+  ///  - Uint8ClampedList
+  ///  - Uint8List
+  ///  - Uint16List
+  ///  - Uint32List
+  ///  - Uint64List
+  ///  - Int8List
+  ///  - Int16List
+  ///  - Int32List
+  ///  - Int64List
+  ///  - Float32List
+  ///  - Float64List
+  ///  - Int32x4List
+  ///  - Float32x4List
+  ///  - Float64x2List
   @optional int offset;
 
   /// The number of elements or associations returned. This is only provided
-  /// when it is less than length. Provided for instance kinds: List Map
-  /// Uint8ClampedList Uint8List Uint16List Uint32List Uint64List Int8List
-  /// Int16List Int32List Int64List Float32List Float64List Int32x4List
-  /// Float32x4List Float64x2List
+  /// when it is less than length.
+  ///
+  /// Provided for instance kinds:
+  ///  - List
+  ///  - Map
+  ///  - Uint8ClampedList
+  ///  - Uint8List
+  ///  - Uint16List
+  ///  - Uint32List
+  ///  - Uint64List
+  ///  - Int8List
+  ///  - Int16List
+  ///  - Int32List
+  ///  - Int64List
+  ///  - Float32List
+  ///  - Float64List
+  ///  - Int32x4List
+  ///  - Float32x4List
+  ///  - Float64x2List
   @optional int count;
 
-  /// The name of a Type instance. Provided for instance kinds: Type
+  /// The name of a Type instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - Type
   @optional String name;
 
-  /// The corresponding Class if this Type is canonical. Provided for instance
-  /// kinds: Type
+  /// The corresponding Class if this Type is canonical.
+  ///
+  /// Provided for instance kinds:
+  ///  - Type
   @optional ClassRef typeClass;
 
-  /// The parameterized class of a type parameter: Provided for instance kinds:
-  /// TypeParameter
+  /// The parameterized class of a type parameter:
+  ///
+  /// Provided for instance kinds:
+  ///  - TypeParameter
   @optional ClassRef parameterizedClass;
 
   /// The fields of this Instance.
   @optional List<BoundField> fields;
 
-  /// The elements of a List instance. Provided for instance kinds: List
+  /// The elements of a List instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - List
   @optional List<dynamic> elements;
 
-  /// The elements of a List instance. Provided for instance kinds: Map
+  /// The elements of a List instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - Map
   @optional List<MapAssociation> associations;
 
-  /// The bytes of a TypedData instance. The data is provided as a Base64
-  /// encoded string. Provided for instance kinds: Uint8ClampedList Uint8List
-  /// Uint16List Uint32List Uint64List Int8List Int16List Int32List Int64List
-  /// Float32List Float64List Int32x4List Float32x4List Float64x2List
+  /// The bytes of a TypedData instance.
+  ///
+  /// The data is provided as a Base64 encoded string.
+  ///
+  /// Provided for instance kinds:
+  ///  - Uint8ClampedList
+  ///  - Uint8List
+  ///  - Uint16List
+  ///  - Uint32List
+  ///  - Uint64List
+  ///  - Int8List
+  ///  - Int16List
+  ///  - Int32List
+  ///  - Int64List
+  ///  - Float32List
+  ///  - Float64List
+  ///  - Int32x4List
+  ///  - Float32x4List
+  ///  - Float64x2List
   @optional String bytes;
 
-  /// The function associated with a Closure instance. Provided for instance
-  /// kinds: Closure
+  /// The function associated with a Closure instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - Closure
   @optional FuncRef closureFunction;
 
-  /// The context associated with a Closure instance. Provided for instance
-  /// kinds: Closure
+  /// The context associated with a Closure instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - Closure
   @optional ContextRef closureContext;
 
-  /// The referent of a MirrorReference instance. Provided for instance kinds:
-  /// MirrorReference
+  /// The referent of a MirrorReference instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - MirrorReference
   @optional InstanceRef mirrorReferent;
 
-  /// The pattern of a RegExp instance. Provided for instance kinds: RegExp
+  /// The pattern of a RegExp instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - RegExp
   @optional String pattern;
 
-  /// Whether this regular expression is case sensitive. Provided for instance
-  /// kinds: RegExp
+  /// Whether this regular expression is case sensitive.
+  ///
+  /// Provided for instance kinds:
+  ///  - RegExp
   @optional bool isCaseSensitive;
 
-  /// Whether this regular expression matches multiple lines. Provided for
-  /// instance kinds: RegExp
+  /// Whether this regular expression matches multiple lines.
+  ///
+  /// Provided for instance kinds:
+  ///  - RegExp
   @optional bool isMultiLine;
 
-  /// The key for a WeakProperty instance. Provided for instance kinds:
-  /// WeakProperty
+  /// The key for a WeakProperty instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - WeakProperty
   @optional InstanceRef propertyKey;
 
-  /// The key for a WeakProperty instance. Provided for instance kinds:
-  /// WeakProperty
+  /// The key for a WeakProperty instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - WeakProperty
   @optional InstanceRef propertyValue;
 
-  /// The type arguments for this type. Provided for instance kinds: Type
+  /// The type arguments for this type.
+  ///
+  /// Provided for instance kinds:
+  ///  - Type
   @optional TypeArgumentsRef typeArguments;
 
-  /// The index of a TypeParameter instance. Provided for instance kinds:
-  /// TypeParameter
+  /// The index of a TypeParameter instance.
+  ///
+  /// Provided for instance kinds:
+  ///  - TypeParameter
   @optional int parameterIndex;
 
   /// The type bounded by a BoundedType instance - or - the referent of a
-  /// TypeRef instance. The value will always be of one of the kinds: Type,
-  /// TypeRef, TypeParameter, BoundedType. Provided for instance kinds:
-  /// BoundedType TypeRef
+  /// TypeRef instance.
+  ///
+  /// The value will always be of one of the kinds: Type, TypeRef,
+  /// TypeParameter, BoundedType.
+  ///
+  /// Provided for instance kinds:
+  ///  - BoundedType
+  ///  - TypeRef
   @optional InstanceRef targetType;
 
-  /// The bound of a TypeParameter or BoundedType. The value will always be of
-  /// one of the kinds: Type, TypeRef, TypeParameter, BoundedType. Provided for
-  /// instance kinds: BoundedType TypeParameter
+  /// The bound of a TypeParameter or BoundedType.
+  ///
+  /// The value will always be of one of the kinds: Type, TypeRef,
+  /// TypeParameter, BoundedType.
+  ///
+  /// Provided for instance kinds:
+  ///  - BoundedType
+  ///  - TypeParameter
   @optional InstanceRef bound;
 
   String toString() =>
@@ -1398,8 +1759,9 @@ class Isolate extends Response {
   /// A name identifying this isolate. Not guaranteed to be unique.
   String name;
 
-  /// The time that the VM started in milliseconds since the epoch. Suitable to
-  /// pass to DateTime.fromMillisecondsSinceEpoch.
+  /// The time that the VM started in milliseconds since the epoch.
+  ///
+  /// Suitable to pass to DateTime.fromMillisecondsSinceEpoch.
   int startTime;
 
   /// The number of live ports for this isolate.
@@ -1412,12 +1774,14 @@ class Isolate extends Response {
   /// this will be a resume event.
   Event pauseEvent;
 
-  /// The root library for this isolate. Guaranteed to be initialized when the
-  /// IsolateRunnable event fires.
+  /// The root library for this isolate.
+  ///
+  /// Guaranteed to be initialized when the IsolateRunnable event fires.
   @optional LibraryRef rootLib;
 
-  /// A list of all libraries for this isolate. Guaranteed to be initialized
-  /// when the IsolateRunnable event fires.
+  /// A list of all libraries for this isolate.
+  ///
+  /// Guaranteed to be initialized when the IsolateRunnable event fires.
   List<LibraryRef> libraries;
 
   /// A list of all breakpoints for this isolate.
@@ -1450,6 +1814,8 @@ class LibraryRef extends ObjRef {
 }
 
 /// A [Library] provides information about a Dart language library.
+///
+/// See setLibraryDebuggable.
 class Library extends Obj {
   static Library parse(Map json) => new Library.fromJson(json);
 
@@ -1638,19 +2004,28 @@ class Obj extends Response {
   }
 
   /// A unique identifier for an Object. Passed to the getObject RPC to reload
-  /// this Object. Some objects may get a new id when they are reloaded.
+  /// this Object.
+  ///
+  /// Some objects may get a new id when they are reloaded.
   String id;
 
   /// If an object is allocated in the Dart heap, it will have a corresponding
-  /// class object. The class of a non-instance is not a Dart class, but is
-  /// instead an internal vm object. Moving an Object into or out of the heap is
-  /// considered a backwards compatible change for types other than Instance.
+  /// class object.
+  ///
+  /// The class of a non-instance is not a Dart class, but is instead an
+  /// internal vm object.
+  ///
+  /// Moving an Object into or out of the heap is considered a backwards
+  /// compatible change for types other than Instance.
   @optional ClassRef classRef;
 
-  /// The size of this object in the heap. If an object is not heap-allocated,
-  /// then this field is omitted. Note that the size can be zero for some
-  /// objects. In the current VM implementation, this occurs for small integers,
-  /// which are stored entirely within their object pointers.
+  /// The size of this object in the heap.
+  ///
+  /// If an object is not heap-allocated, then this field is omitted.
+  ///
+  /// Note that the size can be zero for some objects. In the current VM
+  /// implementation, this occurs for small integers, which are stored entirely
+  /// within their object pointers.
   @optional int size;
 
   String toString() => '[Obj type: ${type}, id: ${id}]';
@@ -1675,6 +2050,9 @@ class Response {
 }
 
 /// A [Sentinel] is used to indicate that the normal response is not available.
+///
+/// We use a [Sentinel] instead of an error for these cases because they do not
+/// represent a problematic condition. They are normal.
 class Sentinel extends Response {
   static Sentinel parse(Map json) => new Sentinel.fromJson(json);
 
@@ -1710,6 +2088,9 @@ class ScriptRef extends ObjRef {
 }
 
 /// A [Script] provides information about a Dart language script.
+///
+/// The [tokenPosTable] is an array of int arrays. Each subarray consists of a
+/// line number followed by [(tokenPos, columnNumber)] pairs:
 class Script extends Obj {
   static Script parse(Map json) => new Script.fromJson(json);
 
@@ -1822,8 +2203,10 @@ class TypeArguments extends Obj {
   /// A name for this type argument list.
   String name;
 
-  /// A list of types. The value will always be one of the kinds: Type, TypeRef,
-  /// TypeParameter, BoundedType.
+  /// A list of types.
+  ///
+  /// The value will always be one of the kinds: Type, TypeRef, TypeParameter,
+  /// BoundedType.
   List<InstanceRef> types;
 
   String toString() =>
@@ -1833,6 +2216,13 @@ class TypeArguments extends Obj {
 /// The [UnresolvedSourceLocation] class is used to refer to an unresolved
 /// breakpoint location. As such, it is meant to approximate the final location
 /// of the breakpoint but it is not exact.
+///
+/// Either the [script] or the [scriptUri] field will be present.
+///
+/// Either the [tokenPos] or the [line] field will be present.
+///
+/// The [column] field will only be present when the breakpoint was specified
+/// with a specific column number.
 class UnresolvedSourceLocation extends Response {
   static UnresolvedSourceLocation parse(Map json) =>
       new UnresolvedSourceLocation.fromJson(json);
@@ -1934,8 +2324,9 @@ class VM extends Response {
   /// The process id for the VM.
   int pid;
 
-  /// The time that the VM started in milliseconds since the epoch. Suitable to
-  /// pass to DateTime.fromMillisecondsSinceEpoch.
+  /// The time that the VM started in milliseconds since the epoch.
+  ///
+  /// Suitable to pass to DateTime.fromMillisecondsSinceEpoch.
   int startTime;
 
   /// A list of isolates running in the VM.

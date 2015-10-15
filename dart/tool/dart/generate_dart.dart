@@ -175,7 +175,7 @@ class Api extends Member with ApiParseUtil {
 
     // Look for h3 nodes
     // the pre following it is the definition
-    // the optional p following that is the dcumentation
+    // the optional p following that is the documentation
 
     String h3Name = null;
 
@@ -184,12 +184,18 @@ class Api extends Member with ApiParseUtil {
 
       if (isPre(node) && h3Name != null) {
         String definition = textForCode(node);
-        String docs = null;
+        String docs = '';
 
-        if (i + 1 < nodes.length && isPara(nodes[i + 1])) {
+        while (i + 1 < nodes.length && isPara(nodes[i + 1])) {
           Element p = nodes[++i];
-          docs = collapseWhitespace(TextOutputVisitor.printText(p));
+          String str = TextOutputVisitor.printText(p);
+          // TODO: Look for `See Success.` type comments.
+          if (!str.contains('|')) str = collapseWhitespace(str);
+          docs = '${docs}\n\n${str}';
         }
+
+        docs = docs.trim();
+        if (docs.isEmpty) docs = null;
 
         _parse(h3Name, definition, docs);
       } else if (isH3(node)) {

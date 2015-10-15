@@ -4,8 +4,6 @@
 
 library parser;
 
-import 'src_gen_common.dart';
-
 class Token {
   static final RegExp _alpha = new RegExp(r'^[0-9a-zA-Z_\-@]+$');
 
@@ -145,11 +143,19 @@ abstract class Parser {
     while (peek().isComment) {
       Token t = advance();
       String str = t.text.substring(2);
-      buf.write(' ${str}');
+
+      if (str.startsWith(' ')) str = str.substring(1);
+
+      if (str.startsWith('  ')) {
+        buf.write('\n - ${str.substring(2)}');
+      } else if (str.isEmpty) {
+        buf.write('\n\n');
+      } else {
+        buf.write('${str} ');
+      }
     }
 
-    if (buf.isEmpty) return null;
-    return collapseWhitespace(buf.toString()).trim();
+    return buf.isEmpty ? null : buf.toString().trim();
   }
 
   void validate(bool result, String message) {
