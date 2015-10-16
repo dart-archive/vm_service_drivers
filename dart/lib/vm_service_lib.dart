@@ -1845,6 +1845,7 @@ class Isolate extends Response {
     libraries = _createObject(json['libraries']);
     breakpoints = _createObject(json['breakpoints']);
     error = _createObject(json['error']);
+    exceptionPauseMode = _parseExceptionPauseMode[json['exceptionPauseMode']];
   }
 
   /// The id which is passed to the getIsolate RPC to reload this isolate.
@@ -1886,6 +1887,9 @@ class Isolate extends Response {
 
   /// The error that is causing this isolate to exit, if applicable.
   @optional Error error;
+
+  /// The current pause on exception mode for this isolate.
+  ExceptionPauseMode exceptionPauseMode;
 
   String toString() => '[Isolate]';
 }
