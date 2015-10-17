@@ -278,7 +278,7 @@ public class VmServiceTest {
 
   private static SampleVmServiceListener startSampleAndConnect(File dartFile) {
     startSample(dartFile);
-    sleep(100);
+    sleep(250);
     vmConnect();
     SampleVmServiceListener vmListener = new SampleVmServiceListener();
     vmService.addVmServiceListener(vmListener);
