@@ -328,12 +328,14 @@ class Enum extends Member {
     gen.writeType(elementTypeName, (TypeWriter writer) {
       writer.javadoc = convertDocLinks(docs);
       writer.isEnum = true;
-      int count = 0;
+      enums.sort((v1, v2) => v1.name.compareTo(v2.name));
       for (var value in enums) {
-        ++count;
-        writer.addEnumValue(value.name,
-            javadoc: value.docs, isLast: count == enums.length);
+        writer.addEnumValue(value.name, javadoc: value.docs);
       }
+      writer.addEnumValue('Unknown',
+          javadoc: 'Represents a value returned by the VM'
+              ' but unknown to this client',
+          isLast: true);
     });
   }
 
@@ -830,7 +832,7 @@ class TypeRef {
   bool get isArray => arrayDepth > 0;
 
   /// Hacked enum determination
-  bool get isEnum => name.endsWith('Kind');
+  bool get isEnum => name.endsWith('Kind') || name.endsWith('Mode');
 
   bool get isSimple => simpleTypes.contains(name);
 
@@ -895,8 +897,13 @@ class TypeRef {
       if (isArray) {
         print('skipped accessor body for $propertyName');
       } else {
-        writer.addLine(
-            'return $name.valueOf(json.get("$propertyName").getAsString());');
+        writer
+            .addLine('String name = json.get("$propertyName").getAsString();');
+        writer.addLine('try {');
+        writer.addLine('  return $name.valueOf(name);');
+        writer.addLine('} catch (IllegalArgumentException e) {');
+        writer.addLine('  return $name.Unknown;');
+        writer.addLine('}');
       }
     } else {
       if (arrayDepth > 1) {

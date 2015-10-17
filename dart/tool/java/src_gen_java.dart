@@ -147,7 +147,7 @@ class TypeWriter {
     }
   }
 
-  void addEnumValue(String name, {String javadoc, bool isLast}) {
+  void addEnumValue(String name, {String javadoc, bool isLast: false}) {
     _content.writeln();
     if (javadoc != null && javadoc.isNotEmpty) {
       _content.writeln('  /**');
@@ -159,8 +159,6 @@ class TypeWriter {
     _content.write('  $name');
     if (!isLast) {
       _content.writeln(',');
-    } else {
-      _content.writeln(';');
     }
   }
 

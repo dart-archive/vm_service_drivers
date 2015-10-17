@@ -17,6 +17,8 @@ package org.dartlang.vm.service.element;
 
 public enum CodeKind {
 
+  Collected,
+
   Dart,
 
   Native,
@@ -25,5 +27,7 @@ public enum CodeKind {
 
   Tag,
 
-  Collected;
-}
+  /**
+   * Represents a value returned by the VM but unknown to this client
+   */
+  Unknown}
