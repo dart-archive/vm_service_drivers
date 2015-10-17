@@ -71,6 +71,17 @@ public class VmService extends VmServiceBase {
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
    */
+  public void addBreakpoint(String isolateId, String scriptId, int line, BreakpointConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("scriptId", scriptId);
+    params.addProperty("line", line);
+    request("addBreakpoint", params, consumer);
+  }
+
+  /**
+   * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
+   */
   public void addBreakpoint(String isolateId, String scriptId, int line, int column, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
@@ -88,6 +99,19 @@ public class VmService extends VmServiceBase {
     params.addProperty("isolateId", isolateId);
     params.addProperty("functionId", functionId);
     request("addBreakpointAtEntry", params, consumer);
+  }
+
+  /**
+   * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script. This
+   * RPC is useful when a script has not yet been assigned an id, for example, if a script is in a
+   * deferred library which has not yet been loaded.
+   */
+  public void addBreakpointWithScriptUri(String isolateId, String scriptUri, int line, BreakpointConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("scriptUri", scriptUri);
+    params.addProperty("line", line);
+    request("addBreakpointWithScriptUri", params, consumer);
   }
 
   /**
@@ -157,6 +181,18 @@ public class VmService extends VmServiceBase {
   }
 
   /**
+   * The [getObject] RPC is used to lookup an [object] from some isolate by its [id].
+   */
+  public void getObject(String isolateId, String objectId, int offset, int count, GetObjectConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("objectId", objectId);
+    params.addProperty("offset", offset);
+    params.addProperty("count", count);
+    request("getObject", params, consumer);
+  }
+
+  /**
    * The [getStack] RPC is used to retrieve the current execution stack and message queue for an
    * isolate. The isolate does not need to be paused.
    */
@@ -213,6 +249,15 @@ public class VmService extends VmServiceBase {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     if (step != null) params.addProperty("step", step.name());
+    request("resume", params, consumer);
+  }
+
+  /**
+   * The [resume] RPC is used to resume execution of a paused isolate.
+   */
+  public void resume(String isolateId, SuccessConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
     request("resume", params, consumer);
   }
 

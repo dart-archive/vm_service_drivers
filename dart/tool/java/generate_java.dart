@@ -167,6 +167,9 @@ class Api extends Member with ApiParseUtil {
               'The minor version number of the protocol supported by this client.');
       for (var m in methods) {
         m.generateVmServiceMethod(writer);
+        if (m.hasOptionalArgs) {
+          m.generateVmServiceMethod(writer, includeOptional: true);
+        }
       }
 
       writer.addMethod('forwardResponse', [
@@ -499,7 +502,7 @@ class Method extends Member {
     writer.addLine('}');
   }
 
-  void generateVmServiceMethod(TypeWriter writer) {
+  void generateVmServiceMethod(TypeWriter writer, {includeOptional: false}) {
     // TODO(danrubel) move this to the Consumer's javadoc
 //    String javadoc = docs == null ? '' : docs;
 //    if (returnType.isMultipleReturns) {
@@ -512,6 +515,7 @@ class Method extends Member {
     var javadoc = new StringBuffer(docs);
     bool firstParamDoc = true;
     for (var a in args) {
+      if (!includeOptional && a.optional) continue;
       var paramDoc = new StringBuffer(a.docs ?? '');
       if (paramDoc.isEmpty) {}
       if (a.optional && a.type != 'int') {
@@ -528,11 +532,16 @@ class Method extends Member {
       }
     }
 
-    var mthArgs = args.map((a) => a.asJavaMethodArg).toList();
+    var mthArgs = args;
+    if (!includeOptional) {
+      mthArgs = mthArgs.toList()..removeWhere((a) => a.optional);
+    }
+    mthArgs = mthArgs.map((a) => a.asJavaMethodArg).toList();
     mthArgs.add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
     writer.addMethod(name, mthArgs, (StatementWriter writer) {
       writer.addLine('JsonObject params = new JsonObject();');
       for (MethodArg arg in args) {
+        if (!includeOptional && arg.optional) continue;
         var name = arg.name;
         String op =
             arg.optional && arg.type != 'int' ? 'if (${name} != null) ' : '';
