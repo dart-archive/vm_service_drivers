@@ -1,5 +1,8 @@
 # Changelog
 
+## unreleased
+- added `exceptionPauseMode` to the Isolate class
+
 ## 0.0.5
 - added more dartdocs
 - moved back to using Dart enums
