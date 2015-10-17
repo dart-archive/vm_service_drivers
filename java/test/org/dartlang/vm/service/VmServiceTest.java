@@ -26,7 +26,8 @@ import java.util.List;
 public class VmServiceTest {
   private static File dartVm;
   private static File sampleDart;
-  private static int vmPort;
+  private static File sampleDartWithException;
+  private static int vmPort = 7575;
   private static Process process;
   private static VmService vmService;
   private static SampleOutPrinter sampleOut;
@@ -36,58 +37,47 @@ public class VmServiceTest {
   public static void main(String[] args) {
     setupLogging();
     parseArgs(args);
+
     try {
-      startSample();
-      sleep(100);
-      vmConnect();
-      SampleVmServiceListener vmListener = new SampleVmServiceListener();
-      vmService.addVmServiceListener(vmListener);
-      vmStreamListen(VmService.DEBUG_STREAM_ID);
-      vmStreamListen(VmService.ISOLATE_STREAM_ID);
-      vmGetVersion();
-      ElementList<IsolateRef> isolates = vmGetVmIsolates();
-      Isolate sampleIsolate = vmGetIsolate(isolates.get(0));
-      Library rootLib = vmGetLibrary(sampleIsolate, sampleIsolate.getRootLib());
-      vmGetScript(sampleIsolate, rootLib.getScripts().get(0));
-
-      // Run to breakpoint on line "foo(1);"
-      vmAddBreakpoint(sampleIsolate, rootLib.getScripts().get(0), 13);
-      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.BreakpointAdded);
-      vmResume(isolates.get(0), null);
-      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.Resume);
-      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.PauseBreakpoint);
-      sampleOut.assertLastLine("hello");
-
-      // Get stack trace
-      vmGetStack(sampleIsolate);
-
-      // Evaluate
-      vmEvaluateInFrame(sampleIsolate, 0, "deepList[0]");
-
-      // Step over line "foo(1);"
-      vmResume(isolates.get(0), StepOption.Over);
-      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.Resume);
-      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.PauseBreakpoint);
-      sampleOut.assertLastLine("val: 1");
-
-      // Finish execution
-      vmResume(isolates.get(0), null);
-      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.Resume);
-
-      // VM pauses on exit and must be resumed to cleanly terminate process
-      vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.PauseExit);
-      vmResume(isolates.get(0), null);
-      vmListener.waitFor(VmService.ISOLATE_STREAM_ID, EventKind.IsolateExit);
-      waitForProcessExit();
-
-      sampleOut.assertLastLine("exiting");
-      sampleErr.assertLastLine(null);
-      process = null;
+      echoDartVmVersion();
+      runSample();
+      runSampleWithException();
       System.out.println("Test Complete");
     } finally {
       vmDisconnect();
       stopSample();
     }
+  }
+
+  private static void echoDartVmVersion() {
+    // Echo Dart VM version
+    List<String> processArgs = new ArrayList<String>();
+    processArgs.add(dartVm.getAbsolutePath());
+    processArgs.add("--version");
+    ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
+    try {
+      process = processBuilder.start();
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to launch Dart VM", e);
+    }
+    new SampleOutPrinter("Version", process.getInputStream());
+    new SampleOutPrinter("Version", process.getErrorStream());
+  }
+
+  private static void finishExecution(SampleVmServiceListener vmListener, ElementList<IsolateRef> isolates) {
+    // Finish execution
+    vmResume(isolates.get(0), null);
+    vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.Resume);
+
+    // VM pauses on exit and must be resumed to cleanly terminate process
+    vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.PauseExit);
+    vmResume(isolates.get(0), null);
+    vmListener.waitFor(VmService.ISOLATE_STREAM_ID, EventKind.IsolateExit);
+    waitForProcessExit();
+
+    sampleOut.assertLastLine("exiting");
+    sampleErr.assertLastLine(null);
+    process = null;
   }
 
   private static boolean isWindows() {
@@ -121,8 +111,68 @@ public class VmServiceTest {
     if (!sampleDart.isFile()) {
       showErrorAndExit("Cannot find sample: " + sampleDart);
     }
+    sampleDartWithException = new File(sampleDart.getParentFile(), "sample_exception.dart");
+    if (!sampleDartWithException.isFile()) {
+      showErrorAndExit("Cannot find sample: " + sampleDartWithException);
+    }
     System.out.println("Using Dart SDK: " + sdkDir);
-    System.out.println("Launching sample: " + sampleDart);
+  }
+
+  /**
+   * Exercise VM service with "normal" sample.
+   */
+  private static void runSample() {
+    SampleVmServiceListener vmListener = startSampleAndConnect(sampleDart);
+    vmGetVersion();
+    ElementList<IsolateRef> isolates = vmGetVmIsolates();
+    Isolate sampleIsolate = vmGetIsolate(isolates.get(0));
+    Library rootLib = vmGetLibrary(sampleIsolate, sampleIsolate.getRootLib());
+    vmGetScript(sampleIsolate, rootLib.getScripts().get(0));
+
+    // Run to breakpoint on line "foo(1);"
+    vmAddBreakpoint(sampleIsolate, rootLib.getScripts().get(0), 13);
+    vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.BreakpointAdded);
+    vmResume(isolates.get(0), null);
+    vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.Resume);
+    vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.PauseBreakpoint);
+    sampleOut.assertLastLine("hello");
+
+    // Get stack trace
+    vmGetStack(sampleIsolate);
+
+    // Evaluate
+    vmEvaluateInFrame(sampleIsolate, 0, "deepList[0]");
+
+    // Step over line "foo(1);"
+    vmResume(isolates.get(0), StepOption.Over);
+    vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.Resume);
+    vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.PauseBreakpoint);
+    sampleOut.assertLastLine("val: 1");
+
+    finishExecution(vmListener, isolates);
+  }
+
+  /**
+   * Exercise VM service with sample that throws exceptions.
+   */
+  private static void runSampleWithException() {
+    SampleVmServiceListener vmListener = startSampleAndConnect(sampleDartWithException);
+    ElementList<IsolateRef> isolates = vmGetVmIsolates();
+    Isolate sampleIsolate = vmGetIsolate(isolates.get(0));
+
+    // Run until exception occurs
+    vmPauseOnException(isolates.get(0), ExceptionPauseMode.All);
+    vmResume(isolates.get(0), null);
+    vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.Resume);
+    Event event = vmListener.waitFor(VmService.DEBUG_STREAM_ID, EventKind.PauseException);
+    InstanceRefToString convert = new InstanceRefToString(sampleIsolate, vmService, new OpLatch());
+    System.out.println("Received PauseException event");
+    System.out.println("  Exception: " + convert.toString(event.getException()));
+    System.out.println("  Top Frame:");
+    showFrame(convert, event.getTopFrame());
+    sampleOut.assertLastLine("hello");
+
+    finishExecution(vmListener, isolates);
   }
 
   private static void setupLogging() {
@@ -165,6 +215,15 @@ public class VmServiceTest {
     System.exit(1);
   }
 
+  private static void showFrame(InstanceRefToString convert, Frame frame) {
+    System.out.println("    #" + frame.getIndex() + " " + frame.getFunction().getName() + " ("
+        + frame.getLocation().getScript().getUri() + ")");
+    for (BoundVariable var : frame.getVars()) {
+      InstanceRef instanceRef = var.getValue();
+      System.out.println("      " + var.getName() + " = " + convert.toString(instanceRef));
+    }
+  }
+
   private static void showRPCError(RPCError error) {
     System.out.println(">>> Received error response");
     System.out.println("  Code: " + error.getCode());
@@ -187,29 +246,24 @@ public class VmServiceTest {
     }
   }
 
-  private static void startSample() {
-    // Echo Dart VM version
-    List<String> processArgs = new ArrayList<String>();
-    processArgs.add(dartVm.getAbsolutePath());
-    processArgs.add("--version");
-    ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
-    try {
-      process = processBuilder.start();
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to launch Dart VM", e);
-    }
-    new SampleOutPrinter("Version", process.getInputStream());
-    new SampleOutPrinter("Version", process.getErrorStream());
+  private static void startSample(File dartFile) {
+    List<String> processArgs;
+    ProcessBuilder processBuilder;
 
-    // Hardcode port to keep travis happy
-    vmPort = 7576;
+    // Use new port to prevent race conditions
+    // between one sample releasing a port
+    // and the next sample using it.
+    ++vmPort;
+
     processArgs = new ArrayList<String>();
     processArgs.add(dartVm.getAbsolutePath());
     processArgs.add("--pause_isolates_on_start");
     processArgs.add("--observe");
     processArgs.add("--enable-vm-service=" + vmPort);
-    processArgs.add(sampleDart.getAbsolutePath());
+    processArgs.add(dartFile.getAbsolutePath());
     processBuilder = new ProcessBuilder(processArgs);
+    System.out.println("=================================================");
+    System.out.println("Launching sample: " + dartFile);
     try {
       process = processBuilder.start();
     } catch (IOException e) {
@@ -219,6 +273,17 @@ public class VmServiceTest {
     sampleOut = new SampleOutPrinter("Sample out", process.getInputStream());
     sampleErr = new SampleOutPrinter("Sample err", process.getErrorStream());
     System.out.println("Dart process started - port " + vmPort);
+  }
+
+  private static SampleVmServiceListener startSampleAndConnect(File dartFile) {
+    startSample(dartFile);
+    sleep(100);
+    vmConnect();
+    SampleVmServiceListener vmListener = new SampleVmServiceListener();
+    vmService.addVmServiceListener(vmListener);
+    vmStreamListen(VmService.DEBUG_STREAM_ID);
+    vmStreamListen(VmService.ISOLATE_STREAM_ID);
+    return vmListener;
   }
 
   private static void stopSample() {
@@ -412,12 +477,7 @@ public class VmServiceTest {
     System.out.println("  Frames:");
     InstanceRefToString convert = new InstanceRefToString(isolate, vmService, latch);
     for (Frame frame : stack.getFrames()) {
-      System.out.println("    #" + frame.getIndex() + " " + frame.getFunction().getName() + " ("
-          + frame.getLocation().getScript().getUri() + ")");
-      for (BoundVariable var : frame.getVars()) {
-        InstanceRef instanceRef = var.getValue();
-        System.out.println("      " + var.getName() + " = " + convert.toString(instanceRef));
-      }
+      showFrame(convert, frame);
     }
   }
 
@@ -466,6 +526,24 @@ public class VmServiceTest {
       }
     });
     return latch.getValue();
+  }
+
+  private static void vmPauseOnException(IsolateRef isolate, ExceptionPauseMode mode) {
+    System.out.println("Request pause on exception: " + mode);
+    final OpLatch latch = new OpLatch();
+    vmService.setExceptionPauseMode(isolate.getId(), mode, new SuccessConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        showRPCError(error);
+      }
+
+      @Override
+      public void received(Success response) {
+        System.out.println("Successfully set pause on exception");
+        latch.opComplete();
+      }
+    });
+    latch.waitAndAssertOpComplete();
   }
 
   private static void vmResume(IsolateRef isolateRef, final StepOption step) {

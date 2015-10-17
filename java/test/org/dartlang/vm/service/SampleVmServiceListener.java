@@ -36,14 +36,15 @@ public class SampleVmServiceListener implements VmServiceListener {
     }
   }
 
-  public void waitFor(String expectedStreamId, EventKind expectedEventKind) {
+  public Event waitFor(String expectedStreamId, EventKind expectedEventKind) {
     long end = System.currentTimeMillis() + 5000;
     synchronized (lock) {
       while (true) {
         if (expectedStreamId.equals(lastStreamId) && expectedEventKind.equals(lastEvent.getKind())) {
+          Event event = lastEvent;
           lastStreamId = null;
           lastEvent = null;
-          return;
+          return event;
         }
         long timeout = end - System.currentTimeMillis();
         if (timeout <= 0) {
