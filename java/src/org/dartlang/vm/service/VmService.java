@@ -81,13 +81,15 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
+   * 
+   * @param column This parameter is optional and may be null.
    */
-  public void addBreakpoint(String isolateId, String scriptId, int line, int column, BreakpointConsumer consumer) {
+  public void addBreakpoint(String isolateId, String scriptId, int line, Integer column, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("scriptId", scriptId);
     params.addProperty("line", line);
-    params.addProperty("column", column);
+    if (column != null) params.addProperty("column", column.intValue());
     request("addBreakpoint", params, consumer);
   }
 
@@ -118,13 +120,15 @@ public class VmService extends VmServiceBase {
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script. This
    * RPC is useful when a script has not yet been assigned an id, for example, if a script is in a
    * deferred library which has not yet been loaded.
+   * 
+   * @param column This parameter is optional and may be null.
    */
-  public void addBreakpointWithScriptUri(String isolateId, String scriptUri, int line, int column, BreakpointConsumer consumer) {
+  public void addBreakpointWithScriptUri(String isolateId, String scriptUri, int line, Integer column, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("scriptUri", scriptUri);
     params.addProperty("line", line);
-    params.addProperty("column", column);
+    if (column != null) params.addProperty("column", column.intValue());
     request("addBreakpointWithScriptUri", params, consumer);
   }
 
@@ -182,13 +186,16 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [getObject] RPC is used to lookup an [object] from some isolate by its [id].
+   * 
+   * @param offset This parameter is optional and may be null.
+   * @param count This parameter is optional and may be null.
    */
-  public void getObject(String isolateId, String objectId, int offset, int count, GetObjectConsumer consumer) {
+  public void getObject(String isolateId, String objectId, Integer offset, Integer count, GetObjectConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("objectId", objectId);
-    params.addProperty("offset", offset);
-    params.addProperty("count", count);
+    if (offset != null) params.addProperty("offset", offset.intValue());
+    if (count != null) params.addProperty("count", count.intValue());
     request("getObject", params, consumer);
   }
 
