@@ -111,7 +111,8 @@ public class VmServiceTest {
     if (!sampleDart.isFile()) {
       showErrorAndExit("Cannot find sample: " + sampleDart);
     }
-    sampleDartWithException = new File(sampleDart.getParentFile(), "sample_exception.dart");
+    sampleDartWithException = new File(projDir,
+        "dart/example_exception/sample_exception.dart".replace("/", File.separator));
     if (!sampleDartWithException.isFile()) {
       showErrorAndExit("Cannot find sample: " + sampleDartWithException);
     }
