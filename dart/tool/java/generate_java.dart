@@ -518,7 +518,7 @@ class Method extends Member {
       if (!includeOptional && a.optional) continue;
       var paramDoc = new StringBuffer(a.docs ?? '');
       if (paramDoc.isEmpty) {}
-      if (a.optional && a.type != 'int') {
+      if (a.optional) {
         if (paramDoc.isNotEmpty) paramDoc.write(' ');
         paramDoc.write('This parameter is optional and may be null.');
       }
@@ -544,11 +544,13 @@ class Method extends Member {
         if (!includeOptional && arg.optional) continue;
         var name = arg.name;
         String op =
-            arg.optional && arg.type != 'int' ? 'if (${name} != null) ' : '';
+            arg.optional ? 'if (${name} != null) ' : '';
         if (arg.isEnumType) {
           writer.addLine('${op}params.addProperty("$name", $name.name());');
+        } else if (arg.optional && arg.type == 'int') {
+          writer.addLine('${op}params.addProperty("$name", $name.intValue());');
         } else {
-          writer.addLine('${op}params.addProperty("$name", $name);');
+    writer.addLine('${op}params.addProperty("$name", $name);');
         }
       }
       writer.addLine('request("$name", params, consumer);');
@@ -569,7 +571,9 @@ class MethodArg extends Member {
 
   MethodArg(this.parent, this.type, this.name);
 
-  get asJavaMethodArg => new JavaMethodArg(name, type);
+  get asJavaMethodArg => optional && type == 'int'
+      ? new JavaMethodArg(name, 'Integer')
+      : new JavaMethodArg(name, type);
 
   /// Hacked enum arg type determination
   bool get isEnumType => name == 'step' || name == 'mode';
