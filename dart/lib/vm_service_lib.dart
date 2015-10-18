@@ -910,6 +910,10 @@ class Breakpoint extends Obj {
   /// [location] can be one of [SourceLocation] or [UnresolvedSourceLocation].
   dynamic location;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Breakpoint && id == other.id;
+
   String toString() => '[Breakpoint ' //
       'type: ${type}, id: ${id}, breakpointNumber: ${breakpointNumber}, ' //
       'resolved: ${resolved}, location: ${location}]';
@@ -926,6 +930,10 @@ class ClassRef extends ObjRef {
 
   /// The name of this class.
   String name;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is ClassRef && id == other.id;
 
   String toString() => '[ClassRef type: ${type}, id: ${id}, name: ${name}]';
 }
@@ -985,6 +993,10 @@ class Class extends Obj {
   /// A list of subclasses of this class.
   List<ClassRef> subclasses;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Class && id == other.id;
+
   String toString() => '[Class]';
 }
 
@@ -1017,6 +1029,10 @@ class CodeRef extends ObjRef {
   /// What kind of code object is this?
   CodeKind kind;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is CodeRef && id == other.id;
+
   String toString() =>
       '[CodeRef type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
 }
@@ -1037,6 +1053,10 @@ class Code extends ObjRef {
   /// What kind of code object is this?
   CodeKind kind;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Code && id == other.id;
+
   String toString() =>
       '[Code type: ${type}, id: ${id}, name: ${name}, kind: ${kind}]';
 }
@@ -1051,6 +1071,10 @@ class ContextRef extends ObjRef {
 
   /// The number of variables in this context.
   int length;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is ContextRef && id == other.id;
 
   String toString() =>
       '[ContextRef type: ${type}, id: ${id}, length: ${length}]';
@@ -1076,6 +1100,10 @@ class Context extends Obj {
 
   /// The variables in this context object.
   List<ContextElement> variables;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Context && id == other.id;
 
   String toString() => '[Context ' //
       'type: ${type}, id: ${id}, length: ${length}, variables: ${variables}]';
@@ -1111,6 +1139,10 @@ class ErrorRef extends ObjRef {
   /// A description of the error.
   String message;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is ErrorRef && id == other.id;
+
   String toString() =>
       '[ErrorRef type: ${type}, id: ${id}, kind: ${kind}, message: ${message}]';
 }
@@ -1141,6 +1173,10 @@ class Error extends Obj {
   /// If this error is due to an unhandled exception, this is the stacktrace
   /// object.
   @optional InstanceRef stacktrace;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Error && id == other.id;
 
   String toString() =>
       '[Error type: ${type}, id: ${id}, kind: ${kind}, message: ${message}]';
@@ -1273,6 +1309,10 @@ class FieldRef extends ObjRef {
   /// Is this field static?
   bool isStatic;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is FieldRef && id == other.id;
+
   String toString() => '[FieldRef]';
 }
 
@@ -1318,6 +1358,10 @@ class Field extends Obj {
 
   /// The location of this field in the source code.
   @optional SourceLocation location;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Field && id == other.id;
 
   String toString() => '[Field]';
 }
@@ -1420,6 +1464,10 @@ class FuncRef extends ObjRef {
   /// Is this function const?
   bool isConst;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is FuncRef && id == other.id;
+
   String toString() => '[FuncRef ' //
       'type: ${type}, id: ${id}, name: ${name}, owner: ${owner}, ' //
       'isStatic: ${isStatic}, isConst: ${isConst}]';
@@ -1450,6 +1498,10 @@ class Func extends Obj {
 
   /// The compiled code associated with this function.
   @optional CodeRef code;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Func && id == other.id;
 
   String toString() =>
       '[Func type: ${type}, id: ${id}, name: ${name}, owner: ${owner}]';
@@ -1542,6 +1594,10 @@ class InstanceRef extends ObjRef {
   /// Provided for instance kinds:
   ///  - RegExp
   @optional InstanceRef pattern;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is InstanceRef && id == other.id;
 
   String toString() => '[InstanceRef ' //
       'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
@@ -1800,6 +1856,10 @@ class Instance extends Obj {
   ///  - TypeParameter
   @optional InstanceRef bound;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Instance && id == other.id;
+
   String toString() => '[Instance ' //
       'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
@@ -1823,6 +1883,10 @@ class IsolateRef extends Response {
 
   /// A name identifying this isolate. Not guaranteed to be unique.
   String name;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is IsolateRef && id == other.id;
 
   String toString() =>
       '[IsolateRef type: ${type}, id: ${id}, number: ${number}, name: ${name}]';
@@ -1891,6 +1955,10 @@ class Isolate extends Response {
   /// The current pause on exception mode for this isolate.
   ExceptionPauseMode exceptionPauseMode;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Isolate && id == other.id;
+
   String toString() => '[Isolate]';
 }
 
@@ -1909,6 +1977,10 @@ class LibraryRef extends ObjRef {
 
   /// The uri of this library.
   String uri;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is LibraryRef && id == other.id;
 
   String toString() =>
       '[LibraryRef type: ${type}, id: ${id}, name: ${name}, uri: ${uri}]';
@@ -1955,6 +2027,10 @@ class Library extends Obj {
 
   /// A list of all classes in this library.
   List<ClassRef> classes;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Library && id == other.id;
 
   String toString() => '[Library]';
 }
@@ -2059,6 +2135,10 @@ class NullRef extends InstanceRef {
   /// Always 'null'.
   String valueAsString;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is NullRef && id == other.id;
+
   String toString() => '[NullRef ' //
       'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, ' //
       'valueAsString: ${valueAsString}]';
@@ -2075,6 +2155,10 @@ class Null extends Instance {
 
   /// Always 'null'.
   String valueAsString;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Null && id == other.id;
 
   String toString() => '[Null ' //
       'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, ' //
@@ -2093,6 +2177,10 @@ class ObjRef extends Response {
   /// A unique identifier for an Object. Passed to the getObject RPC to load
   /// this Object.
   String id;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is ObjRef && id == other.id;
 
   String toString() => '[ObjRef type: ${type}, id: ${id}]';
 }
@@ -2132,6 +2220,10 @@ class Obj extends Response {
   /// implementation, this occurs for small integers, which are stored entirely
   /// within their object pointers.
   @optional int size;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Obj && id == other.id;
 
   String toString() => '[Obj type: ${type}, id: ${id}]';
 }
@@ -2189,6 +2281,10 @@ class ScriptRef extends ObjRef {
   /// The uri from which this script was loaded.
   String uri;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is ScriptRef && id == other.id;
+
   String toString() => '[ScriptRef type: ${type}, id: ${id}, uri: ${uri}]';
 }
 
@@ -2237,6 +2333,10 @@ class Script extends Obj {
 
   /// A table encoding a mapping from token position to line and column.
   List<List<int>> tokenPosTable;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is Script && id == other.id;
 
   String toString() => '[Script ' //
       'type: ${type}, id: ${id}, uri: ${uri}, library: ${library}, ' //
@@ -2309,6 +2409,10 @@ class TypeArgumentsRef extends ObjRef {
   /// A name for this type argument list.
   String name;
 
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is TypeArgumentsRef && id == other.id;
+
   String toString() =>
       '[TypeArgumentsRef type: ${type}, id: ${id}, name: ${name}]';
 }
@@ -2332,6 +2436,10 @@ class TypeArguments extends Obj {
   /// The value will always be one of the kinds: Type, TypeRef, TypeParameter,
   /// BoundedType.
   List<InstanceRef> types;
+
+  int get hashCode => id.hashCode;
+
+  operator ==(other) => other is TypeArguments && id == other.id;
 
   String toString() =>
       '[TypeArguments type: ${type}, id: ${id}, name: ${name}, types: ${types}]';

@@ -515,6 +515,11 @@ class Type extends Member {
 
   bool get isRef => name.endsWith('Ref');
 
+  bool get supportsIdentity {
+    if (fields.any((f) => f.name == 'id')) return true;
+    return superName == null ? false : getSuper().supportsIdentity;
+  }
+
   Type getSuper() => superName == null ? null : api.getType(superName);
 
   List<TypeField> getAllFields() {
@@ -563,6 +568,17 @@ class Type extends Member {
     gen.writeln();
     fields.forEach((TypeField field) => field.generate(gen));
 
+    // equals and hashCode
+    if (supportsIdentity) {
+      gen.writeln();
+      gen.writeStatement('int get hashCode => id.hashCode;');
+
+      gen.writeln();
+      gen.writeStatement('operator==(other) => other is ${name} && id == other.id;');
+      gen.writeln();
+    }
+
+    // toString()
     Iterable<TypeField> toStringFields = getAllFields().where((f) => !f.optional);
     if (toStringFields.length <= 7) {
       String properties = toStringFields.map((TypeField f) =>
