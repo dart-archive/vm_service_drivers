@@ -2,6 +2,7 @@
 
 ## unreleased
 - added `exceptionPauseMode` to the Isolate class
+- added `hashCode` and `operator==` methods to classes supporting object identity
 
 ## 0.0.5
 - added more dartdocs

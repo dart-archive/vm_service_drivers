@@ -3,7 +3,10 @@
 // BSD-style license that can be found in the LICENSE file.
 
 void main(List<String> args) {
-  String local1 = 'abcd';
+  // Hijinks to remove an analysis warning.
+  dynamic local1;
+  if (true) local1 = 'abcd';
+
   int local2 = 2;
   var longList = [1, "hello", 3, 5, 7, 11, 13, 14, 15, 16, 17, 18, 19, 20];
   var deepList = [new Bar(), [[[[[7]]], "end"]]];
