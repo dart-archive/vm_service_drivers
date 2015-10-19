@@ -240,7 +240,7 @@ class Api extends Member with ApiParseUtil {
       } else if (isPara(node)) {
         var children = (node as Element).children;
         if (children.isNotEmpty && children.first is Text) {
-          var text = children.first.text;
+          var text = (children.first as Text).text;
           if (text.startsWith('streamId |')) {
             _parseStreamIds(text);
           }
@@ -486,7 +486,7 @@ class Method extends Member {
   void generateVmServiceForward(StatementWriter writer) {
     var consumerName = classNameFor(consumerTypeName);
     writer.addLine('if (consumer instanceof $consumerName) {');
-    List<Type> types = returnType.types.map((ref) => ref.type).toList();
+    List<Type> types = new List.from(returnType.types.map((ref) => ref.type));
     for (int index = 0; index < types.length; ++index) {
       types.addAll(types[index].subtypes);
     }
@@ -536,7 +536,7 @@ class Method extends Member {
     if (!includeOptional) {
       mthArgs = mthArgs.toList()..removeWhere((a) => a.optional);
     }
-    mthArgs = mthArgs.map((a) => a.asJavaMethodArg).toList();
+    mthArgs = new List.from(mthArgs.map((a) => a.asJavaMethodArg));
     mthArgs.add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
     writer.addMethod(name, mthArgs, (StatementWriter writer) {
       writer.addLine('JsonObject params = new JsonObject();');
