@@ -42,6 +42,14 @@ String _printEnum(Object obj) {
   return str.substring(index + 1);
 }
 
+List<BoundVariable> _parseBoundVariables(json) {
+  if (json is List) {
+    return json.map(BoundVariable._parse).toList();
+  } else {
+    return [];
+  }
+}
+
 Map<String, Function> _typeFactories = {
   'BoundField': BoundField._parse,
   'BoundVariable': BoundVariable._parse,
@@ -1420,7 +1428,7 @@ class Frame extends Response {
     function = _createObject(json['function']);
     code = _createObject(json['code']);
     location = _createObject(json['location']);
-    vars = _createObject(json['vars']);
+    vars = _parseBoundVariables(json['vars']);
   }
 
   int index;
