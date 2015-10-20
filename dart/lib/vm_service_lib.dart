@@ -50,6 +50,14 @@ List<BoundVariable> _parseBoundVariables(json) {
   }
 }
 
+List<BoundField> _parseBoundFields(json) {
+  if (json is List) {
+    return json.map(BoundField._parse).toList();
+  } else {
+    return [];
+  }
+}
+
 Map<String, Function> _typeFactories = {
   'BoundField': BoundField._parse,
   'BoundVariable': BoundVariable._parse,
@@ -1627,7 +1635,7 @@ class Instance extends Obj {
     name = json['name'];
     typeClass = _createObject(json['typeClass']);
     parameterizedClass = _createObject(json['parameterizedClass']);
-    fields = _createObject(json['fields']);
+    fields = _parseBoundFields(json['fields']);
     elements = _createObject(json['elements']);
     associations = _createObject(json['associations']);
     bytes = json['bytes'];

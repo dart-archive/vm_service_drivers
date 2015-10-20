@@ -274,6 +274,14 @@ List<BoundVariable> _parseBoundVariables(json) {
   }
 }
 
+List<BoundField> _parseBoundFields(json) {
+  if (json is List) {
+    return json.map(BoundField._parse).toList();
+  } else {
+    return [];
+  }
+}
+
 ''');
     gen.writeln();
     gen.write('Map<String, Function> _typeFactories = {');
@@ -571,6 +579,9 @@ class Type extends Member {
       } else if (name == 'Frame' && field.name == 'vars') {
         // TODO: Reported as https://github.com/dart-lang/sdk/issues/24654.
         gen.writeln("${field.generatableName} = _parseBoundVariables(json['${field.name}']);");
+      } else if (name == 'Instance' && field.name == 'fields') {
+        // TODO: Reported as https://github.com/dart-lang/sdk/issues/24654.
+        gen.writeln("${field.generatableName} = _parseBoundFields(json['${field.name}']);");
       } else {
         gen.writeln("${field.generatableName} = _createObject(json['${field.name}']);");
       }
