@@ -1,8 +1,9 @@
 # Changelog
 
-## unreleased
+## 0.0.6
 - added `exceptionPauseMode` to the Isolate class
 - added `hashCode` and `operator==` methods to classes supporting object identity
+- work around a VM bug with the `type` field of `BoundVariable` and `BoundField`
 
 ## 0.0.5
 - added more dartdocs
