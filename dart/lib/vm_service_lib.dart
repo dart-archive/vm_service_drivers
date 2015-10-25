@@ -841,16 +841,17 @@ Map<String, StepOption> _parseStepOption = {
 class BoundField {
   static BoundField _parse(Map json) => new BoundField._fromJson(json);
 
-  BoundField();
-  BoundField._fromJson(Map json) {
-    decl = _createObject(json['decl']);
-    value = _createObject(json['value']);
-  }
-
   FieldRef decl;
 
   /// [value] can be one of [InstanceRef] or [Sentinel].
   dynamic value;
+
+  BoundField();
+
+  BoundField._fromJson(Map json) {
+    decl = _createObject(json['decl']);
+    value = _createObject(json['value']);
+  }
 
   String toString() => '[BoundField decl: ${decl}, value: ${value}]';
 }
@@ -869,16 +870,17 @@ class BoundField {
 class BoundVariable {
   static BoundVariable _parse(Map json) => new BoundVariable._fromJson(json);
 
-  BoundVariable();
-  BoundVariable._fromJson(Map json) {
-    name = json['name'];
-    value = _createObject(json['value']);
-  }
-
   String name;
 
   /// [value] can be one of [InstanceRef] or [Sentinel].
   dynamic value;
+
+  BoundVariable();
+
+  BoundVariable._fromJson(Map json) {
+    name = json['name'];
+    value = _createObject(json['value']);
+  }
 
   String toString() => '[BoundVariable name: ${name}, value: ${value}]';
 }
@@ -892,13 +894,6 @@ class BoundVariable {
 class Breakpoint extends Obj {
   static Breakpoint _parse(Map json) => new Breakpoint._fromJson(json);
 
-  Breakpoint();
-  Breakpoint._fromJson(Map json) : super._fromJson(json) {
-    breakpointNumber = json['breakpointNumber'];
-    resolved = json['resolved'];
-    location = _createObject(json['location']);
-  }
-
   /// A number identifying this breakpoint to the user.
   int breakpointNumber;
 
@@ -910,6 +905,14 @@ class Breakpoint extends Obj {
   ///
   /// [location] can be one of [SourceLocation] or [UnresolvedSourceLocation].
   dynamic location;
+
+  Breakpoint();
+
+  Breakpoint._fromJson(Map json) : super._fromJson(json) {
+    breakpointNumber = json['breakpointNumber'];
+    resolved = json['resolved'];
+    location = _createObject(json['location']);
+  }
 
   int get hashCode => id.hashCode;
 
@@ -924,13 +927,14 @@ class Breakpoint extends Obj {
 class ClassRef extends ObjRef {
   static ClassRef _parse(Map json) => new ClassRef._fromJson(json);
 
+  /// The name of this class.
+  String name;
+
   ClassRef();
+
   ClassRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
   }
-
-  /// The name of this class.
-  String name;
 
   int get hashCode => id.hashCode;
 
@@ -942,21 +946,6 @@ class ClassRef extends ObjRef {
 /// A `Class` provides information about a Dart language class.
 class Class extends Obj {
   static Class _parse(Map json) => new Class._fromJson(json);
-
-  Class();
-  Class._fromJson(Map json) : super._fromJson(json) {
-    name = json['name'];
-    error = _createObject(json['error']);
-    isAbstract = json['abstract'];
-    isConst = json['const'];
-    library = _createObject(json['library']);
-    location = _createObject(json['location']);
-    superClass = _createObject(json['super']);
-    interfaces = _createObject(json['interfaces']) as List<InstanceRef>;
-    fields = _createObject(json['fields']) as List<FieldRef>;
-    functions = _createObject(json['functions']) as List<FuncRef>;
-    subclasses = _createObject(json['subclasses']) as List<ClassRef>;
-  }
 
   /// The name of this class.
   String name;
@@ -994,6 +983,22 @@ class Class extends Obj {
   /// A list of subclasses of this class.
   List<ClassRef> subclasses;
 
+  Class();
+
+  Class._fromJson(Map json) : super._fromJson(json) {
+    name = json['name'];
+    error = _createObject(json['error']);
+    isAbstract = json['abstract'];
+    isConst = json['const'];
+    library = _createObject(json['library']);
+    location = _createObject(json['location']);
+    superClass = _createObject(json['super']);
+    interfaces = _createObject(json['interfaces']) as List<InstanceRef>;
+    fields = _createObject(json['fields']) as List<FieldRef>;
+    functions = _createObject(json['functions']) as List<FuncRef>;
+    subclasses = _createObject(json['subclasses']) as List<ClassRef>;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Class && id == other.id;
@@ -1004,12 +1009,13 @@ class Class extends Obj {
 class ClassList extends Response {
   static ClassList _parse(Map json) => new ClassList._fromJson(json);
 
+  List<ClassRef> classes;
+
   ClassList();
+
   ClassList._fromJson(Map json) : super._fromJson(json) {
     classes = _createObject(json['classes']) as List<ClassRef>;
   }
-
-  List<ClassRef> classes;
 
   String toString() => '[ClassList type: ${type}, classes: ${classes}]';
 }
@@ -1018,17 +1024,18 @@ class ClassList extends Response {
 class CodeRef extends ObjRef {
   static CodeRef _parse(Map json) => new CodeRef._fromJson(json);
 
-  CodeRef();
-  CodeRef._fromJson(Map json) : super._fromJson(json) {
-    name = json['name'];
-    kind = _parseCodeKind[json['kind']];
-  }
-
   /// A name for this code object.
   String name;
 
   /// What kind of code object is this?
   CodeKind kind;
+
+  CodeRef();
+
+  CodeRef._fromJson(Map json) : super._fromJson(json) {
+    name = json['name'];
+    kind = _parseCodeKind[json['kind']];
+  }
 
   int get hashCode => id.hashCode;
 
@@ -1042,17 +1049,18 @@ class CodeRef extends ObjRef {
 class Code extends ObjRef {
   static Code _parse(Map json) => new Code._fromJson(json);
 
-  Code();
-  Code._fromJson(Map json) : super._fromJson(json) {
-    name = json['name'];
-    kind = _parseCodeKind[json['kind']];
-  }
-
   /// A name for this code object.
   String name;
 
   /// What kind of code object is this?
   CodeKind kind;
+
+  Code();
+
+  Code._fromJson(Map json) : super._fromJson(json) {
+    name = json['name'];
+    kind = _parseCodeKind[json['kind']];
+  }
 
   int get hashCode => id.hashCode;
 
@@ -1065,13 +1073,14 @@ class Code extends ObjRef {
 class ContextRef extends ObjRef {
   static ContextRef _parse(Map json) => new ContextRef._fromJson(json);
 
+  /// The number of variables in this context.
+  int length;
+
   ContextRef();
+
   ContextRef._fromJson(Map json) : super._fromJson(json) {
     length = json['length'];
   }
-
-  /// The number of variables in this context.
-  int length;
 
   int get hashCode => id.hashCode;
 
@@ -1086,13 +1095,6 @@ class ContextRef extends ObjRef {
 class Context extends Obj {
   static Context _parse(Map json) => new Context._fromJson(json);
 
-  Context();
-  Context._fromJson(Map json) : super._fromJson(json) {
-    length = json['length'];
-    parent = _createObject(json['parent']);
-    variables = _createObject(json['variables']) as List<ContextElement>;
-  }
-
   /// The number of variables in this context.
   int length;
 
@@ -1101,6 +1103,14 @@ class Context extends Obj {
 
   /// The variables in this context object.
   List<ContextElement> variables;
+
+  Context();
+
+  Context._fromJson(Map json) : super._fromJson(json) {
+    length = json['length'];
+    parent = _createObject(json['parent']);
+    variables = _createObject(json['variables']) as List<ContextElement>;
+  }
 
   int get hashCode => id.hashCode;
 
@@ -1113,13 +1123,14 @@ class Context extends Obj {
 class ContextElement {
   static ContextElement _parse(Map json) => new ContextElement._fromJson(json);
 
+  /// [value] can be one of [InstanceRef] or [Sentinel].
+  dynamic value;
+
   ContextElement();
+
   ContextElement._fromJson(Map json) {
     value = _createObject(json['value']);
   }
-
-  /// [value] can be one of [InstanceRef] or [Sentinel].
-  dynamic value;
 
   String toString() => '[ContextElement value: ${value}]';
 }
@@ -1128,17 +1139,18 @@ class ContextElement {
 class ErrorRef extends ObjRef {
   static ErrorRef _parse(Map json) => new ErrorRef._fromJson(json);
 
-  ErrorRef();
-  ErrorRef._fromJson(Map json) : super._fromJson(json) {
-    kind = _parseErrorKind[json['kind']];
-    message = json['message'];
-  }
-
   /// What kind of error is this?
   ErrorKind kind;
 
   /// A description of the error.
   String message;
+
+  ErrorRef();
+
+  ErrorRef._fromJson(Map json) : super._fromJson(json) {
+    kind = _parseErrorKind[json['kind']];
+    message = json['message'];
+  }
 
   int get hashCode => id.hashCode;
 
@@ -1153,14 +1165,6 @@ class ErrorRef extends ObjRef {
 class Error extends Obj {
   static Error _parse(Map json) => new Error._fromJson(json);
 
-  Error();
-  Error._fromJson(Map json) : super._fromJson(json) {
-    kind = _parseErrorKind[json['kind']];
-    message = json['message'];
-    exception = _createObject(json['exception']);
-    stacktrace = _createObject(json['stacktrace']);
-  }
-
   /// What kind of error is this?
   ErrorKind kind;
 
@@ -1174,6 +1178,15 @@ class Error extends Obj {
   /// If this error is due to an unhandled exception, this is the stacktrace
   /// object.
   @optional InstanceRef stacktrace;
+
+  Error();
+
+  Error._fromJson(Map json) : super._fromJson(json) {
+    kind = _parseErrorKind[json['kind']];
+    message = json['message'];
+    exception = _createObject(json['exception']);
+    stacktrace = _createObject(json['stacktrace']);
+  }
 
   int get hashCode => id.hashCode;
 
@@ -1190,20 +1203,6 @@ class Error extends Obj {
 /// For more information, see [events].
 class Event extends Response {
   static Event _parse(Map json) => new Event._fromJson(json);
-
-  Event();
-  Event._fromJson(Map json) : super._fromJson(json) {
-    kind = _parseEventKind[json['kind']];
-    isolate = _createObject(json['isolate']);
-    vm = _createObject(json['vm']);
-    timestamp = json['timestamp'];
-    breakpoint = _createObject(json['breakpoint']);
-    pauseBreakpoints =
-        _createObject(json['pauseBreakpoints']) as List<Breakpoint>;
-    topFrame = _createObject(json['topFrame']);
-    exception = _createObject(json['exception']);
-    bytes = json['bytes'];
-  }
 
   /// What kind of event is this?
   EventKind kind;
@@ -1272,6 +1271,21 @@ class Event extends Response {
   /// This is provided for the WriteEvent event.
   @optional String bytes;
 
+  Event();
+
+  Event._fromJson(Map json) : super._fromJson(json) {
+    kind = _parseEventKind[json['kind']];
+    isolate = _createObject(json['isolate']);
+    vm = _createObject(json['vm']);
+    timestamp = json['timestamp'];
+    breakpoint = _createObject(json['breakpoint']);
+    pauseBreakpoints =
+        _createObject(json['pauseBreakpoints']) as List<Breakpoint>;
+    topFrame = _createObject(json['topFrame']);
+    exception = _createObject(json['exception']);
+    bytes = json['bytes'];
+  }
+
   String toString() =>
       '[Event type: ${type}, kind: ${kind}, timestamp: ${timestamp}]';
 }
@@ -1279,16 +1293,6 @@ class Event extends Response {
 /// An `FieldRef` is a reference to a `Field`.
 class FieldRef extends ObjRef {
   static FieldRef _parse(Map json) => new FieldRef._fromJson(json);
-
-  FieldRef();
-  FieldRef._fromJson(Map json) : super._fromJson(json) {
-    name = json['name'];
-    owner = _createObject(json['owner']);
-    declaredType = _createObject(json['declaredType']);
-    isConst = json['const'];
-    isFinal = json['final'];
-    isStatic = json['static'];
-  }
 
   /// The name of this field.
   String name;
@@ -1311,6 +1315,17 @@ class FieldRef extends ObjRef {
   /// Is this field static?
   bool isStatic;
 
+  FieldRef();
+
+  FieldRef._fromJson(Map json) : super._fromJson(json) {
+    name = json['name'];
+    owner = _createObject(json['owner']);
+    declaredType = _createObject(json['declaredType']);
+    isConst = json['const'];
+    isFinal = json['final'];
+    isStatic = json['static'];
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is FieldRef && id == other.id;
@@ -1321,18 +1336,6 @@ class FieldRef extends ObjRef {
 /// A `Field` provides information about a Dart language field or variable.
 class Field extends Obj {
   static Field _parse(Map json) => new Field._fromJson(json);
-
-  Field();
-  Field._fromJson(Map json) : super._fromJson(json) {
-    name = json['name'];
-    owner = _createObject(json['owner']);
-    declaredType = _createObject(json['declaredType']);
-    isConst = json['const'];
-    isFinal = json['final'];
-    isStatic = json['static'];
-    staticValue = _createObject(json['staticValue']);
-    location = _createObject(json['location']);
-  }
 
   /// The name of this field.
   String name;
@@ -1361,6 +1364,19 @@ class Field extends Obj {
   /// The location of this field in the source code.
   @optional SourceLocation location;
 
+  Field();
+
+  Field._fromJson(Map json) : super._fromJson(json) {
+    name = json['name'];
+    owner = _createObject(json['owner']);
+    declaredType = _createObject(json['declaredType']);
+    isConst = json['const'];
+    isFinal = json['final'];
+    isStatic = json['static'];
+    staticValue = _createObject(json['staticValue']);
+    location = _createObject(json['location']);
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Field && id == other.id;
@@ -1371,14 +1387,6 @@ class Field extends Obj {
 /// A `Flag` represents a single VM command line flag.
 class Flag {
   static Flag _parse(Map json) => new Flag._fromJson(json);
-
-  Flag();
-  Flag._fromJson(Map json) {
-    name = json['name'];
-    comment = json['comment'];
-    modified = json['modified'];
-    valueAsString = json['valueAsString'];
-  }
 
   /// The name of the flag.
   String name;
@@ -1394,6 +1402,15 @@ class Flag {
   /// If this property is absent, then the value of the flag was NULL.
   @optional String valueAsString;
 
+  Flag();
+
+  Flag._fromJson(Map json) {
+    name = json['name'];
+    comment = json['comment'];
+    modified = json['modified'];
+    valueAsString = json['valueAsString'];
+  }
+
   String toString() =>
       '[Flag name: ${name}, comment: ${comment}, modified: ${modified}]';
 }
@@ -1402,28 +1419,20 @@ class Flag {
 class FlagList extends Response {
   static FlagList _parse(Map json) => new FlagList._fromJson(json);
 
+  /// A list of all flags in the VM.
+  List<Flag> flags;
+
   FlagList();
+
   FlagList._fromJson(Map json) : super._fromJson(json) {
     flags = _createObject(json['flags']) as List<Flag>;
   }
-
-  /// A list of all flags in the VM.
-  List<Flag> flags;
 
   String toString() => '[FlagList type: ${type}, flags: ${flags}]';
 }
 
 class Frame extends Response {
   static Frame _parse(Map json) => new Frame._fromJson(json);
-
-  Frame();
-  Frame._fromJson(Map json) : super._fromJson(json) {
-    index = json['index'];
-    function = _createObject(json['function']);
-    code = _createObject(json['code']);
-    location = _createObject(json['location']);
-    vars = _createObject(json['vars']) as List<BoundVariable>;
-  }
 
   int index;
 
@@ -1435,6 +1444,16 @@ class Frame extends Response {
 
   List<BoundVariable> vars;
 
+  Frame();
+
+  Frame._fromJson(Map json) : super._fromJson(json) {
+    index = json['index'];
+    function = _createObject(json['function']);
+    code = _createObject(json['code']);
+    location = _createObject(json['location']);
+    vars = _createObject(json['vars']) as List<BoundVariable>;
+  }
+
   String toString() => '[Frame ' //
       'type: ${type}, index: ${index}, function: ${function}, code: ${code}, ' //
       'location: ${location}, vars: ${vars}]';
@@ -1443,14 +1462,6 @@ class Frame extends Response {
 /// An `FuncRef` is a reference to a `Func`.
 class FuncRef extends ObjRef {
   static FuncRef _parse(Map json) => new FuncRef._fromJson(json);
-
-  FuncRef();
-  FuncRef._fromJson(Map json) : super._fromJson(json) {
-    name = json['name'];
-    owner = _createObject(json['owner']);
-    isStatic = json['static'];
-    isConst = json['const'];
-  }
 
   /// The name of this function.
   String name;
@@ -1466,6 +1477,15 @@ class FuncRef extends ObjRef {
   /// Is this function const?
   bool isConst;
 
+  FuncRef();
+
+  FuncRef._fromJson(Map json) : super._fromJson(json) {
+    name = json['name'];
+    owner = _createObject(json['owner']);
+    isStatic = json['static'];
+    isConst = json['const'];
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is FuncRef && id == other.id;
@@ -1478,14 +1498,6 @@ class FuncRef extends ObjRef {
 /// A `Func` represents a Dart language function.
 class Func extends Obj {
   static Func _parse(Map json) => new Func._fromJson(json);
-
-  Func();
-  Func._fromJson(Map json) : super._fromJson(json) {
-    name = json['name'];
-    owner = _createObject(json['owner']);
-    location = _createObject(json['location']);
-    code = _createObject(json['code']);
-  }
 
   /// The name of this function.
   String name;
@@ -1501,6 +1513,15 @@ class Func extends Obj {
   /// The compiled code associated with this function.
   @optional CodeRef code;
 
+  Func();
+
+  Func._fromJson(Map json) : super._fromJson(json) {
+    name = json['name'];
+    owner = _createObject(json['owner']);
+    location = _createObject(json['location']);
+    code = _createObject(json['code']);
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Func && id == other.id;
@@ -1512,19 +1533,6 @@ class Func extends Obj {
 /// `InstanceRef` is a reference to an `Instance`.
 class InstanceRef extends ObjRef {
   static InstanceRef _parse(Map json) => new InstanceRef._fromJson(json);
-
-  InstanceRef();
-  InstanceRef._fromJson(Map json) : super._fromJson(json) {
-    kind = _parseInstanceKind[json['kind']];
-    classRef = _createObject(json['class']);
-    valueAsString = json['valueAsString'];
-    valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
-    length = json['length'];
-    name = json['name'];
-    typeClass = _createObject(json['typeClass']);
-    parameterizedClass = _createObject(json['parameterizedClass']);
-    pattern = _createObject(json['pattern']);
-  }
 
   /// What kind of instance is this?
   InstanceKind kind;
@@ -1597,6 +1605,20 @@ class InstanceRef extends ObjRef {
   ///  - RegExp
   @optional InstanceRef pattern;
 
+  InstanceRef();
+
+  InstanceRef._fromJson(Map json) : super._fromJson(json) {
+    kind = _parseInstanceKind[json['kind']];
+    classRef = _createObject(json['class']);
+    valueAsString = json['valueAsString'];
+    valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
+    length = json['length'];
+    name = json['name'];
+    typeClass = _createObject(json['typeClass']);
+    parameterizedClass = _createObject(json['parameterizedClass']);
+    pattern = _createObject(json['pattern']);
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is InstanceRef && id == other.id;
@@ -1608,36 +1630,6 @@ class InstanceRef extends ObjRef {
 /// An `Instance` represents an instance of the Dart language class `Obj`.
 class Instance extends Obj {
   static Instance _parse(Map json) => new Instance._fromJson(json);
-
-  Instance();
-  Instance._fromJson(Map json) : super._fromJson(json) {
-    kind = _parseInstanceKind[json['kind']];
-    classRef = _createObject(json['class']);
-    valueAsString = json['valueAsString'];
-    valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
-    length = json['length'];
-    offset = json['offset'];
-    count = json['count'];
-    name = json['name'];
-    typeClass = _createObject(json['typeClass']);
-    parameterizedClass = _createObject(json['parameterizedClass']);
-    fields = _createObject(json['fields']) as List<BoundField>;
-    elements = _createObject(json['elements']) as List<dynamic>;
-    associations = _createObject(json['associations']) as List<MapAssociation>;
-    bytes = json['bytes'];
-    closureFunction = _createObject(json['closureFunction']);
-    closureContext = _createObject(json['closureContext']);
-    mirrorReferent = _createObject(json['mirrorReferent']);
-    pattern = json['pattern'];
-    isCaseSensitive = json['isCaseSensitive'];
-    isMultiLine = json['isMultiLine'];
-    propertyKey = _createObject(json['propertyKey']);
-    propertyValue = _createObject(json['propertyValue']);
-    typeArguments = _createObject(json['typeArguments']);
-    parameterIndex = json['parameterIndex'];
-    targetType = _createObject(json['targetType']);
-    bound = _createObject(json['bound']);
-  }
 
   /// What kind of instance is this?
   InstanceKind kind;
@@ -1858,6 +1850,37 @@ class Instance extends Obj {
   ///  - TypeParameter
   @optional InstanceRef bound;
 
+  Instance();
+
+  Instance._fromJson(Map json) : super._fromJson(json) {
+    kind = _parseInstanceKind[json['kind']];
+    classRef = _createObject(json['class']);
+    valueAsString = json['valueAsString'];
+    valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
+    length = json['length'];
+    offset = json['offset'];
+    count = json['count'];
+    name = json['name'];
+    typeClass = _createObject(json['typeClass']);
+    parameterizedClass = _createObject(json['parameterizedClass']);
+    fields = _createObject(json['fields']) as List<BoundField>;
+    elements = _createObject(json['elements']) as List<dynamic>;
+    associations = _createObject(json['associations']) as List<MapAssociation>;
+    bytes = json['bytes'];
+    closureFunction = _createObject(json['closureFunction']);
+    closureContext = _createObject(json['closureContext']);
+    mirrorReferent = _createObject(json['mirrorReferent']);
+    pattern = json['pattern'];
+    isCaseSensitive = json['isCaseSensitive'];
+    isMultiLine = json['isMultiLine'];
+    propertyKey = _createObject(json['propertyKey']);
+    propertyValue = _createObject(json['propertyValue']);
+    typeArguments = _createObject(json['typeArguments']);
+    parameterIndex = json['parameterIndex'];
+    targetType = _createObject(json['targetType']);
+    bound = _createObject(json['bound']);
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Instance && id == other.id;
@@ -1870,13 +1893,6 @@ class Instance extends Obj {
 class IsolateRef extends Response {
   static IsolateRef _parse(Map json) => new IsolateRef._fromJson(json);
 
-  IsolateRef();
-  IsolateRef._fromJson(Map json) : super._fromJson(json) {
-    id = json['id'];
-    number = json['number'];
-    name = json['name'];
-  }
-
   /// The id which is passed to the getIsolate RPC to load this isolate.
   String id;
 
@@ -1885,6 +1901,14 @@ class IsolateRef extends Response {
 
   /// A name identifying this isolate. Not guaranteed to be unique.
   String name;
+
+  IsolateRef();
+
+  IsolateRef._fromJson(Map json) : super._fromJson(json) {
+    id = json['id'];
+    number = json['number'];
+    name = json['name'];
+  }
 
   int get hashCode => id.hashCode;
 
@@ -1897,22 +1921,6 @@ class IsolateRef extends Response {
 /// An `Isolate` object provides information about one isolate in the VM.
 class Isolate extends Response {
   static Isolate _parse(Map json) => new Isolate._fromJson(json);
-
-  Isolate();
-  Isolate._fromJson(Map json) : super._fromJson(json) {
-    id = json['id'];
-    number = json['number'];
-    name = json['name'];
-    startTime = json['startTime'];
-    livePorts = json['livePorts'];
-    pauseOnExit = json['pauseOnExit'];
-    pauseEvent = _createObject(json['pauseEvent']);
-    rootLib = _createObject(json['rootLib']);
-    libraries = _createObject(json['libraries']) as List<LibraryRef>;
-    breakpoints = _createObject(json['breakpoints']) as List<Breakpoint>;
-    error = _createObject(json['error']);
-    exceptionPauseMode = _parseExceptionPauseMode[json['exceptionPauseMode']];
-  }
 
   /// The id which is passed to the getIsolate RPC to reload this isolate.
   String id;
@@ -1957,6 +1965,23 @@ class Isolate extends Response {
   /// The current pause on exception mode for this isolate.
   ExceptionPauseMode exceptionPauseMode;
 
+  Isolate();
+
+  Isolate._fromJson(Map json) : super._fromJson(json) {
+    id = json['id'];
+    number = json['number'];
+    name = json['name'];
+    startTime = json['startTime'];
+    livePorts = json['livePorts'];
+    pauseOnExit = json['pauseOnExit'];
+    pauseEvent = _createObject(json['pauseEvent']);
+    rootLib = _createObject(json['rootLib']);
+    libraries = _createObject(json['libraries']) as List<LibraryRef>;
+    breakpoints = _createObject(json['breakpoints']) as List<Breakpoint>;
+    error = _createObject(json['error']);
+    exceptionPauseMode = _parseExceptionPauseMode[json['exceptionPauseMode']];
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Isolate && id == other.id;
@@ -1968,17 +1993,18 @@ class Isolate extends Response {
 class LibraryRef extends ObjRef {
   static LibraryRef _parse(Map json) => new LibraryRef._fromJson(json);
 
-  LibraryRef();
-  LibraryRef._fromJson(Map json) : super._fromJson(json) {
-    name = json['name'];
-    uri = json['uri'];
-  }
-
   /// The name of this library.
   String name;
 
   /// The uri of this library.
   String uri;
+
+  LibraryRef();
+
+  LibraryRef._fromJson(Map json) : super._fromJson(json) {
+    name = json['name'];
+    uri = json['uri'];
+  }
 
   int get hashCode => id.hashCode;
 
@@ -1993,19 +2019,6 @@ class LibraryRef extends ObjRef {
 /// See [setLibraryDebuggable].
 class Library extends Obj {
   static Library _parse(Map json) => new Library._fromJson(json);
-
-  Library();
-  Library._fromJson(Map json) : super._fromJson(json) {
-    name = json['name'];
-    uri = json['uri'];
-    debuggable = json['debuggable'];
-    dependencies =
-        _createObject(json['dependencies']) as List<LibraryDependency>;
-    scripts = _createObject(json['scripts']) as List<ScriptRef>;
-    variables = _createObject(json['variables']) as List<FieldRef>;
-    functions = _createObject(json['functions']) as List<FuncRef>;
-    classes = _createObject(json['classes']) as List<ClassRef>;
-  }
 
   /// The name of this library.
   String name;
@@ -2031,6 +2044,20 @@ class Library extends Obj {
   /// A list of all classes in this library.
   List<ClassRef> classes;
 
+  Library();
+
+  Library._fromJson(Map json) : super._fromJson(json) {
+    name = json['name'];
+    uri = json['uri'];
+    debuggable = json['debuggable'];
+    dependencies =
+        _createObject(json['dependencies']) as List<LibraryDependency>;
+    scripts = _createObject(json['scripts']) as List<ScriptRef>;
+    variables = _createObject(json['variables']) as List<FieldRef>;
+    functions = _createObject(json['functions']) as List<FuncRef>;
+    classes = _createObject(json['classes']) as List<ClassRef>;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Library && id == other.id;
@@ -2042,14 +2069,6 @@ class Library extends Obj {
 class LibraryDependency {
   static LibraryDependency _parse(Map json) =>
       new LibraryDependency._fromJson(json);
-
-  LibraryDependency();
-  LibraryDependency._fromJson(Map json) {
-    isImport = json['isImport'];
-    isDeferred = json['isDeferred'];
-    prefix = json['prefix'];
-    target = _createObject(json['target']);
-  }
 
   /// Is this dependency an import (rather than an export)?
   bool isImport;
@@ -2063,6 +2082,15 @@ class LibraryDependency {
   /// The library being imported or exported.
   LibraryRef target;
 
+  LibraryDependency();
+
+  LibraryDependency._fromJson(Map json) {
+    isImport = json['isImport'];
+    isDeferred = json['isDeferred'];
+    prefix = json['prefix'];
+    target = _createObject(json['target']);
+  }
+
   String toString() => '[LibraryDependency ' //
       'isImport: ${isImport}, isDeferred: ${isDeferred}, prefix: ${prefix}, ' //
       'target: ${target}]';
@@ -2071,17 +2099,18 @@ class LibraryDependency {
 class MapAssociation {
   static MapAssociation _parse(Map json) => new MapAssociation._fromJson(json);
 
-  MapAssociation();
-  MapAssociation._fromJson(Map json) {
-    key = _createObject(json['key']);
-    value = _createObject(json['value']);
-  }
-
   /// [key] can be one of [InstanceRef] or [Sentinel].
   dynamic key;
 
   /// [value] can be one of [InstanceRef] or [Sentinel].
   dynamic value;
+
+  MapAssociation();
+
+  MapAssociation._fromJson(Map json) {
+    key = _createObject(json['key']);
+    value = _createObject(json['value']);
+  }
 
   String toString() => '[MapAssociation key: ${key}, value: ${value}]';
 }
@@ -2090,16 +2119,6 @@ class MapAssociation {
 /// function that will be invoked to handle it.
 class Message extends Response {
   static Message _parse(Map json) => new Message._fromJson(json);
-
-  Message();
-  Message._fromJson(Map json) : super._fromJson(json) {
-    index = json['index'];
-    name = json['name'];
-    messageObjectId = json['messageObjectId'];
-    size = json['size'];
-    handler = _createObject(json['handler']);
-    location = _createObject(json['location']);
-  }
 
   /// The index in the isolate's message queue. The 0th message being the next
   /// message to be processed.
@@ -2121,6 +2140,17 @@ class Message extends Response {
   /// The source location of handler.
   @optional SourceLocation location;
 
+  Message();
+
+  Message._fromJson(Map json) : super._fromJson(json) {
+    index = json['index'];
+    name = json['name'];
+    messageObjectId = json['messageObjectId'];
+    size = json['size'];
+    handler = _createObject(json['handler']);
+    location = _createObject(json['location']);
+  }
+
   String toString() => '[Message ' //
       'type: ${type}, index: ${index}, name: ${name}, messageObjectId: ${messageObjectId}, ' //
       'size: ${size}]';
@@ -2130,13 +2160,14 @@ class Message extends Response {
 class NullRef extends InstanceRef {
   static NullRef _parse(Map json) => new NullRef._fromJson(json);
 
+  /// Always 'null'.
+  String valueAsString;
+
   NullRef();
+
   NullRef._fromJson(Map json) : super._fromJson(json) {
     valueAsString = json['valueAsString'];
   }
-
-  /// Always 'null'.
-  String valueAsString;
 
   int get hashCode => id.hashCode;
 
@@ -2151,13 +2182,14 @@ class NullRef extends InstanceRef {
 class Null extends Instance {
   static Null _parse(Map json) => new Null._fromJson(json);
 
+  /// Always 'null'.
+  String valueAsString;
+
   Null();
+
   Null._fromJson(Map json) : super._fromJson(json) {
     valueAsString = json['valueAsString'];
   }
-
-  /// Always 'null'.
-  String valueAsString;
 
   int get hashCode => id.hashCode;
 
@@ -2172,14 +2204,15 @@ class Null extends Instance {
 class ObjRef extends Response {
   static ObjRef _parse(Map json) => new ObjRef._fromJson(json);
 
-  ObjRef();
-  ObjRef._fromJson(Map json) : super._fromJson(json) {
-    id = json['id'];
-  }
-
   /// A unique identifier for an Object. Passed to the getObject RPC to load
   /// this Object.
   String id;
+
+  ObjRef();
+
+  ObjRef._fromJson(Map json) : super._fromJson(json) {
+    id = json['id'];
+  }
 
   int get hashCode => id.hashCode;
 
@@ -2191,13 +2224,6 @@ class ObjRef extends Response {
 /// An `Obj` is a persistent object that is owned by some isolate.
 class Obj extends Response {
   static Obj _parse(Map json) => new Obj._fromJson(json);
-
-  Obj();
-  Obj._fromJson(Map json) : super._fromJson(json) {
-    id = json['id'];
-    classRef = _createObject(json['class']);
-    size = json['size'];
-  }
 
   /// A unique identifier for an Object. Passed to the getObject RPC to reload
   /// this Object.
@@ -2224,6 +2250,14 @@ class Obj extends Response {
   /// within their object pointers.
   @optional int size;
 
+  Obj();
+
+  Obj._fromJson(Map json) : super._fromJson(json) {
+    id = json['id'];
+    classRef = _createObject(json['class']);
+    size = json['size'];
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Obj && id == other.id;
@@ -2237,14 +2271,15 @@ class Obj extends Response {
 class Response {
   static Response _parse(Map json) => new Response._fromJson(json);
 
-  Response();
-  Response._fromJson(Map json) {
-    type = json['type'];
-  }
-
   /// Every response returned by the VM Service has the type property. This
   /// allows the client distinguish between different kinds of responses.
   String type;
+
+  Response();
+
+  Response._fromJson(Map json) {
+    type = json['type'];
+  }
 
   String toString() => '[Response type: ${type}]';
 }
@@ -2256,17 +2291,18 @@ class Response {
 class Sentinel extends Response {
   static Sentinel _parse(Map json) => new Sentinel._fromJson(json);
 
-  Sentinel();
-  Sentinel._fromJson(Map json) : super._fromJson(json) {
-    kind = _parseSentinelKind[json['kind']];
-    valueAsString = json['valueAsString'];
-  }
-
   /// What kind of sentinel is this?
   SentinelKind kind;
 
   /// A reasonable string representation of this sentinel.
   String valueAsString;
+
+  Sentinel();
+
+  Sentinel._fromJson(Map json) : super._fromJson(json) {
+    kind = _parseSentinelKind[json['kind']];
+    valueAsString = json['valueAsString'];
+  }
 
   String toString() => '[Sentinel ' //
       'type: ${type}, kind: ${kind}, valueAsString: ${valueAsString}]';
@@ -2276,13 +2312,14 @@ class Sentinel extends Response {
 class ScriptRef extends ObjRef {
   static ScriptRef _parse(Map json) => new ScriptRef._fromJson(json);
 
+  /// The uri from which this script was loaded.
+  String uri;
+
   ScriptRef();
+
   ScriptRef._fromJson(Map json) : super._fromJson(json) {
     uri = json['uri'];
   }
-
-  /// The uri from which this script was loaded.
-  String uri;
 
   int get hashCode => id.hashCode;
 
@@ -2316,14 +2353,6 @@ class ScriptRef extends ObjRef {
 class Script extends Obj {
   static Script _parse(Map json) => new Script._fromJson(json);
 
-  Script();
-  Script._fromJson(Map json) : super._fromJson(json) {
-    uri = json['uri'];
-    library = _createObject(json['library']);
-    source = json['source'];
-    tokenPosTable = _createObject(json['tokenPosTable']) as List<List<int>>;
-  }
-
   /// The uri from which this script was loaded.
   String uri;
 
@@ -2336,6 +2365,15 @@ class Script extends Obj {
 
   /// A table encoding a mapping from token position to line and column.
   List<List<int>> tokenPosTable;
+
+  Script();
+
+  Script._fromJson(Map json) : super._fromJson(json) {
+    uri = json['uri'];
+    library = _createObject(json['library']);
+    source = json['source'];
+    tokenPosTable = _createObject(json['tokenPosTable']) as List<List<int>>;
+  }
 
   int get hashCode => id.hashCode;
 
@@ -2351,13 +2389,6 @@ class Script extends Obj {
 class SourceLocation extends Response {
   static SourceLocation _parse(Map json) => new SourceLocation._fromJson(json);
 
-  SourceLocation();
-  SourceLocation._fromJson(Map json) : super._fromJson(json) {
-    script = _createObject(json['script']);
-    tokenPos = json['tokenPos'];
-    endTokenPos = json['endTokenPos'];
-  }
-
   /// The script containing the source location.
   ScriptRef script;
 
@@ -2367,6 +2398,14 @@ class SourceLocation extends Response {
   /// The last token of the location if this is a range.
   @optional int endTokenPos;
 
+  SourceLocation();
+
+  SourceLocation._fromJson(Map json) : super._fromJson(json) {
+    script = _createObject(json['script']);
+    tokenPos = json['tokenPos'];
+    endTokenPos = json['endTokenPos'];
+  }
+
   String toString() =>
       '[SourceLocation type: ${type}, script: ${script}, tokenPos: ${tokenPos}]';
 }
@@ -2374,15 +2413,16 @@ class SourceLocation extends Response {
 class Stack extends Response {
   static Stack _parse(Map json) => new Stack._fromJson(json);
 
+  List<Frame> frames;
+
+  List<Message> messages;
+
   Stack();
+
   Stack._fromJson(Map json) : super._fromJson(json) {
     frames = _createObject(json['frames']) as List<Frame>;
     messages = _createObject(json['messages']) as List<Message>;
   }
-
-  List<Frame> frames;
-
-  List<Message> messages;
 
   String toString() =>
       '[Stack type: ${type}, frames: ${frames}, messages: ${messages}]';
@@ -2394,6 +2434,7 @@ class Success extends Response {
   static Success _parse(Map json) => new Success._fromJson(json);
 
   Success();
+
   Success._fromJson(Map json) : super._fromJson(json) {}
 
   String toString() => '[Success type: ${type}]';
@@ -2404,13 +2445,14 @@ class TypeArgumentsRef extends ObjRef {
   static TypeArgumentsRef _parse(Map json) =>
       new TypeArgumentsRef._fromJson(json);
 
+  /// A name for this type argument list.
+  String name;
+
   TypeArgumentsRef();
+
   TypeArgumentsRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
   }
-
-  /// A name for this type argument list.
-  String name;
 
   int get hashCode => id.hashCode;
 
@@ -2425,12 +2467,6 @@ class TypeArgumentsRef extends ObjRef {
 class TypeArguments extends Obj {
   static TypeArguments _parse(Map json) => new TypeArguments._fromJson(json);
 
-  TypeArguments();
-  TypeArguments._fromJson(Map json) : super._fromJson(json) {
-    name = json['name'];
-    types = _createObject(json['types']) as List<InstanceRef>;
-  }
-
   /// A name for this type argument list.
   String name;
 
@@ -2439,6 +2475,13 @@ class TypeArguments extends Obj {
   /// The value will always be one of the kinds: Type, TypeRef, TypeParameter,
   /// BoundedType.
   List<InstanceRef> types;
+
+  TypeArguments();
+
+  TypeArguments._fromJson(Map json) : super._fromJson(json) {
+    name = json['name'];
+    types = _createObject(json['types']) as List<InstanceRef>;
+  }
 
   int get hashCode => id.hashCode;
 
@@ -2462,15 +2505,6 @@ class UnresolvedSourceLocation extends Response {
   static UnresolvedSourceLocation _parse(Map json) =>
       new UnresolvedSourceLocation._fromJson(json);
 
-  UnresolvedSourceLocation();
-  UnresolvedSourceLocation._fromJson(Map json) : super._fromJson(json) {
-    script = _createObject(json['script']);
-    scriptUri = json['scriptUri'];
-    tokenPos = json['tokenPos'];
-    line = json['line'];
-    column = json['column'];
-  }
-
   /// The script containing the source location if the script has been loaded.
   @optional ScriptRef script;
 
@@ -2490,18 +2524,22 @@ class UnresolvedSourceLocation extends Response {
   /// the location is resolved.
   @optional int column;
 
+  UnresolvedSourceLocation();
+
+  UnresolvedSourceLocation._fromJson(Map json) : super._fromJson(json) {
+    script = _createObject(json['script']);
+    scriptUri = json['scriptUri'];
+    tokenPos = json['tokenPos'];
+    line = json['line'];
+    column = json['column'];
+  }
+
   String toString() => '[UnresolvedSourceLocation type: ${type}]';
 }
 
 /// See [Versioning].
 class Version extends Response {
   static Version _parse(Map json) => new Version._fromJson(json);
-
-  Version();
-  Version._fromJson(Map json) : super._fromJson(json) {
-    major = json['major'];
-    minor = json['minor'];
-  }
 
   /// The major version number is incremented when the protocol is changed in a
   /// potentially incompatible way.
@@ -2511,6 +2549,13 @@ class Version extends Response {
   /// backwards compatible way.
   int minor;
 
+  Version();
+
+  Version._fromJson(Map json) : super._fromJson(json) {
+    major = json['major'];
+    minor = json['minor'];
+  }
+
   String toString() =>
       '[Version type: ${type}, major: ${major}, minor: ${minor}]';
 }
@@ -2519,30 +2564,20 @@ class Version extends Response {
 class VMRef extends Response {
   static VMRef _parse(Map json) => new VMRef._fromJson(json);
 
+  /// A name identifying this vm. Not guaranteed to be unique.
+  String name;
+
   VMRef();
+
   VMRef._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
   }
-
-  /// A name identifying this vm. Not guaranteed to be unique.
-  String name;
 
   String toString() => '[VMRef type: ${type}, name: ${name}]';
 }
 
 class VM extends Response {
   static VM _parse(Map json) => new VM._fromJson(json);
-
-  VM();
-  VM._fromJson(Map json) : super._fromJson(json) {
-    architectureBits = json['architectureBits'];
-    targetCPU = json['targetCPU'];
-    hostCPU = json['hostCPU'];
-    version = json['version'];
-    pid = json['pid'];
-    startTime = json['startTime'];
-    isolates = _createObject(json['isolates']) as List<IsolateRef>;
-  }
 
   /// Word length on target architecture (e.g. 32, 64).
   int architectureBits;
@@ -2566,6 +2601,18 @@ class VM extends Response {
 
   /// A list of isolates running in the VM.
   List<IsolateRef> isolates;
+
+  VM();
+
+  VM._fromJson(Map json) : super._fromJson(json) {
+    architectureBits = json['architectureBits'];
+    targetCPU = json['targetCPU'];
+    hostCPU = json['hostCPU'];
+    version = json['version'];
+    pid = json['pid'];
+    startTime = json['startTime'];
+    isolates = _createObject(json['isolates']) as List<IsolateRef>;
+  }
 
   String toString() => '[VM]';
 }

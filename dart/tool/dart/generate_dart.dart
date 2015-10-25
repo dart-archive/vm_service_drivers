@@ -548,7 +548,15 @@ class Type extends Member {
     gen.writeln('{');
     gen.writeln('static ${name} _parse(Map json) => new ${name}._fromJson(json);');
     gen.writeln();
+
+    // fields
+    fields.forEach((TypeField field) => field.generate(gen));
+    gen.writeln();
+
+    // ctors
     gen.writeln('${name}();');
+    gen.writeln();
+    
     String superCall = superName == null ? '' : ": super._fromJson(json) ";
     gen.writeln('${name}._fromJson(Map json) ${superCall}{');
     fields.forEach((TypeField field) {
@@ -573,14 +581,12 @@ class Type extends Member {
     });
     gen.writeln('}');
     gen.writeln();
-    fields.forEach((TypeField field) => field.generate(gen));
 
     // equals and hashCode
     if (supportsIdentity) {
-      gen.writeln();
       gen.writeStatement('int get hashCode => id.hashCode;');
-
       gen.writeln();
+
       gen.writeStatement('operator==(other) => other is ${name} && id == other.id;');
       gen.writeln();
     }
