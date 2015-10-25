@@ -42,22 +42,6 @@ String _printEnum(Object obj) {
   return str.substring(index + 1);
 }
 
-List<BoundVariable> _parseBoundVariables(json) {
-  if (json is List) {
-    return json.map(BoundVariable._parse).toList();
-  } else {
-    return [];
-  }
-}
-
-List<BoundField> _parseBoundFields(json) {
-  if (json is List) {
-    return json.map(BoundField._parse).toList();
-  } else {
-    return [];
-  }
-}
-
 Map<String, Function> _typeFactories = {
   'BoundField': BoundField._parse,
   'BoundVariable': BoundVariable._parse,
@@ -115,8 +99,8 @@ class VmService {
   Map<String, Completer> _completers = {};
   Log _log;
 
-  StreamController _onSend = new StreamController.broadcast();
-  StreamController _onReceive = new StreamController.broadcast();
+  StreamController _onSend = new StreamController.broadcast(sync: true);
+  StreamController _onReceive = new StreamController.broadcast(sync: true);
 
   StreamController<Event> _vmController = new StreamController.broadcast();
   StreamController<Event> _isolateController = new StreamController.broadcast();
@@ -1436,7 +1420,7 @@ class Frame extends Response {
     function = _createObject(json['function']);
     code = _createObject(json['code']);
     location = _createObject(json['location']);
-    vars = _parseBoundVariables(json['vars']);
+    vars = _createObject(json['vars']);
   }
 
   int index;
@@ -1635,7 +1619,7 @@ class Instance extends Obj {
     name = json['name'];
     typeClass = _createObject(json['typeClass']);
     parameterizedClass = _createObject(json['parameterizedClass']);
-    fields = _parseBoundFields(json['fields']);
+    fields = _createObject(json['fields']);
     elements = _createObject(json['elements']);
     associations = _createObject(json['associations']);
     bytes = json['bytes'];
