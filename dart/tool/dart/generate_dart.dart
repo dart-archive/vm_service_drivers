@@ -51,7 +51,7 @@ final String _implCode = r'''
 
   Future<Response> _call(String method, [Map args = const {}]) {
     String id = '${++_id}';
-    _completers[id] = new Completer();
+    _completers[id] = new Completer<Response>();
     // The service protocol needs 'params' to be there.
     Map m = {'id': id, 'method': method, 'params': args};
     if (args != null) m['params'] = args;
@@ -279,11 +279,11 @@ String _printEnum(Object obj) {
     gen.writeStatement('StreamSubscription _streamSub;');
     gen.writeStatement('Function _writeMessage;');
     gen.writeStatement('int _id = 0;');
-    gen.writeStatement('Map<String, Completer> _completers = {};');
+    gen.writeStatement('Map<String, Completer<Response>> _completers = {};');
     gen.writeStatement('Log _log;');
     gen.writeln();
-    gen.writeln("StreamController _onSend = new StreamController.broadcast(sync: true);");
-    gen.writeln("StreamController _onReceive = new StreamController.broadcast(sync: true);");
+    gen.writeln("StreamController<String> _onSend = new StreamController.broadcast(sync: true);");
+    gen.writeln("StreamController<String> _onReceive = new StreamController.broadcast(sync: true);");
     gen.writeln();
     gen.writeln("StreamController<Event> _vmController = new StreamController.broadcast();");
     gen.writeln("StreamController<Event> _isolateController = new StreamController.broadcast();");
@@ -461,6 +461,8 @@ class MemberType extends Member {
 
   bool get isEnum => types.length == 1 && api.isEnumName(types.first.name);
 
+  bool get isArray => types.length == 1 && types.first.isArray;
+
   void generate(DartGenerator gen) => gen.write(name);
 }
 
@@ -475,7 +477,8 @@ class TypeRef {
 
   bool get isArray => arrayDepth > 0;
 
-  bool get isSimple => name == 'int' || name == 'num' || name == 'String' || name == 'bool';
+  bool get isSimple => arrayDepth == 0 &&
+      (name == 'int' || name == 'num' || name == 'String' || name == 'bool');
 
   String toString() => ref;
 }
@@ -560,6 +563,10 @@ class Type extends Member {
         String enumTypeName = field.type.types.first.name;
         gen.writeln(
           "${field.generatableName} = _parse${enumTypeName}[json['${field.name}']];");
+      } else if (field.type.isArray) {
+        TypeRef fieldType = field.type.types.first;
+        gen.writeln("${field.generatableName} = _createObject(json['${field.name}']) "
+            "as ${fieldType.ref};");
       } else {
         gen.writeln("${field.generatableName} = _createObject(json['${field.name}']);");
       }

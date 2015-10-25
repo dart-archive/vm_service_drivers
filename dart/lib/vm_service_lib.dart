@@ -96,11 +96,12 @@ class VmService {
   StreamSubscription _streamSub;
   Function _writeMessage;
   int _id = 0;
-  Map<String, Completer> _completers = {};
+  Map<String, Completer<Response>> _completers = {};
   Log _log;
 
-  StreamController _onSend = new StreamController.broadcast(sync: true);
-  StreamController _onReceive = new StreamController.broadcast(sync: true);
+  StreamController<String> _onSend = new StreamController.broadcast(sync: true);
+  StreamController<String> _onReceive =
+      new StreamController.broadcast(sync: true);
 
   StreamController<Event> _vmController = new StreamController.broadcast();
   StreamController<Event> _isolateController = new StreamController.broadcast();
@@ -458,7 +459,7 @@ class VmService {
 
   Future<Response> _call(String method, [Map args = const {}]) {
     String id = '${++_id}';
-    _completers[id] = new Completer();
+    _completers[id] = new Completer<Response>();
     // The service protocol needs 'params' to be there.
     Map m = {'id': id, 'method': method, 'params': args};
     if (args != null) m['params'] = args;
@@ -951,10 +952,10 @@ class Class extends Obj {
     library = _createObject(json['library']);
     location = _createObject(json['location']);
     superClass = _createObject(json['super']);
-    interfaces = _createObject(json['interfaces']);
-    fields = _createObject(json['fields']);
-    functions = _createObject(json['functions']);
-    subclasses = _createObject(json['subclasses']);
+    interfaces = _createObject(json['interfaces']) as List<InstanceRef>;
+    fields = _createObject(json['fields']) as List<FieldRef>;
+    functions = _createObject(json['functions']) as List<FuncRef>;
+    subclasses = _createObject(json['subclasses']) as List<ClassRef>;
   }
 
   /// The name of this class.
@@ -1005,7 +1006,7 @@ class ClassList extends Response {
 
   ClassList();
   ClassList._fromJson(Map json) : super._fromJson(json) {
-    classes = _createObject(json['classes']);
+    classes = _createObject(json['classes']) as List<ClassRef>;
   }
 
   List<ClassRef> classes;
@@ -1089,7 +1090,7 @@ class Context extends Obj {
   Context._fromJson(Map json) : super._fromJson(json) {
     length = json['length'];
     parent = _createObject(json['parent']);
-    variables = _createObject(json['variables']);
+    variables = _createObject(json['variables']) as List<ContextElement>;
   }
 
   /// The number of variables in this context.
@@ -1197,7 +1198,8 @@ class Event extends Response {
     vm = _createObject(json['vm']);
     timestamp = json['timestamp'];
     breakpoint = _createObject(json['breakpoint']);
-    pauseBreakpoints = _createObject(json['pauseBreakpoints']);
+    pauseBreakpoints =
+        _createObject(json['pauseBreakpoints']) as List<Breakpoint>;
     topFrame = _createObject(json['topFrame']);
     exception = _createObject(json['exception']);
     bytes = json['bytes'];
@@ -1402,7 +1404,7 @@ class FlagList extends Response {
 
   FlagList();
   FlagList._fromJson(Map json) : super._fromJson(json) {
-    flags = _createObject(json['flags']);
+    flags = _createObject(json['flags']) as List<Flag>;
   }
 
   /// A list of all flags in the VM.
@@ -1420,7 +1422,7 @@ class Frame extends Response {
     function = _createObject(json['function']);
     code = _createObject(json['code']);
     location = _createObject(json['location']);
-    vars = _createObject(json['vars']);
+    vars = _createObject(json['vars']) as List<BoundVariable>;
   }
 
   int index;
@@ -1619,9 +1621,9 @@ class Instance extends Obj {
     name = json['name'];
     typeClass = _createObject(json['typeClass']);
     parameterizedClass = _createObject(json['parameterizedClass']);
-    fields = _createObject(json['fields']);
-    elements = _createObject(json['elements']);
-    associations = _createObject(json['associations']);
+    fields = _createObject(json['fields']) as List<BoundField>;
+    elements = _createObject(json['elements']) as List<dynamic>;
+    associations = _createObject(json['associations']) as List<MapAssociation>;
     bytes = json['bytes'];
     closureFunction = _createObject(json['closureFunction']);
     closureContext = _createObject(json['closureContext']);
@@ -1906,8 +1908,8 @@ class Isolate extends Response {
     pauseOnExit = json['pauseOnExit'];
     pauseEvent = _createObject(json['pauseEvent']);
     rootLib = _createObject(json['rootLib']);
-    libraries = _createObject(json['libraries']);
-    breakpoints = _createObject(json['breakpoints']);
+    libraries = _createObject(json['libraries']) as List<LibraryRef>;
+    breakpoints = _createObject(json['breakpoints']) as List<Breakpoint>;
     error = _createObject(json['error']);
     exceptionPauseMode = _parseExceptionPauseMode[json['exceptionPauseMode']];
   }
@@ -1997,11 +1999,12 @@ class Library extends Obj {
     name = json['name'];
     uri = json['uri'];
     debuggable = json['debuggable'];
-    dependencies = _createObject(json['dependencies']);
-    scripts = _createObject(json['scripts']);
-    variables = _createObject(json['variables']);
-    functions = _createObject(json['functions']);
-    classes = _createObject(json['classes']);
+    dependencies =
+        _createObject(json['dependencies']) as List<LibraryDependency>;
+    scripts = _createObject(json['scripts']) as List<ScriptRef>;
+    variables = _createObject(json['variables']) as List<FieldRef>;
+    functions = _createObject(json['functions']) as List<FuncRef>;
+    classes = _createObject(json['classes']) as List<ClassRef>;
   }
 
   /// The name of this library.
@@ -2318,7 +2321,7 @@ class Script extends Obj {
     uri = json['uri'];
     library = _createObject(json['library']);
     source = json['source'];
-    tokenPosTable = json['tokenPosTable'];
+    tokenPosTable = _createObject(json['tokenPosTable']) as List<List<int>>;
   }
 
   /// The uri from which this script was loaded.
@@ -2373,8 +2376,8 @@ class Stack extends Response {
 
   Stack();
   Stack._fromJson(Map json) : super._fromJson(json) {
-    frames = _createObject(json['frames']);
-    messages = _createObject(json['messages']);
+    frames = _createObject(json['frames']) as List<Frame>;
+    messages = _createObject(json['messages']) as List<Message>;
   }
 
   List<Frame> frames;
@@ -2425,7 +2428,7 @@ class TypeArguments extends Obj {
   TypeArguments();
   TypeArguments._fromJson(Map json) : super._fromJson(json) {
     name = json['name'];
-    types = _createObject(json['types']);
+    types = _createObject(json['types']) as List<InstanceRef>;
   }
 
   /// A name for this type argument list.
@@ -2538,7 +2541,7 @@ class VM extends Response {
     version = json['version'];
     pid = json['pid'];
     startTime = json['startTime'];
-    isolates = _createObject(json['isolates']);
+    isolates = _createObject(json['isolates']) as List<IsolateRef>;
   }
 
   /// Word length on target architecture (e.g. 32, 64).

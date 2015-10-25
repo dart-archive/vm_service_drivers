@@ -277,11 +277,11 @@ class Api extends Member with ApiParseUtil {
       if (line.startsWith('---')) continue;
       var index = line.indexOf('|');
       var streamId = line.substring(0, index).trim();
-      var eventTypes = line
+      List<String> eventTypes = new List.from(line
           .substring(index + 1)
           .split(',')
-          .map((t) => t.trim())
-          .toList()..sort();
+          .map((t) => t.trim()));
+      eventTypes.sort();
       streamIdMap[streamId] = eventTypes;
     }
   }
@@ -532,25 +532,25 @@ class Method extends Member {
       }
     }
 
-    var mthArgs = args;
+    List<MethodArg> mthArgs = args;
     if (!includeOptional) {
       mthArgs = mthArgs.toList()..removeWhere((a) => a.optional);
     }
-    mthArgs = new List.from(mthArgs.map((a) => a.asJavaMethodArg));
-    mthArgs.add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
-    writer.addMethod(name, mthArgs, (StatementWriter writer) {
+    List<JavaMethodArg> javaMethodArgs = new List.from(
+        mthArgs.map((a) => a.asJavaMethodArg));
+    javaMethodArgs.add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
+    writer.addMethod(name, javaMethodArgs, (StatementWriter writer) {
       writer.addLine('JsonObject params = new JsonObject();');
       for (MethodArg arg in args) {
         if (!includeOptional && arg.optional) continue;
         var name = arg.name;
-        String op =
-            arg.optional ? 'if (${name} != null) ' : '';
+        String op = arg.optional ? 'if (${name} != null) ' : '';
         if (arg.isEnumType) {
           writer.addLine('${op}params.addProperty("$name", $name.name());');
         } else if (arg.optional && arg.type == 'int') {
           writer.addLine('${op}params.addProperty("$name", $name.intValue());');
         } else {
-    writer.addLine('${op}params.addProperty("$name", $name);');
+          writer.addLine('${op}params.addProperty("$name", $name);');
         }
       }
       writer.addLine('request("$name", params, consumer);');
