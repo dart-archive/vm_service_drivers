@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 0.0.7
 - make the diagnostic logging synchronous
 - remove a workaround for a VM bug (fixed in 1.13.0-dev.7.3)
 - several strong mode fixes
