@@ -51,7 +51,7 @@ final String _implCode = r'''
 
   Future<Response> _call(String method, [Map args = const {}]) {
     String id = '${++_id}';
-    _completers[id] = new Completer();
+    _completers[id] = new Completer<Response>();
     // The service protocol needs 'params' to be there.
     Map m = {'id': id, 'method': method, 'params': args};
     if (args != null) m['params'] = args;
@@ -266,22 +266,6 @@ String _printEnum(Object obj) {
   return str.substring(index + 1);
 }
 
-List<BoundVariable> _parseBoundVariables(json) {
-  if (json is List) {
-    return json.map(BoundVariable._parse).toList();
-  } else {
-    return [];
-  }
-}
-
-List<BoundField> _parseBoundFields(json) {
-  if (json is List) {
-    return json.map(BoundField._parse).toList();
-  } else {
-    return [];
-  }
-}
-
 ''');
     gen.writeln();
     gen.write('Map<String, Function> _typeFactories = {');
@@ -295,11 +279,11 @@ List<BoundField> _parseBoundFields(json) {
     gen.writeStatement('StreamSubscription _streamSub;');
     gen.writeStatement('Function _writeMessage;');
     gen.writeStatement('int _id = 0;');
-    gen.writeStatement('Map<String, Completer> _completers = {};');
+    gen.writeStatement('Map<String, Completer<Response>> _completers = {};');
     gen.writeStatement('Log _log;');
     gen.writeln();
-    gen.writeln("StreamController _onSend = new StreamController.broadcast();");
-    gen.writeln("StreamController _onReceive = new StreamController.broadcast();");
+    gen.writeln("StreamController<String> _onSend = new StreamController.broadcast(sync: true);");
+    gen.writeln("StreamController<String> _onReceive = new StreamController.broadcast(sync: true);");
     gen.writeln();
     gen.writeln("StreamController<Event> _vmController = new StreamController.broadcast();");
     gen.writeln("StreamController<Event> _isolateController = new StreamController.broadcast();");
@@ -477,6 +461,8 @@ class MemberType extends Member {
 
   bool get isEnum => types.length == 1 && api.isEnumName(types.first.name);
 
+  bool get isArray => types.length == 1 && types.first.isArray;
+
   void generate(DartGenerator gen) => gen.write(name);
 }
 
@@ -491,7 +477,8 @@ class TypeRef {
 
   bool get isArray => arrayDepth > 0;
 
-  bool get isSimple => name == 'int' || name == 'num' || name == 'String' || name == 'bool';
+  bool get isSimple => arrayDepth == 0 &&
+      (name == 'int' || name == 'num' || name == 'String' || name == 'bool');
 
   String toString() => ref;
 }
@@ -561,7 +548,15 @@ class Type extends Member {
     gen.writeln('{');
     gen.writeln('static ${name} _parse(Map json) => new ${name}._fromJson(json);');
     gen.writeln();
+
+    // fields
+    fields.forEach((TypeField field) => field.generate(gen));
+    gen.writeln();
+
+    // ctors
     gen.writeln('${name}();');
+    gen.writeln();
+    
     String superCall = superName == null ? '' : ": super._fromJson(json) ";
     gen.writeln('${name}._fromJson(Map json) ${superCall}{');
     fields.forEach((TypeField field) {
@@ -576,26 +571,22 @@ class Type extends Member {
         String enumTypeName = field.type.types.first.name;
         gen.writeln(
           "${field.generatableName} = _parse${enumTypeName}[json['${field.name}']];");
-      } else if (name == 'Frame' && field.name == 'vars') {
-        // TODO: Reported as https://github.com/dart-lang/sdk/issues/24654.
-        gen.writeln("${field.generatableName} = _parseBoundVariables(json['${field.name}']);");
-      } else if (name == 'Instance' && field.name == 'fields') {
-        // TODO: Reported as https://github.com/dart-lang/sdk/issues/24654.
-        gen.writeln("${field.generatableName} = _parseBoundFields(json['${field.name}']);");
+      } else if (field.type.isArray) {
+        TypeRef fieldType = field.type.types.first;
+        gen.writeln("${field.generatableName} = _createObject(json['${field.name}']) "
+            "as ${fieldType.ref};");
       } else {
         gen.writeln("${field.generatableName} = _createObject(json['${field.name}']);");
       }
     });
     gen.writeln('}');
     gen.writeln();
-    fields.forEach((TypeField field) => field.generate(gen));
 
     // equals and hashCode
     if (supportsIdentity) {
-      gen.writeln();
       gen.writeStatement('int get hashCode => id.hashCode;');
-
       gen.writeln();
+
       gen.writeStatement('operator==(other) => other is ${name} && id == other.id;');
       gen.writeln();
     }

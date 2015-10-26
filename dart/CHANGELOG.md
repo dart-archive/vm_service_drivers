@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.7
+- make the diagnostic logging synchronous
+- remove a workaround for a VM bug (fixed in 1.13.0-dev.7.3)
+- several strong mode fixes
+
 ## 0.0.6
 - added `exceptionPauseMode` to the Isolate class
 - added `hashCode` and `operator==` methods to classes supporting object identity
