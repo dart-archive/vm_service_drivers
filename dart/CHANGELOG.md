@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.8
+- allow listening to arbitrary event types
+- use Strings for the enum types (to allow for unknown enum values)
+
 ## 0.0.7
 - make the diagnostic logging synchronous
 - remove a workaround for a VM bug (fixed in 1.13.0-dev.7.3)
