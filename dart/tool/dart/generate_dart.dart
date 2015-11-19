@@ -70,23 +70,7 @@ final String _implCode = r'''
       if (json['id'] == null && json['method'] == 'streamNotify') {
         Map params = json['params'];
         String streamId = params['streamId'];
-
-        // TODO: These could be generated from a list.
-        if (streamId == 'VM') {
-          _vmController.add(_createObject(params['event']));
-        } else if (streamId == 'Isolate') {
-          _isolateController.add(_createObject(params['event']));
-        } else if (streamId == 'Debug') {
-          _debugController.add(_createObject(params['event']));
-        } else if (streamId == 'GC') {
-          _gcController.add(_createObject(params['event']));
-        } else if (streamId == 'Stdout') {
-          _stdoutController.add(_createObject(params['event']));
-        } else if (streamId == 'Stderr') {
-          _stderrController.add(_createObject(params['event']));
-        } else {
-          _log.warning('unknown streamId: ${streamId}');
-        }
+        _getEventController(streamId).add(_createObject(params['event']));
       } else if (json['id'] != null) {
         Completer completer = _completers.remove(json['id']);
 
@@ -237,6 +221,9 @@ class Api extends Member with ApiParseUtil {
 /// @optional
 const String optional = 'optional';
 
+/// @unstable
+const String unstable = 'unstable';
+
 /// Decode a string in Base64 encoding into the equivalent non-encoded string.
 /// This is useful for handling the results of the Stdout or Stderr events.
 String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
@@ -281,37 +268,52 @@ String _printEnum(Object obj) {
     gen.writeStatement('int _id = 0;');
     gen.writeStatement('Map<String, Completer<Response>> _completers = {};');
     gen.writeStatement('Log _log;');
-    gen.writeln();
-    gen.writeln("StreamController<String> _onSend = new StreamController.broadcast(sync: true);");
-    gen.writeln("StreamController<String> _onReceive = new StreamController.broadcast(sync: true);");
-    gen.writeln();
-    gen.writeln("StreamController<Event> _vmController = new StreamController.broadcast();");
-    gen.writeln("StreamController<Event> _isolateController = new StreamController.broadcast();");
-    gen.writeln("StreamController<Event> _debugController = new StreamController.broadcast();");
-    gen.writeln("StreamController<Event> _gcController = new StreamController.broadcast();");
-    gen.writeln("StreamController<Event> _stdoutController = new StreamController.broadcast();");
-    gen.writeln("StreamController<Event> _stderrController = new StreamController.broadcast();");
-    gen.writeln();
-    gen.writeStatement(
-        'VmService(Stream<String> inStream, void writeMessage(String message), {Log log}) {');
-    gen.writeStatement('_streamSub = inStream.listen(_processMessage);');
-    gen.writeStatement('_writeMessage = writeMessage;');
-    gen.writeStatement('_log = log == null ? new _NullLog() : log;');
-    gen.writeln('}');
-    gen.writeln();
-    gen.writeln("// VMUpdate");
-    gen.writeln("Stream<Event> get onVMEvent => _vmController.stream;");
-    gen.writeln("// IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate");
-    gen.writeln("Stream<Event> get onIsolateEvent => _isolateController.stream;");
-    gen.writeln("// PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException,");
-    gen.writeln("// Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect");
-    gen.writeln("Stream<Event> get onDebugEvent => _debugController.stream;");
-    gen.writeln("// GC");
-    gen.writeln("Stream<Event> get onGCEvent => _gcController.stream;");
-    gen.writeln("// WriteEvent");
-    gen.writeln("Stream<Event> get onStdoutEvent => _stdoutController.stream;");
-    gen.writeln("// WriteEvent");
-    gen.writeln("Stream<Event> get onStderrEvent => _stderrController.stream;");
+    gen.writeln('''
+
+StreamController<String> _onSend = new StreamController.broadcast(sync: true);
+StreamController<String> _onReceive = new StreamController.broadcast(sync: true);
+
+Map<String, StreamController<Event>> _eventControllers = {};
+
+StreamController<Event> _getEventController(String eventName) {
+  StreamController<Event> controller = _eventControllers[eventName];
+  if (controller == null) {
+    controller = new StreamController.broadcast();
+    _eventControllers[eventName] = controller;
+  }
+  return controller;
+}
+
+VmService(Stream<String> inStream, void writeMessage(String message), {Log log}) {
+  _streamSub = inStream.listen(_processMessage);
+  _writeMessage = writeMessage;
+  _log = log == null ? new _NullLog() : log;
+}
+
+// VMUpdate
+Stream<Event> get onVMEvent => _getEventController('VM').stream;
+
+// IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate
+Stream<Event> get onIsolateEvent => _getEventController('Isolate').stream;
+
+// PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException,
+// Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect
+Stream<Event> get onDebugEvent => _getEventController('Debug').stream;
+
+// GC
+Stream<Event> get onGCEvent => _getEventController('GC').stream;
+
+// WriteEvent
+Stream<Event> get onStdoutEvent => _getEventController('Stdout').stream;
+
+// WriteEvent
+Stream<Event> get onStderrEvent => _getEventController('Stderr').stream;
+
+// Listen for a specific event name.
+Stream<Event> onEvent(String streamName) => _getEventController('streamName').stream;
+
+''');
+
     gen.writeln();
     methods.forEach((m) => m.generate(gen));
     gen.out(_implCode);
@@ -556,7 +558,7 @@ class Type extends Member {
     // ctors
     gen.writeln('${name}();');
     gen.writeln();
-    
+
     String superCall = superName == null ? '' : ": super._fromJson(json) ";
     gen.writeln('${name}._fromJson(Map json) ${superCall}{');
     fields.forEach((TypeField field) {

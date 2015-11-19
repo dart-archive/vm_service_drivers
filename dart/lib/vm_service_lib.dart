@@ -13,6 +13,9 @@ const String vmServiceVersion = '3.0.0';
 /// @optional
 const String optional = 'optional';
 
+/// @unstable
+const String unstable = 'unstable';
+
 /// Decode a string in Base64 encoding into the equivalent non-encoded string.
 /// This is useful for handling the results of the Stdout or Stderr events.
 String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
@@ -103,12 +106,16 @@ class VmService {
   StreamController<String> _onReceive =
       new StreamController.broadcast(sync: true);
 
-  StreamController<Event> _vmController = new StreamController.broadcast();
-  StreamController<Event> _isolateController = new StreamController.broadcast();
-  StreamController<Event> _debugController = new StreamController.broadcast();
-  StreamController<Event> _gcController = new StreamController.broadcast();
-  StreamController<Event> _stdoutController = new StreamController.broadcast();
-  StreamController<Event> _stderrController = new StreamController.broadcast();
+  Map<String, StreamController<Event>> _eventControllers = {};
+
+  StreamController<Event> _getEventController(String eventName) {
+    StreamController<Event> controller = _eventControllers[eventName];
+    if (controller == null) {
+      controller = new StreamController.broadcast();
+      _eventControllers[eventName] = controller;
+    }
+    return controller;
+  }
 
   VmService(Stream<String> inStream, void writeMessage(String message),
       {Log log}) {
@@ -118,18 +125,27 @@ class VmService {
   }
 
   // VMUpdate
-  Stream<Event> get onVMEvent => _vmController.stream;
+  Stream<Event> get onVMEvent => _getEventController('VM').stream;
+
   // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate
-  Stream<Event> get onIsolateEvent => _isolateController.stream;
+  Stream<Event> get onIsolateEvent => _getEventController('Isolate').stream;
+
   // PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException,
   // Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect
-  Stream<Event> get onDebugEvent => _debugController.stream;
+  Stream<Event> get onDebugEvent => _getEventController('Debug').stream;
+
   // GC
-  Stream<Event> get onGCEvent => _gcController.stream;
+  Stream<Event> get onGCEvent => _getEventController('GC').stream;
+
   // WriteEvent
-  Stream<Event> get onStdoutEvent => _stdoutController.stream;
+  Stream<Event> get onStdoutEvent => _getEventController('Stdout').stream;
+
   // WriteEvent
-  Stream<Event> get onStderrEvent => _stderrController.stream;
+  Stream<Event> get onStderrEvent => _getEventController('Stderr').stream;
+
+  // Listen for a specific event name.
+  Stream<Event> onEvent(String streamName) =>
+      _getEventController('streamName').stream;
 
   /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
   /// some script.
@@ -478,23 +494,7 @@ class VmService {
       if (json['id'] == null && json['method'] == 'streamNotify') {
         Map params = json['params'];
         String streamId = params['streamId'];
-
-        // TODO: These could be generated from a list.
-        if (streamId == 'VM') {
-          _vmController.add(_createObject(params['event']));
-        } else if (streamId == 'Isolate') {
-          _isolateController.add(_createObject(params['event']));
-        } else if (streamId == 'Debug') {
-          _debugController.add(_createObject(params['event']));
-        } else if (streamId == 'GC') {
-          _gcController.add(_createObject(params['event']));
-        } else if (streamId == 'Stdout') {
-          _stdoutController.add(_createObject(params['event']));
-        } else if (streamId == 'Stderr') {
-          _stderrController.add(_createObject(params['event']));
-        } else {
-          _log.warning('unknown streamId: ${streamId}');
-        }
+        _getEventController(streamId).add(_createObject(params['event']));
       } else if (json['id'] != null) {
         Completer completer = _completers.remove(json['id']);
 
