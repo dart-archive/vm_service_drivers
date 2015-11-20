@@ -66,7 +66,6 @@ final String _implCode = r'''
       _onReceive.add(message);
 
       var json = JSON.decode(message);
-
       if (json['id'] == null && json['method'] == 'streamNotify') {
         Map params = json['params'];
         String streamId = params['streamId'];
@@ -221,9 +220,6 @@ class Api extends Member with ApiParseUtil {
 /// @optional
 const String optional = 'optional';
 
-/// @unstable
-const String unstable = 'unstable';
-
 /// Decode a string in Base64 encoding into the equivalent non-encoded string.
 /// This is useful for handling the results of the Stdout or Stderr events.
 String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
@@ -303,7 +299,7 @@ Stream<Event> get onStdoutEvent => _getEventController('Stdout').stream;
 Stream<Event> get onStderrEvent => _getEventController('Stderr').stream;
 
 // Listen for a specific event name.
-Stream<Event> onEvent(String streamName) => _getEventController('streamName').stream;
+Stream<Event> onEvent(String streamName) => _getEventController(streamName).stream;
 
 ''');
 
@@ -538,6 +534,10 @@ class Type extends Member {
     gen.writeln('static ${name} _parse(Map json) => new ${name}._fromJson(json);');
     gen.writeln();
 
+    if (name == 'Response') {
+      gen.writeln('Map json;');
+    }
+
     // fields
     fields.forEach((TypeField field) => field.generate(gen));
     gen.writeln();
@@ -547,7 +547,12 @@ class Type extends Member {
     gen.writeln();
 
     String superCall = superName == null ? '' : ": super._fromJson(json) ";
-    gen.writeln('${name}._fromJson(Map json) ${superCall}{');
+    if (name == 'Response') {
+      gen.writeln('${name}._fromJson(this.json) {');
+    } else {
+      gen.writeln('${name}._fromJson(Map json) ${superCall}{');
+    }
+
     fields.forEach((TypeField field) {
       if (field.type.isSimple || field.type.isEnum) {
         gen.write("${field.generatableName} = json['${field.name}']");
