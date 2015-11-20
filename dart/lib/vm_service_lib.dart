@@ -13,9 +13,6 @@ const String vmServiceVersion = '3.0.0';
 /// @optional
 const String optional = 'optional';
 
-/// @unstable
-const String unstable = 'unstable';
-
 /// Decode a string in Base64 encoding into the equivalent non-encoded string.
 /// This is useful for handling the results of the Stdout or Stderr events.
 String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
@@ -138,7 +135,7 @@ class VmService {
 
   // Listen for a specific event name.
   Stream<Event> onEvent(String streamName) =>
-      _getEventController('streamName').stream;
+      _getEventController(streamName).stream;
 
   /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
   /// some script.
@@ -483,7 +480,6 @@ class VmService {
       _onReceive.add(message);
 
       var json = JSON.decode(message);
-
       if (json['id'] == null && json['method'] == 'streamNotify') {
         Map params = json['params'];
         String streamId = params['streamId'];
@@ -2200,13 +2196,15 @@ class Obj extends Response {
 class Response {
   static Response _parse(Map json) => new Response._fromJson(json);
 
+  Map json;
+
   /// Every response returned by the VM Service has the type property. This
   /// allows the client distinguish between different kinds of responses.
   String type;
 
   Response();
 
-  Response._fromJson(Map json) {
+  Response._fromJson(this.json) {
     type = json['type'];
   }
 
