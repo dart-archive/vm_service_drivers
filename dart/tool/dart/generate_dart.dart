@@ -246,7 +246,7 @@ Object _createObject(dynamic json) {
     gen.writeln();
     gen.write('Map<String, Function> _typeFactories = {');
     types.forEach((Type type) {
-      gen.write("'${type.rawName}': ${type.name}._parse");
+      gen.write("'${type.rawName}': ${type.name}.parse");
       gen.writeln(type == types.last ? '' : ',');
     });
     gen.writeln('};');
@@ -531,7 +531,7 @@ class Type extends Member {
     gen.write('class ${name} ');
     if (superName != null) gen.write('extends ${superName} ');
     gen.writeln('{');
-    gen.writeln('static ${name} _parse(Map json) => new ${name}._fromJson(json);');
+    gen.writeln('static ${name} parse(Map json) => new ${name}._fromJson(json);');
     gen.writeln();
 
     if (name == 'Response') {
