@@ -40,6 +40,13 @@ import 'dart:convert' show BASE64, JSON, JsonCodec;
 
 final String _implCode = r'''
 
+  /// Invoke a specific service protocol extension method.
+  ///
+  /// See https://api.dartlang.org/stable/dart-developer/dart-developer-library.html.
+  Future<Response> callServiceExtension(String method, [Map args]) {
+    return _call(method, args);
+  }
+
   Stream<String> get onSend => _onSend.stream;
 
   Stream<String> get onReceive => _onReceive.stream;
@@ -49,11 +56,10 @@ final String _implCode = r'''
     _completers.values.forEach((c) => c.completeError('disposed'));
   }
 
-  Future<Response> _call(String method, [Map args = const {}]) {
+  Future<Response> _call(String method, [Map args]) {
     String id = '${++_id}';
     _completers[id] = new Completer<Response>();
-    // The service protocol needs 'params' to be there.
-    Map m = {'id': id, 'method': method, 'params': args};
+    Map m = {'id': id, 'method': method};
     if (args != null) m['params'] = args;
     String message = JSON.encode(m);
     _onSend.add(message);
@@ -81,7 +87,7 @@ final String _implCode = r'''
           var result = json['result'];
           String type = result['type'];
           if (_typeFactories[type] == null) {
-            completer.completeError(new RPCError(0, 'unknown response type ${type}'));
+            completer.complete(Response.parse(result));
           } else {
             completer.complete(_createObject(result));
           }
@@ -536,7 +542,7 @@ class Type extends Member {
     gen.writeln();
 
     if (name == 'Response') {
-      gen.writeln('Map json;');
+      gen.writeln('Map<String, dynamic> json;');
     }
 
     // fields
