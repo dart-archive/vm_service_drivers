@@ -531,7 +531,8 @@ class Type extends Member {
     gen.write('class ${name} ');
     if (superName != null) gen.write('extends ${superName} ');
     gen.writeln('{');
-    gen.writeln('static ${name} parse(Map json) => new ${name}._fromJson(json);');
+    gen.writeln('static ${name} parse(Map json) => '
+        'json == null ? null : new ${name}._fromJson(json);');
     gen.writeln();
 
     if (name == 'Response') {
