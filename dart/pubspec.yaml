@@ -1,16 +1,16 @@
 name: vm_service_lib
 description: A library to access the VM Service API.
-version: 0.0.8+2
+version: 0.0.9
 
 author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/dart-lang/vm_service_drivers
 
 environment:
-  sdk: '>=1.13.0-dev.1 <2.0.0'
+  sdk: '>=1.13.0 <2.0.0'
 
 dev_dependencies:
   logging: ^0.11.0
-  markdown: ^0.8.0
+  markdown: ^0.9.0
   path: ^1.0.0
   pub_semver: ^1.0.0
   test: ^0.12.0

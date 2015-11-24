@@ -42,6 +42,11 @@ public enum EventKind {
   GC,
 
   /**
+   * Notification from dart:developer.inspect.
+   */
+  Inspect,
+
+  /**
    * Notification that an isolate has exited.
    */
   IsolateExit,

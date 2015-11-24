@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.9
+- update to the latest spec to capture the `Event.inspectee` field
+
 ## 0.0.8
 - allow listening to arbitrary event types
 - use Strings for the enum types (to allow for unknown enum values)

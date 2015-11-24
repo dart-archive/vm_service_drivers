@@ -58,6 +58,15 @@ public class Event extends Response {
   }
 
   /**
+   * The argument passed to dart:developer.inspect.
+   * 
+   * This is provided for the Inspect event.
+   */
+  public InstanceRef getInspectee() {
+    return new InstanceRef((JsonObject) json.get("inspectee"));
+  }
+
+  /**
    * The isolate with which this event is associated.
    * 
    * This is provided for all event kinds except for:

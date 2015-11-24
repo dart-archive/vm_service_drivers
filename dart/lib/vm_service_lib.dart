@@ -622,6 +622,9 @@ class EventKind {
 
   /// Notification of bytes written, for example, to stdout/stderr.
   static const String kWriteEvent = 'WriteEvent';
+
+  /// Notification from dart:developer.inspect.
+  static const String kInspect = 'Inspect';
 }
 
 /// Adding new values to `InstanceKind` is considered a backwards compatible
@@ -764,7 +767,8 @@ class StepOption {
 /// If the field is being initialized, the `value` will be the
 /// `BeingInitialized` [Sentinel].
 class BoundField {
-  static BoundField parse(Map json) => new BoundField._fromJson(json);
+  static BoundField parse(Map json) =>
+      json == null ? null : new BoundField._fromJson(json);
 
   FieldRef decl;
 
@@ -793,7 +797,8 @@ class BoundField {
 /// If the variable has been optimized out by the compiler, the `value` will be
 /// the `OptimizedOut` [Sentinel].
 class BoundVariable {
-  static BoundVariable parse(Map json) => new BoundVariable._fromJson(json);
+  static BoundVariable parse(Map json) =>
+      json == null ? null : new BoundVariable._fromJson(json);
 
   String name;
 
@@ -817,7 +822,8 @@ class BoundVariable {
 /// yet been compiled or in a library which has not been loaded (i.e. a deferred
 /// library).
 class Breakpoint extends Obj {
-  static Breakpoint parse(Map json) => new Breakpoint._fromJson(json);
+  static Breakpoint parse(Map json) =>
+      json == null ? null : new Breakpoint._fromJson(json);
 
   /// A number identifying this breakpoint to the user.
   int breakpointNumber;
@@ -850,7 +856,8 @@ class Breakpoint extends Obj {
 
 /// `ClassRef` is a reference to a `Class`.
 class ClassRef extends ObjRef {
-  static ClassRef parse(Map json) => new ClassRef._fromJson(json);
+  static ClassRef parse(Map json) =>
+      json == null ? null : new ClassRef._fromJson(json);
 
   /// The name of this class.
   String name;
@@ -870,7 +877,8 @@ class ClassRef extends ObjRef {
 
 /// A `Class` provides information about a Dart language class.
 class Class extends Obj {
-  static Class parse(Map json) => new Class._fromJson(json);
+  static Class parse(Map json) =>
+      json == null ? null : new Class._fromJson(json);
 
   /// The name of this class.
   String name;
@@ -932,7 +940,8 @@ class Class extends Obj {
 }
 
 class ClassList extends Response {
-  static ClassList parse(Map json) => new ClassList._fromJson(json);
+  static ClassList parse(Map json) =>
+      json == null ? null : new ClassList._fromJson(json);
 
   List<ClassRef> classes;
 
@@ -947,7 +956,8 @@ class ClassList extends Response {
 
 /// `CodeRef` is a reference to a `Code` object.
 class CodeRef extends ObjRef {
-  static CodeRef parse(Map json) => new CodeRef._fromJson(json);
+  static CodeRef parse(Map json) =>
+      json == null ? null : new CodeRef._fromJson(json);
 
   /// A name for this code object.
   String name;
@@ -972,7 +982,7 @@ class CodeRef extends ObjRef {
 
 /// A `Code` object represents compiled code in the Dart VM.
 class Code extends ObjRef {
-  static Code parse(Map json) => new Code._fromJson(json);
+  static Code parse(Map json) => json == null ? null : new Code._fromJson(json);
 
   /// A name for this code object.
   String name;
@@ -996,7 +1006,8 @@ class Code extends ObjRef {
 }
 
 class ContextRef extends ObjRef {
-  static ContextRef parse(Map json) => new ContextRef._fromJson(json);
+  static ContextRef parse(Map json) =>
+      json == null ? null : new ContextRef._fromJson(json);
 
   /// The number of variables in this context.
   int length;
@@ -1018,7 +1029,8 @@ class ContextRef extends ObjRef {
 /// A `Context` is a data structure which holds the captured variables for some
 /// closure.
 class Context extends Obj {
-  static Context parse(Map json) => new Context._fromJson(json);
+  static Context parse(Map json) =>
+      json == null ? null : new Context._fromJson(json);
 
   /// The number of variables in this context.
   int length;
@@ -1046,7 +1058,8 @@ class Context extends Obj {
 }
 
 class ContextElement {
-  static ContextElement parse(Map json) => new ContextElement._fromJson(json);
+  static ContextElement parse(Map json) =>
+      json == null ? null : new ContextElement._fromJson(json);
 
   /// [value] can be one of [InstanceRef] or [Sentinel].
   dynamic value;
@@ -1062,7 +1075,8 @@ class ContextElement {
 
 /// `ErrorRef` is a reference to an `Error`.
 class ErrorRef extends ObjRef {
-  static ErrorRef parse(Map json) => new ErrorRef._fromJson(json);
+  static ErrorRef parse(Map json) =>
+      json == null ? null : new ErrorRef._fromJson(json);
 
   /// What kind of error is this?
   /*ErrorKind*/ String kind;
@@ -1088,7 +1102,8 @@ class ErrorRef extends ObjRef {
 /// An `Error` represents a Dart language level error. This is distinct from an
 /// [rpc error].
 class Error extends Obj {
-  static Error parse(Map json) => new Error._fromJson(json);
+  static Error parse(Map json) =>
+      json == null ? null : new Error._fromJson(json);
 
   /// What kind of error is this?
   /*ErrorKind*/ String kind;
@@ -1127,7 +1142,8 @@ class Error extends Obj {
 ///
 /// For more information, see [events].
 class Event extends Response {
-  static Event parse(Map json) => new Event._fromJson(json);
+  static Event parse(Map json) =>
+      json == null ? null : new Event._fromJson(json);
 
   /// What kind of event is this?
   /*EventKind*/ String kind;
@@ -1196,6 +1212,11 @@ class Event extends Response {
   /// This is provided for the WriteEvent event.
   @optional String bytes;
 
+  /// The argument passed to dart:developer.inspect.
+  ///
+  /// This is provided for the Inspect event.
+  @optional InstanceRef inspectee;
+
   Event();
 
   Event._fromJson(Map json) : super._fromJson(json) {
@@ -1209,6 +1230,7 @@ class Event extends Response {
     topFrame = _createObject(json['topFrame']);
     exception = _createObject(json['exception']);
     bytes = json['bytes'];
+    inspectee = _createObject(json['inspectee']);
   }
 
   String toString() =>
@@ -1217,7 +1239,8 @@ class Event extends Response {
 
 /// An `FieldRef` is a reference to a `Field`.
 class FieldRef extends ObjRef {
-  static FieldRef parse(Map json) => new FieldRef._fromJson(json);
+  static FieldRef parse(Map json) =>
+      json == null ? null : new FieldRef._fromJson(json);
 
   /// The name of this field.
   String name;
@@ -1260,7 +1283,8 @@ class FieldRef extends ObjRef {
 
 /// A `Field` provides information about a Dart language field or variable.
 class Field extends Obj {
-  static Field parse(Map json) => new Field._fromJson(json);
+  static Field parse(Map json) =>
+      json == null ? null : new Field._fromJson(json);
 
   /// The name of this field.
   String name;
@@ -1311,7 +1335,7 @@ class Field extends Obj {
 
 /// A `Flag` represents a single VM command line flag.
 class Flag {
-  static Flag parse(Map json) => new Flag._fromJson(json);
+  static Flag parse(Map json) => json == null ? null : new Flag._fromJson(json);
 
   /// The name of the flag.
   String name;
@@ -1342,7 +1366,8 @@ class Flag {
 
 /// A `FlagList` represents the complete set of VM command line flags.
 class FlagList extends Response {
-  static FlagList parse(Map json) => new FlagList._fromJson(json);
+  static FlagList parse(Map json) =>
+      json == null ? null : new FlagList._fromJson(json);
 
   /// A list of all flags in the VM.
   List<Flag> flags;
@@ -1357,7 +1382,8 @@ class FlagList extends Response {
 }
 
 class Frame extends Response {
-  static Frame parse(Map json) => new Frame._fromJson(json);
+  static Frame parse(Map json) =>
+      json == null ? null : new Frame._fromJson(json);
 
   int index;
 
@@ -1386,7 +1412,8 @@ class Frame extends Response {
 
 /// An `FuncRef` is a reference to a `Func`.
 class FuncRef extends ObjRef {
-  static FuncRef parse(Map json) => new FuncRef._fromJson(json);
+  static FuncRef parse(Map json) =>
+      json == null ? null : new FuncRef._fromJson(json);
 
   /// The name of this function.
   String name;
@@ -1422,7 +1449,7 @@ class FuncRef extends ObjRef {
 
 /// A `Func` represents a Dart language function.
 class Func extends Obj {
-  static Func parse(Map json) => new Func._fromJson(json);
+  static Func parse(Map json) => json == null ? null : new Func._fromJson(json);
 
   /// The name of this function.
   String name;
@@ -1457,7 +1484,8 @@ class Func extends Obj {
 
 /// `InstanceRef` is a reference to an `Instance`.
 class InstanceRef extends ObjRef {
-  static InstanceRef parse(Map json) => new InstanceRef._fromJson(json);
+  static InstanceRef parse(Map json) =>
+      json == null ? null : new InstanceRef._fromJson(json);
 
   /// What kind of instance is this?
   /*InstanceKind*/ String kind;
@@ -1554,7 +1582,8 @@ class InstanceRef extends ObjRef {
 
 /// An `Instance` represents an instance of the Dart language class `Obj`.
 class Instance extends Obj {
-  static Instance parse(Map json) => new Instance._fromJson(json);
+  static Instance parse(Map json) =>
+      json == null ? null : new Instance._fromJson(json);
 
   /// What kind of instance is this?
   /*InstanceKind*/ String kind;
@@ -1816,7 +1845,8 @@ class Instance extends Obj {
 
 /// `IsolateRef` is a reference to an `Isolate` object.
 class IsolateRef extends Response {
-  static IsolateRef parse(Map json) => new IsolateRef._fromJson(json);
+  static IsolateRef parse(Map json) =>
+      json == null ? null : new IsolateRef._fromJson(json);
 
   /// The id which is passed to the getIsolate RPC to load this isolate.
   String id;
@@ -1845,7 +1875,8 @@ class IsolateRef extends Response {
 
 /// An `Isolate` object provides information about one isolate in the VM.
 class Isolate extends Response {
-  static Isolate parse(Map json) => new Isolate._fromJson(json);
+  static Isolate parse(Map json) =>
+      json == null ? null : new Isolate._fromJson(json);
 
   /// The id which is passed to the getIsolate RPC to reload this isolate.
   String id;
@@ -1916,7 +1947,8 @@ class Isolate extends Response {
 
 /// `LibraryRef` is a reference to a `Library`.
 class LibraryRef extends ObjRef {
-  static LibraryRef parse(Map json) => new LibraryRef._fromJson(json);
+  static LibraryRef parse(Map json) =>
+      json == null ? null : new LibraryRef._fromJson(json);
 
   /// The name of this library.
   String name;
@@ -1943,7 +1975,8 @@ class LibraryRef extends ObjRef {
 ///
 /// See [setLibraryDebuggable].
 class Library extends Obj {
-  static Library parse(Map json) => new Library._fromJson(json);
+  static Library parse(Map json) =>
+      json == null ? null : new Library._fromJson(json);
 
   /// The name of this library.
   String name;
@@ -1993,7 +2026,7 @@ class Library extends Obj {
 /// A `LibraryDependency` provides information about an import or export.
 class LibraryDependency {
   static LibraryDependency parse(Map json) =>
-      new LibraryDependency._fromJson(json);
+      json == null ? null : new LibraryDependency._fromJson(json);
 
   /// Is this dependency an import (rather than an export)?
   bool isImport;
@@ -2022,7 +2055,8 @@ class LibraryDependency {
 }
 
 class MapAssociation {
-  static MapAssociation parse(Map json) => new MapAssociation._fromJson(json);
+  static MapAssociation parse(Map json) =>
+      json == null ? null : new MapAssociation._fromJson(json);
 
   /// [key] can be one of [InstanceRef] or [Sentinel].
   dynamic key;
@@ -2043,7 +2077,8 @@ class MapAssociation {
 /// A `Message` provides information about a pending isolate message and the
 /// function that will be invoked to handle it.
 class Message extends Response {
-  static Message parse(Map json) => new Message._fromJson(json);
+  static Message parse(Map json) =>
+      json == null ? null : new Message._fromJson(json);
 
   /// The index in the isolate's message queue. The 0th message being the next
   /// message to be processed.
@@ -2083,7 +2118,8 @@ class Message extends Response {
 
 /// `NullRef` is a reference to an a `Null`.
 class NullRef extends InstanceRef {
-  static NullRef parse(Map json) => new NullRef._fromJson(json);
+  static NullRef parse(Map json) =>
+      json == null ? null : new NullRef._fromJson(json);
 
   /// Always 'null'.
   String valueAsString;
@@ -2105,7 +2141,7 @@ class NullRef extends InstanceRef {
 
 /// A `Null` object represents the Dart language value null.
 class Null extends Instance {
-  static Null parse(Map json) => new Null._fromJson(json);
+  static Null parse(Map json) => json == null ? null : new Null._fromJson(json);
 
   /// Always 'null'.
   String valueAsString;
@@ -2127,7 +2163,8 @@ class Null extends Instance {
 
 /// `ObjRef` is a reference to a `Obj`.
 class ObjRef extends Response {
-  static ObjRef parse(Map json) => new ObjRef._fromJson(json);
+  static ObjRef parse(Map json) =>
+      json == null ? null : new ObjRef._fromJson(json);
 
   /// A unique identifier for an Object. Passed to the getObject RPC to load
   /// this Object.
@@ -2148,7 +2185,7 @@ class ObjRef extends Response {
 
 /// An `Obj` is a persistent object that is owned by some isolate.
 class Obj extends Response {
-  static Obj parse(Map json) => new Obj._fromJson(json);
+  static Obj parse(Map json) => json == null ? null : new Obj._fromJson(json);
 
   /// A unique identifier for an Object. Passed to the getObject RPC to reload
   /// this Object.
@@ -2194,7 +2231,8 @@ class Obj extends Response {
 /// `Response`. By using the `type` property, the client can determine which
 /// [type] of response has been provided.
 class Response {
-  static Response parse(Map json) => new Response._fromJson(json);
+  static Response parse(Map json) =>
+      json == null ? null : new Response._fromJson(json);
 
   Map json;
 
@@ -2216,7 +2254,8 @@ class Response {
 /// We use a `Sentinel` instead of an [error] for these cases because they do
 /// not represent a problematic condition. They are normal.
 class Sentinel extends Response {
-  static Sentinel parse(Map json) => new Sentinel._fromJson(json);
+  static Sentinel parse(Map json) =>
+      json == null ? null : new Sentinel._fromJson(json);
 
   /// What kind of sentinel is this?
   /*SentinelKind*/ String kind;
@@ -2237,7 +2276,8 @@ class Sentinel extends Response {
 
 /// `ScriptRef` is a reference to a `Script`.
 class ScriptRef extends ObjRef {
-  static ScriptRef parse(Map json) => new ScriptRef._fromJson(json);
+  static ScriptRef parse(Map json) =>
+      json == null ? null : new ScriptRef._fromJson(json);
 
   /// The uri from which this script was loaded.
   String uri;
@@ -2278,7 +2318,8 @@ class ScriptRef extends ObjRef {
 /// 101 | 1 | 8
 /// 102 | 2 | 7
 class Script extends Obj {
-  static Script parse(Map json) => new Script._fromJson(json);
+  static Script parse(Map json) =>
+      json == null ? null : new Script._fromJson(json);
 
   /// The uri from which this script was loaded.
   String uri;
@@ -2314,7 +2355,8 @@ class Script extends Obj {
 /// The `SourceLocation` class is used to designate a position or range in some
 /// script.
 class SourceLocation extends Response {
-  static SourceLocation parse(Map json) => new SourceLocation._fromJson(json);
+  static SourceLocation parse(Map json) =>
+      json == null ? null : new SourceLocation._fromJson(json);
 
   /// The script containing the source location.
   ScriptRef script;
@@ -2338,7 +2380,8 @@ class SourceLocation extends Response {
 }
 
 class Stack extends Response {
-  static Stack parse(Map json) => new Stack._fromJson(json);
+  static Stack parse(Map json) =>
+      json == null ? null : new Stack._fromJson(json);
 
   List<Frame> frames;
 
@@ -2358,7 +2401,8 @@ class Stack extends Response {
 /// The `Success` type is used to indicate that an operation completed
 /// successfully.
 class Success extends Response {
-  static Success parse(Map json) => new Success._fromJson(json);
+  static Success parse(Map json) =>
+      json == null ? null : new Success._fromJson(json);
 
   Success();
 
@@ -2370,7 +2414,7 @@ class Success extends Response {
 /// `TypeArgumentsRef` is a reference to a `TypeArguments` object.
 class TypeArgumentsRef extends ObjRef {
   static TypeArgumentsRef parse(Map json) =>
-      new TypeArgumentsRef._fromJson(json);
+      json == null ? null : new TypeArgumentsRef._fromJson(json);
 
   /// A name for this type argument list.
   String name;
@@ -2392,7 +2436,8 @@ class TypeArgumentsRef extends ObjRef {
 /// A `TypeArguments` object represents the type argument vector for some
 /// instantiated generic type.
 class TypeArguments extends Obj {
-  static TypeArguments parse(Map json) => new TypeArguments._fromJson(json);
+  static TypeArguments parse(Map json) =>
+      json == null ? null : new TypeArguments._fromJson(json);
 
   /// A name for this type argument list.
   String name;
@@ -2430,7 +2475,7 @@ class TypeArguments extends Obj {
 /// with a specific column number.
 class UnresolvedSourceLocation extends Response {
   static UnresolvedSourceLocation parse(Map json) =>
-      new UnresolvedSourceLocation._fromJson(json);
+      json == null ? null : new UnresolvedSourceLocation._fromJson(json);
 
   /// The script containing the source location if the script has been loaded.
   @optional ScriptRef script;
@@ -2466,7 +2511,8 @@ class UnresolvedSourceLocation extends Response {
 
 /// See [Versioning].
 class Version extends Response {
-  static Version parse(Map json) => new Version._fromJson(json);
+  static Version parse(Map json) =>
+      json == null ? null : new Version._fromJson(json);
 
   /// The major version number is incremented when the protocol is changed in a
   /// potentially incompatible way.
@@ -2489,7 +2535,8 @@ class Version extends Response {
 
 /// `VMRef` is a reference to a `VM` object.
 class VMRef extends Response {
-  static VMRef parse(Map json) => new VMRef._fromJson(json);
+  static VMRef parse(Map json) =>
+      json == null ? null : new VMRef._fromJson(json);
 
   /// A name identifying this vm. Not guaranteed to be unique.
   String name;
@@ -2504,7 +2551,7 @@ class VMRef extends Response {
 }
 
 class VM extends Response {
-  static VM parse(Map json) => new VM._fromJson(json);
+  static VM parse(Map json) => json == null ? null : new VM._fromJson(json);
 
   /// Word length on target architecture (e.g. 32, 64).
   int architectureBits;
