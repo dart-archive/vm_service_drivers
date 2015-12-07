@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.10
+- expose a service extension API
+
 ## 0.0.9
 - update to the latest spec to capture the `Event.inspectee` field
 
