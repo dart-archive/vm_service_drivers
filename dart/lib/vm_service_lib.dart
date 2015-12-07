@@ -454,6 +454,13 @@ class VmService {
     return _call('streamListen', {'streamId': streamId});
   }
 
+  /// Invoke a specific service protocol extension method.
+  ///
+  /// See https://api.dartlang.org/stable/dart-developer/dart-developer-library.html.
+  Future<Response> callServiceExtension(String method, [Map args]) {
+    return _call(method, args);
+  }
+
   Stream<String> get onSend => _onSend.stream;
 
   Stream<String> get onReceive => _onReceive.stream;
@@ -463,11 +470,10 @@ class VmService {
     _completers.values.forEach((c) => c.completeError('disposed'));
   }
 
-  Future<Response> _call(String method, [Map args = const {}]) {
+  Future<Response> _call(String method, [Map args]) {
     String id = '${++_id}';
     _completers[id] = new Completer<Response>();
-    // The service protocol needs 'params' to be there.
-    Map m = {'id': id, 'method': method, 'params': args};
+    Map m = {'id': id, 'method': method};
     if (args != null) m['params'] = args;
     String message = JSON.encode(m);
     _onSend.add(message);
@@ -495,8 +501,7 @@ class VmService {
           var result = json['result'];
           String type = result['type'];
           if (_typeFactories[type] == null) {
-            completer.completeError(
-                new RPCError(0, 'unknown response type ${type}'));
+            completer.complete(Response.parse(result));
           } else {
             completer.complete(_createObject(result));
           }
@@ -2234,7 +2239,7 @@ class Response {
   static Response parse(Map json) =>
       json == null ? null : new Response._fromJson(json);
 
-  Map json;
+  Map<String, dynamic> json;
 
   /// Every response returned by the VM Service has the type property. This
   /// allows the client distinguish between different kinds of responses.
