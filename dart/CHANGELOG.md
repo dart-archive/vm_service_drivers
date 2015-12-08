@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.11
+- bug fix to the service extension API
+
 ## 0.0.10
 - expose a service extension API
 

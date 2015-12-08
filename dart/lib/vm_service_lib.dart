@@ -461,8 +461,15 @@ class VmService {
   /// Invoke a specific service protocol extension method.
   ///
   /// See https://api.dartlang.org/stable/dart-developer/dart-developer-library.html.
-  Future<Response> callServiceExtension(String method, [Map args]) {
-    return _call(method, args);
+  Future<Response> callServiceExtension(String method, String isolateId,
+      {Map args}) {
+    if (args == null) {
+      return _call(method, {'isolateId': isolateId});
+    } else {
+      args = new Map.from(args);
+      args['isolateId'] = isolateId;
+      return _call(method, args);
+    }
   }
 
   Stream<String> get onSend => _onSend.stream;
@@ -547,7 +554,6 @@ class _NullLog implements Log {
   void warning(String message) {}
   void severe(String message) {}
 }
-
 // enums
 
 class CodeKind {
