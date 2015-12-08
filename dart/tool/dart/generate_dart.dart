@@ -47,8 +47,14 @@ final String _implCode = r'''
   /// Invoke a specific service protocol extension method.
   ///
   /// See https://api.dartlang.org/stable/dart-developer/dart-developer-library.html.
-  Future<Response> callServiceExtension(String method, [Map args]) {
-    return _call(method, args);
+  Future<Response> callServiceExtension(String method, String isolateId, {Map args}) {
+    if (args == null) {
+      return _call(method, {'isolateId': isolateId});
+    } else {
+      args = new Map.from(args);
+      args['isolateId'] = isolateId;
+      return _call(method, args);
+    }
   }
 
   Stream<String> get onSend => _onSend.stream;
@@ -131,8 +137,8 @@ abstract class Log {
 }
 
 class _NullLog implements Log {
-  void warning(String message) { }
-  void severe(String message) { }
+  void warning(String message) {}
+  void severe(String message) {}
 }
 ''';
 
@@ -267,7 +273,7 @@ Object _createObject(dynamic json) {
     gen.writeStatement('int _id = 0;');
     gen.writeStatement('Map<String, Completer<Response>> _completers = {};');
     gen.writeStatement('Log _log;');
-    gen.writeln('''
+    gen.write('''
 
 StreamController<String> _onSend = new StreamController.broadcast(sync: true);
 StreamController<String> _onReceive = new StreamController.broadcast(sync: true);
@@ -310,7 +316,6 @@ Stream<Event> get onStderrEvent => _getEventController('Stderr').stream;
 
 // Listen for a specific event name.
 Stream<Event> onEvent(String streamName) => _getEventController(streamName).stream;
-
 ''');
 
     gen.writeln();
@@ -318,7 +323,7 @@ Stream<Event> onEvent(String streamName) => _getEventController(streamName).stre
     gen.out(_implCode);
     gen.writeStatement('}');
     gen.writeln();
-    gen.writeln(_rpcError);
+    gen.out(_rpcError);
     gen.writeln('// enums');
     enums.forEach((e) => e.generate(gen));
     gen.writeln();

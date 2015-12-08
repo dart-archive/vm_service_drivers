@@ -1,0 +1,7 @@
+# Cli launch configuration for tool/generate.dart.
+type: cli
+path: tool/generate.dart
+
+cli:
+  args: 
+  checked: true
