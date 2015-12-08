@@ -1,5 +1,6 @@
 .buildlog
 .DS_Store
+.atom/
 .idea
 .packages
 .pub/
