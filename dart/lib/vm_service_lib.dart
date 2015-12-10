@@ -39,6 +39,19 @@ Object _createObject(dynamic json) {
   }
 }
 
+Object _createSpecificObject(dynamic json, Function creator) {
+  if (json == null) return null;
+
+  if (json is List) {
+    return (json as List).map((e) => creator(e)).toList();
+  } else if (json is Map) {
+    return creator(json);
+  } else {
+    // Handle simple types.
+    return json;
+  }
+}
+
 Map<String, Function> _typeFactories = {
   'BoundField': BoundField.parse,
   'BoundVariable': BoundVariable.parse,
@@ -1834,7 +1847,8 @@ class Instance extends Obj {
     parameterizedClass = _createObject(json['parameterizedClass']);
     fields = _createObject(json['fields']) as List<BoundField>;
     elements = _createObject(json['elements']) as List<dynamic>;
-    associations = _createObject(json['associations']) as List<MapAssociation>;
+    associations =
+        _createSpecificObject(json['associations'], MapAssociation.parse);
     bytes = json['bytes'];
     closureFunction = _createObject(json['closureFunction']);
     closureContext = _createObject(json['closureContext']);

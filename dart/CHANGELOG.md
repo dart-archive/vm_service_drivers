@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.12
+- bug fix for parsing MapAssociations
+
 ## 0.0.11
 - bug fix to the service extension API
 

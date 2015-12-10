@@ -258,6 +258,19 @@ Object _createObject(dynamic json) {
   }
 }
 
+Object _createSpecificObject(dynamic json, Function creator) {
+  if (json == null) return null;
+
+  if (json is List) {
+    return (json as List).map((e) => creator(e)).toList();
+  } else if (json is Map) {
+    return creator(json);
+  } else {
+    // Handle simple types.
+    return json;
+  }
+}
+
 ''');
     gen.writeln();
     gen.write('Map<String, Function> _typeFactories = {');
@@ -581,7 +594,11 @@ class Type extends Member {
       //   String enumTypeName = field.type.types.first.name;
       //   gen.writeln(
       //     "${field.generatableName} = _parse${enumTypeName}[json['${field.name}']];");
-      } else if (field.type.isArray) {
+    } else if (name == 'Instance' && field.name == 'associations') {
+      // Special case `Instance.associations`.
+      gen.writeln("associations = "
+        "_createSpecificObject(json['associations'], MapAssociation.parse);");
+    } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;
         gen.writeln("${field.generatableName} = _createObject(json['${field.name}']) "
             "as ${fieldType.ref};");
