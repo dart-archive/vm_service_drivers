@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.13
+- improve the toString() message for RPCError
+
 ## 0.0.12
 - bug fix for parsing MapAssociations
 
