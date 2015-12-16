@@ -123,7 +123,15 @@ class RPCError {
 
   RPCError(this.code, this.message, [this.data]);
 
-  String toString() => '${code}: ${message}';
+  String get details => data == null ? null : data['details'];
+
+  String toString() {
+    if (details == null) {
+      return '${code}: ${message}';
+    } else {
+      return '${code}: ${message}\n${details}';
+    }
+  }
 }
 
 /// A logging handler you can pass to a [VmService] instance in order to get
