@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.0
+- rev to 0.1.0; declare first stable API version
+
 ## 0.0.13
 - improve the toString() message for RPCError
 
