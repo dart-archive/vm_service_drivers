@@ -37,6 +37,11 @@ public enum EventKind {
   BreakpointResolved,
 
   /**
+   * Event from dart:developer.postEvent.
+   */
+  Extension,
+
+  /**
    * A garbage collection event.
    */
   GC,
@@ -96,6 +101,11 @@ public enum EventKind {
    * An isolate has started or resumed execution.
    */
   Resume,
+
+  /**
+   * Notification that an extension RPC was registered on an isolate.
+   */
+  ServiceExtensionAdded,
 
   /**
    * Notification that VM identifying information has changed. Currently used to notify of changes

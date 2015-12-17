@@ -67,7 +67,7 @@ public class Isolate extends Response {
 
   /**
    * A list of all libraries for this isolate.
-   * 
+   *
    * Guaranteed to be initialized when the IsolateRunnable event fires.
    */
   public ElementList<LibraryRef> getLibraries() {
@@ -117,7 +117,7 @@ public class Isolate extends Response {
 
   /**
    * The root library for this isolate.
-   * 
+   *
    * Guaranteed to be initialized when the IsolateRunnable event fires.
    */
   public LibraryRef getRootLib() {
@@ -126,7 +126,7 @@ public class Isolate extends Response {
 
   /**
    * The time that the VM started in milliseconds since the epoch.
-   * 
+   *
    * Suitable to pass to DateTime.fromMillisecondsSinceEpoch.
    */
   public int getStartTime() {

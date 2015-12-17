@@ -58,6 +58,33 @@ public class Event extends Response {
   }
 
   /**
+   * The extension event data.
+   * 
+   * This is provided for the Extension event.
+   */
+  public ExtensionData getExtensionData() {
+    return new ExtensionData((JsonObject) json.get("extensionData"));
+  }
+
+  /**
+   * The extension event kind.
+   * 
+   * This is provided for the Extension event.
+   */
+  public String getExtensionKind() {
+    return json.get("extensionKind").getAsString();
+  }
+
+  /**
+   * The RPC name of the extension that was added.
+   * 
+   * This is provided for the ServiceExtensionAdded event.
+   */
+  public String getExtensionRPC() {
+    return json.get("extensionRPC").getAsString();
+  }
+
+  /**
    * The argument passed to dart:developer.inspect.
    * 
    * This is provided for the Inspect event.

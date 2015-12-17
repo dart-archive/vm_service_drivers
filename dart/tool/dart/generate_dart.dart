@@ -134,6 +134,20 @@ class RPCError {
   }
 }
 
+/// An `ExtensionData` is an arbitrary map that can have any contents.
+class ExtensionData {
+  static ExtensionData parse(Map json) =>
+      json == null ? null : new ExtensionData._fromJson(json);
+
+  final Map data;
+
+  ExtensionData() : data = {};
+
+  ExtensionData._fromJson(this.data) {}
+
+  String toString() => '[ExtensionData ${data}]';
+}
+
 /// A logging handler you can pass to a [VmService] instance in order to get
 /// notifications of non-fatal service protcol warnings and errors.
 abstract class Log {
@@ -335,6 +349,12 @@ Stream<Event> get onStdoutEvent => _getEventController('Stdout').stream;
 // WriteEvent
 Stream<Event> get onStderrEvent => _getEventController('Stderr').stream;
 
+// ServiceExtensionAdded
+Stream<Event> get onServiceExtensionAddedEvent => _getEventController('ServiceExtensionAdded').stream;
+
+// Extension
+Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
+
 // Listen for a specific event name.
 Stream<Event> onEvent(String streamName) => _getEventController(streamName).stream;
 ''');
@@ -349,7 +369,7 @@ Stream<Event> onEvent(String streamName) => _getEventController(streamName).stre
     enums.forEach((e) => e.generate(gen));
     gen.writeln();
     gen.writeln('// types');
-    types.forEach((t) => t.generate(gen));
+    types.where((t) => !t.skip).forEach((t) => t.generate(gen));
   }
 
   void setDefaultValue(String typeName, String fieldName, String defaultValue) {
@@ -560,6 +580,8 @@ class Type extends Member {
 
     return all;
   }
+
+  bool get skip => name == 'ExtensionData';
 
   void generate(DartGenerator gen) {
     gen.writeln();
