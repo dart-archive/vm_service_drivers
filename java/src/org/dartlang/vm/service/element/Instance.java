@@ -29,7 +29,7 @@ public class Instance extends Obj {
   }
 
   /**
-   * The elements of a List instance.
+   * The elements of a Map instance.
    * 
    * Provided for instance kinds:
    *  - Map

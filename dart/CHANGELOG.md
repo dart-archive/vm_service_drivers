@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.1
+- expose the new 'Extension' event information
+
 ## 0.1.0
 - rev to 0.1.0; declare first stable API version
 

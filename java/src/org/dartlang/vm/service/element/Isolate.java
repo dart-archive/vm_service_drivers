@@ -59,6 +59,12 @@ public class Isolate extends Response {
   }
 
   /**
+   * The list of service extension RPCs that are registered for this isolate.
+   */
+  public List<String> getExtensionRPCs() {
+  }
+
+  /**
    * The id which is passed to the getIsolate RPC to reload this isolate.
    */
   public String getId() {

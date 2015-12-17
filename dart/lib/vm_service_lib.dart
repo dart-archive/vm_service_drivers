@@ -67,6 +67,7 @@ Map<String, Function> _typeFactories = {
   '@Error': ErrorRef.parse,
   'Error': Error.parse,
   'Event': Event.parse,
+  'ExtensionData': ExtensionData.parse,
   '@Field': FieldRef.parse,
   'Field': Field.parse,
   'Flag': Flag.parse,
@@ -149,6 +150,13 @@ class VmService {
 
   // WriteEvent
   Stream<Event> get onStderrEvent => _getEventController('Stderr').stream;
+
+  // ServiceExtensionAdded
+  Stream<Event> get onServiceExtensionAddedEvent =>
+      _getEventController('ServiceExtensionAdded').stream;
+
+  // Extension
+  Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
 
   // Listen for a specific event name.
   Stream<Event> onEvent(String streamName) =>
@@ -447,11 +455,13 @@ class VmService {
   /// streamId | event types provided
   /// -------- | -----------
   /// VM | VMUpdate
-  /// Isolate | IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate
+  /// Isolate | IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate,
+  /// ServiceExtensionAdded
   /// Debug | PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted,
   /// PauseException, Resume, BreakpointAdded, BreakpointResolved,
   /// BreakpointRemoved, Inspect
   /// GC | GC
+  /// Extension | Extension
   ///
   /// Additionally, some embedders provide the `Stdout` and `Stderr` streams.
   /// These streams allow the client to subscribe to writes to stdout and
@@ -561,6 +571,20 @@ class RPCError {
   }
 }
 
+/// An `ExtensionData` is an arbitrary map that can have any contents.
+class ExtensionData {
+  static ExtensionData parse(Map json) =>
+      json == null ? null : new ExtensionData._fromJson(json);
+
+  final Map data;
+
+  ExtensionData() : data = {};
+
+  ExtensionData._fromJson(this.data) {}
+
+  String toString() => '[ExtensionData ${data}]';
+}
+
 /// A logging handler you can pass to a [VmService] instance in order to get
 /// notifications of non-fatal service protcol warnings and errors.
 abstract class Log {
@@ -626,6 +650,9 @@ class EventKind {
   /// used to notify of changes to the isolate debugging name via setName.
   static const String kIsolateUpdate = 'IsolateUpdate';
 
+  /// Notification that an extension RPC was registered on an isolate.
+  static const String kServiceExtensionAdded = 'ServiceExtensionAdded';
+
   /// An isolate has paused at start, before executing code.
   static const String kPauseStart = 'PauseStart';
 
@@ -661,6 +688,9 @@ class EventKind {
 
   /// Notification from dart:developer.inspect.
   static const String kInspect = 'Inspect';
+
+  /// Event from dart:developer.postEvent.
+  static const String kExtension = 'Extension';
 }
 
 /// Adding new values to `InstanceKind` is considered a backwards compatible
@@ -1253,6 +1283,21 @@ class Event extends Response {
   /// This is provided for the Inspect event.
   @optional InstanceRef inspectee;
 
+  /// The RPC name of the extension that was added.
+  ///
+  /// This is provided for the ServiceExtensionAdded event.
+  @optional String extensionRPC;
+
+  /// The extension event kind.
+  ///
+  /// This is provided for the Extension event.
+  @optional String extensionKind;
+
+  /// The extension event data.
+  ///
+  /// This is provided for the Extension event.
+  @optional ExtensionData extensionData;
+
   Event();
 
   Event._fromJson(Map json) : super._fromJson(json) {
@@ -1267,6 +1312,9 @@ class Event extends Response {
     exception = _createObject(json['exception']);
     bytes = json['bytes'];
     inspectee = _createObject(json['inspectee']);
+    extensionRPC = json['extensionRPC'];
+    extensionKind = json['extensionKind'];
+    extensionData = _createObject(json['extensionData']);
   }
 
   String toString() =>
@@ -1732,7 +1780,7 @@ class Instance extends Obj {
   ///  - List
   @optional List<dynamic> elements;
 
-  /// The elements of a List instance.
+  /// The elements of a Map instance.
   ///
   /// Provided for instance kinds:
   ///  - Map
@@ -1958,6 +2006,9 @@ class Isolate extends Response {
   /// The current pause on exception mode for this isolate.
   /*ExceptionPauseMode*/ String exceptionPauseMode;
 
+  /// The list of service extension RPCs that are registered for this isolate.
+  List<String> extensionRPCs;
+
   Isolate();
 
   Isolate._fromJson(Map json) : super._fromJson(json) {
@@ -1973,6 +2024,7 @@ class Isolate extends Response {
     breakpoints = _createObject(json['breakpoints']) as List<Breakpoint>;
     error = _createObject(json['error']);
     exceptionPauseMode = json['exceptionPauseMode'];
+    extensionRPCs = _createObject(json['extensionRPCs']) as List<String>;
   }
 
   int get hashCode => id.hashCode;
