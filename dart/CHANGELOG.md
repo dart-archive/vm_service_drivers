@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.2
+- fixed a bug with the `ServiceExtensionAdded` event
+
 ## 0.1.1
 - expose the new 'Extension' event information
 
