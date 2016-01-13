@@ -333,7 +333,7 @@ VmService(Stream<String> inStream, void writeMessage(String message), {Log log})
 // VMUpdate
 Stream<Event> get onVMEvent => _getEventController('VM').stream;
 
-// IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate
+// IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
 Stream<Event> get onIsolateEvent => _getEventController('Isolate').stream;
 
 // PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException,
@@ -348,9 +348,6 @@ Stream<Event> get onStdoutEvent => _getEventController('Stdout').stream;
 
 // WriteEvent
 Stream<Event> get onStderrEvent => _getEventController('Stderr').stream;
-
-// ServiceExtensionAdded
-Stream<Event> get onServiceExtensionAddedEvent => _getEventController('ServiceExtensionAdded').stream;
 
 // Extension
 Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
