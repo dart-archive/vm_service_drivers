@@ -109,10 +109,11 @@ public class Instance extends Obj {
   }
 
   /**
-   * The number of elements or associations returned. This is only provided when it is less than
-   * length.
+   * The number of elements or associations or codeunits returned. This is only provided when it is
+   * less than length.
    * 
    * Provided for instance kinds:
+   *  - String
    *  - List
    *  - Map
    *  - Uint8ClampedList
@@ -196,9 +197,11 @@ public class Instance extends Obj {
   }
 
   /**
-   * The length of a List or the number of associations in a Map.
+   * The length of a List or the number of associations in a Map or the number of codeunits in a
+   * String.
    * 
    * Provided for instance kinds:
+   *  - String
    *  - List
    *  - Map
    *  - Uint8ClampedList
@@ -241,10 +244,11 @@ public class Instance extends Obj {
   }
 
   /**
-   * The index of the first element or association returned. This is only provided when it is
-   * non-zero.
+   * The index of the first element or association or codeunit returned. This is only provided when
+   * it is non-zero.
    * 
    * Provided for instance kinds:
+   *  - String
    *  - List
    *  - Map
    *  - Uint8ClampedList
@@ -365,6 +369,8 @@ public class Instance extends Obj {
   /**
    * The valueAsString for String references may be truncated. If so, this property is added with
    * the value 'true'.
+   * 
+   * New code should use 'length' and 'count' instead.
    */
   public boolean getValueAsStringIsTruncated() {
     JsonElement elem = json.get("valueAsStringIsTruncated");

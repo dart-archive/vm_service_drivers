@@ -564,7 +564,7 @@ class Method extends Member {
 
 class MethodArg extends Member {
   final Method parent;
-  String type;
+  final TypeRef type;
   String name;
   String docs;
   bool optional = false;
@@ -573,7 +573,7 @@ class MethodArg extends Member {
 
   get asJavaMethodArg => optional && type == 'int'
       ? new JavaMethodArg(name, 'Integer')
-      : new JavaMethodArg(name, type);
+      : new JavaMethodArg(name, type.name);
 
   /// Hacked enum arg type determination
   bool get isEnumType => name == 'step' || name == 'mode';
@@ -596,9 +596,13 @@ class MethodParser extends Parser {
 
     while (peek().text != ')') {
       Token type = expectName();
+      TypeRef ref = new TypeRef(_coerceRefType(type.text));
+      while (consume('[')) {
+        expect(']');
+        ref.arrayDepth++;
+      }
       Token name = expectName();
-      MethodArg arg =
-          new MethodArg(method, _coerceRefType(type.text), name.text);
+      MethodArg arg = new MethodArg(method, ref, name.text);
       if (consume('[')) {
         expect('optional');
         expect(']');
