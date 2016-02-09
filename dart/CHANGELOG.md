@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.0
+- upgrade to service protocol version `3.2`
+
 ## 0.1.2
 - fixed a bug with the `ServiceExtensionAdded` event
 
