@@ -12,7 +12,7 @@ library vm_service_lib;
 import 'dart:async';
 import 'dart:convert' show BASE64, JSON, JsonCodec;
 
-const String vmServiceVersion = '3.0.0';
+const String vmServiceVersion = '3.2.0';
 
 /// @optional
 const String optional = 'optional';
@@ -93,6 +93,9 @@ Map<String, Function> _typeFactories = {
   '@Script': ScriptRef.parse,
   'Script': Script.parse,
   'SourceLocation': SourceLocation.parse,
+  'SourceReport': SourceReport.parse,
+  'SourceReportCoverage': SourceReportCoverage.parse,
+  'SourceReportRange': SourceReportRange.parse,
   'Stack': Stack.parse,
   'Success': Success.parse,
   '@TypeArguments': TypeArgumentsRef.parse,
@@ -314,10 +317,10 @@ class VmService {
   /// collected, then an [Obj] will be returned.
   ///
   /// The `offset` and `count` parameters are used to request subranges of
-  /// Instance objects with the kinds: List, Map, Uint8ClampedList, Uint8List,
-  /// Uint16List, Uint32List, Uint64List, Int8List, Int16List, Int32List,
-  /// Int64List, Flooat32List, Float64List, Inst32x3List, Float32x4List, and
-  /// Float64x2List. These parameters are otherwise ignored.
+  /// Instance objects with the kinds: String, List, Map, Uint8ClampedList,
+  /// Uint8List, Uint16List, Uint32List, Uint64List, Int8List, Int16List,
+  /// Int32List, Int64List, Flooat32List, Float64List, Inst32x3List,
+  /// Float32x4List, and Float64x2List. These parameters are otherwise ignored.
   ///
   /// The return value can be one of [Obj] or [Sentinel].
   Future<dynamic> getObject(String isolateId, String objectId,
@@ -334,6 +337,50 @@ class VmService {
   /// See [Stack].
   Future<Stack> getStack(String isolateId) {
     return _call('getStack', {'isolateId': isolateId});
+  }
+
+  /// The `getSourceReport` RPC is used to generate a set of reports tied to
+  /// source locations in an isolate.
+  ///
+  /// The `reports` parameter is used to specify which reports should be
+  /// generated. The `reports` parameter is a list, which allows multiple
+  /// reports to be generated simultaneously from a consistent isolate state.
+  /// The `reports` parameter is allowed to be empty (this might be used to
+  /// force compilation of a particular subrange of some script).
+  ///
+  /// The available report kinds are:
+  ///
+  /// report kind | meaning
+  /// ----------- | -------
+  /// Coverage | Provide code coverage information
+  /// PossibleBreakpoints | Provide a list of token positions which correspond
+  /// to possible breakpoints.
+  ///
+  /// The `scriptId` parameter is used to restrict the report to a particular
+  /// script. When analyzing a particular script, either or both of the
+  /// `tokenPos` and `endTokenPos` parameters may be provided to restrict the
+  /// analysis to a subrange of a script (for example, these can be used to
+  /// restrict the report to the range of a particular class or function).
+  ///
+  /// If the `scriptId` parameter is not provided then the reports are generated
+  /// for all loaded scripts and the `tokenPos` and `endTokenPos` parameters are
+  /// disallowed.
+  ///
+  /// The `forceCompilation` parameter can be used to force compilation of all
+  /// functions in the range of the report. Forcing compilation can cause a
+  /// compilation error, which could terminate the running Dart program. If this
+  /// parameter is not provided, it is considered to have the value `false`.
+  ///
+  /// See [SourceReport].
+  Future<SourceReport> getSourceReport(
+      String isolateId, List<SourceReportKind> reports,
+      {String scriptId, int tokenPos, int endTokenPos, bool forceCompile}) {
+    Map m = {'isolateId': isolateId, 'reports': reports};
+    if (scriptId != null) m['scriptId'] = scriptId;
+    if (tokenPos != null) m['tokenPos'] = tokenPos;
+    if (endTokenPos != null) m['endTokenPos'] = endTokenPos;
+    if (forceCompile != null) m['forceCompile'] = forceCompile;
+    return _call('getSourceReport', m);
   }
 
   /// The `getVersion` RPC is used to determine what version of the Service
@@ -798,6 +845,16 @@ class SentinelKind {
   static const String kFree = 'Free';
 }
 
+class SourceReportKind {
+  SourceReportKind._();
+
+  /// Used to request a code coverage information.
+  static const String kCoverage = 'Coverage';
+
+  /// Used to request a list of token positions of possible breakpoints.
+  static const String kPossibleBreakpoints = 'PossibleBreakpoints';
+}
+
 /// An `ExceptionPauseMode` indicates how the isolate pauses when an exception
 /// is thrown.
 class ExceptionPauseMode {
@@ -946,7 +1003,8 @@ class Class extends Obj {
   String name;
 
   /// The error which occurred during class finalization, if it exists.
-  @optional ErrorRef error;
+  @optional
+  ErrorRef error;
 
   /// Is this an abstract class?
   bool isAbstract;
@@ -958,10 +1016,12 @@ class Class extends Obj {
   LibraryRef library;
 
   /// The location of this class in the source code.
-  @optional SourceLocation location;
+  @optional
+  SourceLocation location;
 
   /// The superclass of this class, if any.
-  @optional ClassRef superClass;
+  @optional
+  ClassRef superClass;
 
   /// A list of interface types for this class.
   ///
@@ -1098,7 +1158,8 @@ class Context extends Obj {
   int length;
 
   /// The enclosing context for this context.
-  @optional Context parent;
+  @optional
+  Context parent;
 
   /// The variables in this context object.
   List<ContextElement> variables;
@@ -1175,11 +1236,13 @@ class Error extends Obj {
 
   /// If this error is due to an unhandled exception, this is the exception
   /// thrown.
-  @optional InstanceRef exception;
+  @optional
+  InstanceRef exception;
 
   /// If this error is due to an unhandled exception, this is the stacktrace
   /// object.
-  @optional InstanceRef stacktrace;
+  @optional
+  InstanceRef stacktrace;
 
   Error();
 
@@ -1214,13 +1277,15 @@ class Event extends Response {
   ///
   /// This is provided for all event kinds except for:
   ///  - VMUpdate
-  @optional IsolateRef isolate;
+  @optional
+  IsolateRef isolate;
 
   /// The vm with which this event is associated.
   ///
   /// This is provided for the event kind:
   ///  - VMUpdate
-  @optional VMRef vm;
+  @optional
+  VMRef vm;
 
   /// The timestamp (in milliseconds since the epoch) associated with this
   /// event. For some isolate pause events, the timestamp is from when the
@@ -1235,7 +1300,8 @@ class Event extends Response {
   ///  - BreakpointAdded
   ///  - BreakpointRemoved
   ///  - BreakpointResolved
-  @optional Breakpoint breakpoint;
+  @optional
+  Breakpoint breakpoint;
 
   /// The list of breakpoints at which we are currently paused for a
   /// PauseBreakpoint event.
@@ -1248,7 +1314,8 @@ class Event extends Response {
   ///
   /// This is provided for the event kinds:
   ///  - PauseBreakpoint
-  @optional List<Breakpoint> pauseBreakpoints;
+  @optional
+  List<Breakpoint> pauseBreakpoints;
 
   /// The top stack frame associated with this event, if applicable.
   ///
@@ -1263,36 +1330,43 @@ class Event extends Response {
   /// For the Resume event, the top frame is provided at all times except for
   /// the initial resume event that is delivered when an isolate begins
   /// execution.
-  @optional Frame topFrame;
+  @optional
+  Frame topFrame;
 
   /// The exception associated with this event, if this is a PauseException
   /// event.
-  @optional InstanceRef exception;
+  @optional
+  InstanceRef exception;
 
   /// An array of bytes, encoded as a base64 string.
   ///
   /// This is provided for the WriteEvent event.
-  @optional String bytes;
+  @optional
+  String bytes;
 
   /// The argument passed to dart:developer.inspect.
   ///
   /// This is provided for the Inspect event.
-  @optional InstanceRef inspectee;
+  @optional
+  InstanceRef inspectee;
 
   /// The RPC name of the extension that was added.
   ///
   /// This is provided for the ServiceExtensionAdded event.
-  @optional String extensionRPC;
+  @optional
+  String extensionRPC;
 
   /// The extension event kind.
   ///
   /// This is provided for the Extension event.
-  @optional String extensionKind;
+  @optional
+  String extensionKind;
 
   /// The extension event data.
   ///
   /// This is provided for the Extension event.
-  @optional ExtensionData extensionData;
+  @optional
+  ExtensionData extensionData;
 
   Event();
 
@@ -1388,10 +1462,12 @@ class Field extends Obj {
   bool isStatic;
 
   /// The value of this field, if the field is static.
-  @optional InstanceRef staticValue;
+  @optional
+  InstanceRef staticValue;
 
   /// The location of this field in the source code.
-  @optional SourceLocation location;
+  @optional
+  SourceLocation location;
 
   Field();
 
@@ -1429,7 +1505,8 @@ class Flag {
   /// The value of this flag as a string.
   ///
   /// If this property is absent, then the value of the flag was NULL.
-  @optional String valueAsString;
+  @optional
+  String valueAsString;
 
   Flag();
 
@@ -1540,10 +1617,12 @@ class Func extends Obj {
   dynamic owner;
 
   /// The location of this function in the source code.
-  @optional SourceLocation location;
+  @optional
+  SourceLocation location;
 
   /// The compiled code associated with this function.
-  @optional CodeRef code;
+  @optional
+  CodeRef code;
 
   Func();
 
@@ -1585,15 +1664,21 @@ class InstanceRef extends ObjRef {
   ///  - Float64x2
   ///  - Int32x4
   ///  - StackTrace
-  @optional String valueAsString;
+  @optional
+  String valueAsString;
 
   /// The valueAsString for String references may be truncated. If so, this
   /// property is added with the value 'true'.
-  @optional bool valueAsStringIsTruncated;
+  ///
+  /// New code should use 'length' and 'count' instead.
+  @optional
+  bool valueAsStringIsTruncated;
 
-  /// The length of a List or the number of associations in a Map.
+  /// The length of a List or the number of associations in a Map or the number
+  /// of codeunits in a String.
   ///
   /// Provided for instance kinds:
+  ///  - String
   ///  - List
   ///  - Map
   ///  - Uint8ClampedList
@@ -1610,25 +1695,29 @@ class InstanceRef extends ObjRef {
   ///  - Int32x4List
   ///  - Float32x4List
   ///  - Float64x2List
-  @optional int length;
+  @optional
+  int length;
 
   /// The name of a Type instance.
   ///
   /// Provided for instance kinds:
   ///  - Type
-  @optional String name;
+  @optional
+  String name;
 
   /// The corresponding Class if this Type is canonical.
   ///
   /// Provided for instance kinds:
   ///  - Type
-  @optional ClassRef typeClass;
+  @optional
+  ClassRef typeClass;
 
   /// The parameterized class of a type parameter:
   ///
   /// Provided for instance kinds:
   ///  - TypeParameter
-  @optional ClassRef parameterizedClass;
+  @optional
+  ClassRef parameterizedClass;
 
   /// The pattern of a RegExp instance.
   ///
@@ -1636,7 +1725,8 @@ class InstanceRef extends ObjRef {
   ///
   /// Provided for instance kinds:
   ///  - RegExp
-  @optional InstanceRef pattern;
+  @optional
+  InstanceRef pattern;
 
   InstanceRef();
 
@@ -1678,15 +1768,21 @@ class Instance extends Obj {
   ///  - Double (suitable for passing to Double.parse())
   ///  - Int (suitable for passing to int.parse())
   ///  - String (value may be truncated)
-  @optional String valueAsString;
+  @optional
+  String valueAsString;
 
   /// The valueAsString for String references may be truncated. If so, this
   /// property is added with the value 'true'.
-  @optional bool valueAsStringIsTruncated;
+  ///
+  /// New code should use 'length' and 'count' instead.
+  @optional
+  bool valueAsStringIsTruncated;
 
-  /// The length of a List or the number of associations in a Map.
+  /// The length of a List or the number of associations in a Map or the number
+  /// of codeunits in a String.
   ///
   /// Provided for instance kinds:
+  ///  - String
   ///  - List
   ///  - Map
   ///  - Uint8ClampedList
@@ -1703,12 +1799,14 @@ class Instance extends Obj {
   ///  - Int32x4List
   ///  - Float32x4List
   ///  - Float64x2List
-  @optional int length;
+  @optional
+  int length;
 
-  /// The index of the first element or association returned. This is only
-  /// provided when it is non-zero.
+  /// The index of the first element or association or codeunit returned. This
+  /// is only provided when it is non-zero.
   ///
   /// Provided for instance kinds:
+  ///  - String
   ///  - List
   ///  - Map
   ///  - Uint8ClampedList
@@ -1725,12 +1823,14 @@ class Instance extends Obj {
   ///  - Int32x4List
   ///  - Float32x4List
   ///  - Float64x2List
-  @optional int offset;
+  @optional
+  int offset;
 
-  /// The number of elements or associations returned. This is only provided
-  /// when it is less than length.
+  /// The number of elements or associations or codeunits returned. This is only
+  /// provided when it is less than length.
   ///
   /// Provided for instance kinds:
+  ///  - String
   ///  - List
   ///  - Map
   ///  - Uint8ClampedList
@@ -1747,40 +1847,47 @@ class Instance extends Obj {
   ///  - Int32x4List
   ///  - Float32x4List
   ///  - Float64x2List
-  @optional int count;
+  @optional
+  int count;
 
   /// The name of a Type instance.
   ///
   /// Provided for instance kinds:
   ///  - Type
-  @optional String name;
+  @optional
+  String name;
 
   /// The corresponding Class if this Type is canonical.
   ///
   /// Provided for instance kinds:
   ///  - Type
-  @optional ClassRef typeClass;
+  @optional
+  ClassRef typeClass;
 
   /// The parameterized class of a type parameter:
   ///
   /// Provided for instance kinds:
   ///  - TypeParameter
-  @optional ClassRef parameterizedClass;
+  @optional
+  ClassRef parameterizedClass;
 
   /// The fields of this Instance.
-  @optional List<BoundField> fields;
+  @optional
+  List<BoundField> fields;
 
   /// The elements of a List instance.
   ///
   /// Provided for instance kinds:
   ///  - List
-  @optional List<dynamic> elements;
+  @optional
+  List<dynamic> elements;
 
   /// The elements of a Map instance.
   ///
   /// Provided for instance kinds:
   ///  - Map
-  @optional List<MapAssociation> associations;
+  @optional
+  List<MapAssociation> associations;
 
   /// The bytes of a TypedData instance.
   ///
@@ -1801,67 +1908,78 @@ class Instance extends Obj {
   ///  - Int32x4List
   ///  - Float32x4List
   ///  - Float64x2List
-  @optional String bytes;
+  @optional
+  String bytes;
 
   /// The function associated with a Closure instance.
   ///
   /// Provided for instance kinds:
   ///  - Closure
-  @optional FuncRef closureFunction;
+  @optional
+  FuncRef closureFunction;
 
   /// The context associated with a Closure instance.
   ///
   /// Provided for instance kinds:
   ///  - Closure
-  @optional ContextRef closureContext;
+  @optional
+  ContextRef closureContext;
 
   /// The referent of a MirrorReference instance.
   ///
   /// Provided for instance kinds:
   ///  - MirrorReference
-  @optional InstanceRef mirrorReferent;
+  @optional
+  InstanceRef mirrorReferent;
 
   /// The pattern of a RegExp instance.
   ///
   /// Provided for instance kinds:
   ///  - RegExp
-  @optional String pattern;
+  @optional
+  String pattern;
 
   /// Whether this regular expression is case sensitive.
   ///
   /// Provided for instance kinds:
   ///  - RegExp
-  @optional bool isCaseSensitive;
+  @optional
+  bool isCaseSensitive;
 
   /// Whether this regular expression matches multiple lines.
   ///
   /// Provided for instance kinds:
   ///  - RegExp
-  @optional bool isMultiLine;
+  @optional
+  bool isMultiLine;
 
   /// The key for a WeakProperty instance.
   ///
   /// Provided for instance kinds:
   ///  - WeakProperty
-  @optional InstanceRef propertyKey;
+  @optional
+  InstanceRef propertyKey;
 
   /// The key for a WeakProperty instance.
   ///
   /// Provided for instance kinds:
   ///  - WeakProperty
-  @optional InstanceRef propertyValue;
+  @optional
+  InstanceRef propertyValue;
 
   /// The type arguments for this type.
   ///
   /// Provided for instance kinds:
   ///  - Type
-  @optional TypeArgumentsRef typeArguments;
+  @optional
+  TypeArgumentsRef typeArguments;
 
   /// The index of a TypeParameter instance.
   ///
   /// Provided for instance kinds:
   ///  - TypeParameter
-  @optional int parameterIndex;
+  @optional
+  int parameterIndex;
 
   /// The type bounded by a BoundedType instance - or - the referent of a
   /// TypeRef instance.
@@ -1872,7 +1990,8 @@ class Instance extends Obj {
   /// Provided for instance kinds:
   ///  - BoundedType
   ///  - TypeRef
-  @optional InstanceRef targetType;
+  @optional
+  InstanceRef targetType;
 
   /// The bound of a TypeParameter or BoundedType.
   ///
@@ -1882,7 +2001,8 @@ class Instance extends Obj {
   /// Provided for instance kinds:
   ///  - BoundedType
   ///  - TypeParameter
-  @optional InstanceRef bound;
+  @optional
+  InstanceRef bound;
 
   Instance();
 
@@ -1973,6 +2093,9 @@ class Isolate extends Response {
   /// Suitable to pass to DateTime.fromMillisecondsSinceEpoch.
   int startTime;
 
+  /// Is the isolate in a runnable state?
+  bool runnable;
+
   /// The number of live ports for this isolate.
   int livePorts;
 
@@ -1986,7 +2109,8 @@ class Isolate extends Response {
   /// The root library for this isolate.
   ///
   /// Guaranteed to be initialized when the IsolateRunnable event fires.
-  @optional LibraryRef rootLib;
+  @optional
+  LibraryRef rootLib;
 
   /// A list of all libraries for this isolate.
   ///
@@ -1997,7 +2121,8 @@ class Isolate extends Response {
   List<Breakpoint> breakpoints;
 
   /// The error that is causing this isolate to exit, if applicable.
-  @optional Error error;
+  @optional
+  Error error;
 
   /// The current pause on exception mode for this isolate.
   /*ExceptionPauseMode*/ String exceptionPauseMode;
@@ -2012,6 +2137,7 @@ class Isolate extends Response {
     number = json['number'];
     name = json['name'];
     startTime = json['startTime'];
+    runnable = json['runnable'];
     livePorts = json['livePorts'];
     pauseOnExit = json['pauseOnExit'];
     pauseEvent = _createObject(json['pauseEvent']);
@@ -2180,10 +2306,12 @@ class Message extends Response {
   int size;
 
   /// A reference to the function that will be invoked to handle this message.
-  @optional FuncRef handler;
+  @optional
+  FuncRef handler;
 
   /// The source location of handler.
-  @optional SourceLocation location;
+  @optional
+  SourceLocation location;
 
   Message();
 
@@ -2286,7 +2414,8 @@ class Obj extends Response {
   ///
   /// Moving an Object into or out of the heap is considered a backwards
   /// compatible change for types other than Instance.
-  @optional ClassRef classRef;
+  @optional
+  ClassRef classRef;
 
   /// The size of this object in the heap.
   ///
@@ -2295,7 +2424,8 @@ class Obj extends Response {
   /// Note that the size can be zero for some objects. In the current VM
   /// implementation, this occurs for small integers, which are stored entirely
   /// within their object pointers.
-  @optional int size;
+  @optional
+  int size;
 
   Obj();
 
@@ -2450,7 +2580,8 @@ class SourceLocation extends Response {
   int tokenPos;
 
   /// The last token of the location if this is a range.
-  @optional int endTokenPos;
+  @optional
+  int endTokenPos;
 
   SourceLocation();
 
@@ -2462,6 +2593,116 @@ class SourceLocation extends Response {
 
   String toString() =>
       '[SourceLocation type: ${type}, script: ${script}, tokenPos: ${tokenPos}]';
+}
+
+/// The `SourceReport` class represents a set of reports tied to source
+/// locations in an isolate.
+class SourceReport extends Response {
+  static SourceReport parse(Map json) =>
+      json == null ? null : new SourceReport._fromJson(json);
+
+  /// A list of ranges in the program source.  These ranges correspond to ranges
+  /// of executable code in the user's program (functions, methods,
+  /// constructors, etc.)
+  ///
+  /// Note that ranges may nest in other ranges, in the case of nested
+  /// functions.
+  ///
+  /// Note that ranges may be duplicated, in the case of mixins.
+  List<SourceReportRange> ranges;
+
+  /// A list of scripts, referenced by index in the report's ranges.
+  List<ScriptRef> scripts;
+
+  SourceReport();
+
+  SourceReport._fromJson(Map json) : super._fromJson(json) {
+    ranges = _createObject(json['ranges']) as List<SourceReportRange>;
+    scripts = _createObject(json['scripts']) as List<ScriptRef>;
+  }
+
+  String toString() =>
+      '[SourceReport type: ${type}, ranges: ${ranges}, scripts: ${scripts}]';
+}
+
+/// The `SourceReportCoverage` class represents coverage information for one
+/// [SourceReportRange].
+///
+/// Note that `SourceReportCoverage` does not extend [Response] and therefore
+/// will not contain a `type` property.
+class SourceReportCoverage {
+  static SourceReportCoverage parse(Map json) =>
+      json == null ? null : new SourceReportCoverage._fromJson(json);
+
+  /// A list of token positions in a SourceReportRange which have been executed.
+  /// The list is sorted.
+  List<int> hits;
+
+  /// A list of token positions in a SourceReportRange which have not been
+  /// executed.  The list is sorted.
+  List<int> misses;
+
+  SourceReportCoverage();
+
+  SourceReportCoverage._fromJson(Map json) {
+    hits = _createObject(json['hits']) as List<int>;
+    misses = _createObject(json['misses']) as List<int>;
+  }
+
+  String toString() =>
+      '[SourceReportCoverage hits: ${hits}, misses: ${misses}]';
+}
+
+/// The `SourceReportRange` class represents a range of executable code
+/// (function, method, constructor, etc) in the running program. It is part of a
+/// [SourceReport].
+///
+/// Note that `SourceReportRange` does not extend [Response] and therefore will
+/// not contain a `type` property.
+class SourceReportRange {
+  static SourceReportRange parse(Map json) =>
+      json == null ? null : new SourceReportRange._fromJson(json);
+
+  /// An index into the script table of the SourceReport, indicating which
+  /// script contains this range of code.
+  int scriptIndex;
+
+  /// The token position at which this range begins.
+  int startPos;
+
+  /// The token position at which this range ends.  Inclusive.
+  int endPos;
+
+  /// Has this range been compiled by the Dart VM?
+  bool compiled;
+
+  /// Code coverage information for this range.  Provided only when the Coverage
+  /// report has been requested and the range has been compiled.
+  @optional
+  SourceReportCoverage coverage;
+
+  /// Possible breakpoint information for this range, represented as a sorted
+  /// list of token positions.  Provided only when the when the
+  /// PossibleBreakpoint report has been requested and the range has been
+  /// compiled.
+  @optional
+  List<int> possibleBreakpoints;
+
+  SourceReportRange();
+
+  SourceReportRange._fromJson(Map json) {
+    scriptIndex = json['scriptIndex'];
+    startPos = json['startPos'];
+    endPos = json['endPos'];
+    compiled = json['compiled'];
+    coverage = _createObject(json['coverage']);
+    possibleBreakpoints =
+        _createObject(json['possibleBreakpoints']) as List<int>;
+  }
+
+  String toString() => '[SourceReportRange ' //
+      'scriptIndex: ${scriptIndex}, startPos: ${startPos}, endPos: ${endPos}, ' //
+      'compiled: ${compiled}]';
 }
 
 class Stack extends Response {
@@ -2563,23 +2804,28 @@ class UnresolvedSourceLocation extends Response {
       json == null ? null : new UnresolvedSourceLocation._fromJson(json);
 
   /// The script containing the source location if the script has been loaded.
-  @optional ScriptRef script;
+  @optional
+  ScriptRef script;
 
   /// The uri of the script containing the source location if the script has yet
   /// to be loaded.
-  @optional String scriptUri;
+  @optional
+  String scriptUri;
 
   /// An approximate token position for the source location. This may change
   /// when the location is resolved.
-  @optional int tokenPos;
+  @optional
+  int tokenPos;
 
   /// An approximate line number for the source location. This may change when
   /// the location is resolved.
-  @optional int line;
+  @optional
+  int line;
 
   /// An approximate column number for the source location. This may change when
   /// the location is resolved.
-  @optional int column;
+  @optional
+  int column;
 
   UnresolvedSourceLocation();
 

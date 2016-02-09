@@ -47,9 +47,11 @@ public class InstanceRef extends ObjRef {
   }
 
   /**
-   * The length of a List or the number of associations in a Map.
+   * The length of a List or the number of associations in a Map or the number of codeunits in a
+   * String.
    * 
    * Provided for instance kinds:
+   *  - String
    *  - List
    *  - Map
    *  - Uint8ClampedList
@@ -134,6 +136,8 @@ public class InstanceRef extends ObjRef {
   /**
    * The valueAsString for String references may be truncated. If so, this property is added with
    * the value 'true'.
+   * 
+   * New code should use 'length' and 'count' instead.
    */
   public boolean getValueAsStringIsTruncated() {
     JsonElement elem = json.get("valueAsStringIsTruncated");

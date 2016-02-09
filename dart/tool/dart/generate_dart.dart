@@ -409,7 +409,8 @@ class Method extends Member {
       gen.write('Future<${returnType.name}> ${name}(');
       bool startedOptional = false;
       gen.write(args.map((MethodArg arg) {
-        String typeName = api.isEnumName(arg.type) ? '/*${arg.type}*/ String' : arg.paramType;
+        String typeName = (!arg.type.isArray && api.isEnumName(arg.type.name))
+          ? '/*${arg.type}*/ String' : arg.type.ref;
         if (arg.optional && !startedOptional) {
           startedOptional = true;
           return '{${typeName} ${arg.name}';
@@ -523,16 +524,16 @@ class TypeRef {
 
 class MethodArg extends Member {
   final Method parent;
-  String type;
+  TypeRef type;
   String name;
   bool optional = false;
 
   MethodArg(this.parent, this.type, this.name);
 
-  String get paramType => type;
+  // String get paramType => type;
 
   void generate(DartGenerator gen) {
-    gen.write('${type} ${name}');
+    gen.write('${type.ref} ${name}');
   }
 }
 
@@ -842,8 +843,13 @@ class MethodParser extends Parser {
 
     while (peek().text != ')') {
       Token type = expectName();
+      TypeRef ref = new TypeRef(_coerceRefType(type.text));
+      while (consume('[')) {
+        expect(']');
+        ref.arrayDepth++;
+      }
       Token name = expectName();
-      MethodArg arg = new MethodArg(method, _coerceRefType(type.text), name.text);
+      MethodArg arg = new MethodArg(method, ref, name.text);
       if (consume('[')) {
         expect('optional');
         expect(']');

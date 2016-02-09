@@ -68,7 +68,7 @@ public class VmService extends VmServiceBase {
   /**
    * The minor version number of the protocol supported by this client.
    */
-  public static final int versionMinor = 0;
+  public static final int versionMinor = 2;
 
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
@@ -86,12 +86,12 @@ public class VmService extends VmServiceBase {
    * 
    * @param column This parameter is optional and may be null.
    */
-  public void addBreakpoint(String isolateId, String scriptId, int line, Integer column, BreakpointConsumer consumer) {
+  public void addBreakpoint(String isolateId, String scriptId, int line, int column, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("scriptId", scriptId);
     params.addProperty("line", line);
-    if (column != null) params.addProperty("column", column.intValue());
+    if (column != null) params.addProperty("column", column);
     request("addBreakpoint", params, consumer);
   }
 
@@ -125,12 +125,12 @@ public class VmService extends VmServiceBase {
    * 
    * @param column This parameter is optional and may be null.
    */
-  public void addBreakpointWithScriptUri(String isolateId, String scriptUri, int line, Integer column, BreakpointConsumer consumer) {
+  public void addBreakpointWithScriptUri(String isolateId, String scriptUri, int line, int column, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("scriptUri", scriptUri);
     params.addProperty("line", line);
-    if (column != null) params.addProperty("column", column.intValue());
+    if (column != null) params.addProperty("column", column);
     request("addBreakpointWithScriptUri", params, consumer);
   }
 
@@ -192,13 +192,44 @@ public class VmService extends VmServiceBase {
    * @param offset This parameter is optional and may be null.
    * @param count This parameter is optional and may be null.
    */
-  public void getObject(String isolateId, String objectId, Integer offset, Integer count, GetObjectConsumer consumer) {
+  public void getObject(String isolateId, String objectId, int offset, int count, GetObjectConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("objectId", objectId);
-    if (offset != null) params.addProperty("offset", offset.intValue());
-    if (count != null) params.addProperty("count", count.intValue());
+    if (offset != null) params.addProperty("offset", offset);
+    if (count != null) params.addProperty("count", count);
     request("getObject", params, consumer);
+  }
+
+  /**
+   * The [getSourceReport] RPC is used to generate a set of reports tied to source locations in an
+   * isolate.
+   */
+  public void getSourceReport(String isolateId, SourceReportKind reports, SourceReportConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("reports", reports);
+    request("getSourceReport", params, consumer);
+  }
+
+  /**
+   * The [getSourceReport] RPC is used to generate a set of reports tied to source locations in an
+   * isolate.
+   * 
+   * @param scriptId This parameter is optional and may be null.
+   * @param tokenPos This parameter is optional and may be null.
+   * @param endTokenPos This parameter is optional and may be null.
+   * @param forceCompile This parameter is optional and may be null.
+   */
+  public void getSourceReport(String isolateId, SourceReportKind reports, String scriptId, int tokenPos, int endTokenPos, boolean forceCompile, SourceReportConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("reports", reports);
+    if (scriptId != null) params.addProperty("scriptId", scriptId);
+    if (tokenPos != null) params.addProperty("tokenPos", tokenPos);
+    if (endTokenPos != null) params.addProperty("endTokenPos", endTokenPos);
+    if (forceCompile != null) params.addProperty("forceCompile", forceCompile);
+    request("getSourceReport", params, consumer);
   }
 
   /**
@@ -251,8 +282,7 @@ public class VmService extends VmServiceBase {
   /**
    * The [resume] RPC is used to resume execution of a paused isolate.
    * 
-   * @param step A [StepOption] indicates which form of stepping is requested in a resume RPC. This
-   * parameter is optional and may be null.
+   * @param step This parameter is optional and may be null.
    */
   public void resume(String isolateId, StepOption step, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -272,9 +302,6 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [setExceptionPauseMode] RPC is used to control if an isolate pauses when an exception is
-   * thrown.
-   * 
-   * @param mode An [ExceptionPauseMode] indicates how the isolate pauses when an exception is
    * thrown.
    */
   public void setExceptionPauseMode(String isolateId, ExceptionPauseMode mode, SuccessConsumer consumer) {
@@ -441,6 +468,12 @@ public class VmService extends VmServiceBase {
       }
       if (responseType.equals("TypeArguments")) {
         ((GetObjectConsumer) consumer).received(new TypeArguments(json));
+        return;
+      }
+    }
+    if (consumer instanceof SourceReportConsumer) {
+      if (responseType.equals("SourceReport")) {
+        ((SourceReportConsumer) consumer).received(new SourceReport(json));
         return;
       }
     }
