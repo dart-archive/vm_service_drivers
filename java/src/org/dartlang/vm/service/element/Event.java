@@ -29,6 +29,17 @@ public class Event extends Response {
   }
 
   /**
+   * Is the isolate paused at an await, yield, or yield* statement?
+   * 
+   * This is provided for the event kinds:
+   *  - PauseBreakpoint
+   *  - PauseInterrupted
+   */
+  public boolean getAtAsyncSuspension() {
+    return json.get("atAsyncSuspension").getAsBoolean();
+  }
+
+  /**
    * The breakpoint which was added, removed, or resolved.
    * 
    * This is provided for the event kinds:

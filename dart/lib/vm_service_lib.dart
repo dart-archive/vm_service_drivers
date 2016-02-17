@@ -12,7 +12,7 @@ library vm_service_lib;
 import 'dart:async';
 import 'dart:convert' show BASE64, JSON, JsonCodec;
 
-const String vmServiceVersion = '3.2.0';
+const String vmServiceVersion = '3.3.0';
 
 /// @optional
 const String optional = 'optional';
@@ -872,6 +872,7 @@ class StepOption {
 
   static const String kInto = 'Into';
   static const String kOver = 'Over';
+  static const String kOverAsyncSuspension = 'OverAsyncSuspension';
   static const String kOut = 'Out';
 }
 
@@ -950,6 +951,10 @@ class Breakpoint extends Obj {
   /// Has this breakpoint been assigned to a specific program location?
   bool resolved;
 
+  /// Is this a breakpoint that was added synthetically as part of a step
+  /// OverAsyncSuspension resume command?
+  @optional bool isSyntheticAsyncContinuation;
+
   /// SourceLocation when breakpoint is resolved, UnresolvedSourceLocation when
   /// a breakpoint is not resolved.
   ///
@@ -961,6 +966,7 @@ class Breakpoint extends Obj {
   Breakpoint._fromJson(Map json) : super._fromJson(json) {
     breakpointNumber = json['breakpointNumber'];
     resolved = json['resolved'];
+    isSyntheticAsyncContinuation = json['isSyntheticAsyncContinuation'];
     location = _createObject(json['location']);
   }
 
@@ -1003,8 +1009,7 @@ class Class extends Obj {
   String name;
 
   /// The error which occurred during class finalization, if it exists.
-  @optional
-  ErrorRef error;
+  @optional ErrorRef error;
 
   /// Is this an abstract class?
   bool isAbstract;
@@ -1016,12 +1021,10 @@ class Class extends Obj {
   LibraryRef library;
 
   /// The location of this class in the source code.
-  @optional
-  SourceLocation location;
+  @optional SourceLocation location;
 
   /// The superclass of this class, if any.
-  @optional
-  ClassRef superClass;
+  @optional ClassRef superClass;
 
   /// A list of interface types for this class.
   ///
@@ -1158,8 +1161,7 @@ class Context extends Obj {
   int length;
 
   /// The enclosing context for this context.
-  @optional
-  Context parent;
+  @optional Context parent;
 
   /// The variables in this context object.
   List<ContextElement> variables;
@@ -1236,13 +1238,11 @@ class Error extends Obj {
 
   /// If this error is due to an unhandled exception, this is the exception
   /// thrown.
-  @optional
-  InstanceRef exception;
+  @optional InstanceRef exception;
 
   /// If this error is due to an unhandled exception, this is the stacktrace
   /// object.
-  @optional
-  InstanceRef stacktrace;
+  @optional InstanceRef stacktrace;
 
   Error();
 
@@ -1277,15 +1277,13 @@ class Event extends Response {
   ///
   /// This is provided for all event kinds except for:
   ///  - VMUpdate
-  @optional
-  IsolateRef isolate;
+  @optional IsolateRef isolate;
 
   /// The vm with which this event is associated.
   ///
   /// This is provided for the event kind:
   ///  - VMUpdate
-  @optional
-  VMRef vm;
+  @optional VMRef vm;
 
   /// The timestamp (in milliseconds since the epoch) associated with this
   /// event. For some isolate pause events, the timestamp is from when the
@@ -1300,8 +1298,7 @@ class Event extends Response {
   ///  - BreakpointAdded
   ///  - BreakpointRemoved
   ///  - BreakpointResolved
-  @optional
-  Breakpoint breakpoint;
+  @optional Breakpoint breakpoint;
 
   /// The list of breakpoints at which we are currently paused for a
   /// PauseBreakpoint event.
@@ -1314,8 +1311,7 @@ class Event extends Response {
   ///
   /// This is provided for the event kinds:
   ///  - PauseBreakpoint
-  @optional
-  List<Breakpoint> pauseBreakpoints;
+  @optional List<Breakpoint> pauseBreakpoints;
 
   /// The top stack frame associated with this event, if applicable.
   ///
@@ -1330,43 +1326,43 @@ class Event extends Response {
   /// For the Resume event, the top frame is provided at all times except for
   /// the initial resume event that is delivered when an isolate begins
   /// execution.
-  @optional
-  Frame topFrame;
+  @optional Frame topFrame;
 
   /// The exception associated with this event, if this is a PauseException
   /// event.
-  @optional
-  InstanceRef exception;
+  @optional InstanceRef exception;
 
   /// An array of bytes, encoded as a base64 string.
   ///
   /// This is provided for the WriteEvent event.
-  @optional
-  String bytes;
+  @optional String bytes;
 
   /// The argument passed to dart:developer.inspect.
   ///
   /// This is provided for the Inspect event.
-  @optional
-  InstanceRef inspectee;
+  @optional InstanceRef inspectee;
 
   /// The RPC name of the extension that was added.
   ///
   /// This is provided for the ServiceExtensionAdded event.
-  @optional
-  String extensionRPC;
+  @optional String extensionRPC;
 
   /// The extension event kind.
   ///
   /// This is provided for the Extension event.
-  @optional
-  String extensionKind;
+  @optional String extensionKind;
 
   /// The extension event data.
   ///
   /// This is provided for the Extension event.
-  @optional
-  ExtensionData extensionData;
+  @optional ExtensionData extensionData;
+
+  /// Is the isolate paused at an await, yield, or yield* statement?
+  ///
+  /// This is provided for the event kinds:
+  ///  - PauseBreakpoint
+  ///  - PauseInterrupted
+  @optional bool atAsyncSuspension;
 
   Event();
 
@@ -1385,6 +1381,7 @@ class Event extends Response {
     extensionRPC = json['extensionRPC'];
     extensionKind = json['extensionKind'];
     extensionData = _createObject(json['extensionData']);
+    atAsyncSuspension = json['atAsyncSuspension'];
   }
 
   String toString() =>
@@ -1462,12 +1459,10 @@ class Field extends Obj {
   bool isStatic;
 
   /// The value of this field, if the field is static.
-  @optional
-  InstanceRef staticValue;
+  @optional InstanceRef staticValue;
 
   /// The location of this field in the source code.
-  @optional
-  SourceLocation location;
+  @optional SourceLocation location;
 
   Field();
 
@@ -1505,8 +1500,7 @@ class Flag {
   /// The value of this flag as a string.
   ///
   /// If this property is absent, then the value of the flag was NULL.
-  @optional
-  String valueAsString;
+  @optional String valueAsString;
 
   Flag();
 
@@ -1617,12 +1611,10 @@ class Func extends Obj {
   dynamic owner;
 
   /// The location of this function in the source code.
-  @optional
-  SourceLocation location;
+  @optional SourceLocation location;
 
   /// The compiled code associated with this function.
-  @optional
-  CodeRef code;
+  @optional CodeRef code;
 
   Func();
 
@@ -1664,15 +1656,13 @@ class InstanceRef extends ObjRef {
   ///  - Float64x2
   ///  - Int32x4
   ///  - StackTrace
-  @optional
-  String valueAsString;
+  @optional String valueAsString;
 
   /// The valueAsString for String references may be truncated. If so, this
   /// property is added with the value 'true'.
   ///
   /// New code should use 'length' and 'count' instead.
-  @optional
-  bool valueAsStringIsTruncated;
+  @optional bool valueAsStringIsTruncated;
 
   /// The length of a List or the number of associations in a Map or the number
   /// of codeunits in a String.
@@ -1695,29 +1685,25 @@ class InstanceRef extends ObjRef {
   ///  - Int32x4List
   ///  - Float32x4List
   ///  - Float64x2List
-  @optional
-  int length;
+  @optional int length;
 
   /// The name of a Type instance.
   ///
   /// Provided for instance kinds:
   ///  - Type
-  @optional
-  String name;
+  @optional String name;
 
   /// The corresponding Class if this Type is canonical.
   ///
   /// Provided for instance kinds:
   ///  - Type
-  @optional
-  ClassRef typeClass;
+  @optional ClassRef typeClass;
 
   /// The parameterized class of a type parameter:
   ///
   /// Provided for instance kinds:
   ///  - TypeParameter
-  @optional
-  ClassRef parameterizedClass;
+  @optional ClassRef parameterizedClass;
 
   /// The pattern of a RegExp instance.
   ///
@@ -1725,8 +1711,7 @@ class InstanceRef extends ObjRef {
   ///
   /// Provided for instance kinds:
   ///  - RegExp
-  @optional
-  InstanceRef pattern;
+  @optional InstanceRef pattern;
 
   InstanceRef();
 
@@ -1768,15 +1753,13 @@ class Instance extends Obj {
   ///  - Double (suitable for passing to Double.parse())
   ///  - Int (suitable for passing to int.parse())
   ///  - String (value may be truncated)
-  @optional
-  String valueAsString;
+  @optional String valueAsString;
 
   /// The valueAsString for String references may be truncated. If so, this
   /// property is added with the value 'true'.
   ///
   /// New code should use 'length' and 'count' instead.
-  @optional
-  bool valueAsStringIsTruncated;
+  @optional bool valueAsStringIsTruncated;
 
   /// The length of a List or the number of associations in a Map or the number
   /// of codeunits in a String.
@@ -1799,8 +1782,7 @@ class Instance extends Obj {
   ///  - Int32x4List
   ///  - Float32x4List
   ///  - Float64x2List
-  @optional
-  int length;
+  @optional int length;
 
   /// The index of the first element or association or codeunit returned. This
   /// is only provided when it is non-zero.
@@ -1823,8 +1805,7 @@ class Instance extends Obj {
   ///  - Int32x4List
   ///  - Float32x4List
   ///  - Float64x2List
-  @optional
-  int offset;
+  @optional int offset;
 
   /// The number of elements or associations or codeunits returned. This is only
   /// provided when it is less than length.
@@ -1847,47 +1828,40 @@ class Instance extends Obj {
   ///  - Int32x4List
   ///  - Float32x4List
   ///  - Float64x2List
-  @optional
-  int count;
+  @optional int count;
 
   /// The name of a Type instance.
   ///
   /// Provided for instance kinds:
   ///  - Type
-  @optional
-  String name;
+  @optional String name;
 
   /// The corresponding Class if this Type is canonical.
   ///
   /// Provided for instance kinds:
   ///  - Type
-  @optional
-  ClassRef typeClass;
+  @optional ClassRef typeClass;
 
   /// The parameterized class of a type parameter:
   ///
   /// Provided for instance kinds:
   ///  - TypeParameter
-  @optional
-  ClassRef parameterizedClass;
+  @optional ClassRef parameterizedClass;
 
   /// The fields of this Instance.
-  @optional
-  List<BoundField> fields;
+  @optional List<BoundField> fields;
 
   /// The elements of a List instance.
   ///
   /// Provided for instance kinds:
   ///  - List
-  @optional
-  List<dynamic> elements;
+  @optional List<dynamic> elements;
 
   /// The elements of a Map instance.
   ///
   /// Provided for instance kinds:
   ///  - Map
-  @optional
-  List<MapAssociation> associations;
+  @optional List<MapAssociation> associations;
 
   /// The bytes of a TypedData instance.
   ///
@@ -1908,78 +1882,67 @@ class Instance extends Obj {
   ///  - Int32x4List
   ///  - Float32x4List
   ///  - Float64x2List
-  @optional
-  String bytes;
+  @optional String bytes;
 
   /// The function associated with a Closure instance.
   ///
   /// Provided for instance kinds:
   ///  - Closure
-  @optional
-  FuncRef closureFunction;
+  @optional FuncRef closureFunction;
 
   /// The context associated with a Closure instance.
   ///
   /// Provided for instance kinds:
   ///  - Closure
-  @optional
-  ContextRef closureContext;
+  @optional ContextRef closureContext;
 
   /// The referent of a MirrorReference instance.
   ///
   /// Provided for instance kinds:
   ///  - MirrorReference
-  @optional
-  InstanceRef mirrorReferent;
+  @optional InstanceRef mirrorReferent;
 
   /// The pattern of a RegExp instance.
   ///
   /// Provided for instance kinds:
   ///  - RegExp
-  @optional
-  String pattern;
+  @optional String pattern;
 
   /// Whether this regular expression is case sensitive.
   ///
   /// Provided for instance kinds:
   ///  - RegExp
-  @optional
-  bool isCaseSensitive;
+  @optional bool isCaseSensitive;
 
   /// Whether this regular expression matches multiple lines.
   ///
   /// Provided for instance kinds:
   ///  - RegExp
-  @optional
-  bool isMultiLine;
+  @optional bool isMultiLine;
 
   /// The key for a WeakProperty instance.
   ///
   /// Provided for instance kinds:
   ///  - WeakProperty
-  @optional
-  InstanceRef propertyKey;
+  @optional InstanceRef propertyKey;
 
   /// The key for a WeakProperty instance.
   ///
   /// Provided for instance kinds:
   ///  - WeakProperty
-  @optional
-  InstanceRef propertyValue;
+  @optional InstanceRef propertyValue;
 
   /// The type arguments for this type.
   ///
   /// Provided for instance kinds:
   ///  - Type
-  @optional
-  TypeArgumentsRef typeArguments;
+  @optional TypeArgumentsRef typeArguments;
 
   /// The index of a TypeParameter instance.
   ///
   /// Provided for instance kinds:
   ///  - TypeParameter
-  @optional
-  int parameterIndex;
+  @optional int parameterIndex;
 
   /// The type bounded by a BoundedType instance - or - the referent of a
   /// TypeRef instance.
@@ -1990,8 +1953,7 @@ class Instance extends Obj {
   /// Provided for instance kinds:
   ///  - BoundedType
   ///  - TypeRef
-  @optional
-  InstanceRef targetType;
+  @optional InstanceRef targetType;
 
   /// The bound of a TypeParameter or BoundedType.
   ///
@@ -2001,8 +1963,7 @@ class Instance extends Obj {
   /// Provided for instance kinds:
   ///  - BoundedType
   ///  - TypeParameter
-  @optional
-  InstanceRef bound;
+  @optional InstanceRef bound;
 
   Instance();
 
@@ -2109,8 +2070,7 @@ class Isolate extends Response {
   /// The root library for this isolate.
   ///
   /// Guaranteed to be initialized when the IsolateRunnable event fires.
-  @optional
-  LibraryRef rootLib;
+  @optional LibraryRef rootLib;
 
   /// A list of all libraries for this isolate.
   ///
@@ -2121,14 +2081,14 @@ class Isolate extends Response {
   List<Breakpoint> breakpoints;
 
   /// The error that is causing this isolate to exit, if applicable.
-  @optional
-  Error error;
+  @optional Error error;
 
   /// The current pause on exception mode for this isolate.
   /*ExceptionPauseMode*/ String exceptionPauseMode;
 
-  /// The list of service extension RPCs that are registered for this isolate.
-  List<String> extensionRPCs;
+  /// The list of service extension RPCs that are registered for this isolate,
+  /// if any.
+  @optional List<String> extensionRPCs;
 
   Isolate();
 
@@ -2306,12 +2266,10 @@ class Message extends Response {
   int size;
 
   /// A reference to the function that will be invoked to handle this message.
-  @optional
-  FuncRef handler;
+  @optional FuncRef handler;
 
   /// The source location of handler.
-  @optional
-  SourceLocation location;
+  @optional SourceLocation location;
 
   Message();
 
@@ -2414,8 +2372,7 @@ class Obj extends Response {
   ///
   /// Moving an Object into or out of the heap is considered a backwards
   /// compatible change for types other than Instance.
-  @optional
-  ClassRef classRef;
+  @optional ClassRef classRef;
 
   /// The size of this object in the heap.
   ///
@@ -2424,8 +2381,7 @@ class Obj extends Response {
   /// Note that the size can be zero for some objects. In the current VM
   /// implementation, this occurs for small integers, which are stored entirely
   /// within their object pointers.
-  @optional
-  int size;
+  @optional int size;
 
   Obj();
 
@@ -2580,8 +2536,7 @@ class SourceLocation extends Response {
   int tokenPos;
 
   /// The last token of the location if this is a range.
-  @optional
-  int endTokenPos;
+  @optional int endTokenPos;
 
   SourceLocation();
 
@@ -2678,15 +2633,13 @@ class SourceReportRange {
 
   /// Code coverage information for this range.  Provided only when the Coverage
   /// report has been requested and the range has been compiled.
-  @optional
-  SourceReportCoverage coverage;
+  @optional SourceReportCoverage coverage;
 
   /// Possible breakpoint information for this range, represented as a sorted
   /// list of token positions.  Provided only when the when the
   /// PossibleBreakpoint report has been requested and the range has been
   /// compiled.
-  @optional
-  List<int> possibleBreakpoints;
+  @optional List<int> possibleBreakpoints;
 
   SourceReportRange();
 
@@ -2804,28 +2757,23 @@ class UnresolvedSourceLocation extends Response {
       json == null ? null : new UnresolvedSourceLocation._fromJson(json);
 
   /// The script containing the source location if the script has been loaded.
-  @optional
-  ScriptRef script;
+  @optional ScriptRef script;
 
   /// The uri of the script containing the source location if the script has yet
   /// to be loaded.
-  @optional
-  String scriptUri;
+  @optional String scriptUri;
 
   /// An approximate token position for the source location. This may change
   /// when the location is resolved.
-  @optional
-  int tokenPos;
+  @optional int tokenPos;
 
   /// An approximate line number for the source location. This may change when
   /// the location is resolved.
-  @optional
-  int line;
+  @optional int line;
 
   /// An approximate column number for the source location. This may change when
   /// the location is resolved.
-  @optional
-  int column;
+  @optional int column;
 
   UnresolvedSourceLocation();
 
