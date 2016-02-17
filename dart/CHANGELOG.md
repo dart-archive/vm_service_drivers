@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.1
+- upgrade to service protocol version `3.3`
+
 ## 0.2.0
 - upgrade to service protocol version `3.2`
 

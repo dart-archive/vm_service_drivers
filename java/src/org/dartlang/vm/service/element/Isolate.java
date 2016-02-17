@@ -59,7 +59,7 @@ public class Isolate extends Response {
   }
 
   /**
-   * The list of service extension RPCs that are registered for this isolate.
+   * The list of service extension RPCs that are registered for this isolate, if any.
    */
   public List<String> getExtensionRPCs() {
   }
