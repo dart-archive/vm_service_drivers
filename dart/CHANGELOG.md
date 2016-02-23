@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.2
+- fixed several strong mode analysis issues
+
 ## 0.2.1
 - upgrade to service protocol version `3.3`
 
