@@ -94,7 +94,7 @@ final String _implCode = r'''
         } else if (json['error'] != null) {
           completer.completeError(RPCError.parse(json['error']));
         } else {
-          var result = json['result'];
+          Map<String, dynamic> result = json['result'] as Map<String, dynamic>;
           String type = result['type'];
           if (_typeFactories[type] == null) {
             completer.complete(Response.parse(result));
@@ -266,7 +266,7 @@ Object _createObject(dynamic json) {
   if (json == null) return null;
 
   if (json is List) {
-    return (json as List).map((e) => _createObject(e)).toList();
+    return json.map((e) => _createObject(e)).toList();
   } else if (json is Map) {
     String type = json['type'];
     if (_typeFactories[type] == null) {
@@ -284,7 +284,7 @@ Object _createSpecificObject(dynamic json, Function creator) {
   if (json == null) return null;
 
   if (json is List) {
-    return (json as List).map((e) => creator(e)).toList();
+    return json.map((e) => creator(e)).toList();
   } else if (json is Map) {
     return creator(json);
   } else {
@@ -587,7 +587,7 @@ class Type extends Member {
     gen.write('class ${name} ');
     if (superName != null) gen.write('extends ${superName} ');
     gen.writeln('{');
-    gen.writeln('static ${name} parse(Map json) => '
+    gen.writeln('static ${name} parse(Map<String, dynamic> json) => '
         'json == null ? null : new ${name}._fromJson(json);');
     gen.writeln();
 
@@ -607,7 +607,7 @@ class Type extends Member {
     if (name == 'Response') {
       gen.writeln('${name}._fromJson(this.json) {');
     } else {
-      gen.writeln('${name}._fromJson(Map json) ${superCall}{');
+      gen.writeln('${name}._fromJson(Map<String, dynamic> json) ${superCall}{');
     }
 
     fields.forEach((TypeField field) {
@@ -625,7 +625,7 @@ class Type extends Member {
     } else if (name == 'Instance' && field.name == 'associations') {
       // Special case `Instance.associations`.
       gen.writeln("associations = "
-        "_createSpecificObject(json['associations'], MapAssociation.parse);");
+        "_createSpecificObject(json['associations'], MapAssociation.parse) as List<MapAssociation>;");
     } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;
         gen.writeln("${field.generatableName} = _createObject(json['${field.name}']) "

@@ -226,10 +226,10 @@ class TypeWriter {
     } else {
       mthDecl.writeln(';');
     }
-    var key = (modifiers != null && modifiers.contains('public'))
+    String key = (modifiers != null && modifiers.contains('public'))
         ? '1 $name('
         : '2 $name(';
-    key = args.fold(key, (k, a) => '$k${a.typeName},');
+    key = args.fold(key, (String k, JavaMethodArg a) => '$k${a.typeName},');
     _methods[key] = mthDecl.toString();
   }
 
