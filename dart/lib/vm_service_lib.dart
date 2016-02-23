@@ -1770,15 +1770,15 @@ class InstanceRef extends ObjRef {
 }
 
 /// An `Instance` represents an instance of the Dart language class `Obj`.
+///
+/// `Instance` references always include their class (the `class` field is never
+/// null).
 class Instance extends Obj {
   static Instance parse(Map<String, dynamic> json) =>
       json == null ? null : new Instance._fromJson(json);
 
   /// What kind of instance is this?
   /*InstanceKind*/ String kind;
-
-  /// Instance references always include their class.
-  ClassRef classRef;
 
   /// The value of this instance as a string.
   ///
@@ -2027,7 +2027,6 @@ class Instance extends Obj {
 
   Instance._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     kind = json['kind'];
-    classRef = _createObject(json['class']);
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
     length = json['length'];
@@ -2060,8 +2059,7 @@ class Instance extends Obj {
 
   operator ==(other) => other is Instance && id == other.id;
 
-  String toString() => '[Instance ' //
-      'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
+  String toString() => '[Instance type: ${type}, id: ${id}, kind: ${kind}]';
 }
 
 /// `IsolateRef` is a reference to an `Isolate` object.
@@ -2352,49 +2350,40 @@ class Message extends Response {
 }
 
 /// `NullRef` is a reference to an a `Null`.
+///
+/// The [valueAsString] field will always be null.
 class NullRef extends InstanceRef {
   static NullRef parse(Map<String, dynamic> json) =>
       json == null ? null : new NullRef._fromJson(json);
 
-  /// Always 'null'.
-  String valueAsString;
-
   NullRef();
 
-  NullRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
-    valueAsString = json['valueAsString'];
-  }
+  NullRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
 
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is NullRef && id == other.id;
 
   String toString() => '[NullRef ' //
-      'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, ' //
-      'valueAsString: ${valueAsString}]';
+      'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
 
-/// A `Null` object represents the Dart language value null.
+/// A `Null` object represents the Dart language value `null`.
+///
+/// The [valueAsString] field will always be null.
 class Null extends Instance {
   static Null parse(Map<String, dynamic> json) =>
       json == null ? null : new Null._fromJson(json);
 
-  /// Always 'null'.
-  String valueAsString;
-
   Null();
 
-  Null._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
-    valueAsString = json['valueAsString'];
-  }
+  Null._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
 
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Null && id == other.id;
 
-  String toString() => '[Null ' //
-      'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, ' //
-      'valueAsString: ${valueAsString}]';
+  String toString() => '[Null type: ${type}, id: ${id}, kind: ${kind}]';
 }
 
 /// `ObjRef` is a reference to a `Obj`.

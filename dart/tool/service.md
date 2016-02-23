@@ -1545,9 +1545,6 @@ class Instance extends Object {
   // What kind of instance is this?
   InstanceKind kind;
 
-  // Instance references always include their class.
-  @Class class;
-
   // The value of this instance as a string.
   //
   // Provided for the instance kinds:
@@ -1771,6 +1768,9 @@ class Instance extends Object {
 ```
 
 An _Instance_ represents an instance of the Dart language class _Object_.
+
+_Instance_ references always include their class (the _class_ field is never
+null).
 
 ### InstanceKind
 
@@ -2041,21 +2041,21 @@ function that will be invoked to handle it.
 
 ```
 class @Null extends @Instance {
-  // Always 'null'.
-  string valueAsString;
 }
 ```
 
 _@Null_ is a reference to an a _Null_.
 
+The [valueAsString] field will always be null.
+
 ```
 class Null extends Instance {
-  // Always 'null'.
-  string valueAsString;
 }
 ```
 
-A _Null_ object represents the Dart language value null.
+A _Null_ object represents the Dart language value _null_.
+
+The [valueAsString] field will always be null.
 
 ### Object
 
