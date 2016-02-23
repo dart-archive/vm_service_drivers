@@ -25,11 +25,4 @@ public class NullRef extends InstanceRef {
   public NullRef(JsonObject json) {
     super(json);
   }
-
-  /**
-   * Always 'null'.
-   */
-  public String getValueAsString() {
-    return json.get("valueAsString").getAsString();
-  }
 }
