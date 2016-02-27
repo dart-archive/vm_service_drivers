@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.3
+- include the name of the calling method in RPC errors
+
 ## 0.2.2
 - fixed several strong mode analysis issues
 
