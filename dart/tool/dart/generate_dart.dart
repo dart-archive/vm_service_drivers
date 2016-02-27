@@ -69,6 +69,7 @@ final String _implCode = r'''
   Future<Response> _call(String method, [Map args]) {
     String id = '${++_id}';
     _completers[id] = new Completer<Response>();
+    _methodCalls[id] = method;
     Map m = {'id': id, 'method': method};
     if (args != null) m['params'] = args;
     String message = JSON.encode(m);
@@ -88,11 +89,12 @@ final String _implCode = r'''
         _getEventController(streamId).add(_createObject(params['event']));
       } else if (json['id'] != null) {
         Completer completer = _completers.remove(json['id']);
+        String methodName = _methodCalls.remove(json['id']);
 
         if (completer == null) {
           _log.severe('unmatched request response: ${message}');
         } else if (json['error'] != null) {
-          completer.completeError(RPCError.parse(json['error']));
+          completer.completeError(RPCError.parse(methodName, json['error']));
         } else {
           Map<String, dynamic> result = json['result'] as Map<String, dynamic>;
           String type = result['type'];
@@ -113,23 +115,24 @@ final String _implCode = r'''
 
 final String _rpcError = r'''
 class RPCError {
-  static RPCError parse(dynamic json) {
-    return new RPCError(json['code'], json['message'], json['data']);
+  static RPCError parse(String callingMethod, dynamic json) {
+    return new RPCError(callingMethod, json['code'], json['message'], json['data']);
   }
 
+  final String callingMethod;
   final int code;
   final String message;
   final Map data;
 
-  RPCError(this.code, this.message, [this.data]);
+  RPCError(this.callingMethod, this.code, this.message, [this.data]);
 
   String get details => data == null ? null : data['details'];
 
   String toString() {
     if (details == null) {
-      return '${code}: ${message}';
+      return '${message} (${code}) from ${callingMethod}()';
     } else {
-      return '${code}: ${message}\n${details}';
+      return '${message} (${code}) from ${callingMethod}():\n${details}';
     }
   }
 }
@@ -307,6 +310,7 @@ Object _createSpecificObject(dynamic json, Function creator) {
     gen.writeStatement('Function _writeMessage;');
     gen.writeStatement('int _id = 0;');
     gen.writeStatement('Map<String, Completer<Response>> _completers = {};');
+    gen.writeStatement('Map<String, String> _methodCalls = {};');
     gen.writeStatement('Log _log;');
     gen.write('''
 
