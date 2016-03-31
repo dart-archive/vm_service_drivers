@@ -217,6 +217,10 @@ class Api extends Member with ApiParseUtil {
         h3Name = null;
       }
     }
+
+    for (Type type in types) {
+      type.removeDuplicateFieldDefs();
+    }
   }
 
   String get name => 'api';
@@ -674,6 +678,22 @@ class Type extends Member {
 
   void _parse(Token token) {
     new TypeParser(token).parseInto(this);
+  }
+
+  void removeDuplicateFieldDefs() {
+    for (TypeField field in fields.toList()) {
+      if (superName == null) continue;
+
+      if (getSuper().hasField(field.name)) {
+        print('Removing duplicate field def: ${name}.${field.name}.');
+        fields.remove(field);
+      }
+    }
+  }
+
+  bool hasField(String name) {
+    if (fields.any((field) => field.name == name)) return true;
+    return getSuper()?.hasField(name) ?? false;
   }
 }
 

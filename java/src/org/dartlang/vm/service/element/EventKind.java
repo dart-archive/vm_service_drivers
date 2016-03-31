@@ -73,6 +73,12 @@ public enum EventKind {
   IsolateUpdate,
 
   /**
+   * Indicates an isolate is not yet runnable. Only appears in an Isolate's pauseEvent. Never sent
+   * over a stream.
+   */
+  None,
+
+  /**
    * An isolate has paused at a breakpoint or due to stepping.
    */
   PauseBreakpoint,

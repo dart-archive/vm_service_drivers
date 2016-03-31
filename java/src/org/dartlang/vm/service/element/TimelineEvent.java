@@ -18,18 +18,11 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonObject;
 
 /**
- * {@link NullRef} is a reference to an a {@link Null}.
+ * An {@link TimelineEvent} is an arbitrary map that contains a Trace Event Format event.
  */
-public class NullRef extends InstanceRef {
+public class TimelineEvent extends Element {
 
-  public NullRef(JsonObject json) {
+  public TimelineEvent(JsonObject json) {
     super(json);
-  }
-
-  /**
-   * Always 'null'.
-   */
-  public String getValueAsString() {
-    return json.get("valueAsString").getAsString();
   }
 }
