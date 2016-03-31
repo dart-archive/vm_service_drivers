@@ -58,6 +58,8 @@ public class VmService extends VmServiceBase {
 
   public static final String STDOUT_STREAM_ID = "Stdout";
 
+  public static final String TIMELINE_STREAM_ID = "Timeline";
+
   public static final String VM_STREAM_ID = "VM";
 
   /**

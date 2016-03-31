@@ -98,6 +98,7 @@ Map<String, Function> _typeFactories = {
   'SourceReportRange': SourceReportRange.parse,
   'Stack': Stack.parse,
   'Success': Success.parse,
+  'TimelineEvent': TimelineEvent.parse,
   '@TypeArguments': TypeArgumentsRef.parse,
   'TypeArguments': TypeArguments.parse,
   'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
@@ -503,9 +504,10 @@ class VmService {
   /// ServiceExtensionAdded
   /// Debug | PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted,
   /// PauseException, Resume, BreakpointAdded, BreakpointResolved,
-  /// BreakpointRemoved, Inspect
+  /// BreakpointRemoved, Inspect, None
   /// GC | GC
   /// Extension | Extension
+  /// Timeline | TimelineEvents
   ///
   /// Additionally, some embedders provide the `Stdout` and `Stderr` streams.
   /// These streams allow the client to subscribe to writes to stdout and
@@ -718,6 +720,10 @@ class EventKind {
 
   /// An isolate has started or resumed execution.
   static const String kResume = 'Resume';
+
+  /// Indicates an isolate is not yet runnable. Only appears in an Isolate's
+  /// pauseEvent. Never sent over a stream.
+  static const String kNone = 'None';
 
   /// A breakpoint has been added for an isolate.
   static const String kBreakpointAdded = 'BreakpointAdded';
@@ -1035,10 +1041,22 @@ class Class extends Obj {
   @optional
   ClassRef superClass;
 
-  /// A list of interface types for this class.
+  /// The supertype for this class, if any.
   ///
   /// The value will be of the kind: Type.
+  @optional
+  InstanceRef superType;
+
+  /// A list of interface types for this class.
+  ///
+  /// The values will be of the kind: Type.
   List<InstanceRef> interfaces;
+
+  /// The mixin type for this class, if any.
+  ///
+  /// The value will be of the kind: Type.
+  @optional
+  InstanceRef mixin;
 
   /// A list of fields in this class. Does not include fields from superclasses.
   List<FieldRef> fields;
@@ -1060,7 +1078,9 @@ class Class extends Obj {
     library = _createObject(json['library']);
     location = _createObject(json['location']);
     superClass = _createObject(json['super']);
+    superType = _createObject(json['superType']);
     interfaces = _createObject(json['interfaces']) as List<InstanceRef>;
+    mixin = _createObject(json['mixin']);
     fields = _createObject(json['fields']) as List<FieldRef>;
     functions = _createObject(json['functions']) as List<FuncRef>;
     subclasses = _createObject(json['subclasses']) as List<ClassRef>;
@@ -1381,6 +1401,12 @@ class Event extends Response {
   @optional
   ExtensionData extensionData;
 
+  /// An array of TimelineEvents
+  ///
+  /// This is provided for the TimelineEvents event.
+  @optional
+  List<TimelineEvent> timelineEvents;
+
   /// Is the isolate paused at an await, yield, or yield* statement?
   ///
   /// This is provided for the event kinds:
@@ -1406,6 +1432,8 @@ class Event extends Response {
     extensionRPC = json['extensionRPC'];
     extensionKind = json['extensionKind'];
     extensionData = _createObject(json['extensionData']);
+    timelineEvents =
+        _createObject(json['timelineEvents']) as List<TimelineEvent>;
     atAsyncSuspension = json['atAsyncSuspension'];
   }
 
@@ -1775,9 +1803,6 @@ class InstanceRef extends ObjRef {
 }
 
 /// An `Instance` represents an instance of the Dart language class `Obj`.
-///
-/// `Instance` references always include their class (the `class` field is never
-/// null).
 class Instance extends Obj {
   static Instance parse(Map<String, dynamic> json) =>
       json == null ? null : new Instance._fromJson(json);
@@ -2355,8 +2380,6 @@ class Message extends Response {
 }
 
 /// `NullRef` is a reference to an a `Null`.
-///
-/// The [valueAsString] field will always be null.
 class NullRef extends InstanceRef {
   static NullRef parse(Map<String, dynamic> json) =>
       json == null ? null : new NullRef._fromJson(json);
@@ -2373,9 +2396,7 @@ class NullRef extends InstanceRef {
       'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
 
-/// A `Null` object represents the Dart language value `null`.
-///
-/// The [valueAsString] field will always be null.
+/// A `Null` object represents the Dart language value null.
 class Null extends Instance {
   static Null parse(Map<String, dynamic> json) =>
       json == null ? null : new Null._fromJson(json);
@@ -2753,6 +2774,19 @@ class Success extends Response {
   Success._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
 
   String toString() => '[Success type: ${type}]';
+}
+
+/// An `TimelineEvent` is an arbitrary map that contains a [Trace Event Format]
+/// event.
+class TimelineEvent {
+  static TimelineEvent parse(Map<String, dynamic> json) =>
+      json == null ? null : new TimelineEvent._fromJson(json);
+
+  TimelineEvent();
+
+  TimelineEvent._fromJson(Map<String, dynamic> json) {}
+
+  String toString() => '[TimelineEvent ]';
 }
 
 /// `TypeArgumentsRef` is a reference to a `TypeArguments` object.

@@ -148,6 +148,20 @@ public class Event extends Response {
   }
 
   /**
+   * An array of TimelineEvents
+   * 
+   * This is provided for the TimelineEvents event.
+   */
+  public ElementList<TimelineEvent> getTimelineEvents() {
+    return new ElementList<TimelineEvent>(json.get("timelineEvents").getAsJsonArray()) {
+      @Override
+      protected TimelineEvent basicGet(JsonArray array, int index) {
+        return new TimelineEvent(array.get(index).getAsJsonObject());
+      }
+    };
+  }
+
+  /**
    * The timestamp (in milliseconds since the epoch) associated with this event. For some isolate
    * pause events, the timestamp is from when the isolate was paused. For other events, the
    * timestamp is from when the event was created.

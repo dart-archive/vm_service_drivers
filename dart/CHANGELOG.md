@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.4
+- expose the service protocol timeline API
+- add the new `None` event type
+
 ## 0.2.3
 - include the name of the calling method in RPC errors
 

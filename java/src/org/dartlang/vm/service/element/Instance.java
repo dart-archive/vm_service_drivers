@@ -82,6 +82,13 @@ public class Instance extends Obj {
   }
 
   /**
+   * Instance references always include their class.
+   */
+  public ClassRef getClassRef() {
+    return new ClassRef((JsonObject) json.get("class"));
+  }
+
+  /**
    * The context associated with a Closure instance.
    * 
    * Provided for instance kinds:

@@ -1,6 +1,2 @@
 analyzer:
   strong-mode: true
-
-  # Ignore two strong mode warnings in example code.
-  exclude:
-    - example/vm_service_lib_tester.dart
