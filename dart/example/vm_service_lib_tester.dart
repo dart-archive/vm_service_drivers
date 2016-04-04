@@ -35,10 +35,10 @@ main(List<String> args) async {
   print('dart process started');
 
   process.exitCode.then((code) => print('vm exited: ${code}'));
-  // TODO: We shouldn't have to use three of these.
   // ignore: strong_mode_down_cast_composite
-  process.stdout.transform(UTF8.decoder).listen(print); // ignore: strong_mode_down_cast_composite
-  process.stderr.transform(UTF8.decoder).listen(print); // ignore: strong_mode_down_cast_composite
+  process.stdout.transform(UTF8.decoder).listen(print);
+  // ignore: strong_mode_down_cast_composite
+  process.stderr.transform(UTF8.decoder).listen(print);
 
   await new Future.delayed(new Duration(milliseconds: 500));
 
