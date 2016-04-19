@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service_lib/vm_service_lib_io.dart';
 
 final String host = 'localhost';
 final int port = 7575;
@@ -42,18 +43,9 @@ main(List<String> args) async {
 
   await new Future.delayed(new Duration(milliseconds: 500));
 
-  WebSocket socket = await WebSocket.connect('ws://$host:$port/ws');
+  serviceClient = await vmServiceConnect(host, port, log: new StdoutLog());
 
   print('socket connected');
-
-  StreamController<String> _controller = new StreamController();
-  socket.listen((data) {
-    _controller.add(data);
-  });
-
-  serviceClient = new VmService(_controller.stream, (String message) {
-    socket.add(message);
-  }, log: new StdoutLog());
 
   serviceClient.onSend.listen((str)    => print('--> ${str}'));
   serviceClient.onReceive.listen((str) => print('<-- ${str}'));
@@ -77,7 +69,6 @@ main(List<String> args) async {
   print(await serviceClient.resume(isolateRef.id));
 
   serviceClient.dispose();
-  socket.close();
   process.kill();
 }
 
