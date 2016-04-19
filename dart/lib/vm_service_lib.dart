@@ -10,7 +10,7 @@
 library vm_service_lib;
 
 import 'dart:async';
-import 'dart:convert' show BASE64, JSON, JsonCodec;
+import 'dart:convert' show BASE64, JSON;
 
 const String vmServiceVersion = '3.3.0';
 
@@ -130,11 +130,14 @@ class VmService {
     return controller;
   }
 
+  DisposeHandler _disposeHandler;
+
   VmService(Stream<String> inStream, void writeMessage(String message),
-      {Log log}) {
+      {Log log, DisposeHandler disposeHandler}) {
     _streamSub = inStream.listen(_processMessage);
     _writeMessage = writeMessage;
     _log = log == null ? new _NullLog() : log;
+    _disposeHandler = disposeHandler;
   }
 
   // VMUpdate
@@ -527,12 +530,20 @@ class VmService {
     return _call('streamListen', {'streamId': streamId});
   }
 
+  /// Call an arbitrary service protocol method. This allows clients to call
+  /// methds not explicitly exposed by this library.
+  Future<Response> callMethod(String method, {String isolateId, Map args}) {
+    return callServiceExtension(method, isolateId: isolateId, args: args);
+  }
+
   /// Invoke a specific service protocol extension method.
   ///
   /// See https://api.dartlang.org/stable/dart-developer/dart-developer-library.html.
-  Future<Response> callServiceExtension(String method, String isolateId,
-      {Map args}) {
-    if (args == null) {
+  Future<Response> callServiceExtension(String method,
+      {String isolateId, Map args}) {
+    if (args == null && isolateId == null) {
+      return _call(method);
+    } else if (args == null) {
       return _call(method, {'isolateId': isolateId});
     } else {
       args = new Map.from(args);
@@ -548,6 +559,7 @@ class VmService {
   void dispose() {
     _streamSub.cancel();
     _completers.values.forEach((c) => c.completeError('disposed'));
+    if (_disposeHandler != null) _disposeHandler();
   }
 
   Future<Response> _call(String method, [Map args]) {
@@ -596,6 +608,8 @@ class VmService {
     }
   }
 }
+
+typedef Future DisposeHandler();
 
 class RPCError {
   static RPCError parse(String callingMethod, dynamic json) {
