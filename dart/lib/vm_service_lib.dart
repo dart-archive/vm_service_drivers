@@ -12,7 +12,7 @@ library vm_service_lib;
 import 'dart:async';
 import 'dart:convert' show BASE64, JSON;
 
-const String vmServiceVersion = '3.3.0';
+const String vmServiceVersion = '3.4.0';
 
 /// @optional
 const String optional = 'optional';
@@ -288,7 +288,7 @@ class VmService {
     });
   }
 
-  /// The _getFlagList RPC returns a list of all command line flags in the VM
+  /// The `getFlagList` RPC returns a list of all command line flags in the VM
   /// along with their current values.
   ///
   /// See [FlagList].
