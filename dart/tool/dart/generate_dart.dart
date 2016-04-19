@@ -78,7 +78,7 @@ final String _implCode = r'''
   void dispose() {
     _streamSub.cancel();
     _completers.values.forEach((c) => c.completeError('disposed'));
-    if (disposeHandler != null) disposeHandler();
+    if (_disposeHandler != null) _disposeHandler();
   }
 
   Future<Response> _call(String method, [Map args]) {
@@ -349,15 +349,16 @@ StreamController<Event> _getEventController(String eventName) {
   return controller;
 }
 
-final DisposeHandler disposeHandler;
+DisposeHandler _disposeHandler;
 
 VmService(Stream<String> inStream, void writeMessage(String message), {
   Log log,
-  this.disposeHandler
+  DisposeHandler disposeHandler
 }) {
   _streamSub = inStream.listen(_processMessage);
   _writeMessage = writeMessage;
   _log = log == null ? new _NullLog() : log;
+  _disposeHandler = disposeHandler;
 }
 
 // VMUpdate
