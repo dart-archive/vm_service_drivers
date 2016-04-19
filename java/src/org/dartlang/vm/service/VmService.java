@@ -70,7 +70,7 @@ public class VmService extends VmServiceBase {
   /**
    * The minor version number of the protocol supported by this client.
    */
-  public static final int versionMinor = 3;
+  public static final int versionMinor = 4;
 
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
@@ -161,7 +161,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * The _getFlagList RPC returns a list of all command line flags in the VM along with their
+   * The [getFlagList] RPC returns a list of all command line flags in the VM along with their
    * current values.
    */
   public void getFlagList(FlagListConsumer consumer) {
