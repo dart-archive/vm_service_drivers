@@ -12,7 +12,7 @@ library vm_service_lib;
 import 'dart:async';
 import 'dart:convert' show BASE64, JSON;
 
-const String vmServiceVersion = '3.4.0';
+const String vmServiceVersion = '3.5.0';
 
 /// @optional
 const String optional = 'optional';
@@ -2572,6 +2572,10 @@ class ScriptRef extends ObjRef {
 /// [lineNumber, (tokenPos, columnNumber)*]
 /// ```
 ///
+/// The `tokenPos` is an arbitrary integer value that is used to represent a
+/// location in the source code. A `tokenPos` value is not meaningful in itself
+/// and code should not rely on the exact values returned.
+///
 /// For example, a `tokenPosTable` with the value...
 ///
 /// ```
@@ -2729,6 +2733,11 @@ class SourceReportRange {
   /// Has this range been compiled by the Dart VM?
   bool compiled;
 
+  /// The error while attempting to compile this range, if this report was
+  /// generated with forceCompile=true.
+  @optional
+  ErrorRef error;
+
   /// Code coverage information for this range.  Provided only when the Coverage
   /// report has been requested and the range has been compiled.
   @optional
@@ -2748,6 +2757,7 @@ class SourceReportRange {
     startPos = json['startPos'];
     endPos = json['endPos'];
     compiled = json['compiled'];
+    error = _createObject(json['error']);
     coverage = _createObject(json['coverage']);
     possibleBreakpoints =
         _createObject(json['possibleBreakpoints']) as List<int>;

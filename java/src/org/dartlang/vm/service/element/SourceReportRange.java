@@ -51,6 +51,14 @@ public class SourceReportRange extends Element {
   }
 
   /**
+   * The error while attempting to compile this range, if this report was generated with
+   * forceCompile=true.
+   */
+  public ErrorRef getError() {
+    return new ErrorRef((JsonObject) json.get("error"));
+  }
+
+  /**
    * Possible breakpoint information for this range, represented as a sorted list of token
    * positions.  Provided only when the when the PossibleBreakpoint report has been requested and
    * the range has been compiled.
