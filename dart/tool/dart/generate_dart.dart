@@ -221,7 +221,8 @@ class Api extends Member with ApiParseUtil {
             (isPara(nodes[i + 1]) || isBlockquote(nodes[i + 1]))) {
           Element p = nodes[++i];
           String str = TextOutputVisitor.printText(p);
-          if (!str.contains('|') && !str.contains('``')) str = collapseWhitespace(str);
+          if (!str.contains('|') && !str.contains('``'))
+            str = collapseWhitespace(str);
           docs = '${docs}\n\n${str}';
         }
 
@@ -402,8 +403,10 @@ Stream<Event> onEvent(String streamName) => _getEventController(streamName).stre
   }
 
   void setDefaultValue(String typeName, String fieldName, String defaultValue) {
-    types.firstWhere((t) => t.name == typeName)
-      .fields.firstWhere((f) => f.name == fieldName)
+    types
+        .firstWhere((t) => t.name == typeName)
+        .fields
+        .firstWhere((f) => f.name == fieldName)
         .defaultValue = defaultValue;
   }
 
@@ -442,7 +445,8 @@ class Method extends Member {
       bool startedOptional = false;
       gen.write(args.map((MethodArg arg) {
         String typeName = (!arg.type.isArray && api.isEnumName(arg.type.name))
-          ? '/*${arg.type}*/ String' : arg.type.ref;
+            ? '/*${arg.type}*/ String'
+            : arg.type.ref;
         if (arg.optional && !startedOptional) {
           startedOptional = true;
           return '{${typeName} ${arg.name}';
@@ -457,12 +461,15 @@ class Method extends Member {
       } else if (hasOptionalArgs) {
         gen.writeStatement('{');
         gen.write('Map m = {');
-        gen.write(args.where((MethodArg a) => !a.optional).map(
-            (arg) => "'${arg.name}': ${arg.name}").join(', '));
+        gen.write(args
+            .where((MethodArg a) => !a.optional)
+            .map((arg) => "'${arg.name}': ${arg.name}")
+            .join(', '));
         gen.writeln('};');
         args.where((MethodArg a) => a.optional).forEach((MethodArg arg) {
           String valueRef = arg.name;
-          gen.writeln("if (${arg.name} != null) m['${arg.name}'] = ${valueRef};");
+          gen.writeln(
+              "if (${arg.name} != null) m['${arg.name}'] = ${valueRef};");
         });
         gen.writeStatement("return _call('${name}', m);");
         gen.writeStatement('}');
@@ -544,11 +551,13 @@ class TypeRef {
   TypeRef(this.name);
 
   String get ref => arrayDepth == 2
-      ? 'List<List<${name}>>' : arrayDepth == 1 ? 'List<${name}>' : name;
+      ? 'List<List<${name}>>'
+      : arrayDepth == 1 ? 'List<${name}>' : name;
 
   bool get isArray => arrayDepth > 0;
 
-  bool get isSimple => arrayDepth == 0 &&
+  bool get isSimple =>
+      arrayDepth == 0 &&
       (name == 'int' || name == 'num' || name == 'String' || name == 'bool');
 
   String toString() => ref;
@@ -649,21 +658,23 @@ class Type extends Member {
           gen.write(' ?? ${field.defaultValue}');
         }
         gen.writeln(';');
-      // } else if (field.type.isEnum) {
-      //   // Parse the enum.
-      //   String enumTypeName = field.type.types.first.name;
-      //   gen.writeln(
-      //     "${field.generatableName} = _parse${enumTypeName}[json['${field.name}']];");
-    } else if (name == 'Instance' && field.name == 'associations') {
-      // Special case `Instance.associations`.
-      gen.writeln("associations = "
-        "_createSpecificObject(json['associations'], MapAssociation.parse) as List<MapAssociation>;");
-    } else if (field.type.isArray) {
+        // } else if (field.type.isEnum) {
+        //   // Parse the enum.
+        //   String enumTypeName = field.type.types.first.name;
+        //   gen.writeln(
+        //     "${field.generatableName} = _parse${enumTypeName}[json['${field.name}']];");
+      } else if (name == 'Instance' && field.name == 'associations') {
+        // Special case `Instance.associations`.
+        gen.writeln("associations = "
+            "_createSpecificObject(json['associations'], MapAssociation.parse) as List<MapAssociation>;");
+      } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;
-        gen.writeln("${field.generatableName} = _createObject(json['${field.name}']) "
+        gen.writeln(
+            "${field.generatableName} = _createObject(json['${field.name}']) "
             "as ${fieldType.ref};");
       } else {
-        gen.writeln("${field.generatableName} = _createObject(json['${field.name}']);");
+        gen.writeln(
+            "${field.generatableName} = _createObject(json['${field.name}']);");
       }
     });
     gen.writeln('}');
@@ -674,20 +685,25 @@ class Type extends Member {
       gen.writeStatement('int get hashCode => id.hashCode;');
       gen.writeln();
 
-      gen.writeStatement('operator==(other) => other is ${name} && id == other.id;');
+      gen.writeStatement(
+          'operator==(other) => other is ${name} && id == other.id;');
       gen.writeln();
     }
 
     // toString()
-    Iterable<TypeField> toStringFields = getAllFields().where((f) => !f.optional);
+    Iterable<TypeField> toStringFields =
+        getAllFields().where((f) => !f.optional);
     if (toStringFields.length <= 7) {
-      String properties = toStringFields.map((TypeField f) =>
-          "${f.generatableName}: \${${f.generatableName}}").join(', ');
+      String properties = toStringFields
+          .map(
+              (TypeField f) => "${f.generatableName}: \${${f.generatableName}}")
+          .join(', ');
       if (properties.length > 60) {
         int index = properties.indexOf(', ', 55);
         if (index != -1) {
           properties = properties.substring(0, index + 2) +
-              "' //\n'" + properties.substring(index + 2);
+              "' //\n'" +
+              properties.substring(index + 2);
         }
         gen.writeln("String toString() => '[${name} ' //\n'${properties}]';");
       } else {
@@ -757,7 +773,8 @@ class TypeField extends Member {
   void generate(DartGenerator gen) {
     if (docs.isNotEmpty) gen.writeDocs(docs);
     if (optional) gen.write('@optional ');
-    String typeName = api.isEnumName(type.name) ? '/*${type.name}*/ String' : type.name;
+    String typeName =
+        api.isEnumName(type.name) ? '/*${type.name}*/ String' : type.name;
     gen.writeStatement('${typeName} ${generatableName};');
     if (parent.fields.any((field) => field.hasDocs)) gen.writeln();
   }
@@ -774,7 +791,7 @@ class Enum extends Member {
   }
 
   String get prefix =>
-    name.endsWith('Kind') ? name.substring(0, name.length - 4) : name;
+      name.endsWith('Kind') ? name.substring(0, name.length - 4) : name;
 
   void generate(DartGenerator gen) {
     gen.writeln();
@@ -843,7 +860,7 @@ class TextOutputVisitor implements NodeVisitor {
     String t = text.text;
     if (_em) {
       t = _coerceRefType(t);
-    } else  if (_href) {
+    } else if (_href) {
       t = '[${_coerceRefType(t)}]';
     }
 
@@ -885,7 +902,8 @@ class MethodParser extends Parser {
     method.returnType.parse(this);
 
     Token t = expectName();
-    validate(t.text == method.name, 'method name ${method.name} equals ${t.text}');
+    validate(
+        t.text == method.name, 'method name ${method.name} equals ${t.text}');
 
     expect('(');
 
