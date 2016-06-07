@@ -81,16 +81,17 @@ final String _implCode = r'''
     if (_disposeHandler != null) _disposeHandler();
   }
 
-  Future<Response> _call(String method, [Map args]) {
+  Future<T> _call/*<T>*/(String method, [Map args]) {
     String id = '${++_id}';
-    _completers[id] = new Completer<Response>();
+    Completer<T> completer = new Completer<T>();
+    _completers[id] = completer;
     _methodCalls[id] = method;
     Map m = {'id': id, 'method': method};
     if (args != null) m['params'] = args;
     String message = JSON.encode(m);
     _onSend.add(message);
     _writeMessage(message);
-    return _completers[id].future;
+    return completer.future;
   }
 
   void _processMessage(String message) {
@@ -330,7 +331,7 @@ Object _createSpecificObject(dynamic json, Function creator) {
     gen.writeStatement('StreamSubscription _streamSub;');
     gen.writeStatement('Function _writeMessage;');
     gen.writeStatement('int _id = 0;');
-    gen.writeStatement('Map<String, Completer<Response>> _completers = {};');
+    gen.writeStatement('Map<String, Completer> _completers = {};');
     gen.writeStatement('Map<String, String> _methodCalls = {};');
     gen.writeStatement('Log _log;');
     gen.write('''

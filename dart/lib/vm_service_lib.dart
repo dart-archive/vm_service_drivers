@@ -562,7 +562,7 @@ class VmService {
     if (_disposeHandler != null) _disposeHandler();
   }
 
-  Future<T> _call /*<T>*/ (String method, [Map args]) {
+  Future<T> _call/*<T>*/(String method, [Map args]) {
     String id = '${++_id}';
     Completer<T> completer = new Completer<T>();
     _completers[id] = completer;
