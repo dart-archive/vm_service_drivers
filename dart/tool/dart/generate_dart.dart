@@ -402,6 +402,134 @@ Stream<Event> onEvent(String streamName) => _getEventController(streamName).stre
     types.where((t) => !t.skip).forEach((t) => t.generate(gen));
   }
 
+  void generateAsserts(DartGenerator gen) {
+    gen.out(r'''
+// Copyright (c) 2015, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+// This is a generated file.
+
+/// A library for asserting correct responses from the VM Service.
+
+import 'package:vm_service_lib/vm_service_lib.dart' as vms;
+
+dynamic assertNotNull(dynamic obj) {
+  if (obj == null) throw 'assert failed';
+  return obj;
+}
+
+bool assertBool(bool obj) {
+  assertNotNull(obj);
+  return obj;
+}
+
+dynamic assertDynamic(dynamic obj) {
+  assertNotNull(obj);
+  return obj;
+}
+
+int assertInt(int obj) {
+  assertNotNull(obj);
+  return obj;
+}
+
+List<int> assertInts(List<int> list) {
+  for (int elem in list) {
+    assertInt(elem);
+  }
+  return list;
+}
+
+String assertString(String obj) {
+  assertNotNull(obj);
+  if (obj.length == 0) throw 'expected non-zero length string';
+  return obj;
+}
+
+vms.Success assertSuccess(vms.Success obj) {
+  assertNotNull(obj);
+  if (obj.type != 'Success') throw 'expected Success';
+  return obj;
+}
+
+/// Assert PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted,
+/// PauseException, Resume, BreakpointAdded, BreakpointResolved,
+/// BreakpointRemoved, and Inspect events.
+vms.Event assertDebugEvent(vms.Event event) {
+  assertEvent(event);
+  if (event.kind == vms.EventKind.kPauseBreakpoint ||
+      event.kind == vms.EventKind.kBreakpointAdded ||
+      event.kind == vms.EventKind.kBreakpointRemoved ||
+      event.kind == vms.EventKind.kBreakpointResolved) {
+    assertBreakpoint(event.breakpoint);
+  }
+  if (event.kind == vms.EventKind.kPauseBreakpoint) {
+    for (vms.Breakpoint elem in event.pauseBreakpoints) {
+      assertBreakpoint(elem);
+    }
+  }
+  if (event.kind == vms.EventKind.kPauseBreakpoint ||
+      event.kind == vms.EventKind.kPauseInterrupted ||
+      event.kind == vms.EventKind.kPauseException ||
+      event.kind == vms.EventKind.kResume) {
+    // For PauseInterrupted events, there will be no top frame if the isolate is
+    // idle (waiting in the message loop).
+    // For the Resume event, the top frame is provided at all times except for
+    // the initial resume event that is delivered when an isolate begins
+    // execution.
+    if (event.topFrame != null ||
+        (event.kind != vms.EventKind.kPauseInterrupted &&
+            event.kind != vms.EventKind.kResume)) {
+      assertFrame(event.topFrame);
+    }
+  }
+  if (event.kind == vms.EventKind.kPauseException) {
+    assertInstanceRef(event.exception);
+  }
+  if (event.kind == vms.EventKind.kPauseBreakpoint ||
+      event.kind == vms.EventKind.kPauseInterrupted) {
+    assertBool(event.atAsyncSuspension);
+  }
+  if (event.kind == vms.EventKind.kInspect) {
+    assertInstanceRef(event.inspectee);
+  }
+  return event;
+}
+
+/// Assert IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate,
+/// and ServiceExtensionAdded events.
+vms.Event assertIsolateEvent(vms.Event event) {
+  assertEvent(event);
+  if (event.kind == vms.EventKind.kServiceExtensionAdded) {
+    assertString(event.extensionRPC);
+  }
+  return event;
+}
+
+''');
+    for (Enum e in enums) {
+      e.generateAssert(gen);
+    }
+    for (Type type in types) {
+      if (type.name == 'Success') continue;
+      type.generateAssert(gen);
+      if (type.name.endsWith('Ref') ||
+          [
+            'BoundVariable',
+            'Breakpoint',
+            'ContextElement',
+            'Flag',
+            'Frame',
+            'LibraryDependency',
+            'Message',
+            'SourceReportRange',
+          ].contains(type.name)) {
+        type.generateListAssert(gen);
+      }
+    }
+  }
+
   void setDefaultValue(String typeName, String fieldName, String defaultValue) {
     types
         .firstWhere((t) => t.name == typeName)
@@ -560,6 +688,10 @@ class TypeRef {
       arrayDepth == 0 &&
       (name == 'int' || name == 'num' || name == 'String' || name == 'bool');
 
+  String get namePlural => name.endsWith('y')
+      ? name.substring(0, name.length - 1) + 'ies'
+      : name + 's';
+
   String toString() => ref;
 }
 
@@ -597,6 +729,10 @@ class Type extends Member {
   }
 
   bool get isRef => name.endsWith('Ref');
+
+  String get namePlural => name.endsWith('y')
+      ? name.substring(0, name.length - 1) + 'ies'
+      : name + 's';
 
   bool get supportsIdentity {
     if (fields.any((f) => f.name == 'id')) return true;
@@ -716,6 +852,47 @@ class Type extends Member {
     gen.writeln('}');
   }
 
+  void generateAssert(DartGenerator gen) {
+    gen.writeln('vms.${name} assert${name}(vms.${name} obj) {');
+    gen.writeln('assertNotNull(obj);');
+    for (TypeField field in getAllFields()) {
+      if (!field.optional) {
+        MemberType type = field.type;
+        if (type.isArray) {
+          TypeRef arrayType = type.types.first;
+          if (arrayType.arrayDepth == 1) {
+            String assertMethodName = 'assert' +
+                arrayType.name.substring(0, 1).toUpperCase() +
+                arrayType.namePlural.substring(1);
+            gen.writeln('$assertMethodName(obj.${field.generatableName});');
+          } else {
+            gen.writeln(
+                '// assert obj.${field.generatableName} is ${type.name}');
+          }
+        } else {
+          String assertMethodName = 'assert' +
+              type.name.substring(0, 1).toUpperCase() +
+              type.name.substring(1);
+          gen.writeln('$assertMethodName(obj.${field.generatableName});');
+        }
+      }
+    }
+    gen.writeln('return obj;');
+    gen.writeln('}');
+    gen.writeln('');
+  }
+
+  void generateListAssert(DartGenerator gen) {
+    gen.writeln('List<vms.${name}> '
+        'assert${namePlural}(List<vms.${name}> list) {');
+    gen.writeln('for (vms.${name} elem in list) {');
+    gen.writeln('assert${name}(elem);');
+    gen.writeln('}');
+    gen.writeln('return list;');
+    gen.writeln('}');
+    gen.writeln('');
+  }
+
   void _parse(Token token) {
     new TypeParser(token).parseInto(this);
   }
@@ -801,6 +978,18 @@ class Enum extends Member {
     gen.writeln();
     enums.forEach((e) => e.generate(gen));
     gen.writeStatement('}');
+  }
+
+  void generateAssert(DartGenerator gen) {
+    gen.writeln('String assert${name}(String obj) {');
+    List<EnumValue> sorted = enums.toList()
+      ..sort((EnumValue e1, EnumValue e2) => e1.name.compareTo(e2.name));
+    for (EnumValue value in sorted) {
+      gen.writeln('  if (obj == "${value.name}") return obj;');
+    }
+    gen.writeln('  throw "invalid ${name}: \$obj";');
+    gen.writeln('}');
+    gen.writeln('');
   }
 
   void _parse(Token token) {
