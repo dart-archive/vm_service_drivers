@@ -28,9 +28,9 @@ main(List<String> args) async {
 
   // pause_isolates_on_start, pause_isolates_on_exit
   Process process = await Process.start('${sdk}/bin/dart', [
-      '--pause_isolates_on_start',
-      '--enable-vm-service=${port}',
-      'example/sample_main.dart'
+    '--pause_isolates_on_start',
+    '--enable-vm-service=${port}',
+    'example/sample_main.dart'
   ]);
 
   print('dart process started');
@@ -47,7 +47,7 @@ main(List<String> args) async {
 
   print('socket connected');
 
-  serviceClient.onSend.listen((str)    => print('--> ${str}'));
+  serviceClient.onSend.listen((str) => print('--> ${str}'));
   serviceClient.onReceive.listen((str) => print('<-- ${str}'));
 
   serviceClient.onIsolateEvent.listen((e) => print('onIsolateEvent: ${e}'));
