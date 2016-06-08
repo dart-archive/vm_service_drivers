@@ -18,11 +18,6 @@ bool assertBool(bool obj) {
   return obj;
 }
 
-dynamic assertDynamic(dynamic obj) {
-  assertNotNull(obj);
-  return obj;
-}
-
 int assertInt(int obj) {
   assertNotNull(obj);
   return obj;
@@ -214,14 +209,26 @@ String assertStepOption(String obj) {
 vms.BoundField assertBoundField(vms.BoundField obj) {
   assertNotNull(obj);
   assertFieldRef(obj.decl);
-  assertDynamic(obj.value);
+  if (obj.value is vms.InstanceRef) {
+    assertInstanceRef(obj.value);
+  } else if (obj.value is vms.Sentinel) {
+    assertSentinel(obj.value);
+  } else {
+    throw "Unexpected value: ${obj.value}";
+  }
   return obj;
 }
 
 vms.BoundVariable assertBoundVariable(vms.BoundVariable obj) {
   assertNotNull(obj);
   assertString(obj.name);
-  assertDynamic(obj.value);
+  if (obj.value is vms.InstanceRef) {
+    assertInstanceRef(obj.value);
+  } else if (obj.value is vms.Sentinel) {
+    assertSentinel(obj.value);
+  } else {
+    throw "Unexpected value: ${obj.value}";
+  }
   return obj;
 }
 
@@ -238,7 +245,13 @@ vms.Breakpoint assertBreakpoint(vms.Breakpoint obj) {
   assertString(obj.id);
   assertInt(obj.breakpointNumber);
   assertBool(obj.resolved);
-  assertDynamic(obj.location);
+  if (obj.location is vms.SourceLocation) {
+    assertSourceLocation(obj.location);
+  } else if (obj.location is vms.UnresolvedSourceLocation) {
+    assertUnresolvedSourceLocation(obj.location);
+  } else {
+    throw "Unexpected value: ${obj.location}";
+  }
   return obj;
 }
 
@@ -337,7 +350,13 @@ vms.Context assertContext(vms.Context obj) {
 
 vms.ContextElement assertContextElement(vms.ContextElement obj) {
   assertNotNull(obj);
-  assertDynamic(obj.value);
+  if (obj.value is vms.InstanceRef) {
+    assertInstanceRef(obj.value);
+  } else if (obj.value is vms.Sentinel) {
+    assertSentinel(obj.value);
+  } else {
+    throw "Unexpected value: ${obj.value}";
+  }
   return obj;
 }
 
@@ -464,7 +483,15 @@ vms.FuncRef assertFuncRef(vms.FuncRef obj) {
   assertString(obj.type);
   assertString(obj.id);
   assertString(obj.name);
-  assertDynamic(obj.owner);
+  if (obj.owner is vms.LibraryRef) {
+    assertLibraryRef(obj.owner);
+  } else if (obj.owner is vms.ClassRef) {
+    assertClassRef(obj.owner);
+  } else if (obj.owner is vms.FuncRef) {
+    assertFuncRef(obj.owner);
+  } else {
+    throw "Unexpected value: ${obj.owner}";
+  }
   assertBool(obj.isStatic);
   assertBool(obj.isConst);
   return obj;
@@ -482,7 +509,15 @@ vms.Func assertFunc(vms.Func obj) {
   assertString(obj.type);
   assertString(obj.id);
   assertString(obj.name);
-  assertDynamic(obj.owner);
+  if (obj.owner is vms.LibraryRef) {
+    assertLibraryRef(obj.owner);
+  } else if (obj.owner is vms.ClassRef) {
+    assertClassRef(obj.owner);
+  } else if (obj.owner is vms.FuncRef) {
+    assertFuncRef(obj.owner);
+  } else {
+    throw "Unexpected value: ${obj.owner}";
+  }
   return obj;
 }
 
@@ -593,8 +628,20 @@ List<vms.LibraryDependency> assertLibraryDependencies(
 
 vms.MapAssociation assertMapAssociation(vms.MapAssociation obj) {
   assertNotNull(obj);
-  assertDynamic(obj.key);
-  assertDynamic(obj.value);
+  if (obj.key is vms.InstanceRef) {
+    assertInstanceRef(obj.key);
+  } else if (obj.key is vms.Sentinel) {
+    assertSentinel(obj.key);
+  } else {
+    throw "Unexpected value: ${obj.key}";
+  }
+  if (obj.value is vms.InstanceRef) {
+    assertInstanceRef(obj.value);
+  } else if (obj.value is vms.Sentinel) {
+    assertSentinel(obj.value);
+  } else {
+    throw "Unexpected value: ${obj.value}";
+  }
   return obj;
 }
 

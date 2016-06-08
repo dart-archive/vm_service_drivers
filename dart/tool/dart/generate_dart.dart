@@ -424,11 +424,6 @@ bool assertBool(bool obj) {
   return obj;
 }
 
-dynamic assertDynamic(dynamic obj) {
-  assertNotNull(obj);
-  return obj;
-}
-
 int assertInt(int obj) {
   assertNotNull(obj);
   return obj;
@@ -869,6 +864,26 @@ class Type extends Member {
             gen.writeln(
                 '// assert obj.${field.generatableName} is ${type.name}');
           }
+        } else if (type.isMultipleReturns) {
+          //
+          //   assertSourceLocation(obj.location);
+          // } else if (obj.location is vms.SourceLocation) {
+          //   assertSourceLocation(obj.location);
+          bool first = true;
+          for (TypeRef typeRef in type.types) {
+            if (!first) gen.write('} else ');
+            first = false;
+            gen.writeln(
+                'if (obj.${field.generatableName} is vms.${typeRef.name}) {');
+            String assertMethodName = 'assert' +
+                typeRef.name.substring(0, 1).toUpperCase() +
+                typeRef.name.substring(1);
+            gen.writeln('$assertMethodName(obj.${field.generatableName});');
+          }
+          gen.writeln('} else {');
+          gen.writeln(
+              'throw "Unexpected value: \${obj.${field.generatableName}}";');
+          gen.writeln('}');
         } else {
           String assertMethodName = 'assert' +
               type.name.substring(0, 1).toUpperCase() +
