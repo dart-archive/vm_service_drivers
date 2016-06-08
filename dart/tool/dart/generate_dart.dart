@@ -865,10 +865,6 @@ class Type extends Member {
                 '// assert obj.${field.generatableName} is ${type.name}');
           }
         } else if (type.isMultipleReturns) {
-          //
-          //   assertSourceLocation(obj.location);
-          // } else if (obj.location is vms.SourceLocation) {
-          //   assertSourceLocation(obj.location);
           bool first = true;
           for (TypeRef typeRef in type.types) {
             if (!first) gen.write('} else ');
