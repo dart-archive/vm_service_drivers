@@ -29,6 +29,7 @@ main(List<String> args) {
   // Generate code from the model.
   _generateDart(appDirPath, nodes);
   _generateJava(appDirPath, nodes);
+  _generateAsserts(appDirPath, nodes);
 }
 
 void _generateDart(String appDirPath, List<Node> nodes) {
@@ -71,6 +72,31 @@ void _generateJava(String appDirPath, List<Node> nodes) {
   file.writeAsStringSync('version=${version.major}.${version.minor}\n');
 
   print('Wrote Java to $srcDirPath.');
+}
+
+void _generateAsserts(String appDirPath, List<Node> nodes) {
+  print('');
+  var outDirPath = normalize(join(appDirPath, '..', 'example'));
+  var outDir = new Directory(outDirPath);
+  if (!outDir.existsSync()) outDir.createSync(recursive: true);
+  var outputFile = new File(join(outDirPath, 'vm_service_assert.dart'));
+  var generator = new dart.DartGenerator();
+  dart.api = new dart.Api();
+  dart.api.parse(nodes);
+  dart.api.generateAsserts(generator);
+  outputFile.writeAsStringSync(generator.toString());
+  Process.runSync('dartfmt', ['-w', outDirPath]);
+
+  if (_stampPubspecVersion) {
+    // Update the pubspec file.
+    Version version = ApiParseUtil.parseVersionSemVer(nodes);
+    _stampPubspec(version);
+
+    // Validate that the changelog contains an entry for the current version.
+    _checkUpdateChangelog(version);
+  }
+
+  print('Wrote Dart to ${outputFile.path}.');
 }
 
 // Push the major and minor versions into the pubspec.
