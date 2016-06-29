@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.1
+- fix a parsing issue with ExtensionData
+
 ## 0.2.4
 - expose the service protocol timeline API
 - add the new `None` event type

@@ -794,10 +794,13 @@ class Type extends Member {
         //   String enumTypeName = field.type.types.first.name;
         //   gen.writeln(
         //     "${field.generatableName} = _parse${enumTypeName}[json['${field.name}']];");
+      } else if (name == 'Event' && field.name == 'extensionData') {
+        // Special case `Event.extensionData`.
+        gen.writeln("extensionData = ExtensionData.parse(json['extensionData']);");
       } else if (name == 'Instance' && field.name == 'associations') {
         // Special case `Instance.associations`.
-        gen.writeln("associations = "
-            "_createSpecificObject(json['associations'], MapAssociation.parse) as List<MapAssociation>;");
+        gen.writeln("associations = _createSpecificObject(json['associations'], MapAssociation.parse) "
+          "as List<MapAssociation>;");
       } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;
         gen.writeln(

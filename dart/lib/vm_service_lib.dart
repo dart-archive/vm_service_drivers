@@ -1446,7 +1446,7 @@ class Event extends Response {
     inspectee = _createObject(json['inspectee']);
     extensionRPC = json['extensionRPC'];
     extensionKind = json['extensionKind'];
-    extensionData = _createObject(json['extensionData']);
+    extensionData = ExtensionData.parse(json['extensionData']);
     timelineEvents =
         _createObject(json['timelineEvents']) as List<TimelineEvent>;
     atAsyncSuspension = json['atAsyncSuspension'];
