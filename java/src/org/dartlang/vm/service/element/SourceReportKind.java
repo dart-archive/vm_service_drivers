@@ -30,4 +30,5 @@ public enum SourceReportKind {
   /**
    * Represents a value returned by the VM but unknown to this client
    */
-  Unknown}
+  Unknown
+}

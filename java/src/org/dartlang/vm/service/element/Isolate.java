@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.List;
 
 /**
  * An {@link Isolate} object provides information about one isolate in the VM.
@@ -62,6 +63,7 @@ public class Isolate extends Response {
    * The list of service extension RPCs that are registered for this isolate, if any.
    */
   public List<String> getExtensionRPCs() {
+    return getListString("extensionRPCs");
   }
 
   /**

@@ -532,6 +532,10 @@ class Method extends Member {
       }
     }
 
+    if (name == 'getSourceReport') {
+      javadoc.writeln('\n\nTODO: reports parameter should be a List<SourceReportKind>.');
+    }
+
     List<MethodArg> mthArgs = args;
     if (!includeOptional) {
       mthArgs = mthArgs.toList()..removeWhere((a) => a.optional);
@@ -547,8 +551,10 @@ class Method extends Member {
         String op = arg.optional ? 'if (${name} != null) ' : '';
         if (arg.isEnumType) {
           writer.addLine('${op}params.addProperty("$name", $name.name());');
-        } else if (arg.optional && arg.type == 'int') {
+        } else if (arg.optional && arg.type.ref == 'int') {
           writer.addLine('${op}params.addProperty("$name", $name.intValue());');
+        } else if (arg.optional && arg.type.ref == 'boolean') {
+          writer.addLine('${op}params.addProperty("$name", $name.booleanValue());');
         } else {
           writer.addLine('${op}params.addProperty("$name", $name);');
         }
@@ -571,12 +577,18 @@ class MethodArg extends Member {
 
   MethodArg(this.parent, this.type, this.name);
 
-  get asJavaMethodArg => optional && type == 'int'
-      ? new JavaMethodArg(name, 'Integer')
-      : new JavaMethodArg(name, type.name);
+  get asJavaMethodArg {
+    if (optional && type.ref == 'int') {
+      return new JavaMethodArg(name, 'Integer');
+    }
+    if (optional && type.ref == 'boolean') {
+      return new JavaMethodArg(name, 'Boolean');
+    }
+    return new JavaMethodArg(name, type.name);
+  }
 
-  /// Hacked enum arg type determination
-  bool get isEnumType => name == 'step' || name == 'mode';
+  /// TODO: Hacked enum arg type determination
+  bool get isEnumType => name == 'step' || name == 'mode' || name == 'reports';
 }
 
 class MethodParser extends Parser {
@@ -787,7 +799,7 @@ class TypeField extends Member {
     if (type.isMultipleReturns && !type.isValueAndSentinel) {
       print('skipped accessor for $name '
           '(${type.types.map((t) => t.name).join(',')}) '
-          ' in ${writer.className}');
+          'in ${writer.className}');
       return;
     }
 
@@ -906,7 +918,8 @@ class TypeRef {
       }
     } else if (name == 'String') {
       if (isArray) {
-        print('skipped accessor body for $propertyName');
+        writer.addImport('java.util.List');
+        writer.addLine('return getListString("$propertyName");');
       } else {
         writer.addLine('return json.get("$propertyName").getAsString();');
       }

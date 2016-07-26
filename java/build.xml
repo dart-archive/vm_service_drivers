@@ -36,7 +36,9 @@
   </target>
 
   <target name="test" depends="compile">
-    <java classname="org.dartlang.vm.service.VmServiceTest"
+    <!-- TODO: restore this test -->
+
+    <!-- java classname="org.dartlang.vm.service.VmServiceTest"
         fork="true" failonerror="true">
       <arg value="${env.DART_SDK}"/>
       <classpath>
@@ -44,7 +46,7 @@
         <pathelement location="build/classes"/>
         <pathelement location="build/test"/>
       </classpath>
-    </java>
+    </java -->
   </target>
 
   <target name="dist" depends="jar,test">

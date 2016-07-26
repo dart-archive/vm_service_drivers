@@ -159,6 +159,8 @@ class TypeWriter {
     _content.write('  $name');
     if (!isLast) {
       _content.writeln(',');
+    } else {
+      _content.writeln();
     }
   }
 
@@ -198,39 +200,39 @@ class TypeWriter {
       String modifiers: 'public',
       String returnType: 'void',
       bool isOverride: false}) {
-    var mthDecl = new StringBuffer();
+    var methodDecl = new StringBuffer();
     if (javadoc != null && javadoc.isNotEmpty) {
-      mthDecl.writeln('  /**');
+      methodDecl.writeln('  /**');
       wrap(javadoc.trim(), colBoundary - 6)
           .split('\n')
-          .forEach((line) => mthDecl.writeln('   * $line'));
-      mthDecl.writeln('   */');
+          .forEach((line) => methodDecl.writeln('   * $line'));
+      methodDecl.writeln('   */');
     }
     if (isOverride) {
-      mthDecl.writeln('  @Override');
+      methodDecl.writeln('  @Override');
     }
-    mthDecl.write('  ');
+    methodDecl.write('  ');
     if (modifiers != null && modifiers.isNotEmpty) {
-      mthDecl.write('$modifiers ');
+      methodDecl.write('$modifiers ');
     }
-    mthDecl.write('$returnType $name(');
-    mthDecl.write(
-        args.map((a) => '${classNameFor(a.typeName)} ${a.name}').join(', '));
-    mthDecl.write(')');
+    methodDecl.write('$returnType $name(');
+    methodDecl.write(
+        args.map((JavaMethodArg arg) => '${classNameFor(arg.typeName)} ${arg.name}').join(', '));
+    methodDecl.write(')');
     if (write != null) {
-      mthDecl.writeln(' {');
+      methodDecl.writeln(' {');
       StatementWriter writer = new StatementWriter(this);
       write(writer);
-      mthDecl.write(writer.toSource());
-      mthDecl.writeln('  }');
+      methodDecl.write(writer.toSource());
+      methodDecl.writeln('  }');
     } else {
-      mthDecl.writeln(';');
+      methodDecl.writeln(';');
     }
     String key = (modifiers != null && modifiers.contains('public'))
         ? '1 $name('
         : '2 $name(';
     key = args.fold(key, (String k, JavaMethodArg a) => '$k${a.typeName},');
-    _methods[key] = mthDecl.toString();
+    _methods[key] = methodDecl.toString();
   }
 
   String toSource() {
