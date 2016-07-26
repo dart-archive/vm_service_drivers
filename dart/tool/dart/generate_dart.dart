@@ -45,7 +45,7 @@ import 'dart:convert' show BASE64, JSON;
 final String _implCode = r'''
 
   /// Call an arbitrary service protocol method. This allows clients to call
-  /// methds not explicitly exposed by this library.
+  /// methods not explicitly exposed by this library.
   Future<Response> callMethod(String method, {
     String isolateId,
     Map args
@@ -170,7 +170,7 @@ class ExtensionData {
 }
 
 /// A logging handler you can pass to a [VmService] instance in order to get
-/// notifications of non-fatal service protcol warnings and errors.
+/// notifications of non-fatal service protocol warnings and errors.
 abstract class Log {
   /// Log a warning level message.
   void warning(String message);

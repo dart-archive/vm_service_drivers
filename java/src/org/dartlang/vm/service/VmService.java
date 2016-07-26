@@ -88,12 +88,12 @@ public class VmService extends VmServiceBase {
    * 
    * @param column This parameter is optional and may be null.
    */
-  public void addBreakpoint(String isolateId, String scriptId, int line, int column, BreakpointConsumer consumer) {
+  public void addBreakpoint(String isolateId, String scriptId, int line, Integer column, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("scriptId", scriptId);
     params.addProperty("line", line);
-    if (column != null) params.addProperty("column", column);
+    if (column != null) params.addProperty("column", column.intValue());
     request("addBreakpoint", params, consumer);
   }
 
@@ -127,12 +127,12 @@ public class VmService extends VmServiceBase {
    * 
    * @param column This parameter is optional and may be null.
    */
-  public void addBreakpointWithScriptUri(String isolateId, String scriptUri, int line, int column, BreakpointConsumer consumer) {
+  public void addBreakpointWithScriptUri(String isolateId, String scriptUri, int line, Integer column, BreakpointConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("scriptUri", scriptUri);
     params.addProperty("line", line);
-    if (column != null) params.addProperty("column", column);
+    if (column != null) params.addProperty("column", column.intValue());
     request("addBreakpointWithScriptUri", params, consumer);
   }
 
@@ -194,23 +194,25 @@ public class VmService extends VmServiceBase {
    * @param offset This parameter is optional and may be null.
    * @param count This parameter is optional and may be null.
    */
-  public void getObject(String isolateId, String objectId, int offset, int count, GetObjectConsumer consumer) {
+  public void getObject(String isolateId, String objectId, Integer offset, Integer count, GetObjectConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("objectId", objectId);
-    if (offset != null) params.addProperty("offset", offset);
-    if (count != null) params.addProperty("count", count);
+    if (offset != null) params.addProperty("offset", offset.intValue());
+    if (count != null) params.addProperty("count", count.intValue());
     request("getObject", params, consumer);
   }
 
   /**
    * The [getSourceReport] RPC is used to generate a set of reports tied to source locations in an
    * isolate.
+   * 
+   * TODO: reports parameter should be a List<SourceReportKind>.
    */
   public void getSourceReport(String isolateId, SourceReportKind reports, SourceReportConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
-    params.addProperty("reports", reports);
+    params.addProperty("reports", reports.name());
     request("getSourceReport", params, consumer);
   }
 
@@ -222,15 +224,18 @@ public class VmService extends VmServiceBase {
    * @param tokenPos This parameter is optional and may be null.
    * @param endTokenPos This parameter is optional and may be null.
    * @param forceCompile This parameter is optional and may be null.
+   * 
+   * 
+   * TODO: reports parameter should be a List<SourceReportKind>.
    */
-  public void getSourceReport(String isolateId, SourceReportKind reports, String scriptId, int tokenPos, int endTokenPos, boolean forceCompile, SourceReportConsumer consumer) {
+  public void getSourceReport(String isolateId, SourceReportKind reports, String scriptId, Integer tokenPos, Integer endTokenPos, Boolean forceCompile, SourceReportConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
-    params.addProperty("reports", reports);
+    params.addProperty("reports", reports.name());
     if (scriptId != null) params.addProperty("scriptId", scriptId);
-    if (tokenPos != null) params.addProperty("tokenPos", tokenPos);
-    if (endTokenPos != null) params.addProperty("endTokenPos", endTokenPos);
-    if (forceCompile != null) params.addProperty("forceCompile", forceCompile);
+    if (tokenPos != null) params.addProperty("tokenPos", tokenPos.intValue());
+    if (endTokenPos != null) params.addProperty("endTokenPos", endTokenPos.intValue());
+    if (forceCompile != null) params.addProperty("forceCompile", forceCompile.booleanValue());
     request("getSourceReport", params, consumer);
   }
 
