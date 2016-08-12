@@ -15,5 +15,5 @@ Future<VmService> vmServiceConnect(String host, int port, {Log log}) {
     return new VmService(
         controller.stream, (String message) => socket.add(message),
         log: log, disposeHandler: () => socket.close());
-  });
+  }) as Future<VmService>;
 }
