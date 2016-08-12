@@ -1772,7 +1772,7 @@ class InstanceRef extends ObjRef {
   @optional
   String name;
 
-  /// The corresponding Class if this Type is canonical.
+  /// The corresponding Class if this Type has a resolved typeClass.
   ///
   /// Provided for instance kinds:
   ///  - Type
