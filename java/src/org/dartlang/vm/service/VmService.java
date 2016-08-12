@@ -93,7 +93,7 @@ public class VmService extends VmServiceBase {
     params.addProperty("isolateId", isolateId);
     params.addProperty("scriptId", scriptId);
     params.addProperty("line", line);
-    if (column != null) params.addProperty("column", column.intValue());
+    if (column != null) params.addProperty("column", column);
     request("addBreakpoint", params, consumer);
   }
 
@@ -132,7 +132,7 @@ public class VmService extends VmServiceBase {
     params.addProperty("isolateId", isolateId);
     params.addProperty("scriptUri", scriptUri);
     params.addProperty("line", line);
-    if (column != null) params.addProperty("column", column.intValue());
+    if (column != null) params.addProperty("column", column);
     request("addBreakpointWithScriptUri", params, consumer);
   }
 
@@ -198,8 +198,8 @@ public class VmService extends VmServiceBase {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("objectId", objectId);
-    if (offset != null) params.addProperty("offset", offset.intValue());
-    if (count != null) params.addProperty("count", count.intValue());
+    if (offset != null) params.addProperty("offset", offset);
+    if (count != null) params.addProperty("count", count);
     request("getObject", params, consumer);
   }
 
@@ -233,9 +233,9 @@ public class VmService extends VmServiceBase {
     params.addProperty("isolateId", isolateId);
     params.addProperty("reports", reports.name());
     if (scriptId != null) params.addProperty("scriptId", scriptId);
-    if (tokenPos != null) params.addProperty("tokenPos", tokenPos.intValue());
-    if (endTokenPos != null) params.addProperty("endTokenPos", endTokenPos.intValue());
-    if (forceCompile != null) params.addProperty("forceCompile", forceCompile.booleanValue());
+    if (tokenPos != null) params.addProperty("tokenPos", tokenPos);
+    if (endTokenPos != null) params.addProperty("endTokenPos", endTokenPos);
+    if (forceCompile != null) params.addProperty("forceCompile", forceCompile);
     request("getSourceReport", params, consumer);
   }
 

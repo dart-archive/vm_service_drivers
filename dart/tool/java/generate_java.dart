@@ -551,10 +551,6 @@ class Method extends Member {
         String op = arg.optional ? 'if (${name} != null) ' : '';
         if (arg.isEnumType) {
           writer.addLine('${op}params.addProperty("$name", $name.name());');
-        } else if (arg.optional && arg.type.ref == 'int') {
-          writer.addLine('${op}params.addProperty("$name", $name.intValue());');
-        } else if (arg.optional && arg.type.ref == 'boolean') {
-          writer.addLine('${op}params.addProperty("$name", $name.booleanValue());');
         } else {
           writer.addLine('${op}params.addProperty("$name", $name);');
         }
