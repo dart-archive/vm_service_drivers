@@ -30,7 +30,7 @@ public class Instance extends Obj {
 
   /**
    * The elements of a Map instance.
-   * 
+   *
    * Provided for instance kinds:
    *  - Map
    */
@@ -45,9 +45,9 @@ public class Instance extends Obj {
 
   /**
    * The bound of a TypeParameter or BoundedType.
-   * 
+   *
    * The value will always be of one of the kinds: Type, TypeRef, TypeParameter, BoundedType.
-   * 
+   *
    * Provided for instance kinds:
    *  - BoundedType
    *  - TypeParameter
@@ -58,9 +58,9 @@ public class Instance extends Obj {
 
   /**
    * The bytes of a TypedData instance.
-   * 
+   *
    * The data is provided as a Base64 encoded string.
-   * 
+   *
    * Provided for instance kinds:
    *  - Uint8ClampedList
    *  - Uint8List
@@ -90,7 +90,7 @@ public class Instance extends Obj {
 
   /**
    * The context associated with a Closure instance.
-   * 
+   *
    * Provided for instance kinds:
    *  - Closure
    */
@@ -100,7 +100,7 @@ public class Instance extends Obj {
 
   /**
    * The function associated with a Closure instance.
-   * 
+   *
    * Provided for instance kinds:
    *  - Closure
    */
@@ -111,7 +111,7 @@ public class Instance extends Obj {
   /**
    * The number of elements or associations or codeunits returned. This is only provided when it is
    * less than length.
-   * 
+   *
    * Provided for instance kinds:
    *  - String
    *  - List
@@ -137,10 +137,10 @@ public class Instance extends Obj {
 
   /**
    * The elements of a List instance.
-   * 
+   *
    * Provided for instance kinds:
    *  - List
-   * 
+   *
    * @return one of <code>ElementList<InstanceRef></code> or <code>ElementList<Sentinel></code>
    */
   public ElementList<InstanceRef> getElements() {
@@ -166,7 +166,7 @@ public class Instance extends Obj {
 
   /**
    * Whether this regular expression is case sensitive.
-   * 
+   *
    * Provided for instance kinds:
    *  - RegExp
    */
@@ -176,7 +176,7 @@ public class Instance extends Obj {
 
   /**
    * Whether this regular expression matches multiple lines.
-   * 
+   *
    * Provided for instance kinds:
    *  - RegExp
    */
@@ -199,7 +199,7 @@ public class Instance extends Obj {
   /**
    * The length of a List or the number of associations in a Map or the number of codeunits in a
    * String.
-   * 
+   *
    * Provided for instance kinds:
    *  - String
    *  - List
@@ -225,7 +225,7 @@ public class Instance extends Obj {
 
   /**
    * The referent of a MirrorReference instance.
-   * 
+   *
    * Provided for instance kinds:
    *  - MirrorReference
    */
@@ -235,7 +235,7 @@ public class Instance extends Obj {
 
   /**
    * The name of a Type instance.
-   * 
+   *
    * Provided for instance kinds:
    *  - Type
    */
@@ -246,7 +246,7 @@ public class Instance extends Obj {
   /**
    * The index of the first element or association or codeunit returned. This is only provided when
    * it is non-zero.
-   * 
+   *
    * Provided for instance kinds:
    *  - String
    *  - List
@@ -272,7 +272,7 @@ public class Instance extends Obj {
 
   /**
    * The index of a TypeParameter instance.
-   * 
+   *
    * Provided for instance kinds:
    *  - TypeParameter
    */
@@ -282,7 +282,7 @@ public class Instance extends Obj {
 
   /**
    * The parameterized class of a type parameter:
-   * 
+   *
    * Provided for instance kinds:
    *  - TypeParameter
    */
@@ -292,7 +292,7 @@ public class Instance extends Obj {
 
   /**
    * The pattern of a RegExp instance.
-   * 
+   *
    * Provided for instance kinds:
    *  - RegExp
    */
@@ -302,7 +302,7 @@ public class Instance extends Obj {
 
   /**
    * The key for a WeakProperty instance.
-   * 
+   *
    * Provided for instance kinds:
    *  - WeakProperty
    */
@@ -312,7 +312,7 @@ public class Instance extends Obj {
 
   /**
    * The key for a WeakProperty instance.
-   * 
+   *
    * Provided for instance kinds:
    *  - WeakProperty
    */
@@ -322,9 +322,9 @@ public class Instance extends Obj {
 
   /**
    * The type bounded by a BoundedType instance - or - the referent of a TypeRef instance.
-   * 
+   *
    * The value will always be of one of the kinds: Type, TypeRef, TypeParameter, BoundedType.
-   * 
+   *
    * Provided for instance kinds:
    *  - BoundedType
    *  - TypeRef
@@ -335,7 +335,7 @@ public class Instance extends Obj {
 
   /**
    * The type arguments for this type.
-   * 
+   *
    * Provided for instance kinds:
    *  - Type
    */
@@ -345,7 +345,7 @@ public class Instance extends Obj {
 
   /**
    * The corresponding Class if this Type is canonical.
-   * 
+   *
    * Provided for instance kinds:
    *  - Type
    */
@@ -355,7 +355,7 @@ public class Instance extends Obj {
 
   /**
    * The value of this instance as a string.
-   * 
+   *
    * Provided for the instance kinds:
    *  - Bool (true or false)
    *  - Double (suitable for passing to Double.parse())
@@ -369,7 +369,7 @@ public class Instance extends Obj {
   /**
    * The valueAsString for String references may be truncated. If so, this property is added with
    * the value 'true'.
-   * 
+   *
    * New code should use 'length' and 'count' instead.
    */
   public boolean getValueAsStringIsTruncated() {

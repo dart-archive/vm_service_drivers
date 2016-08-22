@@ -31,9 +31,9 @@ public class SourceReport extends Response {
   /**
    * A list of ranges in the program source.  These ranges correspond to ranges of executable code
    * in the user's program (functions, methods, constructors, etc.)
-   * 
+   *
    * Note that ranges may nest in other ranges, in the case of nested functions.
-   * 
+   *
    * Note that ranges may be duplicated, in the case of mixins.
    */
   public ElementList<SourceReportRange> getRanges() {

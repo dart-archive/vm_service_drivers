@@ -60,7 +60,7 @@ public class ClassObj extends Obj {
 
   /**
    * A list of interface types for this class.
-   * 
+   *
    * The values will be of the kind: Type.
    */
   public ElementList<InstanceRef> getInterfaces() {
@@ -88,7 +88,7 @@ public class ClassObj extends Obj {
 
   /**
    * The mixin type for this class, if any.
-   * 
+   *
    * The value will be of the kind: Type.
    */
   public InstanceRef getMixin() {
@@ -123,7 +123,7 @@ public class ClassObj extends Obj {
 
   /**
    * The supertype for this class, if any.
-   * 
+   *
    * The value will be of the kind: Type.
    */
   public InstanceRef getSuperType() {
