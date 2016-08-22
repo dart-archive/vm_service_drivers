@@ -204,8 +204,8 @@ class TypeWriter {
     if (javadoc != null && javadoc.isNotEmpty) {
       methodDecl.writeln('  /**');
       wrap(javadoc.trim(), colBoundary - 6)
-          .split('\n')
-          .forEach((line) => methodDecl.writeln('   * $line'));
+        .split('\n')
+        .forEach((line) => methodDecl.writeln('   * $line'.trimRight()));
       methodDecl.writeln('   */');
     }
     if (isOverride) {

@@ -85,7 +85,7 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
-   * 
+   *
    * @param column This parameter is optional and may be null.
    */
   public void addBreakpoint(String isolateId, String scriptId, int line, Integer column, BreakpointConsumer consumer) {
@@ -124,7 +124,7 @@ public class VmService extends VmServiceBase {
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script. This
    * RPC is useful when a script has not yet been assigned an id, for example, if a script is in a
    * deferred library which has not yet been loaded.
-   * 
+   *
    * @param column This parameter is optional and may be null.
    */
   public void addBreakpointWithScriptUri(String isolateId, String scriptUri, int line, Integer column, BreakpointConsumer consumer) {
@@ -190,7 +190,7 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [getObject] RPC is used to lookup an [object] from some isolate by its [id].
-   * 
+   *
    * @param offset This parameter is optional and may be null.
    * @param count This parameter is optional and may be null.
    */
@@ -206,7 +206,7 @@ public class VmService extends VmServiceBase {
   /**
    * The [getSourceReport] RPC is used to generate a set of reports tied to source locations in an
    * isolate.
-   * 
+   *
    * TODO: reports parameter should be a List<SourceReportKind>.
    */
   public void getSourceReport(String isolateId, SourceReportKind reports, SourceReportConsumer consumer) {
@@ -219,13 +219,13 @@ public class VmService extends VmServiceBase {
   /**
    * The [getSourceReport] RPC is used to generate a set of reports tied to source locations in an
    * isolate.
-   * 
+   *
    * @param scriptId This parameter is optional and may be null.
    * @param tokenPos This parameter is optional and may be null.
    * @param endTokenPos This parameter is optional and may be null.
    * @param forceCompile This parameter is optional and may be null.
-   * 
-   * 
+   *
+   *
    * TODO: reports parameter should be a List<SourceReportKind>.
    */
   public void getSourceReport(String isolateId, SourceReportKind reports, String scriptId, Integer tokenPos, Integer endTokenPos, Boolean forceCompile, SourceReportConsumer consumer) {
@@ -288,7 +288,7 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [resume] RPC is used to resume execution of a paused isolate.
-   * 
+   *
    * @param step This parameter is optional and may be null.
    */
   public void resume(String isolateId, StepOption step, SuccessConsumer consumer) {
