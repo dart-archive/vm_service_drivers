@@ -793,16 +793,24 @@ class TypeField extends Member {
 
   void generateAccessor(TypeWriter writer) {
     if (type.isMultipleReturns && !type.isValueAndSentinel) {
-      print('skipped accessor for $name '
-          '(${type.types.map((t) => t.name).join(',')}) '
-          'in ${writer.className}');
-      return;
+      writer.addMethod(accessorName, [], (StatementWriter w) {
+        w.addImport('com.google.gson.JsonObject');
+        w.addLine('JsonObject elem = (JsonObject)json.get("$name");');
+        w.addLine('if (elem == null) return null;\n');
+        for (TypeRef t in type.types) {
+          String refName = t.name;
+          if (refName.endsWith('Ref')) refName = "@" + refName.substring(0, refName.length - 3);
+          w.addLine('if (elem.get("type").getAsString() == "${refName}") return new ${t.name}(elem);');
+        }
+        w.addLine('return null;');
+      }, javadoc: docs, returnType: 'Object');
+    } else {
+      writer.addMethod(accessorName, [], (StatementWriter writer) {
+        type.valueType.generateAccessStatements(writer, name,
+            canBeSentinel: type.isValueAndSentinel,
+            defaultValue: defaultValue, optional: optional);
+      }, javadoc: docs, returnType: type.valueType.ref);
     }
-
-    writer.addMethod(accessorName, [], (StatementWriter writer) {
-      type.valueType.generateAccessStatements(writer, name,
-          canBeSentinel: type.isValueAndSentinel, defaultValue: defaultValue);
-    }, javadoc: docs, returnType: type.valueType.ref);
   }
 }
 
@@ -881,7 +889,7 @@ class TypeRef {
   Type get type => api.types.firstWhere((t) => t.name == name);
 
   void generateAccessStatements(StatementWriter writer, String propertyName,
-      {bool canBeSentinel: false, String defaultValue}) {
+      {bool canBeSentinel: false, String defaultValue, bool optional: false}) {
     if (name == 'boolean') {
       if (isArray) {
         print('skipped accessor body for $propertyName');
@@ -891,6 +899,8 @@ class TypeRef {
           writer.addLine('JsonElement elem = json.get("$propertyName");');
           writer.addLine(
               'return elem != null ? elem.getAsBoolean() : $defaultValue;');
+        } else if (optional) {
+          writer.addLine('return json.get("$propertyName") == null ? false : json.get("$propertyName").getAsBoolean();');
         } else {
           writer.addLine('return json.get("$propertyName").getAsBoolean();');
         }
@@ -955,8 +965,13 @@ class TypeRef {
           writer.addLine('if ("Sentinel".equals(type)) return null;');
           writer.addLine('return new $name(child);');
         } else {
-          writer.addLine(
-              'return new $name((JsonObject) json.get("$propertyName"));');
+          if (optional) {
+            writer.addLine('return json.get("$propertyName") == null ? '
+                'null : new $name((JsonObject) json.get("$propertyName"));');
+          } else {
+            writer.addLine(
+                'return new $name((JsonObject) json.get("$propertyName"));');
+          }
         }
       }
     }

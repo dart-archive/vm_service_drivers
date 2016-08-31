@@ -54,7 +54,7 @@ String joinLast(Iterable<String> strs, String join, [String last]) {
 /// Wrap a string on column boundaries.
 String wrap(String str, [int col = 80]) {
   // The given string could contain newlines.
-  List lines = str.split('\n');
+  List<String> lines = str.split('\n');
   return lines.map((l) => _simpleWrap(l, col)).join('\n');
 }
 
