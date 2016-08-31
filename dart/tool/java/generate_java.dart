@@ -793,17 +793,24 @@ class TypeField extends Member {
 
   void generateAccessor(TypeWriter writer) {
     if (type.isMultipleReturns && !type.isValueAndSentinel) {
-      print('skipped accessor for $name '
-          '(${type.types.map((t) => t.name).join(',')}) '
-          'in ${writer.className}');
-      return;
+      writer.addMethod(accessorName, [], (StatementWriter w) {
+        w.addImport('com.google.gson.JsonObject');
+        w.addLine('JsonObject elem = (JsonObject)json.get("$name");');
+        w.addLine('if (elem == null) return null;\n');
+        for (TypeRef t in type.types) {
+          String refName = t.name;
+          if (refName.endsWith('Ref')) refName = "@" + refName.substring(0, refName.length - 3);
+          w.addLine('if (elem.get("type").getAsString() == "${refName}") return new ${t.name}(elem);');
+        }
+        w.addLine('return null;');
+      }, javadoc: docs, returnType: 'Object');
+    } else {
+      writer.addMethod(accessorName, [], (StatementWriter writer) {
+        type.valueType.generateAccessStatements(writer, name,
+            canBeSentinel: type.isValueAndSentinel,
+            defaultValue: defaultValue, optional: optional);
+      }, javadoc: docs, returnType: type.valueType.ref);
     }
-
-    writer.addMethod(accessorName, [], (StatementWriter writer) {
-      type.valueType.generateAccessStatements(writer, name,
-          canBeSentinel: type.isValueAndSentinel,
-          defaultValue: defaultValue, optional: optional);
-    }, javadoc: docs, returnType: type.valueType.ref);
   }
 }
 
