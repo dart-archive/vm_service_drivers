@@ -801,7 +801,8 @@ class TypeField extends Member {
 
     writer.addMethod(accessorName, [], (StatementWriter writer) {
       type.valueType.generateAccessStatements(writer, name,
-          canBeSentinel: type.isValueAndSentinel, defaultValue: defaultValue);
+          canBeSentinel: type.isValueAndSentinel,
+          defaultValue: defaultValue, optional: optional);
     }, javadoc: docs, returnType: type.valueType.ref);
   }
 }
@@ -881,7 +882,7 @@ class TypeRef {
   Type get type => api.types.firstWhere((t) => t.name == name);
 
   void generateAccessStatements(StatementWriter writer, String propertyName,
-      {bool canBeSentinel: false, String defaultValue}) {
+      {bool canBeSentinel: false, String defaultValue, bool optional: false}) {
     if (name == 'boolean') {
       if (isArray) {
         print('skipped accessor body for $propertyName');
@@ -891,6 +892,8 @@ class TypeRef {
           writer.addLine('JsonElement elem = json.get("$propertyName");');
           writer.addLine(
               'return elem != null ? elem.getAsBoolean() : $defaultValue;');
+        } else if (optional) {
+          writer.addLine('return json.get("$propertyName") == null ? false : json.get("$propertyName").getAsBoolean();');
         } else {
           writer.addLine('return json.get("$propertyName").getAsBoolean();');
         }
@@ -955,8 +958,13 @@ class TypeRef {
           writer.addLine('if ("Sentinel".equals(type)) return null;');
           writer.addLine('return new $name(child);');
         } else {
-          writer.addLine(
-              'return new $name((JsonObject) json.get("$propertyName"));');
+          if (optional) {
+            writer.addLine('return json.get("$propertyName") == null ? '
+                'null : new $name((JsonObject) json.get("$propertyName"));');
+          } else {
+            writer.addLine(
+                'return new $name((JsonObject) json.get("$propertyName"));');
+          }
         }
       }
     }

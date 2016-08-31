@@ -38,7 +38,7 @@ public class Breakpoint extends Obj {
    * command?
    */
   public boolean getIsSyntheticAsyncContinuation() {
-    return json.get("isSyntheticAsyncContinuation").getAsBoolean();
+    return json.get("isSyntheticAsyncContinuation") == null ? false : json.get("isSyntheticAsyncContinuation").getAsBoolean();
   }
 
   /**

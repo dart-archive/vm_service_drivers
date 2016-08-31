@@ -30,14 +30,14 @@ public class Func extends Obj {
    * The compiled code associated with this function.
    */
   public CodeRef getCode() {
-    return new CodeRef((JsonObject) json.get("code"));
+    return json.get("code") == null ? null : new CodeRef((JsonObject) json.get("code"));
   }
 
   /**
    * The location of this function in the source code.
    */
   public SourceLocation getLocation() {
-    return new SourceLocation((JsonObject) json.get("location"));
+    return json.get("location") == null ? null : new SourceLocation((JsonObject) json.get("location"));
   }
 
   /**
