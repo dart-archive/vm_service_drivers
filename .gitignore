@@ -18,8 +18,7 @@ pubspec.lock
 *.md~
 
 # IDEs
-.idea
-*.iml
+.idea/
 .project
 .settings
 
