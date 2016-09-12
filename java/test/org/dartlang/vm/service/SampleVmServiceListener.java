@@ -25,6 +25,11 @@ public class SampleVmServiceListener implements VmServiceListener {
   private Event lastEvent;
 
   @Override
+  public void connectionOpened() {
+
+  }
+
+  @Override
   public void received(String streamId, Event event) {
     synchronized (lock) {
       if (lastStreamId != null) {
@@ -34,6 +39,11 @@ public class SampleVmServiceListener implements VmServiceListener {
       lastEvent = event;
       lock.notifyAll();
     }
+  }
+
+  @Override
+  public void connectionClosed() {
+
   }
 
   public Event waitFor(String expectedStreamId, EventKind expectedEventKind) {
