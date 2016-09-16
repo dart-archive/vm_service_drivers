@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2015, the Dart project authors.
- * 
+ *
  * Licensed under the Eclipse Public License v1.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -23,7 +23,6 @@ import de.roderick.weberknecht.WebSocketEventHandler;
 import de.roderick.weberknecht.WebSocketException;
 import de.roderick.weberknecht.WebSocketMessage;
 
-import org.dartlang.vm.service.consumer.BreakpointConsumer;
 import org.dartlang.vm.service.consumer.Consumer;
 import org.dartlang.vm.service.consumer.GetInstanceConsumer;
 import org.dartlang.vm.service.consumer.GetLibraryConsumer;
@@ -58,7 +57,7 @@ abstract class VmServiceBase implements VmServiceConst {
 
   /**
    * Connect to the VM observatory service via the specified URI
-   * 
+   *
    * @return an API object for interacting with the VM service (not {@code null}).
    */
   public static VmService connect(final String url) throws IOException {
@@ -175,7 +174,7 @@ abstract class VmServiceBase implements VmServiceConst {
 
   /**
    * Connect to the VM observatory service on the given local port.
-   * 
+   *
    * @return an API object for interacting with the VM service (not {@code null}).
    */
   public static VmService localConnect(int port) throws IOException {
