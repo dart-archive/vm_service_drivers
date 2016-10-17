@@ -951,14 +951,28 @@ class BoundVariable {
   /// [value] can be one of [InstanceRef] or [Sentinel].
   dynamic value;
 
+  /// The token position where this variable was declared.
+  int declarationTokenPos;
+
+  /// The first token position where this variable is visible to the scope.
+  int scopeStartTokenPos;
+
+  /// The last token position where this variable is visible to the scope.
+  int scopeEndTokenPos;
+
   BoundVariable();
 
   BoundVariable._fromJson(Map<String, dynamic> json) {
     name = json['name'];
     value = _createObject(json['value']);
+    declarationTokenPos = json['declarationTokenPos'];
+    scopeStartTokenPos = json['scopeStartTokenPos'];
+    scopeEndTokenPos = json['scopeEndTokenPos'];
   }
 
-  String toString() => '[BoundVariable name: ${name}, value: ${value}]';
+  String toString() => '[BoundVariable ' //
+      'name: ${name}, value: ${value}, declarationTokenPos: ${declarationTokenPos}, ' //
+      'scopeStartTokenPos: ${scopeStartTokenPos}, scopeEndTokenPos: ${scopeEndTokenPos}]';
 }
 
 /// A `Breakpoint` describes a debugger breakpoint.

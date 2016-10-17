@@ -913,7 +913,7 @@ class TypeRef {
         writer.addImport('java.util.List');
         writer.addLine('return getListInt("$propertyName");');
       } else {
-        writer.addLine('return json.get("$propertyName").getAsInt();');
+        writer.addLine('return json.get("$propertyName") == null ? -1 : json.get("$propertyName").getAsInt();');
       }
     } else if (name == 'BigDecimal') {
       if (isArray) {
