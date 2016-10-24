@@ -129,6 +129,7 @@ String assertEventKind(String obj) {
   if (obj == "PauseException") return obj;
   if (obj == "PauseExit") return obj;
   if (obj == "PauseInterrupted") return obj;
+  if (obj == "PausePostRequest") return obj;
   if (obj == "PauseStart") return obj;
   if (obj == "Resume") return obj;
   if (obj == "ServiceExtensionAdded") return obj;
@@ -229,6 +230,9 @@ vms.BoundVariable assertBoundVariable(vms.BoundVariable obj) {
   } else {
     throw "Unexpected value: ${obj.value}";
   }
+  assertInt(obj.declarationTokenPos);
+  assertInt(obj.scopeStartTokenPos);
+  assertInt(obj.scopeEndTokenPos);
   return obj;
 }
 

@@ -1287,6 +1287,9 @@ enum EventKind {
   // An isolate has paused at a breakpoint or due to stepping.
   PauseBreakpoint,
 
+  // An isolate has paused after a service protocol request.
+  PausePostRequest,
+
   // An isolate has paused due to interruption via pause.
   PauseInterrupted,
 

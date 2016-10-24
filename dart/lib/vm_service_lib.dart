@@ -727,6 +727,9 @@ class EventKind {
   /// An isolate has paused at a breakpoint or due to stepping.
   static const String kPauseBreakpoint = 'PauseBreakpoint';
 
+  /// An isolate has paused after a service protocol request.
+  static const String kPausePostRequest = 'PausePostRequest';
+
   /// An isolate has paused due to interruption via pause.
   static const String kPauseInterrupted = 'PauseInterrupted';
 
