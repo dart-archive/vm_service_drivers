@@ -12,7 +12,10 @@ main(List<String> args) async {
   var hash2 = newHash(417);
 
   // ignore unused
-  arr.length; arr2.length; hash1.length; hash2.length;
+  arr.length;
+  arr2.length;
+  hash1.length;
+  hash2.length;
 
   startIsolate(1);
   startIsolate(2);
