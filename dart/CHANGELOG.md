@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.2
+- expose the `PausePostRequest` event
+
 ## 0.3.1
 - fix a parsing issue with ExtensionData
 

@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
 
@@ -17,12 +18,7 @@ final int port = 7575;
 VmService serviceClient;
 
 main(List<String> args) async {
-  if (args.length != 1) {
-    print('usage: dart example/vm_service_lib_tester.dart <sdk location>');
-    exit(1);
-  }
-
-  String sdk = args.first;
+  String sdk = path.dirname(path.dirname(Platform.resolvedExecutable));
 
   print('Using sdk at ${sdk}.');
 
@@ -61,6 +57,7 @@ main(List<String> args) async {
   serviceClient.streamListen('Stdout');
 
   VM vm = await serviceClient.getVM();
+  print('hostCPU=${vm.hostCPU}');
   print(await serviceClient.getVersion());
   List<IsolateRef> isolates = await vm.isolates;
   print(isolates);
