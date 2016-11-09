@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.2+1
+- fix a strong mode issue in the generated Dart library
+
 ## 0.3.2
 - expose the `PausePostRequest` event
 
