@@ -88,6 +88,7 @@ Map<String, Function> _typeFactories = {
   'Null': Null.parse,
   '@Object': ObjRef.parse,
   'Object': Obj.parse,
+  'ReloadReport': ReloadReport.parse,
   'Response': Response.parse,
   'Sentinel': Sentinel.parse,
   '@Script': ScriptRef.parse,
@@ -410,6 +411,30 @@ class VmService {
     return _call('pause', {'isolateId': isolateId});
   }
 
+  /// The `reloadSources` RPC is used to perform a hot reload of an Isolate's
+  /// sources.
+  ///
+  /// if the `force` parameter is provided, it indicates that all of the
+  /// Isolate's sources should be reloaded regardless of modification time.
+  ///
+  /// if the `pause` parameter is provided, the isolate will pause immediately
+  /// after the reload.
+  ///
+  /// if the `rootLibUri` parameter is provided, it indicates the new uri to the
+  /// Isolate's root library.
+  ///
+  /// if the `packagesUri` parameter is provided, it indicates the new uri to
+  /// the Isolate's package map (.packages) file.
+  Future<ReloadReport> reloadSources(String isolateId,
+      {bool force, bool pause, String rootLibUri, String packagesUri}) {
+    Map m = {'isolateId': isolateId};
+    if (force != null) m['force'] = force;
+    if (pause != null) m['pause'] = pause;
+    if (rootLibUri != null) m['rootLibUri'] = rootLibUri;
+    if (packagesUri != null) m['packagesUri'] = packagesUri;
+    return _call('reloadSources', m);
+  }
+
   /// The `removeBreakpoint` RPC is used to remove a breakpoint by its `id`.
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
@@ -433,6 +458,8 @@ class VmService {
   /// Into | Single step, entering function calls
   /// Over | Single step, skipping over function calls
   /// Out | Single step until the current function exits
+  /// Rewind | Immediately exit the top frame(s) without executing any code.
+  /// Isolate will be paused at the call of the last exited function.
   ///
   /// See [Success], [StepOption].
   Future<Success> resume(String isolateId, {/*StepOption*/ String step}) {
@@ -504,10 +531,10 @@ class VmService {
   /// -------- | -----------
   /// VM | VMUpdate
   /// Isolate | IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate,
-  /// ServiceExtensionAdded
+  /// IsolateReload, ServiceExtensionAdded
   /// Debug | PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted,
-  /// PauseException, Resume, BreakpointAdded, BreakpointResolved,
-  /// BreakpointRemoved, Inspect, None
+  /// PauseException, PausePostRequest, Resume, BreakpointAdded,
+  /// BreakpointResolved, BreakpointRemoved, Inspect, None
   /// GC | GC
   /// Extension | Extension
   /// Timeline | TimelineEvents
@@ -715,6 +742,9 @@ class EventKind {
   /// used to notify of changes to the isolate debugging name via setName.
   static const String kIsolateUpdate = 'IsolateUpdate';
 
+  /// Notification that an isolate has been reloaded.
+  static const String kIsolateReload = 'IsolateReload';
+
   /// Notification that an extension RPC was registered on an isolate.
   static const String kServiceExtensionAdded = 'ServiceExtensionAdded';
 
@@ -727,14 +757,14 @@ class EventKind {
   /// An isolate has paused at a breakpoint or due to stepping.
   static const String kPauseBreakpoint = 'PauseBreakpoint';
 
-  /// An isolate has paused after a service protocol request.
-  static const String kPausePostRequest = 'PausePostRequest';
-
   /// An isolate has paused due to interruption via pause.
   static const String kPauseInterrupted = 'PauseInterrupted';
 
   /// An isolate has paused due to an exception.
   static const String kPauseException = 'PauseException';
+
+  /// An isolate has paused after a service request.
+  static const String kPausePostRequest = 'PausePostRequest';
 
   /// An isolate has started or resumed execution.
   static const String kResume = 'Resume';
@@ -903,6 +933,7 @@ class StepOption {
   static const String kOver = 'Over';
   static const String kOverAsyncSuspension = 'OverAsyncSuspension';
   static const String kOut = 'Out';
+  static const String kRewind = 'Rewind';
 }
 
 // types
@@ -1447,6 +1478,13 @@ class Event extends Response {
   @optional
   bool atAsyncSuspension;
 
+  /// The status (success or failure) related to the event. This is provided for
+  /// the event kinds:
+  ///  - IsolateReloaded
+  ///  - IsolateSpawn
+  @optional
+  String status;
+
   Event();
 
   Event._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
@@ -1467,6 +1505,7 @@ class Event extends Response {
     timelineEvents =
         _createObject(json['timelineEvents']) as List<TimelineEvent>;
     atAsyncSuspension = json['atAsyncSuspension'];
+    status = json['status'];
   }
 
   String toString() =>
@@ -2101,7 +2140,7 @@ class Instance extends Obj {
     elements = _createObject(json['elements']) as List<dynamic>;
     associations =
         _createSpecificObject(json['associations'], MapAssociation.parse)
-        as List<MapAssociation>;
+            as List<MapAssociation>;
     bytes = json['bytes'];
     closureFunction = _createObject(json['closureFunction']);
     closureContext = _createObject(json['closureContext']);
@@ -2511,6 +2550,22 @@ class Obj extends Response {
   operator ==(other) => other is Obj && id == other.id;
 
   String toString() => '[Obj type: ${type}, id: ${id}]';
+}
+
+class ReloadReport extends Response {
+  static ReloadReport parse(Map<String, dynamic> json) =>
+      json == null ? null : new ReloadReport._fromJson(json);
+
+  /// Did the reload succeed or fail?
+  bool status;
+
+  ReloadReport();
+
+  ReloadReport._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    status = json['status'];
+  }
+
+  String toString() => '[ReloadReport type: ${type}, status: ${status}]';
 }
 
 /// Every non-error response returned by the Service Protocol extends

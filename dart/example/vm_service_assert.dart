@@ -121,6 +121,7 @@ String assertEventKind(String obj) {
   if (obj == "GC") return obj;
   if (obj == "Inspect") return obj;
   if (obj == "IsolateExit") return obj;
+  if (obj == "IsolateReload") return obj;
   if (obj == "IsolateRunnable") return obj;
   if (obj == "IsolateStart") return obj;
   if (obj == "IsolateUpdate") return obj;
@@ -204,6 +205,7 @@ String assertStepOption(String obj) {
   if (obj == "Out") return obj;
   if (obj == "Over") return obj;
   if (obj == "OverAsyncSuspension") return obj;
+  if (obj == "Rewind") return obj;
   throw "invalid StepOption: $obj";
 }
 
@@ -708,6 +710,13 @@ vms.Obj assertObj(vms.Obj obj) {
   assertNotNull(obj);
   assertString(obj.type);
   assertString(obj.id);
+  return obj;
+}
+
+vms.ReloadReport assertReloadReport(vms.ReloadReport obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertBool(obj.status);
   return obj;
 }
 
