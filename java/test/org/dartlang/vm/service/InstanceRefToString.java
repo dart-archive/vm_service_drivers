@@ -92,7 +92,7 @@ public class InstanceRefToString {
     }
     InstanceKind kind = ref.getKind();
     if (kind == null) {
-      result.append("a " + kind);
+      result.append("-- unknown instance kind --");
       return;
     }
     switch (kind) {

@@ -800,7 +800,7 @@ class TypeField extends Member {
         for (TypeRef t in type.types) {
           String refName = t.name;
           if (refName.endsWith('Ref')) refName = "@" + refName.substring(0, refName.length - 3);
-          w.addLine('if (elem.get("type").getAsString() == "${refName}") return new ${t.name}(elem);');
+          w.addLine('if (elem.get("type").getAsString().equals("${refName}")) return new ${t.name}(elem);');
         }
         w.addLine('return null;');
       }, javadoc: docs, returnType: 'Object');
