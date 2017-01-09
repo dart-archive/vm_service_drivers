@@ -14,8 +14,11 @@ pub get
 dart -c tool/generate.dart
 
 # Ensure all the code analyzes cleanly.
-pub global activate tuneup
-pub global run tuneup check
+dartanalyzer --fatal-warnings \
+  example/sample_exception.dart example/sample_isolates.dart example/sample_main.dart \
+  example/vm_service_assert.dart example/vm_service_lib_tester.dart \
+  lib/vm_service_lib.dart lib/vm_service_lib_io.dart \
+  tool/generate.dart
 
-# Run the VM service protcol smoke tester.
+# Run the VM service protocol smoke tester.
 dart -c example/vm_service_lib_tester.dart
