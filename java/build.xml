@@ -8,7 +8,7 @@
     <mkdir dir="dist"/>
 
     <property environment="env"/>
-    <property file="version.txt" prefix="service"/>
+    <property file="version.properties" prefix="service"/>
     <property name="build.id" value=""/>
 
     <property
@@ -30,7 +30,7 @@
   </target>
 
   <target name="jar" depends="compile">
-    <copy file="version.txt" todir="build/classes"/>
+    <copy file="version.properties" todir="build/classes"/>
     <jar destfile="build/vm_service_lib.jar" basedir="build/classes"/>
     <jar destfile="build/vm_service_lib-src.jar" basedir="src"/>
   </target>
