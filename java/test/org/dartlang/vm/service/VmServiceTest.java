@@ -549,7 +549,7 @@ public class VmServiceTest {
 
   private static void vmResume(IsolateRef isolateRef, final StepOption step) {
     final String id = isolateRef.getId();
-    vmService.resume(id, step, new SuccessConsumer() {
+    vmService.resume(id, step, null, new SuccessConsumer() {
       @Override
       public void onError(RPCError error) {
         showRPCError(error);
