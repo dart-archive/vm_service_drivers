@@ -37,7 +37,7 @@ The Service Protocol uses [JSON-RPC 2.0][].
 	- [getVersion](#getversion)
 	- [getVM](#getvm)
 	- [pause](#pause)
-  - [reloadSources](#reloadSources)
+	- [reloadSources](#reloadSources)
 	- [removeBreakpoint](#removebreakpoint)
 	- [resume](#resume)
 	- [setExceptionPauseMode](#setexceptionpausemode)
@@ -74,7 +74,7 @@ The Service Protocol uses [JSON-RPC 2.0][].
 	- [Message](#message)
 	- [Null](#null)
 	- [Object](#object)
-  - [ReloadReport](#reloadreport)
+	- [ReloadReport](#reloadreport)
 	- [Response](#response)
 	- [Sentinel](#sentinel)
 	- [SentinelKind](#sentinelkind)
@@ -697,7 +697,8 @@ See [Success](#success).
 
 ```
 Success resume(string isolateId,
-               StepOption step [optional])
+               StepOption step [optional],
+               int frameIndex [optional])
 ```
 
 The _resume_ RPC is used to resume execution of a paused isolate.
@@ -714,6 +715,12 @@ Into | Single step, entering function calls
 Over | Single step, skipping over function calls
 Out | Single step until the current function exits
 Rewind | Immediately exit the top frame(s) without executing any code. Isolate will be paused at the call of the last exited function.
+
+The _frameIndex_ parameter is only used when the _step_ parameter is Rewind. It
+specifies the stack frame to rewind to. Stack frame 0 is the currently executing
+function, so _frameIndex_ must be at least 1.
+
+If the _frameIndex_ parameter is not provided, it defaults to 1.
 
 See [Success](#success), [StepOption](#StepOption).
 

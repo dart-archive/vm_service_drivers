@@ -461,10 +461,18 @@ class VmService {
   /// Rewind | Immediately exit the top frame(s) without executing any code.
   /// Isolate will be paused at the call of the last exited function.
   ///
+  /// The `frameIndex` parameter is only used when the `step` parameter is
+  /// Rewind. It specifies the stack frame to rewind to. Stack frame 0 is the
+  /// currently executing function, so `frameIndex` must be at least 1.
+  ///
+  /// If the `frameIndex` parameter is not provided, it defaults to 1.
+  ///
   /// See [Success], [StepOption].
-  Future<Success> resume(String isolateId, {/*StepOption*/ String step}) {
+  Future<Success> resume(String isolateId,
+      {/*StepOption*/ String step, int frameIndex}) {
     Map m = {'isolateId': isolateId};
     if (step != null) m['step'] = step;
+    if (frameIndex != null) m['frameIndex'] = frameIndex;
     return _call('resume', m);
   }
 
