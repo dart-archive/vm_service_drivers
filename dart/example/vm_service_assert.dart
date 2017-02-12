@@ -187,6 +187,13 @@ String assertSentinelKind(String obj) {
   throw "invalid SentinelKind: $obj";
 }
 
+String assertFrameKind(String obj) {
+  if (obj == "AsyncCausal") return obj;
+  if (obj == "AsyncSuspensionMarker") return obj;
+  if (obj == "Regular") return obj;
+  throw "invalid FrameKind: $obj";
+}
+
 String assertSourceReportKind(String obj) {
   if (obj == "Coverage") return obj;
   if (obj == "PossibleBreakpoints") return obj;
@@ -472,8 +479,6 @@ vms.Frame assertFrame(vms.Frame obj) {
   assertInt(obj.index);
   assertFuncRef(obj.function);
   assertCodeRef(obj.code);
-  assertSourceLocation(obj.location);
-  assertBoundVariables(obj.vars);
   return obj;
 }
 
@@ -716,7 +721,7 @@ vms.Obj assertObj(vms.Obj obj) {
 vms.ReloadReport assertReloadReport(vms.ReloadReport obj) {
   assertNotNull(obj);
   assertString(obj.type);
-  assertBool(obj.status);
+  assertBool(obj.success);
   return obj;
 }
 

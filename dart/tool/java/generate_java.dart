@@ -5,6 +5,7 @@
 library generate_vm_service_lib_java;
 
 import 'package:markdown/markdown.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 import '../common/generate_common.dart';
 import '../common/parser.dart';
@@ -209,9 +210,9 @@ class Api extends Member with ApiParseUtil {
   bool isEnumName(String typeName) => enums.any((Enum e) => e.name == typeName);
 
   void parse(List<Node> nodes) {
-    var version = parseServiceVersion(nodes);
-    serviceMajor = version[0];
-    serviceMinor = version[1];
+    Version version = ApiParseUtil.parseVersionSemVer(nodes);
+    serviceMajor = version.major;
+    serviceMinor = version.minor;
     serviceVersion = '$serviceMajor.$serviceMinor';
 
     // Look for h3 nodes
@@ -946,6 +947,10 @@ class TypeRef {
         print('skipped accessor body for $propertyName');
       } else if (arrayDepth == 1) {
         writer.addImport('com.google.gson.JsonArray');
+        if (optional) {
+          writer.addLine('if (json.get("$propertyName") == null) return null;');
+          writer.addLine('');
+        }
         writer.addLine(
             'return new ElementList<$javaBoxedName>(json.get("$propertyName").getAsJsonArray()) {');
         writer.addLine('  @Override');

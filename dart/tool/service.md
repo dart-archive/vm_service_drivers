@@ -1,4 +1,7 @@
-# Dart VM Service Protocol 3.5
+Note: this dev version of the protocol contains not yet released functionality,
+and is subject to change.
+
+# Dart VM Service Protocol 3.6-dev
 
 > Please post feedback to the [observatory-discuss group][discuss-list]
 
@@ -37,7 +40,7 @@ The Service Protocol uses [JSON-RPC 2.0][].
 	- [getVersion](#getversion)
 	- [getVM](#getvm)
 	- [pause](#pause)
-	- [reloadSources](#reloadSources)
+	- [reloadSources](#reloadsources)
 	- [removeBreakpoint](#removebreakpoint)
 	- [resume](#resume)
 	- [setExceptionPauseMode](#setexceptionpausemode)
@@ -1490,8 +1493,9 @@ class Frame extends Response {
   int index;
   @Function function;
   @Code code;
-  SourceLocation location;
-  BoundVariable[] vars;
+  SourceLocation location [optional];
+  BoundVariable[] vars [optional];
+  FrameKind kind [optional];
 }
 ```
 
@@ -2183,7 +2187,7 @@ An _Object_ is a  persistent object that is owned by some isolate.
 ```
 class ReloadReport extends Response {
   // Did the reload succeed or fail?
-  bool status;
+  bool success;
 }
 ```
 
@@ -2247,6 +2251,18 @@ A _SentinelKind_ is used to distinguish different kinds of _Sentinel_ objects.
 
 Adding new values to _SentinelKind_ is considered a backwards
 compatible change. Clients must handle this gracefully.
+
+
+### FrameKind
+```
+enum FrameKind {
+  Regular,
+  AsyncCausal,
+  AsyncSuspensionMarker,
+}
+```
+
+A _FrameKind_ is used to distinguish different kinds of _Frame_ objects.
 
 ### Script
 
@@ -2417,6 +2433,7 @@ and therefore will not contain a _type_ property.
 ```
 class Stack extends Response {
   Frame[] frames;
+  Frame[] asyncCausalFrames [optional];
   Message[] messages;
 }
 ```
