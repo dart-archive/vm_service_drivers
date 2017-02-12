@@ -25,41 +25,6 @@ class ApiParseUtil {
     if (match == null) throw 'Unable to locate service protocol version';
 
     // Append a `.0`.
-    String ver = '${match.group(0)}.0';
-
-    return new Version.parse(ver);
-  }
-
-  /// Extract the current VM Service version number.
-  List<int> parseServiceVersion(List<Node> nodes) {
-    // Extract version from header
-    // e.g. # Dart VM Service Protocol 2.0
-    Element node = nodes.firstWhere((n) => isH1(n));
-    Text text = node.children[0];
-    List<int> v1 = _versionFromText(text.text);
-
-    // Extract version from paragraph
-    // e.g. This document describes of _version 2.0_ of
-    node = nodes.firstWhere((n) => isPara(n));
-    node = node.children.firstWhere((n) => isEmphasis(n));
-    text = node.children[0];
-    List<int> v2 = _versionFromText(text.text);
-
-    if (v1[0] != v2[0] || v1[1] != v2[1]) {
-      print('Found multiple service versions: $v1 and $v2');
-    }
-    return v2;
-  }
-
-  List<int> _versionFromText(String text) {
-    var version = <int>[];
-    var start = text.indexOf(new RegExp(r'\d+\.\d+'));
-    if (start == -1) throw 'failed to find version';
-    var index = text.indexOf('.', start);
-    var end = text.indexOf(new RegExp(r'\D'), index + 1);
-    if (end == -1) end = text.length;
-    version.add(int.parse(text.substring(start, index)));
-    version.add(int.parse(text.substring(index + 1, end)));
-    return version;
+    return new Version.parse('${match.group(0)}.0');
   }
 }

@@ -12,7 +12,7 @@ library vm_service_lib;
 import 'dart:async';
 import 'dart:convert' show BASE64, JSON;
 
-const String vmServiceVersion = '3.5.0';
+const String vmServiceVersion = '3.6.0';
 
 /// @optional
 const String optional = 'optional';
@@ -912,6 +912,15 @@ class SentinelKind {
   static const String kFree = 'Free';
 }
 
+/// A `FrameKind` is used to distinguish different kinds of `Frame` objects.
+class FrameKind {
+  FrameKind._();
+
+  static const String kRegular = 'Regular';
+  static const String kAsyncCausal = 'AsyncCausal';
+  static const String kAsyncSuspensionMarker = 'AsyncSuspensionMarker';
+}
+
 class SourceReportKind {
   SourceReportKind._();
 
@@ -1678,9 +1687,15 @@ class Frame extends Response {
 
   CodeRef code;
 
+  @optional
   SourceLocation location;
 
+  @optional
   List<BoundVariable> vars;
+
+  @optional
+  /*FrameKind*/
+  String kind;
 
   Frame();
 
@@ -1690,11 +1705,11 @@ class Frame extends Response {
     code = _createObject(json['code']);
     location = _createObject(json['location']);
     vars = _createObject(json['vars']) as List<BoundVariable>;
+    kind = json['kind'];
   }
 
   String toString() => '[Frame ' //
-      'type: ${type}, index: ${index}, function: ${function}, code: ${code}, ' //
-      'location: ${location}, vars: ${vars}]';
+      'type: ${type}, index: ${index}, function: ${function}, code: ${code}]';
 }
 
 /// An `FuncRef` is a reference to a `Func`.
@@ -2565,15 +2580,15 @@ class ReloadReport extends Response {
       json == null ? null : new ReloadReport._fromJson(json);
 
   /// Did the reload succeed or fail?
-  bool status;
+  bool success;
 
   ReloadReport();
 
   ReloadReport._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
-    status = json['status'];
+    success = json['success'];
   }
 
-  String toString() => '[ReloadReport type: ${type}, status: ${status}]';
+  String toString() => '[ReloadReport type: ${type}, success: ${success}]';
 }
 
 /// Every non-error response returned by the Service Protocol extends
@@ -2855,12 +2870,16 @@ class Stack extends Response {
 
   List<Frame> frames;
 
+  @optional
+  List<Frame> asyncCausalFrames;
+
   List<Message> messages;
 
   Stack();
 
   Stack._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     frames = _createObject(json['frames']) as List<Frame>;
+    asyncCausalFrames = _createObject(json['asyncCausalFrames']) as List<Frame>;
     messages = _createObject(json['messages']) as List<Message>;
   }
 
