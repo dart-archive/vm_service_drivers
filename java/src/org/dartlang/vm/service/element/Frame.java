@@ -37,6 +37,8 @@ public class Frame extends Response {
   }
 
   public FrameKind getKind() {
+    if (json.get("kind") == null) return null;
+    
     String name = json.get("kind").getAsString();
     try {
       return FrameKind.valueOf(name);

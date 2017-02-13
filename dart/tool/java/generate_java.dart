@@ -934,6 +934,11 @@ class TypeRef {
       if (isArray) {
         print('skipped accessor body for $propertyName');
       } else {
+        if (optional) {
+          writer
+              .addLine('if (json.get("$propertyName") == null) return null;');
+          writer.addLine('');
+        }
         writer
             .addLine('String name = json.get("$propertyName").getAsString();');
         writer.addLine('try {');
