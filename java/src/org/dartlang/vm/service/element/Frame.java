@@ -25,11 +25,11 @@ public class Frame extends Response {
   }
 
   public CodeRef getCode() {
-    return new CodeRef((JsonObject) json.get("code"));
+    return json.get("code") == null ? null : new CodeRef((JsonObject) json.get("code"));
   }
 
   public FuncRef getFunction() {
-    return new FuncRef((JsonObject) json.get("function"));
+    return json.get("function") == null ? null : new FuncRef((JsonObject) json.get("function"));
   }
 
   public int getIndex() {
