@@ -477,8 +477,6 @@ vms.Frame assertFrame(vms.Frame obj) {
   assertNotNull(obj);
   assertString(obj.type);
   assertInt(obj.index);
-  assertFuncRef(obj.function);
-  assertCodeRef(obj.code);
   return obj;
 }
 

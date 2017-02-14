@@ -1683,8 +1683,10 @@ class Frame extends Response {
 
   int index;
 
+  @optional
   FuncRef function;
 
+  @optional
   CodeRef code;
 
   @optional
@@ -1708,8 +1710,7 @@ class Frame extends Response {
     kind = json['kind'];
   }
 
-  String toString() => '[Frame ' //
-      'type: ${type}, index: ${index}, function: ${function}, code: ${code}]';
+  String toString() => '[Frame type: ${type}, index: ${index}]';
 }
 
 /// An `FuncRef` is a reference to a `Func`.
