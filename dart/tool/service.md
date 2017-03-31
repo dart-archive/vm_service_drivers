@@ -2259,6 +2259,7 @@ enum FrameKind {
   Regular,
   AsyncCausal,
   AsyncSuspensionMarker,
+  AsyncActivation
 }
 ```
 
@@ -2434,6 +2435,7 @@ and therefore will not contain a _type_ property.
 class Stack extends Response {
   Frame[] frames;
   Frame[] asyncCausalFrames [optional];
+  Frame[] awaiterFrames [optional];
   Message[] messages;
 }
 ```
