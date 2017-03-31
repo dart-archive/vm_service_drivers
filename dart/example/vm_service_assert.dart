@@ -188,6 +188,7 @@ String assertSentinelKind(String obj) {
 }
 
 String assertFrameKind(String obj) {
+  if (obj == "AsyncActivation") return obj;
   if (obj == "AsyncCausal") return obj;
   if (obj == "AsyncSuspensionMarker") return obj;
   if (obj == "Regular") return obj;

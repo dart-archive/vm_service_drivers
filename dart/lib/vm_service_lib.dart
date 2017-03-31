@@ -919,6 +919,7 @@ class FrameKind {
   static const String kRegular = 'Regular';
   static const String kAsyncCausal = 'AsyncCausal';
   static const String kAsyncSuspensionMarker = 'AsyncSuspensionMarker';
+  static const String kAsyncActivation = 'AsyncActivation';
 }
 
 class SourceReportKind {
@@ -2874,6 +2875,9 @@ class Stack extends Response {
   @optional
   List<Frame> asyncCausalFrames;
 
+  @optional
+  List<Frame> awaiterFrames;
+
   List<Message> messages;
 
   Stack();
@@ -2881,6 +2885,7 @@ class Stack extends Response {
   Stack._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     frames = _createObject(json['frames']) as List<Frame>;
     asyncCausalFrames = _createObject(json['asyncCausalFrames']) as List<Frame>;
+    awaiterFrames = _createObject(json['awaiterFrames']) as List<Frame>;
     messages = _createObject(json['messages']) as List<Message>;
   }
 
