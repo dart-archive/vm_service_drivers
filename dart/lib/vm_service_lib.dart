@@ -193,7 +193,7 @@ class VmService {
       {int column}) {
     Map m = {'isolateId': isolateId, 'scriptId': scriptId, 'line': line};
     if (column != null) m['column'] = column;
-    return _call('addBreakpoint', m);
+    return _call('addBreakpoint', m) as Future<Breakpoint>;
   }
 
   /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
