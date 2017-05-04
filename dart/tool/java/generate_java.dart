@@ -189,6 +189,10 @@ class Api extends Member with ApiParseUtil {
             m.generateVmServiceForward(writer);
           }
         }
+        writer.addLine('if (consumer instanceof ServiceExtensionConsumer) {');
+        writer.addLine('  ((ServiceExtensionConsumer) consumer).received(json);');
+        writer.addLine('  return;');
+        writer.addLine('}');
         writer.addLine('logUnknownResponse(consumer, json);');
       }, modifiers: null, isOverride: true);
     });
