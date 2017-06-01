@@ -253,6 +253,13 @@ class VmService {
   /// If `targetId` refers to an object which has been collected by the VM's
   /// garbage collector, then the `Collected` [Sentinel] is returned.
   ///
+  /// If `scope` is provided, it should be a map from identifiers to object ids.
+  /// These bindings will be added to the scope in which the expression is
+  /// evaluated, which is a child scope of the class or library for
+  /// instance/class or library targets respectively. This means bindings
+  /// provided in `scope` may shadow instance members, class members and
+  /// top-level members.
+  ///
   /// If an error occurs while evaluating the expression, an [ErrorRef]
   /// reference will be returned.
   ///
@@ -260,18 +267,26 @@ class VmService {
   /// will be returned.
   ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
-  Future<dynamic> evaluate(
-      String isolateId, String targetId, String expression) {
-    return _call('evaluate', {
+  Future<dynamic> evaluate(String isolateId, String targetId, String expression,
+      {Map<String, String> scope}) {
+    Map m = {
       'isolateId': isolateId,
       'targetId': targetId,
       'expression': expression
-    });
+    };
+    if (scope != null) m['scope'] = scope;
+    return _call('evaluate', m);
   }
 
   /// The `evaluateInFrame` RPC is used to evaluate an expression in the context
   /// of a particular stack frame. `frameIndex` is the index of the desired
   /// [Frame], with an index of `0` indicating the top (most recent) frame.
+  ///
+  /// If `scope` is provided, it should be a map from identifiers to object ids.
+  /// These bindings will be added to the scope in which the expression is
+  /// evaluated, which is a child scope of the frame's current scope. This means
+  /// bindings provided in `scope` may shadow instance members, class members,
+  /// top-level members, parameters and locals.
   ///
   /// If an error occurs while evaluating the expression, an [ErrorRef]
   /// reference will be returned.
@@ -281,12 +296,15 @@ class VmService {
   ///
   /// The return value can be one of [InstanceRef] or [ErrorRef].
   Future<dynamic> evaluateInFrame(
-      String isolateId, int frameIndex, String expression) {
-    return _call('evaluateInFrame', {
+      String isolateId, int frameIndex, String expression,
+      {Map<String, String> scope}) {
+    Map m = {
       'isolateId': isolateId,
       'frameIndex': frameIndex,
       'expression': expression
-    });
+    };
+    if (scope != null) m['scope'] = scope;
+    return _call('evaluateInFrame', m);
   }
 
   /// The `getFlagList` RPC returns a list of all command line flags in the VM

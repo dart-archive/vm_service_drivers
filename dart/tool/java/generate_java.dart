@@ -88,6 +88,7 @@ String _coerceRefType(String typeName) {
   if (typeName == 'string') typeName = 'String';
   if (typeName == 'bool') typeName = 'boolean';
   if (typeName == 'num') typeName = 'BigDecimal';
+  if (typeName == 'map') typeName = 'Map';
   return typeName;
 }
 
@@ -145,7 +146,10 @@ class Api extends Member with ApiParseUtil {
     }
 
     gen.writeType('$servicePackage.VmService', (TypeWriter writer) {
+      writer.addImport('com.google.gson.JsonArray');
       writer.addImport('com.google.gson.JsonObject');
+      writer.addImport('com.google.gson.JsonPrimitive');
+
       writer.addImport('$servicePackage.consumer.*');
       writer.addImport('$servicePackage.element.*');
       writer.javadoc = vmServiceJavadoc;
@@ -190,11 +194,32 @@ class Api extends Member with ApiParseUtil {
           }
         }
         writer.addLine('if (consumer instanceof ServiceExtensionConsumer) {');
-        writer.addLine('  ((ServiceExtensionConsumer) consumer).received(json);');
+        writer
+            .addLine('  ((ServiceExtensionConsumer) consumer).received(json);');
         writer.addLine('  return;');
         writer.addLine('}');
         writer.addLine('logUnknownResponse(consumer, json);');
       }, modifiers: null, isOverride: true);
+
+      writer.addMethod("convertMapToJsonObject", [
+        new JavaMethodArg('map', 'Map<String, String>')
+      ], (StatementWriter writer) {
+        writer.addLine('JsonObject obj = new JsonObject();');
+        writer.addLine('for (String key : map.keySet()) {');
+        writer.addLine('  obj.addProperty(key, map.get(key));');
+        writer.addLine('}');
+        writer.addLine('return obj;');
+      }, modifiers: "private", returnType: "JsonObject");
+
+      writer.addMethod(
+          "convertIterableToJsonArray", [new JavaMethodArg('list', 'Iterable')],
+          (StatementWriter writer) {
+        writer.addLine('JsonArray arr = new JsonArray();');
+        writer.addLine('for (Object element : list) {');
+        writer.addLine('  arr.add(new JsonPrimitive(element.toString()));');
+        writer.addLine('}');
+        writer.addLine('return arr;');
+      }, modifiers: "private", returnType: "JsonArray");
     });
 
     for (var m in methods) {
@@ -263,6 +288,8 @@ class Api extends Member with ApiParseUtil {
   void _parse(String name, String definition, [String docs]) {
     name = name.trim();
     definition = definition.trim();
+    // clean markdown introduced changes
+    definition = definition.replaceAll('&lt;', '<').replaceAll('&gt;', '>');
     if (docs != null) docs = docs.trim();
 
     if (name.substring(0, 1).toLowerCase() == name.substring(0, 1)) {
@@ -282,10 +309,8 @@ class Api extends Member with ApiParseUtil {
       if (line.startsWith('---')) continue;
       var index = line.indexOf('|');
       var streamId = line.substring(0, index).trim();
-      List<String> eventTypes = new List.from(line
-          .substring(index + 1)
-          .split(',')
-          .map((t) => t.trim()));
+      List<String> eventTypes = new List.from(
+          line.substring(index + 1).split(',').map((t) => t.trim()));
       eventTypes.sort();
       streamIdMap[streamId] = eventTypes;
     }
@@ -537,17 +562,21 @@ class Method extends Member {
       }
     }
 
-    if (name == 'getSourceReport') {
-      javadoc.writeln('\n\nTODO: reports parameter should be a List<SourceReportKind>.');
-    }
+    args.forEach((MethodArg arg) {
+      if (arg.type.name == 'Map') {
+        writer.addImport('java.util.Map');
+      }
+    });
 
     List<MethodArg> mthArgs = args;
     if (!includeOptional) {
       mthArgs = mthArgs.toList()..removeWhere((a) => a.optional);
     }
-    List<JavaMethodArg> javaMethodArgs = new List.from(
-        mthArgs.map((a) => a.asJavaMethodArg));
-    javaMethodArgs.add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
+
+    List<JavaMethodArg> javaMethodArgs =
+        new List.from(mthArgs.map((a) => a.asJavaMethodArg));
+    javaMethodArgs
+        .add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
     writer.addMethod(name, javaMethodArgs, (StatementWriter writer) {
       writer.addLine('JsonObject params = new JsonObject();');
       for (MethodArg arg in args) {
@@ -556,6 +585,12 @@ class Method extends Member {
         String op = arg.optional ? 'if (${name} != null) ' : '';
         if (arg.isEnumType) {
           writer.addLine('${op}params.addProperty("$name", $name.name());');
+        } else if (arg.type.name == 'Map') {
+          writer.addLine(
+              '${op}params.add("$name", convertMapToJsonObject($name));');
+        } else if (arg.type.arrayDepth > 0) {
+          writer.addLine(
+              '${op}params.add("$name", convertIterableToJsonArray($name));');
         } else {
           writer.addLine('${op}params.addProperty("$name", $name);');
         }
@@ -585,11 +620,11 @@ class MethodArg extends Member {
     if (optional && type.ref == 'boolean') {
       return new JavaMethodArg(name, 'Boolean');
     }
-    return new JavaMethodArg(name, type.name);
+    return new JavaMethodArg(name, type.ref);
   }
 
   /// TODO: Hacked enum arg type determination
-  bool get isEnumType => name == 'step' || name == 'mode' || name == 'reports';
+  bool get isEnumType => name == 'step' || name == 'mode';
 }
 
 class MethodParser extends Parser {
@@ -610,9 +645,22 @@ class MethodParser extends Parser {
     while (peek().text != ')') {
       Token type = expectName();
       TypeRef ref = new TypeRef(_coerceRefType(type.text));
-      while (consume('[')) {
-        expect(']');
-        ref.arrayDepth++;
+      if (peek().text == '[') {
+        while (consume('[')) {
+          expect(']');
+          ref.arrayDepth++;
+        }
+      } else if (peek().text == '<') {
+        // handle generics
+        expect('<');
+        ref.genericTypes = [];
+        while (peek().text != '>') {
+          Token genericTypeName = expectName();
+          ref.genericTypes
+              .add(new TypeRef(_coerceRefType(genericTypeName.text)));
+          consume(',');
+        }
+        expect('>');
       }
       Token name = expectName();
       MethodArg arg = new MethodArg(method, ref, name.text);
@@ -804,8 +852,10 @@ class TypeField extends Member {
         w.addLine('if (elem == null) return null;\n');
         for (TypeRef t in type.types) {
           String refName = t.name;
-          if (refName.endsWith('Ref')) refName = "@" + refName.substring(0, refName.length - 3);
-          w.addLine('if (elem.get("type").getAsString().equals("${refName}")) return new ${t.name}(elem);');
+          if (refName.endsWith('Ref'))
+            refName = "@" + refName.substring(0, refName.length - 3);
+          w.addLine(
+              'if (elem.get("type").getAsString().equals("${refName}")) return new ${t.name}(elem);');
         }
         w.addLine('return null;');
       }, javadoc: docs, returnType: 'Object');
@@ -813,7 +863,8 @@ class TypeField extends Member {
       writer.addMethod(accessorName, [], (StatementWriter writer) {
         type.valueType.generateAccessStatements(writer, name,
             canBeSentinel: type.isValueAndSentinel,
-            defaultValue: defaultValue, optional: optional);
+            defaultValue: defaultValue,
+            optional: optional);
       }, javadoc: docs, returnType: type.valueType.ref);
     }
   }
@@ -859,6 +910,7 @@ class TypeParser extends Parser {
 class TypeRef {
   String name;
   int arrayDepth = 0;
+  List<TypeRef> genericTypes;
 
   TypeRef(this.name);
 
@@ -881,7 +933,9 @@ class TypeRef {
   }
 
   String get ref {
-    if (isSimple) {
+    if (genericTypes != null) {
+      return '$name<${genericTypes.join(', ')}>';
+    } else if (isSimple) {
       if (arrayDepth == 2) return 'List<List<${javaBoxedName}>>';
       if (arrayDepth == 1) return 'List<${javaBoxedName}>';
     } else {
@@ -905,7 +959,8 @@ class TypeRef {
           writer.addLine(
               'return elem != null ? elem.getAsBoolean() : $defaultValue;');
         } else if (optional) {
-          writer.addLine('return json.get("$propertyName") == null ? false : json.get("$propertyName").getAsBoolean();');
+          writer.addLine(
+              'return json.get("$propertyName") == null ? false : json.get("$propertyName").getAsBoolean();');
         } else {
           writer.addLine('return json.get("$propertyName").getAsBoolean();');
         }
@@ -918,7 +973,8 @@ class TypeRef {
         writer.addImport('java.util.List');
         writer.addLine('return getListInt("$propertyName");');
       } else {
-        writer.addLine('return json.get("$propertyName") == null ? -1 : json.get("$propertyName").getAsInt();');
+        writer.addLine(
+            'return json.get("$propertyName") == null ? -1 : json.get("$propertyName").getAsInt();');
       }
     } else if (name == 'BigDecimal') {
       if (isArray) {
@@ -939,8 +995,7 @@ class TypeRef {
         print('skipped accessor body for $propertyName');
       } else {
         if (optional) {
-          writer
-              .addLine('if (json.get("$propertyName") == null) return null;');
+          writer.addLine('if (json.get("$propertyName") == null) return null;');
           writer.addLine('');
         }
         writer
