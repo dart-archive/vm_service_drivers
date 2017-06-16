@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.3
+- fix strong mode issues at runtime (with JSLists and Lists)
+
 ## 0.3.2+1
 - fix a strong mode issue in the generated Dart library
 

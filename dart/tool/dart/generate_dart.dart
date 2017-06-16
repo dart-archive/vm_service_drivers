@@ -292,7 +292,7 @@ Object _createObject(dynamic json) {
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => _createObject(e)).toList();
+    return json.map((e) => _createObject(e));
   } else if (json is Map) {
     String type = json['type'];
     if (_typeFactories[type] == null) {
@@ -677,6 +677,8 @@ class TypeRef {
       ? 'List<List<${name}>>'
       : arrayDepth == 1 ? 'List<${name}>' : name;
 
+  String get listTypeArg => arrayDepth == 2 ? 'List<$name>' : name;
+
   bool get isArray => arrayDepth > 0;
 
   bool get isSimple =>
@@ -796,16 +798,18 @@ class Type extends Member {
         //     "${field.generatableName} = _parse${enumTypeName}[json['${field.name}']];");
       } else if (name == 'Event' && field.name == 'extensionData') {
         // Special case `Event.extensionData`.
-        gen.writeln("extensionData = ExtensionData.parse(json['extensionData']);");
+        gen.writeln(
+            "extensionData = ExtensionData.parse(json['extensionData']);");
       } else if (name == 'Instance' && field.name == 'associations') {
         // Special case `Instance.associations`.
-        gen.writeln("associations = _createSpecificObject(json['associations'], MapAssociation.parse) "
-          "as List<MapAssociation>;");
+        gen.writeln(
+            "associations = _createSpecificObject(json['associations'], MapAssociation.parse) "
+            "as List<MapAssociation>;");
       } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;
         gen.writeln(
-            "${field.generatableName} = _createObject(json['${field.name}']) "
-            "as ${fieldType.ref};");
+            "${field.generatableName} = new List<${fieldType.listTypeArg}>.from("
+            "_createObject(json['${field.name}']));");
       } else {
         gen.writeln(
             "${field.generatableName} = _createObject(json['${field.name}']);");
