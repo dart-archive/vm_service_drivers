@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
  * An {@link Event} is an asynchronous notification from the VM. It is delivered only when the
  * client has subscribed to an event stream using the streamListen RPC.
  */
+@SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public class Event extends Response {
 
   public Event(JsonObject json) {
@@ -139,6 +140,8 @@ public class Event extends Response {
    *  - PauseBreakpoint
    */
   public ElementList<Breakpoint> getPauseBreakpoints() {
+    if (json.get("pauseBreakpoints") == null) return null;
+    
     return new ElementList<Breakpoint>(json.get("pauseBreakpoints").getAsJsonArray()) {
       @Override
       protected Breakpoint basicGet(JsonArray array, int index) {
@@ -148,11 +151,22 @@ public class Event extends Response {
   }
 
   /**
+   * The status (success or failure) related to the event. This is provided for the event kinds:
+   *  - IsolateReloaded
+   *  - IsolateSpawn
+   */
+  public String getStatus() {
+    return json.get("status").getAsString();
+  }
+
+  /**
    * An array of TimelineEvents
    *
    * This is provided for the TimelineEvents event.
    */
   public ElementList<TimelineEvent> getTimelineEvents() {
+    if (json.get("timelineEvents") == null) return null;
+    
     return new ElementList<TimelineEvent>(json.get("timelineEvents").getAsJsonArray()) {
       @Override
       protected TimelineEvent basicGet(JsonArray array, int index) {

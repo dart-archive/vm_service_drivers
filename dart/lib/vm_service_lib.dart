@@ -12,7 +12,7 @@ library vm_service_lib;
 import 'dart:async';
 import 'dart:convert' show BASE64, JSON;
 
-const String vmServiceVersion = '3.5.0';
+const String vmServiceVersion = '3.6.0';
 
 /// @optional
 const String optional = 'optional';
@@ -88,6 +88,7 @@ Map<String, Function> _typeFactories = {
   'Null': Null.parse,
   '@Object': ObjRef.parse,
   'Object': Obj.parse,
+  'ReloadReport': ReloadReport.parse,
   'Response': Response.parse,
   'Sentinel': Sentinel.parse,
   '@Script': ScriptRef.parse,
@@ -252,6 +253,13 @@ class VmService {
   /// If `targetId` refers to an object which has been collected by the VM's
   /// garbage collector, then the `Collected` [Sentinel] is returned.
   ///
+  /// If `scope` is provided, it should be a map from identifiers to object ids.
+  /// These bindings will be added to the scope in which the expression is
+  /// evaluated, which is a child scope of the class or library for
+  /// instance/class or library targets respectively. This means bindings
+  /// provided in `scope` may shadow instance members, class members and
+  /// top-level members.
+  ///
   /// If an error occurs while evaluating the expression, an [ErrorRef]
   /// reference will be returned.
   ///
@@ -259,18 +267,26 @@ class VmService {
   /// will be returned.
   ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
-  Future<dynamic> evaluate(
-      String isolateId, String targetId, String expression) {
-    return _call('evaluate', {
+  Future<dynamic> evaluate(String isolateId, String targetId, String expression,
+      {Map<String, String> scope}) {
+    Map m = {
       'isolateId': isolateId,
       'targetId': targetId,
       'expression': expression
-    });
+    };
+    if (scope != null) m['scope'] = scope;
+    return _call('evaluate', m);
   }
 
   /// The `evaluateInFrame` RPC is used to evaluate an expression in the context
   /// of a particular stack frame. `frameIndex` is the index of the desired
   /// [Frame], with an index of `0` indicating the top (most recent) frame.
+  ///
+  /// If `scope` is provided, it should be a map from identifiers to object ids.
+  /// These bindings will be added to the scope in which the expression is
+  /// evaluated, which is a child scope of the frame's current scope. This means
+  /// bindings provided in `scope` may shadow instance members, class members,
+  /// top-level members, parameters and locals.
   ///
   /// If an error occurs while evaluating the expression, an [ErrorRef]
   /// reference will be returned.
@@ -280,12 +296,15 @@ class VmService {
   ///
   /// The return value can be one of [InstanceRef] or [ErrorRef].
   Future<dynamic> evaluateInFrame(
-      String isolateId, int frameIndex, String expression) {
-    return _call('evaluateInFrame', {
+      String isolateId, int frameIndex, String expression,
+      {Map<String, String> scope}) {
+    Map m = {
       'isolateId': isolateId,
       'frameIndex': frameIndex,
       'expression': expression
-    });
+    };
+    if (scope != null) m['scope'] = scope;
+    return _call('evaluateInFrame', m);
   }
 
   /// The `getFlagList` RPC returns a list of all command line flags in the VM
@@ -410,6 +429,30 @@ class VmService {
     return _call('pause', {'isolateId': isolateId});
   }
 
+  /// The `reloadSources` RPC is used to perform a hot reload of an Isolate's
+  /// sources.
+  ///
+  /// if the `force` parameter is provided, it indicates that all of the
+  /// Isolate's sources should be reloaded regardless of modification time.
+  ///
+  /// if the `pause` parameter is provided, the isolate will pause immediately
+  /// after the reload.
+  ///
+  /// if the `rootLibUri` parameter is provided, it indicates the new uri to the
+  /// Isolate's root library.
+  ///
+  /// if the `packagesUri` parameter is provided, it indicates the new uri to
+  /// the Isolate's package map (.packages) file.
+  Future<ReloadReport> reloadSources(String isolateId,
+      {bool force, bool pause, String rootLibUri, String packagesUri}) {
+    Map m = {'isolateId': isolateId};
+    if (force != null) m['force'] = force;
+    if (pause != null) m['pause'] = pause;
+    if (rootLibUri != null) m['rootLibUri'] = rootLibUri;
+    if (packagesUri != null) m['packagesUri'] = packagesUri;
+    return _call('reloadSources', m);
+  }
+
   /// The `removeBreakpoint` RPC is used to remove a breakpoint by its `id`.
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
@@ -433,11 +476,21 @@ class VmService {
   /// Into | Single step, entering function calls
   /// Over | Single step, skipping over function calls
   /// Out | Single step until the current function exits
+  /// Rewind | Immediately exit the top frame(s) without executing any code.
+  /// Isolate will be paused at the call of the last exited function.
+  ///
+  /// The `frameIndex` parameter is only used when the `step` parameter is
+  /// Rewind. It specifies the stack frame to rewind to. Stack frame 0 is the
+  /// currently executing function, so `frameIndex` must be at least 1.
+  ///
+  /// If the `frameIndex` parameter is not provided, it defaults to 1.
   ///
   /// See [Success], [StepOption].
-  Future<Success> resume(String isolateId, {/*StepOption*/ String step}) {
+  Future<Success> resume(String isolateId,
+      {/*StepOption*/ String step, int frameIndex}) {
     Map m = {'isolateId': isolateId};
     if (step != null) m['step'] = step;
+    if (frameIndex != null) m['frameIndex'] = frameIndex;
     return _call('resume', m);
   }
 
@@ -504,10 +557,10 @@ class VmService {
   /// -------- | -----------
   /// VM | VMUpdate
   /// Isolate | IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate,
-  /// ServiceExtensionAdded
+  /// IsolateReload, ServiceExtensionAdded
   /// Debug | PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted,
-  /// PauseException, Resume, BreakpointAdded, BreakpointResolved,
-  /// BreakpointRemoved, Inspect, None
+  /// PauseException, PausePostRequest, Resume, BreakpointAdded,
+  /// BreakpointResolved, BreakpointRemoved, Inspect, None
   /// GC | GC
   /// Extension | Extension
   /// Timeline | TimelineEvents
@@ -715,6 +768,9 @@ class EventKind {
   /// used to notify of changes to the isolate debugging name via setName.
   static const String kIsolateUpdate = 'IsolateUpdate';
 
+  /// Notification that an isolate has been reloaded.
+  static const String kIsolateReload = 'IsolateReload';
+
   /// Notification that an extension RPC was registered on an isolate.
   static const String kServiceExtensionAdded = 'ServiceExtensionAdded';
 
@@ -727,14 +783,14 @@ class EventKind {
   /// An isolate has paused at a breakpoint or due to stepping.
   static const String kPauseBreakpoint = 'PauseBreakpoint';
 
-  /// An isolate has paused after a service protocol request.
-  static const String kPausePostRequest = 'PausePostRequest';
-
   /// An isolate has paused due to interruption via pause.
   static const String kPauseInterrupted = 'PauseInterrupted';
 
   /// An isolate has paused due to an exception.
   static const String kPauseException = 'PauseException';
+
+  /// An isolate has paused after a service request.
+  static const String kPausePostRequest = 'PausePostRequest';
 
   /// An isolate has started or resumed execution.
   static const String kResume = 'Resume';
@@ -874,6 +930,16 @@ class SentinelKind {
   static const String kFree = 'Free';
 }
 
+/// A `FrameKind` is used to distinguish different kinds of `Frame` objects.
+class FrameKind {
+  FrameKind._();
+
+  static const String kRegular = 'Regular';
+  static const String kAsyncCausal = 'AsyncCausal';
+  static const String kAsyncSuspensionMarker = 'AsyncSuspensionMarker';
+  static const String kAsyncActivation = 'AsyncActivation';
+}
+
 class SourceReportKind {
   SourceReportKind._();
 
@@ -903,6 +969,7 @@ class StepOption {
   static const String kOver = 'Over';
   static const String kOverAsyncSuspension = 'OverAsyncSuspension';
   static const String kOut = 'Out';
+  static const String kRewind = 'Rewind';
 }
 
 // types
@@ -1447,6 +1514,13 @@ class Event extends Response {
   @optional
   bool atAsyncSuspension;
 
+  /// The status (success or failure) related to the event. This is provided for
+  /// the event kinds:
+  ///  - IsolateReloaded
+  ///  - IsolateSpawn
+  @optional
+  String status;
+
   Event();
 
   Event._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
@@ -1467,6 +1541,7 @@ class Event extends Response {
     timelineEvents =
         new List<TimelineEvent>.from(_createObject(json['timelineEvents']));
     atAsyncSuspension = json['atAsyncSuspension'];
+    status = json['status'];
   }
 
   String toString() =>
@@ -1627,13 +1702,21 @@ class Frame extends Response {
 
   int index;
 
+  @optional
   FuncRef function;
 
+  @optional
   CodeRef code;
 
+  @optional
   SourceLocation location;
 
+  @optional
   List<BoundVariable> vars;
+
+  @optional
+  /*FrameKind*/
+  String kind;
 
   Frame();
 
@@ -1643,11 +1726,10 @@ class Frame extends Response {
     code = _createObject(json['code']);
     location = _createObject(json['location']);
     vars = new List<BoundVariable>.from(_createObject(json['vars']));
+    kind = json['kind'];
   }
 
-  String toString() => '[Frame ' //
-      'type: ${type}, index: ${index}, function: ${function}, code: ${code}, ' //
-      'location: ${location}, vars: ${vars}]';
+  String toString() => '[Frame type: ${type}, index: ${index}]';
 }
 
 /// An `FuncRef` is a reference to a `Func`.
@@ -2513,6 +2595,22 @@ class Obj extends Response {
   String toString() => '[Obj type: ${type}, id: ${id}]';
 }
 
+class ReloadReport extends Response {
+  static ReloadReport parse(Map<String, dynamic> json) =>
+      json == null ? null : new ReloadReport._fromJson(json);
+
+  /// Did the reload succeed or fail?
+  bool success;
+
+  ReloadReport();
+
+  ReloadReport._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    success = json['success'];
+  }
+
+  String toString() => '[ReloadReport type: ${type}, success: ${success}]';
+}
+
 /// Every non-error response returned by the Service Protocol extends
 /// `Response`. By using the `type` property, the client can determine which
 /// [type] of response has been provided.
@@ -2793,12 +2891,21 @@ class Stack extends Response {
 
   List<Frame> frames;
 
+  @optional
+  List<Frame> asyncCausalFrames;
+
+  @optional
+  List<Frame> awaiterFrames;
+
   List<Message> messages;
 
   Stack();
 
   Stack._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     frames = new List<Frame>.from(_createObject(json['frames']));
+    asyncCausalFrames =
+        new List<Frame>.from(_createObject(json['asyncCausalFrames']));
+    awaiterFrames = new List<Frame>.from(_createObject(json['awaiterFrames']));
     messages = new List<Message>.from(_createObject(json['messages']));
   }
 

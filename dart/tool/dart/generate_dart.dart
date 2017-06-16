@@ -22,6 +22,7 @@ String _coerceRefType(String typeName) {
   if (typeName == '@Function') typeName = 'FuncRef';
   if (typeName.startsWith('@')) typeName = typeName.substring(1) + 'Ref';
   if (typeName == 'string') typeName = 'String';
+  if (typeName == 'map') typeName = 'Map';
   return typeName;
 }
 
@@ -248,6 +249,8 @@ class Api extends Member with ApiParseUtil {
   void _parse(String name, String definition, [String docs]) {
     name = name.trim();
     definition = definition.trim();
+    // clean markdown introduced changes
+    definition = definition.replaceAll('&lt;', '<').replaceAll('&gt;', '>');
     if (docs != null) docs = docs.trim();
 
     if (name.substring(0, 1).toLowerCase() == name.substring(0, 1)) {
@@ -670,12 +673,21 @@ class MemberType extends Member {
 class TypeRef {
   String name;
   int arrayDepth = 0;
+  List<TypeRef> genericTypes;
 
   TypeRef(this.name);
 
-  String get ref => arrayDepth == 2
-      ? 'List<List<${name}>>'
-      : arrayDepth == 1 ? 'List<${name}>' : name;
+  String get ref {
+   if (arrayDepth == 2) {
+     return 'List<List<${name}>>';
+   } else if (arrayDepth == 1) {
+     return 'List<${name}>';
+   } else if (genericTypes != null) {
+     return '$name<${genericTypes.join(', ')}>';
+   } else {
+     return name;
+    }
+  }
 
   String get listTypeArg => arrayDepth == 2 ? 'List<$name>' : name;
 
@@ -1117,10 +1129,23 @@ class MethodParser extends Parser {
     while (peek().text != ')') {
       Token type = expectName();
       TypeRef ref = new TypeRef(_coerceRefType(type.text));
-      while (consume('[')) {
-        expect(']');
-        ref.arrayDepth++;
+      if (peek().text == '[') {
+        while (consume('[')) {
+          expect(']');
+          ref.arrayDepth++;
+        }
+      } else if (peek().text == '<') {
+        // handle generics
+        expect('<');
+        ref.genericTypes = [];
+        while (peek().text != '>') {
+          Token genericTypeName = expectName();
+          ref.genericTypes.add(new TypeRef(_coerceRefType(genericTypeName.text)));
+          consume(',');
+        }
+        expect('>');
       }
+
       Token name = expectName();
       MethodArg arg = new MethodArg(method, ref, name.text);
       if (consume('[')) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, the Dart project authors.
+ * Copyright (c) 2017, the Dart project authors.
  *
  * Licensed under the Eclipse Public License v1.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,12 +13,8 @@
  */
 package org.dartlang.vm.service.consumer;
 
-// This is a generated file.
+import com.google.gson.JsonObject;
 
-import org.dartlang.vm.service.element.Version;
-
-@SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
-public interface VersionConsumer extends Consumer {
-
-  public void received(Version response);
+public interface ServiceExtensionConsumer extends Consumer {
+    public void received(JsonObject result);
 }

@@ -18,10 +18,33 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+@SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public class Stack extends Response {
 
   public Stack(JsonObject json) {
     super(json);
+  }
+
+  public ElementList<Frame> getAsyncCausalFrames() {
+    if (json.get("asyncCausalFrames") == null) return null;
+    
+    return new ElementList<Frame>(json.get("asyncCausalFrames").getAsJsonArray()) {
+      @Override
+      protected Frame basicGet(JsonArray array, int index) {
+        return new Frame(array.get(index).getAsJsonObject());
+      }
+    };
+  }
+
+  public ElementList<Frame> getAwaiterFrames() {
+    if (json.get("awaiterFrames") == null) return null;
+    
+    return new ElementList<Frame>(json.get("awaiterFrames").getAsJsonArray()) {
+      @Override
+      protected Frame basicGet(JsonArray array, int index) {
+        return new Frame(array.get(index).getAsJsonObject());
+      }
+    };
   }
 
   public ElementList<Frame> getFrames() {

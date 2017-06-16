@@ -19,6 +19,7 @@ package org.dartlang.vm.service.element;
  * Adding new values to {@link EventKind} is considered a backwards compatible change. Clients
  * should ignore unrecognized events.
  */
+@SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public enum EventKind {
 
   /**
@@ -55,6 +56,11 @@ public enum EventKind {
    * Notification that an isolate has exited.
    */
   IsolateExit,
+
+  /**
+   * Notification that an isolate has been reloaded.
+   */
+  IsolateReload,
 
   /**
    * Notification that an isolate is ready to run.
@@ -99,7 +105,7 @@ public enum EventKind {
   PauseInterrupted,
 
   /**
-   * An isolate has paused after a service protocol request.
+   * An isolate has paused after a service request.
    */
   PausePostRequest,
 

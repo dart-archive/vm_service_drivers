@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 /**
  * An {@link Instance} represents an instance of the Dart language class {@link Obj}.
  */
+@SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public class Instance extends Obj {
 
   public Instance(JsonObject json) {
@@ -35,6 +36,8 @@ public class Instance extends Obj {
    *  - Map
    */
   public ElementList<MapAssociation> getAssociations() {
+    if (json.get("associations") == null) return null;
+    
     return new ElementList<MapAssociation>(json.get("associations").getAsJsonArray()) {
       @Override
       protected MapAssociation basicGet(JsonArray array, int index) {
@@ -144,6 +147,8 @@ public class Instance extends Obj {
    * @return one of <code>ElementList<InstanceRef></code> or <code>ElementList<Sentinel></code>
    */
   public ElementList<InstanceRef> getElements() {
+    if (json.get("elements") == null) return null;
+    
     return new ElementList<InstanceRef>(json.get("elements").getAsJsonArray()) {
       @Override
       protected InstanceRef basicGet(JsonArray array, int index) {
@@ -156,6 +161,8 @@ public class Instance extends Obj {
    * The fields of this Instance.
    */
   public ElementList<BoundField> getFields() {
+    if (json.get("fields") == null) return null;
+    
     return new ElementList<BoundField>(json.get("fields").getAsJsonArray()) {
       @Override
       protected BoundField basicGet(JsonArray array, int index) {

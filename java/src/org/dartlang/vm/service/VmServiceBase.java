@@ -23,11 +23,7 @@ import de.roderick.weberknecht.WebSocketEventHandler;
 import de.roderick.weberknecht.WebSocketException;
 import de.roderick.weberknecht.WebSocketMessage;
 
-import org.dartlang.vm.service.consumer.Consumer;
-import org.dartlang.vm.service.consumer.GetInstanceConsumer;
-import org.dartlang.vm.service.consumer.GetLibraryConsumer;
-import org.dartlang.vm.service.consumer.GetObjectConsumer;
-import org.dartlang.vm.service.consumer.VersionConsumer;
+import org.dartlang.vm.service.consumer.*;
 import org.dartlang.vm.service.element.Event;
 import org.dartlang.vm.service.element.Instance;
 import org.dartlang.vm.service.element.Library;
@@ -53,6 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Internal {@link VmService} base class containing non-generated code.
  */
+@SuppressWarnings({"unused", "WeakerAccess"})
 abstract class VmServiceBase implements VmServiceConst {
 
   /**
@@ -278,6 +275,27 @@ abstract class VmServiceBase implements VmServiceConst {
   public abstract void getObject(String isolateId, String objectId, GetObjectConsumer consumer);
 
   /**
+   * Invoke a specific service protocol extension method.
+   *
+   * See https://api.dartlang.org/stable/dart-developer/dart-developer-library.html.
+   */
+  public void callServiceExtension(String isolateId, String method, ServiceExtensionConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    request(method, params, consumer);
+  }
+
+  /**
+   * Invoke a specific service protocol extension method.
+   *
+   * See https://api.dartlang.org/stable/dart-developer/dart-developer-library.html.
+   */
+  public void callServiceExtension(String isolateId, String method, JsonObject params, ServiceExtensionConsumer consumer) {
+    params.addProperty("isolateId", isolateId);
+    request(method, params, consumer);
+  }
+
+  /**
    * Sends the request and associates the request with the passed {@link Consumer}.
    */
   protected void request(String method, JsonObject params, Consumer consumer) {
@@ -370,7 +388,7 @@ abstract class VmServiceBase implements VmServiceConst {
         return;
       }
       if (!"streamNotify".equals(method)) {
-        Logging.getLogger().logError("Unkown event " + METHOD + ": " + method);
+        Logging.getLogger().logError("Unknown event " + METHOD + ": " + method);
         return;
       }
       JsonObject params;

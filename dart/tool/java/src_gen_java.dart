@@ -258,6 +258,7 @@ class TypeWriter {
           .forEach((line) => buffer.writeln(' * $line'));
       buffer.writeln(' */');
     }
+    buffer.writeln("@SuppressWarnings({\"WeakerAccess\", \"unused\", \"UnnecessaryInterfaceModifier\"})");
     buffer.write('$modifiers $kind $className');
     if (superclassName != null) {
       buffer.write(' extends ${classNameFor(superclassName)}');

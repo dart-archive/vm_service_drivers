@@ -15,36 +15,22 @@ package org.dartlang.vm.service.element;
 
 // This is a generated file.
 
-import com.google.gson.JsonObject;
-
 /**
- * The {@link SourceLocation} class is used to designate a position or range in some script.
+ * A {@link FrameKind} is used to distinguish different kinds of {@link Frame} objects.
  */
 @SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
-public class SourceLocation extends Response {
+public enum FrameKind {
 
-  public SourceLocation(JsonObject json) {
-    super(json);
-  }
+  AsyncActivation,
 
-  /**
-   * The last token of the location if this is a range.
-   */
-  public int getEndTokenPos() {
-    return json.get("endTokenPos") == null ? -1 : json.get("endTokenPos").getAsInt();
-  }
+  AsyncCausal,
+
+  AsyncSuspensionMarker,
+
+  Regular,
 
   /**
-   * The script containing the source location.
+   * Represents a value returned by the VM but unknown to this client
    */
-  public ScriptRef getScript() {
-    return new ScriptRef((JsonObject) json.get("script"));
-  }
-
-  /**
-   * The first token of the location.
-   */
-  public int getTokenPos() {
-    return json.get("tokenPos") == null ? -1 : json.get("tokenPos").getAsInt();
-  }
+  Unknown
 }

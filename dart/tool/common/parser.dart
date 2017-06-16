@@ -77,7 +77,7 @@ class Tokenizer {
 
   String _peek(int i) {
     i += 1;
-    return i < text.length ? text[i] :new String.fromCharCodes([0]);
+    return i < text.length ? text[i] : new String.fromCharCodes([0]);
   }
 
   String toString() {

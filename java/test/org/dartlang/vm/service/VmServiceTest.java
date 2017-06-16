@@ -13,6 +13,7 @@
  */
 package org.dartlang.vm.service;
 
+import com.google.gson.JsonObject;
 import org.dartlang.vm.service.consumer.*;
 import org.dartlang.vm.service.element.*;
 import org.dartlang.vm.service.logging.Logger;
@@ -129,6 +130,7 @@ public class VmServiceTest {
     Isolate sampleIsolate = vmGetIsolate(isolates.get(0));
     Library rootLib = vmGetLibrary(sampleIsolate, sampleIsolate.getRootLib());
     vmGetScript(sampleIsolate, rootLib.getScripts().get(0));
+    vmCallServiceExtension(sampleIsolate);
 
     // Run to breakpoint on line "foo(1);"
     vmAddBreakpoint(sampleIsolate, rootLib.getScripts().get(0), 13);
@@ -314,6 +316,7 @@ public class VmServiceTest {
     System.out.println("Terminated sample process");
   }
 
+  @SuppressWarnings("SameParameterValue")
   private static void vmAddBreakpoint(Isolate isolate, ScriptRef script, int lineNum) {
     final OpLatch latch = new OpLatch();
     vmService.addBreakpoint(isolate.getId(), script.getId(), lineNum, new BreakpointConsumer() {
@@ -346,6 +349,7 @@ public class VmServiceTest {
     }
   }
 
+  @SuppressWarnings("SameParameterValue")
   private static void vmEvaluateInFrame(Isolate isolate, int frameIndex, String expression) {
     System.out.println("Evaluating: " + expression);
     final ResultLatch<InstanceRef> latch = new ResultLatch<InstanceRef>();
@@ -503,6 +507,23 @@ public class VmServiceTest {
     latch.waitAndAssertOpComplete();
   }
 
+  private static void vmCallServiceExtension(Isolate isolateId) {
+    final OpLatch latch = new OpLatch();
+    vmService.callServiceExtension(isolateId.getId(), "getIsolate", new ServiceExtensionConsumer() {
+      @Override
+      public void onError(RPCError error) {
+        showRPCError(error);
+      }
+
+      @Override
+      public void received(JsonObject result) {
+        System.out.println("Received response: " + result);
+        latch.opComplete();
+      }
+    });
+    latch.waitAndAssertOpComplete();
+  }
+
   private static ElementList<IsolateRef> vmGetVmIsolates() {
     final ResultLatch<ElementList<IsolateRef>> latch = new ResultLatch<ElementList<IsolateRef>>();
     vmService.getVM(new VMConsumer() {
@@ -549,7 +570,7 @@ public class VmServiceTest {
 
   private static void vmResume(IsolateRef isolateRef, final StepOption step) {
     final String id = isolateRef.getId();
-    vmService.resume(id, step, new SuccessConsumer() {
+    vmService.resume(id, step, null, new SuccessConsumer() {
       @Override
       public void onError(RPCError error) {
         showRPCError(error);

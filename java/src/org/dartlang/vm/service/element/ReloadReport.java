@@ -17,34 +17,17 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonObject;
 
-/**
- * The {@link SourceLocation} class is used to designate a position or range in some script.
- */
 @SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
-public class SourceLocation extends Response {
+public class ReloadReport extends Response {
 
-  public SourceLocation(JsonObject json) {
+  public ReloadReport(JsonObject json) {
     super(json);
   }
 
   /**
-   * The last token of the location if this is a range.
+   * Did the reload succeed or fail?
    */
-  public int getEndTokenPos() {
-    return json.get("endTokenPos") == null ? -1 : json.get("endTokenPos").getAsInt();
-  }
-
-  /**
-   * The script containing the source location.
-   */
-  public ScriptRef getScript() {
-    return new ScriptRef((JsonObject) json.get("script"));
-  }
-
-  /**
-   * The first token of the location.
-   */
-  public int getTokenPos() {
-    return json.get("tokenPos") == null ? -1 : json.get("tokenPos").getAsInt();
+  public boolean getSuccess() {
+    return json.get("success").getAsBoolean();
   }
 }

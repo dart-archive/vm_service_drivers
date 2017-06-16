@@ -16,7 +16,7 @@ final bool _stampPubspecVersion = false;
 
 /// Parse the 'service.md' into a model and generate both Dart and Java
 /// libraries.
-main(List<String> args) {
+main(List<String> args) async {
   String appDirPath = dirname(Platform.script.toFilePath());
 
   // Parse service.md into a model.
@@ -27,12 +27,12 @@ main(List<String> args) {
   print('Service protocol version ${ApiParseUtil.parseVersionString(nodes)}.');
 
   // Generate code from the model.
-  _generateDart(appDirPath, nodes);
-  _generateJava(appDirPath, nodes);
-  _generateAsserts(appDirPath, nodes);
+  await _generateDart(appDirPath, nodes);
+  await _generateJava(appDirPath, nodes);
+  await _generateAsserts(appDirPath, nodes);
 }
 
-void _generateDart(String appDirPath, List<Node> nodes) {
+_generateDart(String appDirPath, List<Node> nodes) async {
   print('');
   var outDirPath = normalize(join(appDirPath, '..', 'lib'));
   var outDir = new Directory(outDirPath);
@@ -57,7 +57,7 @@ void _generateDart(String appDirPath, List<Node> nodes) {
   print('Wrote Dart to ${outputFile.path}.');
 }
 
-void _generateJava(String appDirPath, List<Node> nodes) {
+_generateJava(String appDirPath, List<Node> nodes) async {
   print('');
   var srcDirPath = normalize(join(appDirPath, '..', '..', 'java', 'src'));
   assert(new Directory(srcDirPath).existsSync());
@@ -68,13 +68,13 @@ void _generateJava(String appDirPath, List<Node> nodes) {
 
   // Generate a version file.
   Version version = ApiParseUtil.parseVersionSemVer(nodes);
-  File file = new File(join('..', 'java', 'version.txt'));
+  File file = new File(join('..', 'java', 'version.properties'));
   file.writeAsStringSync('version=${version.major}.${version.minor}\n');
 
   print('Wrote Java to $srcDirPath.');
 }
 
-void _generateAsserts(String appDirPath, List<Node> nodes) {
+_generateAsserts(String appDirPath, List<Node> nodes) async {
   print('');
   var outDirPath = normalize(join(appDirPath, '..', 'example'));
   var outDir = new Directory(outDirPath);

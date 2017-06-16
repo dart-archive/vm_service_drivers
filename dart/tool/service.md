@@ -1,4 +1,7 @@
-# Dart VM Service Protocol 3.5
+Note: this dev version of the protocol contains not yet released functionality,
+and is subject to change.
+
+# Dart VM Service Protocol 3.6-dev
 
 > Please post feedback to the [observatory-discuss group][discuss-list]
 
@@ -37,6 +40,7 @@ The Service Protocol uses [JSON-RPC 2.0][].
 	- [getVersion](#getversion)
 	- [getVM](#getvm)
 	- [pause](#pause)
+	- [reloadSources](#reloadsources)
 	- [removeBreakpoint](#removebreakpoint)
 	- [resume](#resume)
 	- [setExceptionPauseMode](#setexceptionpausemode)
@@ -73,6 +77,7 @@ The Service Protocol uses [JSON-RPC 2.0][].
 	- [Message](#message)
 	- [Null](#null)
 	- [Object](#object)
+	- [ReloadReport](#reloadreport)
 	- [Response](#response)
 	- [Sentinel](#sentinel)
 	- [SentinelKind](#sentinelkind)
@@ -183,7 +188,9 @@ code | message | meaning
 104 | Stream not subscribed | The client is not subscribed to the specified _streamId_
 105 | Isolate must be runnable | This operation cannot happen until the isolate is runnable
 106 | Isolate must be paused | This operation is only valid when the isolate is paused
-
+107 | Cannot resume execution | The isolate could not be resumed
+108 | Isolate is reloading | The isolate is currently processing another reload request
+109 | Isolate cannot be reloaded | The isolate has an unhandled exception and can no longer be reloaded
 
 
 
@@ -465,7 +472,8 @@ Note that breakpoints are added and removed on a per-isolate basis.
 ```
 @Instance|@Error|Sentinel evaluate(string isolateId,
                                    string targetId,
-                                   string expression)
+                                   string expression,
+                                   map<string,string> scope [optional])
 ```
 
 The _evaluate_ RPC is used to evaluate an expression in the context of
@@ -481,6 +489,12 @@ If _targetId_ refers to an object which has been collected by the VM's
 garbage collector, then the _Collected_ [Sentinel](#sentinel) is
 returned.
 
+If _scope_ is provided, it should be a map from identifiers to object ids.
+These bindings will be added to the scope in which the expression is evaluated,
+which is a child scope of the class or library for instance/class or library
+targets respectively. This means bindings provided in _scope_ may shadow
+instance members, class members and top-level members.
+
 If an error occurs while evaluating the expression, an [@Error](#error)
 reference will be returned.
 
@@ -492,13 +506,20 @@ reference will be returned.
 ```
 @Instance|@Error evaluateInFrame(string isolateId,
                                  int frameIndex,
-                                 string expression)
+                                 string expression,
+                                 map<string,string> scope [optional])
 ```
 
 The _evaluateInFrame_ RPC is used to evaluate an expression in the
 context of a particular stack frame. _frameIndex_ is the index of the
 desired [Frame](#frame), with an index of _0_ indicating the top (most
 recent) frame.
+
+If _scope_ is provided, it should be a map from identifiers to object ids.
+These bindings will be added to the scope in which the expression is evaluated,
+which is a child scope of the frame's current scope. This means bindings
+provided in _scope_ may shadow instance members, class members, top-level
+members, parameters and locals.
 
 If an error occurs while evaluating the expression, an [@Error](#error)
 reference will be returned.
@@ -651,6 +672,31 @@ When the isolate is paused an event will be sent on the _Debug_ stream.
 
 See [Success](#success).
 
+### reloadSources
+
+
+```
+ReloadReport reloadSources(string isolateId,
+                           bool force [optional],
+                           bool pause [optional],
+                           string rootLibUri [optional],
+                           string packagesUri [optional])
+```
+
+The _reloadSources_ RPC is used to perform a hot reload of an Isolate's sources.
+
+if the _force_ parameter is provided, it indicates that all of the Isolate's
+sources should be reloaded regardless of modification time.
+
+if the _pause_ parameter is provided, the isolate will pause immediately
+after the reload.
+
+if the _rootLibUri_ parameter is provided, it indicates the new uri to the
+Isolate's root library.
+
+if the _packagesUri_ parameter is provided, it indicates the new uri to the
+Isolate's package map (.packages) file.
+
 ### removeBreakpoint
 
 ```
@@ -668,7 +714,8 @@ See [Success](#success).
 
 ```
 Success resume(string isolateId,
-               StepOption step [optional])
+               StepOption step [optional],
+               int frameIndex [optional])
 ```
 
 The _resume_ RPC is used to resume execution of a paused isolate.
@@ -684,6 +731,13 @@ step | meaning
 Into | Single step, entering function calls
 Over | Single step, skipping over function calls
 Out | Single step until the current function exits
+Rewind | Immediately exit the top frame(s) without executing any code. Isolate will be paused at the call of the last exited function.
+
+The _frameIndex_ parameter is only used when the _step_ parameter is Rewind. It
+specifies the stack frame to rewind to. Stack frame 0 is the currently executing
+function, so _frameIndex_ must be at least 1.
+
+If the _frameIndex_ parameter is not provided, it defaults to 1.
 
 See [Success](#success), [StepOption](#StepOption).
 
@@ -768,8 +822,8 @@ The _streamId_ parameter may have the following published values:
 streamId | event types provided
 -------- | -----------
 VM | VMUpdate
-Isolate | IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
-Debug | PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException, Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect, None
+Isolate | IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, IsolateReload, ServiceExtensionAdded
+Debug | PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException, PausePostRequest, Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect, None
 GC | GC
 Extension | Extension
 Timeline | TimelineEvents
@@ -1244,6 +1298,12 @@ class Event extends Response {
   //   PauseBreakpoint
   //   PauseInterrupted
   bool atAsyncSuspension [optional];
+
+  // The status (success or failure) related to the event.
+  // This is provided for the event kinds:
+  //   IsolateReloaded
+  //   IsolateSpawn
+  string status [optional];
 }
 ```
 
@@ -1275,6 +1335,9 @@ enum EventKind {
   // via setName.
   IsolateUpdate,
 
+  // Notification that an isolate has been reloaded.
+  IsolateReload,
+
   // Notification that an extension RPC was registered on an isolate.
   ServiceExtensionAdded,
 
@@ -1287,14 +1350,14 @@ enum EventKind {
   // An isolate has paused at a breakpoint or due to stepping.
   PauseBreakpoint,
 
-  // An isolate has paused after a service protocol request.
-  PausePostRequest,
-
   // An isolate has paused due to interruption via pause.
   PauseInterrupted,
 
   // An isolate has paused due to an exception.
   PauseException,
+
+  // An isolate has paused after a service request.
+  PausePostRequest,
 
   // An isolate has started or resumed execution.
   Resume,
@@ -1442,10 +1505,11 @@ A _FlagList_ represents the complete set of VM command line flags.
 ```
 class Frame extends Response {
   int index;
-  @Function function;
-  @Code code;
-  SourceLocation location;
-  BoundVariable[] vars;
+  @Function function [optional];
+  @Code code [optional];
+  SourceLocation location [optional];
+  BoundVariable[] vars [optional];
+  FrameKind kind [optional];
 }
 ```
 
@@ -2132,6 +2196,15 @@ class Object extends Response {
 
 An _Object_ is a  persistent object that is owned by some isolate.
 
+### ReloadReport
+
+```
+class ReloadReport extends Response {
+  // Did the reload succeed or fail?
+  bool success;
+}
+```
+
 ### Response
 
 ```
@@ -2192,6 +2265,19 @@ A _SentinelKind_ is used to distinguish different kinds of _Sentinel_ objects.
 
 Adding new values to _SentinelKind_ is considered a backwards
 compatible change. Clients must handle this gracefully.
+
+
+### FrameKind
+```
+enum FrameKind {
+  Regular,
+  AsyncCausal,
+  AsyncSuspensionMarker,
+  AsyncActivation
+}
+```
+
+A _FrameKind_ is used to distinguish different kinds of _Frame_ objects.
 
 ### Script
 
@@ -2362,6 +2448,8 @@ and therefore will not contain a _type_ property.
 ```
 class Stack extends Response {
   Frame[] frames;
+  Frame[] asyncCausalFrames [optional];
+  Frame[] awaiterFrames [optional];
   Message[] messages;
 }
 ```
@@ -2386,7 +2474,8 @@ enum StepOption {
   Into,
   Over,
   OverAsyncSuspension,
-  Out
+  Out,
+  Rewind
 }
 ```
 
@@ -2540,6 +2629,6 @@ version | comments
 3.3 | Pause event now indicates if the isolate is paused at an await, yield, or yield* suspension point via the 'atAsyncSuspension' field. Resume command now supports the step parameter 'OverAsyncSuspension'. A Breakpoint added synthetically by an 'OverAsyncSuspension' resume command identifies itself as such via the 'isSyntheticAsyncContinuation' field.
 3.4 | Add the superType and mixin fields to Class. Added new pause event 'None'.
 3.5 | Add the error field to SourceReportRange.  Clarify definition of token position.  Add "Isolate must be paused" error code.
-3.6 (unreleased) | Add 'scopeStartTokenPos', 'scopeEndTokenPos', and 'declarationTokenPos' to BoundVariable.
+3.6 (unreleased) | Add 'scopeStartTokenPos', 'scopeEndTokenPos', and 'declarationTokenPos' to BoundVariable. Add 'PausePostRequest' event kind. Add 'Rewind' StepOption. Add error code 107 (isolate cannot resume). Add 'reloadSources' RPC and related error codes. Add optional parameter 'scope' to 'evaluate' and 'evaluateInFrame'.
 
 [discuss-list]: https://groups.google.com/a/dartlang.org/forum/#!forum/observatory-discuss

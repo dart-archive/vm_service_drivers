@@ -18,6 +18,7 @@ package org.dartlang.vm.service.element;
 /**
  * A {@link StepOption} indicates which form of stepping is requested in a resume RPC.
  */
+@SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public enum StepOption {
 
   Into,
@@ -27,6 +28,8 @@ public enum StepOption {
   Over,
 
   OverAsyncSuspension,
+
+  Rewind,
 
   /**
    * Represents a value returned by the VM but unknown to this client

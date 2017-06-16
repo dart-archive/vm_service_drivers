@@ -15,10 +15,10 @@ package org.dartlang.vm.service.consumer;
 
 // This is a generated file.
 
-import org.dartlang.vm.service.element.Version;
+import org.dartlang.vm.service.element.ReloadReport;
 
 @SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
-public interface VersionConsumer extends Consumer {
+public interface ReloadReportConsumer extends Consumer {
 
-  public void received(Version response);
+  public void received(ReloadReport response);
 }

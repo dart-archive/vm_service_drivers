@@ -15,7 +15,10 @@ package org.dartlang.vm.service;
 
 // This is a generated file.
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import java.util.Map;
 import org.dartlang.vm.service.consumer.*;
 import org.dartlang.vm.service.element.*;
 
@@ -44,6 +47,7 @@ import org.dartlang.vm.service.element.*;
  * More specifically, you should not make any calls to {@link VmService}
  * from within any {@link Consumer} method.
  */
+@SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public class VmService extends VmServiceBase {
 
   public static final String DEBUG_STREAM_ID = "Debug";
@@ -70,7 +74,7 @@ public class VmService extends VmServiceBase {
   /**
    * The minor version number of the protocol supported by this client.
    */
-  public static final int versionMinor = 5;
+  public static final int versionMinor = 6;
 
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
@@ -148,6 +152,20 @@ public class VmService extends VmServiceBase {
   }
 
   /**
+   * The [evaluate] RPC is used to evaluate an expression in the context of some target.
+   *
+   * @param scope This parameter is optional and may be null.
+   */
+  public void evaluate(String isolateId, String targetId, String expression, Map<String, String> scope, EvaluateConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("targetId", targetId);
+    params.addProperty("expression", expression);
+    if (scope != null) params.add("scope", convertMapToJsonObject(scope));
+    request("evaluate", params, consumer);
+  }
+
+  /**
    * The [evaluateInFrame] RPC is used to evaluate an expression in the context of a particular
    * stack frame. [frameIndex] is the index of the desired Frame, with an index of [0] indicating
    * the top (most recent) frame.
@@ -157,6 +175,22 @@ public class VmService extends VmServiceBase {
     params.addProperty("isolateId", isolateId);
     params.addProperty("frameIndex", frameIndex);
     params.addProperty("expression", expression);
+    request("evaluateInFrame", params, consumer);
+  }
+
+  /**
+   * The [evaluateInFrame] RPC is used to evaluate an expression in the context of a particular
+   * stack frame. [frameIndex] is the index of the desired Frame, with an index of [0] indicating
+   * the top (most recent) frame.
+   *
+   * @param scope This parameter is optional and may be null.
+   */
+  public void evaluateInFrame(String isolateId, int frameIndex, String expression, Map<String, String> scope, EvaluateInFrameConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("frameIndex", frameIndex);
+    params.addProperty("expression", expression);
+    if (scope != null) params.add("scope", convertMapToJsonObject(scope));
     request("evaluateInFrame", params, consumer);
   }
 
@@ -206,13 +240,11 @@ public class VmService extends VmServiceBase {
   /**
    * The [getSourceReport] RPC is used to generate a set of reports tied to source locations in an
    * isolate.
-   *
-   * TODO: reports parameter should be a List<SourceReportKind>.
    */
-  public void getSourceReport(String isolateId, SourceReportKind reports, SourceReportConsumer consumer) {
+  public void getSourceReport(String isolateId, ElementList<SourceReportKind> reports, SourceReportConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
-    params.addProperty("reports", reports.name());
+    params.add("reports", convertIterableToJsonArray(reports));
     request("getSourceReport", params, consumer);
   }
 
@@ -224,14 +256,11 @@ public class VmService extends VmServiceBase {
    * @param tokenPos This parameter is optional and may be null.
    * @param endTokenPos This parameter is optional and may be null.
    * @param forceCompile This parameter is optional and may be null.
-   *
-   *
-   * TODO: reports parameter should be a List<SourceReportKind>.
    */
-  public void getSourceReport(String isolateId, SourceReportKind reports, String scriptId, Integer tokenPos, Integer endTokenPos, Boolean forceCompile, SourceReportConsumer consumer) {
+  public void getSourceReport(String isolateId, ElementList<SourceReportKind> reports, String scriptId, Integer tokenPos, Integer endTokenPos, Boolean forceCompile, SourceReportConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
-    params.addProperty("reports", reports.name());
+    params.add("reports", convertIterableToJsonArray(reports));
     if (scriptId != null) params.addProperty("scriptId", scriptId);
     if (tokenPos != null) params.addProperty("tokenPos", tokenPos);
     if (endTokenPos != null) params.addProperty("endTokenPos", endTokenPos);
@@ -277,6 +306,33 @@ public class VmService extends VmServiceBase {
   }
 
   /**
+   * The [reloadSources] RPC is used to perform a hot reload of an Isolate's sources.
+   *
+   * @param force This parameter is optional and may be null.
+   * @param pause This parameter is optional and may be null.
+   * @param rootLibUri This parameter is optional and may be null.
+   * @param packagesUri This parameter is optional and may be null.
+   */
+  public void reloadSources(String isolateId, Boolean force, Boolean pause, String rootLibUri, String packagesUri, ReloadReportConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    if (force != null) params.addProperty("force", force);
+    if (pause != null) params.addProperty("pause", pause);
+    if (rootLibUri != null) params.addProperty("rootLibUri", rootLibUri);
+    if (packagesUri != null) params.addProperty("packagesUri", packagesUri);
+    request("reloadSources", params, consumer);
+  }
+
+  /**
+   * The [reloadSources] RPC is used to perform a hot reload of an Isolate's sources.
+   */
+  public void reloadSources(String isolateId, ReloadReportConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    request("reloadSources", params, consumer);
+  }
+
+  /**
    * The [removeBreakpoint] RPC is used to remove a breakpoint by its [id].
    */
   public void removeBreakpoint(String isolateId, String breakpointId, SuccessConsumer consumer) {
@@ -290,11 +346,13 @@ public class VmService extends VmServiceBase {
    * The [resume] RPC is used to resume execution of a paused isolate.
    *
    * @param step This parameter is optional and may be null.
+   * @param frameIndex This parameter is optional and may be null.
    */
-  public void resume(String isolateId, StepOption step, SuccessConsumer consumer) {
+  public void resume(String isolateId, StepOption step, Integer frameIndex, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     if (step != null) params.addProperty("step", step.name());
+    if (frameIndex != null) params.addProperty("frameIndex", frameIndex);
     request("resume", params, consumer);
   }
 
@@ -366,6 +424,22 @@ public class VmService extends VmServiceBase {
     JsonObject params = new JsonObject();
     params.addProperty("streamId", streamId);
     request("streamListen", params, consumer);
+  }
+
+  private JsonArray convertIterableToJsonArray(Iterable list) {
+    JsonArray arr = new JsonArray();
+    for (Object element : list) {
+      arr.add(new JsonPrimitive(element.toString()));
+    }
+    return arr;
+  }
+
+  private JsonObject convertMapToJsonObject(Map<String, String> map) {
+    JsonObject obj = new JsonObject();
+    for (String key : map.keySet()) {
+      obj.addProperty(key, map.get(key));
+    }
+    return obj;
   }
 
   @Override
@@ -478,6 +552,12 @@ public class VmService extends VmServiceBase {
         return;
       }
     }
+    if (consumer instanceof ReloadReportConsumer) {
+      if (responseType.equals("ReloadReport")) {
+        ((ReloadReportConsumer) consumer).received(new ReloadReport(json));
+        return;
+      }
+    }
     if (consumer instanceof SourceReportConsumer) {
       if (responseType.equals("SourceReport")) {
         ((SourceReportConsumer) consumer).received(new SourceReport(json));
@@ -507,6 +587,10 @@ public class VmService extends VmServiceBase {
         ((VersionConsumer) consumer).received(new Version(json));
         return;
       }
+    }
+    if (consumer instanceof ServiceExtensionConsumer) {
+      ((ServiceExtensionConsumer) consumer).received(json);
+      return;
     }
     logUnknownResponse(consumer, json);
   }
