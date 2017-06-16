@@ -2,6 +2,10 @@
 
 ## 0.3.3
 - fix strong mode issues at runtime (with JSLists and Lists)
+- expose the ability to evaluate in the scope of another object
+- expose the async causal frame info
+- expose the `awaiterFrames` field
+- expose the `frameIndex` param for the step call
 
 ## 0.3.2+1
 - fix a strong mode issue in the generated Dart library
