@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.4
+- more strong mode runtime fixes
+- expose some undocumented (and unsupported) service protocol methods
+
 ## 0.3.3
 - fix strong mode issues at runtime (with JSLists and Lists)
 - expose the ability to evaluate in the scope of another object

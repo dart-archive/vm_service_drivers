@@ -22,7 +22,10 @@ main(List<String> args) async {
   // Parse service.md into a model.
   var file = new File(join(appDirPath, 'service.md'));
   var document = new Document();
-  var nodes = document.parseLines(file.readAsStringSync().split('\n'));
+  StringBuffer buf = new StringBuffer(file.readAsStringSync());
+  buf.writeln();
+  buf.write(new File(join(appDirPath, 'service_undocumented.md')).readAsStringSync());
+  var nodes = document.parseLines(buf.toString().split('\n'));
   print('Parsed ${file.path}.');
   print('Service protocol version ${ApiParseUtil.parseVersionString(nodes)}.');
 

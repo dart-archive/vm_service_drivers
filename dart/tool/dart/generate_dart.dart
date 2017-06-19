@@ -39,7 +39,8 @@ final String _headerCode = r'''
 library vm_service_lib;
 
 import 'dart:async';
-import 'dart:convert' show BASE64, JSON;
+import 'dart:convert' show BASE64, JSON, UTF8;
+import 'dart:typed_data';
 
 ''';
 
@@ -95,7 +96,40 @@ final String _implCode = r'''
     return completer.future;
   }
 
-  void _processMessage(String message) {
+  void _processMessage(dynamic message) {
+    // Expect a String, an int[], or a ByteData.
+
+    if (message is String) {
+      _processMessageStr(message);
+    } else if (message is List<int>) {
+      Uint8List list = new Uint8List.fromList(message);
+      _processMessageByteData(new ByteData.view(list.buffer));
+    } else if (message is ByteData) {
+      _processMessageByteData(message);
+    } else {
+      _log.warning('unknown message type: ${message.runtimeType}');
+    }
+  }
+
+  void _processMessageByteData(ByteData bytes) {
+    int offset = 0;
+    int metaSize = bytes.getUint32(offset + 4, Endianness.BIG_ENDIAN);
+    offset += 8;
+    String meta = UTF8.decode(new Uint8List.view(
+        bytes.buffer, bytes.offsetInBytes + offset, metaSize));
+    offset += metaSize;
+    ByteData data = new ByteData.view(bytes.buffer, bytes.offsetInBytes + offset,
+        bytes.lengthInBytes - offset);
+    dynamic map = JSON.decode(meta);
+    if (map != null && map['method'] == 'streamNotify') {
+      String streamId = map['params']['streamId'];
+      Map event = map['params']['event'];
+      event['_data'] = data;
+      _getEventController(streamId).add(_createObject(event));
+    }
+  }
+
+  void _processMessageStr(String message) {
     try {
       _onReceive.add(message);
 
@@ -253,10 +287,10 @@ class Api extends Member with ApiParseUtil {
     definition = definition.replaceAll('&lt;', '<').replaceAll('&gt;', '>');
     if (docs != null) docs = docs.trim();
 
-    if (name.substring(0, 1).toLowerCase() == name.substring(0, 1)) {
-      methods.add(new Method(name, definition, docs));
-    } else if (definition.startsWith('class ')) {
+    if (definition.startsWith('class ')) {
       types.add(new Type(this, name, definition, docs));
+    } else if (name.substring(0, 1).toLowerCase() == name.substring(0, 1)) {
+      methods.add(new Method(name, definition, docs));
     } else if (definition.startsWith('enum ')) {
       enums.add(new Enum(name, definition, docs));
     } else {
@@ -287,6 +321,9 @@ class Api extends Member with ApiParseUtil {
 /// @optional
 const String optional = 'optional';
 
+/// @undocumented
+const String undocumented = 'undocumented';
+
 /// Decode a string in Base64 encoding into the equivalent non-encoded string.
 /// This is useful for handling the results of the Stdout or Stderr events.
 String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
@@ -313,7 +350,7 @@ Object _createSpecificObject(dynamic json, Function creator) {
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => creator(e)).toList();
+    return json.map((e) => creator(e));
   } else if (json is Map) {
     return creator(json);
   } else {
@@ -326,9 +363,10 @@ Object _createSpecificObject(dynamic json, Function creator) {
     gen.writeln();
     gen.write('Map<String, Function> _typeFactories = {');
     types.forEach((Type type) {
-      gen.write("'${type.rawName}': ${type.name}.parse");
-      gen.writeln(type == types.last ? '' : ',');
+      gen.writeln("'${type.rawName}': ${type.publicName}.parse,");
     });
+    gen.writeln(
+        "'OK': Success.parse, // TODO: file a bug against _requestHeapSnapshot");
     gen.writeln('};');
     gen.writeln();
     gen.writeStatement('class VmService {');
@@ -356,7 +394,7 @@ StreamController<Event> _getEventController(String eventName) {
 
 DisposeHandler _disposeHandler;
 
-VmService(Stream<String> inStream, void writeMessage(String message), {
+VmService(Stream<dynamic> /*String|List<int>*/ inStream, void writeMessage(String message), {
   Log log,
   DisposeHandler disposeHandler
 }) {
@@ -387,6 +425,9 @@ Stream<Event> get onStderrEvent => _getEventController('Stderr').stream;
 
 // Extension
 Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
+
+// _Graph
+Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
 
 // Listen for a specific event name.
 Stream<Event> onEvent(String streamName) => _getEventController(streamName).stream;
@@ -428,6 +469,11 @@ bool assertBool(bool obj) {
 }
 
 int assertInt(int obj) {
+  assertNotNull(obj);
+  return obj;
+}
+
+double assertDouble(double obj) {
   assertNotNull(obj);
   return obj;
 }
@@ -522,6 +568,7 @@ vms.Event assertIsolateEvent(vms.Event event) {
             'LibraryDependency',
             'Message',
             'SourceReportRange',
+            'ClassHeapStats',
           ].contains(type.name)) {
         type.generateListAssert(gen);
       }
@@ -557,6 +604,10 @@ class Method extends Member {
 
   bool get hasOptionalArgs => args.any((MethodArg arg) => arg.optional);
 
+  bool get isUndocumented => name.startsWith('_');
+
+  String get publicName => isUndocumented ? name.substring(1) : name;
+
   void generate(DartGenerator gen) {
     gen.writeln();
     if (docs != null) {
@@ -567,47 +618,47 @@ class Method extends Member {
         _docs = _docs.trim();
       }
       if (_docs.isNotEmpty) gen.writeDocs(_docs);
-      gen.write('Future<${returnType.name}> ${name}(');
-      bool startedOptional = false;
-      gen.write(args.map((MethodArg arg) {
-        String typeName = (!arg.type.isArray && api.isEnumName(arg.type.name))
-            ? '/*${arg.type}*/ String'
-            : arg.type.ref;
-        if (arg.optional && !startedOptional) {
-          startedOptional = true;
-          return '{${typeName} ${arg.name}';
-        } else {
-          return '${typeName} ${arg.name}';
-        }
-      }).join(', '));
-      if (startedOptional) gen.write('}');
-      gen.write(') ');
-      if (!hasArgs) {
-        gen.writeStatement("=> _call('${name}');");
-      } else if (hasOptionalArgs) {
-        gen.writeStatement('{');
-        gen.write('Map m = {');
-        gen.write(args
-            .where((MethodArg a) => !a.optional)
-            .map((arg) => "'${arg.name}': ${arg.name}")
-            .join(', '));
-        gen.writeln('};');
-        args.where((MethodArg a) => a.optional).forEach((MethodArg arg) {
-          String valueRef = arg.name;
-          gen.writeln(
-              "if (${arg.name} != null) m['${arg.name}'] = ${valueRef};");
-        });
-        gen.writeStatement("return _call('${name}', m);");
-        gen.writeStatement('}');
+    }
+    if (isUndocumented) gen.writeln('@undocumented');
+    gen.write('Future<${returnType.name}> ${publicName}(');
+    bool startedOptional = false;
+    gen.write(args.map((MethodArg arg) {
+      String typeName = (!arg.type.isArray && api.isEnumName(arg.type.name))
+          ? '/*${arg.type}*/ String'
+          : arg.type.ref;
+      if (arg.optional && !startedOptional) {
+        startedOptional = true;
+        return '{${typeName} ${arg.name}';
       } else {
-        gen.writeStatement('{');
-        gen.write("return _call('${name}', {");
-        gen.write(args.map((MethodArg arg) {
-          return "'${arg.name}': ${arg.name}";
-        }).join(', '));
-        gen.writeStatement('});');
-        gen.writeStatement('}');
+        return '${typeName} ${arg.name}';
       }
+    }).join(', '));
+    if (startedOptional) gen.write('}');
+    gen.write(') ');
+    if (!hasArgs) {
+      gen.writeStatement("=> _call('${name}');");
+    } else if (hasOptionalArgs) {
+      gen.writeStatement('{');
+      gen.write('Map m = {');
+      gen.write(args
+          .where((MethodArg a) => !a.optional)
+          .map((arg) => "'${arg.name}': ${arg.name}")
+          .join(', '));
+      gen.writeln('};');
+      args.where((MethodArg a) => a.optional).forEach((MethodArg arg) {
+        String valueRef = arg.name;
+        gen.writeln("if (${arg.name} != null) m['${arg.name}'] = ${valueRef};");
+      });
+      gen.writeStatement("return _call('${name}', m);");
+      gen.writeStatement('}');
+    } else {
+      gen.writeStatement('{');
+      gen.write("return _call('${name}', {");
+      gen.write(args.map((MethodArg arg) {
+        return "'${arg.name}': ${arg.name}";
+      }).join(', '));
+      gen.writeStatement('});');
+      gen.writeStatement('}');
     }
   }
 
@@ -678,14 +729,14 @@ class TypeRef {
   TypeRef(this.name);
 
   String get ref {
-   if (arrayDepth == 2) {
-     return 'List<List<${name}>>';
-   } else if (arrayDepth == 1) {
-     return 'List<${name}>';
-   } else if (genericTypes != null) {
-     return '$name<${genericTypes.join(', ')}>';
-   } else {
-     return name;
+    if (arrayDepth == 2) {
+      return 'List<List<${name}>>';
+    } else if (arrayDepth == 1) {
+      return 'List<${name}>';
+    } else if (genericTypes != null) {
+      return '$name<${genericTypes.join(', ')}>';
+    } else {
+      return name.startsWith('_') ? name.substring(1) : name;
     }
   }
 
@@ -695,7 +746,11 @@ class TypeRef {
 
   bool get isSimple =>
       arrayDepth == 0 &&
-      (name == 'int' || name == 'num' || name == 'String' || name == 'bool');
+      (name == 'int' ||
+          name == 'num' ||
+          name == 'String' ||
+          name == 'bool' ||
+          name == 'double');
 
   String get namePlural => name.endsWith('y')
       ? name.substring(0, name.length - 1) + 'ies'
@@ -739,6 +794,10 @@ class Type extends Member {
 
   bool get isRef => name.endsWith('Ref');
 
+  bool get isUndocumented => name.startsWith('_');
+
+  String get publicName => isUndocumented ? name.substring(1) : name;
+
   String get namePlural => name.endsWith('y')
       ? name.substring(0, name.length - 1) + 'ies'
       : name + 's';
@@ -770,11 +829,12 @@ class Type extends Member {
   void generate(DartGenerator gen) {
     gen.writeln();
     if (docs != null) gen.writeDocs(docs);
-    gen.write('class ${name} ');
+    if (isUndocumented) gen.writeln('@undocumented');
+    gen.write('class ${publicName} ');
     if (superName != null) gen.write('extends ${superName} ');
     gen.writeln('{');
-    gen.writeln('static ${name} parse(Map<String, dynamic> json) => '
-        'json == null ? null : new ${name}._fromJson(json);');
+    gen.writeln('static ${publicName} parse(Map<String, dynamic> json) => '
+        'json == null ? null : new ${publicName}._fromJson(json);');
     gen.writeln();
 
     if (name == 'Response') {
@@ -786,14 +846,15 @@ class Type extends Member {
     gen.writeln();
 
     // ctors
-    gen.writeln('${name}();');
+    gen.writeln('${publicName}();');
     gen.writeln();
 
     String superCall = superName == null ? '' : ": super._fromJson(json) ";
     if (name == 'Response') {
-      gen.writeln('${name}._fromJson(this.json) {');
+      gen.writeln('${publicName}._fromJson(this.json) {');
     } else {
-      gen.writeln('${name}._fromJson(Map<String, dynamic> json) ${superCall}{');
+      gen.writeln(
+          '${publicName}._fromJson(Map<String, dynamic> json) ${superCall}{');
     }
 
     fields.forEach((TypeField field) {
@@ -814,14 +875,14 @@ class Type extends Member {
             "extensionData = ExtensionData.parse(json['extensionData']);");
       } else if (name == 'Instance' && field.name == 'associations') {
         // Special case `Instance.associations`.
-        gen.writeln(
-            "associations = _createSpecificObject(json['associations'], MapAssociation.parse) "
-            "as List<MapAssociation>;");
+        gen.writeln("associations = new List<MapAssociation>.from("
+            "_createSpecificObject(json['associations'], MapAssociation.parse));");
       } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;
-        gen.writeln(
-            "${field.generatableName} = new List<${fieldType.listTypeArg}>.from("
-            "_createObject(json['${field.name}']));");
+        if (field.optional) {}
+        String ref = "json['${field.name}']";
+        gen.writeln("${field.generatableName} = $ref == null ? null : "
+            "new List<${fieldType.listTypeArg}>.from(_createObject($ref));");
       } else {
         gen.writeln(
             "${field.generatableName} = _createObject(json['${field.name}']);");
@@ -867,7 +928,7 @@ class Type extends Member {
   }
 
   void generateAssert(DartGenerator gen) {
-    gen.writeln('vms.${name} assert${name}(vms.${name} obj) {');
+    gen.writeln('vms.${publicName} assert${name}(vms.${publicName} obj) {');
     gen.writeln('assertNotNull(obj);');
     for (TypeField field in getAllFields()) {
       if (!field.optional) {
@@ -951,7 +1012,8 @@ class TypeField extends Member {
     'static': 'isStatic',
     'abstract': 'isAbstract',
     'super': 'superClass',
-    'class': 'classRef'
+    'class': 'classRef',
+    'new': 'new_',
   };
 
   final Type parent;
@@ -1140,7 +1202,8 @@ class MethodParser extends Parser {
         ref.genericTypes = [];
         while (peek().text != '>') {
           Token genericTypeName = expectName();
-          ref.genericTypes.add(new TypeRef(_coerceRefType(genericTypeName.text)));
+          ref.genericTypes
+              .add(new TypeRef(_coerceRefType(genericTypeName.text)));
           consume(',');
         }
         expect('>');

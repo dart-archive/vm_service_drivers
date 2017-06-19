@@ -23,6 +23,11 @@ int assertInt(int obj) {
   return obj;
 }
 
+double assertDouble(double obj) {
+  assertNotNull(obj);
+  return obj;
+}
+
 List<int> assertInts(List<int> list) {
   for (int elem in list) {
     assertInt(elem);
@@ -882,5 +887,56 @@ vms.VM assertVM(vms.VM obj) {
   assertInt(obj.pid);
   assertInt(obj.startTime);
   assertIsolateRefs(obj.isolates);
+  return obj;
+}
+
+vms.CpuProfile assert_CpuProfile(vms.CpuProfile obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertInt(obj.sampleCount);
+  assertInt(obj.samplePeriod);
+  assertInt(obj.stackDepth);
+  assertDouble(obj.timeSpan);
+  assertInt(obj.timeOriginMicros);
+  assertInt(obj.timeExtentMicros);
+  return obj;
+}
+
+vms.AllocationProfile assertAllocationProfile(vms.AllocationProfile obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertInt(obj.dateLastServiceGC);
+  assertClassHeapStatss(obj.members);
+  return obj;
+}
+
+vms.ClassHeapStats assertClassHeapStats(vms.ClassHeapStats obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertClassRef(obj.classRef);
+  assertInts(obj.new_);
+  assertInts(obj.old);
+  assertInt(obj.promotedBytes);
+  assertInt(obj.promotedInstances);
+  return obj;
+}
+
+List<vms.ClassHeapStats> assertClassHeapStatss(List<vms.ClassHeapStats> list) {
+  for (vms.ClassHeapStats elem in list) {
+    assertClassHeapStats(elem);
+  }
+  return list;
+}
+
+vms.HeapSpace assertHeapSpace(vms.HeapSpace obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertDouble(obj.avgCollectionPeriodMillis);
+  assertInt(obj.capacity);
+  assertInt(obj.collections);
+  assertInt(obj.external);
+  assertString(obj.name);
+  assertDouble(obj.time);
+  assertInt(obj.used);
   return obj;
 }
