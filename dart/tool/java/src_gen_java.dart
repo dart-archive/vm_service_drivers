@@ -19,7 +19,9 @@ String fileHeader;
 
 String classNameFor(String typeName) {
   var index = typeName.lastIndexOf('.');
-  return index > 0 ? typeName.substring(index + 1) : typeName;
+  typeName = index > 0 ? typeName.substring(index + 1) : typeName;
+  if (typeName.startsWith('_')) typeName = typeName.substring(1);
+  return typeName;
 }
 
 String pkgNameFor(String typeName) {
@@ -204,8 +206,8 @@ class TypeWriter {
     if (javadoc != null && javadoc.isNotEmpty) {
       methodDecl.writeln('  /**');
       wrap(javadoc.trim(), colBoundary - 6)
-        .split('\n')
-        .forEach((line) => methodDecl.writeln('   * $line'.trimRight()));
+          .split('\n')
+          .forEach((line) => methodDecl.writeln('   * $line'.trimRight()));
       methodDecl.writeln('   */');
     }
     if (isOverride) {
@@ -216,8 +218,9 @@ class TypeWriter {
       methodDecl.write('$modifiers ');
     }
     methodDecl.write('$returnType $name(');
-    methodDecl.write(
-        args.map((JavaMethodArg arg) => '${classNameFor(arg.typeName)} ${arg.name}').join(', '));
+    methodDecl.write(args
+        .map((JavaMethodArg arg) => '${classNameFor(arg.typeName)} ${arg.name}')
+        .join(', '));
     methodDecl.write(')');
     if (write != null) {
       methodDecl.writeln(' {');
@@ -258,7 +261,8 @@ class TypeWriter {
           .forEach((line) => buffer.writeln(' * $line'));
       buffer.writeln(' */');
     }
-    buffer.writeln("@SuppressWarnings({\"WeakerAccess\", \"unused\", \"UnnecessaryInterfaceModifier\"})");
+    buffer.writeln(
+        "@SuppressWarnings({\"WeakerAccess\", \"unused\", \"UnnecessaryInterfaceModifier\"})");
     buffer.write('$modifiers $kind $className');
     if (superclassName != null) {
       buffer.write(' extends ${classNameFor(superclassName)}');

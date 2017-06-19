@@ -10,12 +10,16 @@
 library vm_service_lib;
 
 import 'dart:async';
-import 'dart:convert' show BASE64, JSON;
+import 'dart:convert' show BASE64, JSON, UTF8;
+import 'dart:typed_data';
 
 const String vmServiceVersion = '3.6.0';
 
 /// @optional
 const String optional = 'optional';
+
+/// @undocumented
+const String undocumented = 'undocumented';
 
 /// Decode a string in Base64 encoding into the equivalent non-encoded string.
 /// This is useful for handling the results of the Stdout or Stderr events.
@@ -43,7 +47,7 @@ Object _createSpecificObject(dynamic json, Function creator) {
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => creator(e)).toList();
+    return json.map((e) => creator(e));
   } else if (json is Map) {
     return creator(json);
   } else {
@@ -105,7 +109,12 @@ Map<String, Function> _typeFactories = {
   'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
   'Version': Version.parse,
   '@VM': VMRef.parse,
-  'VM': VM.parse
+  'VM': VM.parse,
+  '_CpuProfile': CpuProfile.parse,
+  'AllocationProfile': AllocationProfile.parse,
+  'ClassHeapStats': ClassHeapStats.parse,
+  'HeapSpace': HeapSpace.parse,
+  'OK': Success.parse, // TODO: file a bug against _requestHeapSnapshot
 };
 
 class VmService {
@@ -133,7 +142,8 @@ class VmService {
 
   DisposeHandler _disposeHandler;
 
-  VmService(Stream<String> inStream, void writeMessage(String message),
+  VmService(Stream<dynamic> /*String|List<int>*/ inStream,
+      void writeMessage(String message),
       {Log log, DisposeHandler disposeHandler}) {
     _streamSub = inStream.listen(_processMessage);
     _writeMessage = writeMessage;
@@ -162,6 +172,9 @@ class VmService {
 
   // Extension
   Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
+
+  // _Graph
+  Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
 
   // Listen for a specific event name.
   Stream<Event> onEvent(String streamName) =>
@@ -583,6 +596,56 @@ class VmService {
     return _call('streamListen', {'streamId': streamId});
   }
 
+  /// Trigger a full GC, collecting all unreachable or weakly reachable objects.
+  @undocumented
+  Future<Success> collectAllGarbage(String isolateId) {
+    return _call('_collectAllGarbage', {'isolateId': isolateId});
+  }
+
+  /// `roots` is one of User or VM. The results are returned as a stream of
+  /// [_Graph] events.
+  @undocumented
+  Future<Success> requestHeapSnapshot(
+      String isolateId, String roots, bool collectGarbage) {
+    return _call('_requestHeapSnapshot', {
+      'isolateId': isolateId,
+      'roots': roots,
+      'collectGarbage': collectGarbage
+    });
+  }
+
+  /// Valid values for `gc` are 'full'.
+  @undocumented
+  Future<AllocationProfile> getAllocationProfile(String isolateId,
+      {String gc, bool reset}) {
+    Map m = {'isolateId': isolateId};
+    if (gc != null) m['gc'] = gc;
+    if (reset != null) m['reset'] = reset;
+    return _call('_getAllocationProfile', m);
+  }
+
+  @undocumented
+  Future<Success> clearCpuProfile(String isolateId) {
+    return _call('_clearCpuProfile', {'isolateId': isolateId});
+  }
+
+  /// `tags` is one of UserVM, UserOnly, VMUser, VMOnly, or None.
+  @undocumented
+  Future<CpuProfile> getCpuProfile(String isolateId, String tags) {
+    return _call('_getCpuProfile', {'isolateId': isolateId, 'tags': tags});
+  }
+
+  @undocumented
+  Future<Success> clearVMTimeline() => _call('_clearVMTimeline');
+
+  @undocumented
+  Future<Success> setVMTimelineFlags(List<String> recordedStreams) {
+    return _call('_setVMTimelineFlags', {'recordedStreams': recordedStreams});
+  }
+
+  @undocumented
+  Future<Response> getVMTimeline() => _call('_getVMTimeline');
+
   /// Call an arbitrary service protocol method. This allows clients to call
   /// methods not explicitly exposed by this library.
   Future<Response> callMethod(String method, {String isolateId, Map args}) {
@@ -628,7 +691,40 @@ class VmService {
     return completer.future;
   }
 
-  void _processMessage(String message) {
+  void _processMessage(dynamic message) {
+    // Expect a String, an int[], or a ByteData.
+
+    if (message is String) {
+      _processMessageStr(message);
+    } else if (message is List<int>) {
+      Uint8List list = new Uint8List.fromList(message);
+      _processMessageByteData(new ByteData.view(list.buffer));
+    } else if (message is ByteData) {
+      _processMessageByteData(message);
+    } else {
+      _log.warning('unknown message type: ${message.runtimeType}');
+    }
+  }
+
+  void _processMessageByteData(ByteData bytes) {
+    int offset = 0;
+    int metaSize = bytes.getUint32(offset + 4, Endianness.BIG_ENDIAN);
+    offset += 8;
+    String meta = UTF8.decode(new Uint8List.view(
+        bytes.buffer, bytes.offsetInBytes + offset, metaSize));
+    offset += metaSize;
+    ByteData data = new ByteData.view(bytes.buffer,
+        bytes.offsetInBytes + offset, bytes.lengthInBytes - offset);
+    dynamic map = JSON.decode(meta);
+    if (map != null && map['method'] == 'streamNotify') {
+      String streamId = map['params']['streamId'];
+      Map event = map['params']['event'];
+      event['_data'] = data;
+      _getEventController(streamId).add(_createObject(event));
+    }
+  }
+
+  void _processMessageStr(String message) {
     try {
       _onReceive.add(message);
 
@@ -1178,11 +1274,19 @@ class Class extends Obj {
     location = _createObject(json['location']);
     superClass = _createObject(json['super']);
     superType = _createObject(json['superType']);
-    interfaces = new List<InstanceRef>.from(_createObject(json['interfaces']));
+    interfaces = json['interfaces'] == null
+        ? null
+        : new List<InstanceRef>.from(_createObject(json['interfaces']));
     mixin = _createObject(json['mixin']);
-    fields = new List<FieldRef>.from(_createObject(json['fields']));
-    functions = new List<FuncRef>.from(_createObject(json['functions']));
-    subclasses = new List<ClassRef>.from(_createObject(json['subclasses']));
+    fields = json['fields'] == null
+        ? null
+        : new List<FieldRef>.from(_createObject(json['fields']));
+    functions = json['functions'] == null
+        ? null
+        : new List<FuncRef>.from(_createObject(json['functions']));
+    subclasses = json['subclasses'] == null
+        ? null
+        : new List<ClassRef>.from(_createObject(json['subclasses']));
   }
 
   int get hashCode => id.hashCode;
@@ -1201,7 +1305,9 @@ class ClassList extends Response {
   ClassList();
 
   ClassList._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
-    classes = new List<ClassRef>.from(_createObject(json['classes']));
+    classes = json['classes'] == null
+        ? null
+        : new List<ClassRef>.from(_createObject(json['classes']));
   }
 
   String toString() => '[ClassList type: ${type}, classes: ${classes}]';
@@ -1301,7 +1407,9 @@ class Context extends Obj {
   Context._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     length = json['length'];
     parent = _createObject(json['parent']);
-    variables = new List<ContextElement>.from(_createObject(json['variables']));
+    variables = json['variables'] == null
+        ? null
+        : new List<ContextElement>.from(_createObject(json['variables']));
   }
 
   int get hashCode => id.hashCode;
@@ -1529,8 +1637,9 @@ class Event extends Response {
     vm = _createObject(json['vm']);
     timestamp = json['timestamp'];
     breakpoint = _createObject(json['breakpoint']);
-    pauseBreakpoints =
-        new List<Breakpoint>.from(_createObject(json['pauseBreakpoints']));
+    pauseBreakpoints = json['pauseBreakpoints'] == null
+        ? null
+        : new List<Breakpoint>.from(_createObject(json['pauseBreakpoints']));
     topFrame = _createObject(json['topFrame']);
     exception = _createObject(json['exception']);
     bytes = json['bytes'];
@@ -1538,8 +1647,9 @@ class Event extends Response {
     extensionRPC = json['extensionRPC'];
     extensionKind = json['extensionKind'];
     extensionData = ExtensionData.parse(json['extensionData']);
-    timelineEvents =
-        new List<TimelineEvent>.from(_createObject(json['timelineEvents']));
+    timelineEvents = json['timelineEvents'] == null
+        ? null
+        : new List<TimelineEvent>.from(_createObject(json['timelineEvents']));
     atAsyncSuspension = json['atAsyncSuspension'];
     status = json['status'];
   }
@@ -1690,7 +1800,9 @@ class FlagList extends Response {
   FlagList();
 
   FlagList._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
-    flags = new List<Flag>.from(_createObject(json['flags']));
+    flags = json['flags'] == null
+        ? null
+        : new List<Flag>.from(_createObject(json['flags']));
   }
 
   String toString() => '[FlagList type: ${type}, flags: ${flags}]';
@@ -1725,7 +1837,9 @@ class Frame extends Response {
     function = _createObject(json['function']);
     code = _createObject(json['code']);
     location = _createObject(json['location']);
-    vars = new List<BoundVariable>.from(_createObject(json['vars']));
+    vars = json['vars'] == null
+        ? null
+        : new List<BoundVariable>.from(_createObject(json['vars']));
     kind = json['kind'];
   }
 
@@ -2179,11 +2293,14 @@ class Instance extends Obj {
     name = json['name'];
     typeClass = _createObject(json['typeClass']);
     parameterizedClass = _createObject(json['parameterizedClass']);
-    fields = new List<BoundField>.from(_createObject(json['fields']));
-    elements = new List<dynamic>.from(_createObject(json['elements']));
-    associations =
-        _createSpecificObject(json['associations'], MapAssociation.parse)
-            as List<MapAssociation>;
+    fields = json['fields'] == null
+        ? null
+        : new List<BoundField>.from(_createObject(json['fields']));
+    elements = json['elements'] == null
+        ? null
+        : new List<dynamic>.from(_createObject(json['elements']));
+    associations = new List<MapAssociation>.from(
+        _createSpecificObject(json['associations'], MapAssociation.parse));
     bytes = json['bytes'];
     closureFunction = _createObject(json['closureFunction']);
     closureContext = _createObject(json['closureContext']);
@@ -2306,11 +2423,17 @@ class Isolate extends Response {
     pauseOnExit = json['pauseOnExit'];
     pauseEvent = _createObject(json['pauseEvent']);
     rootLib = _createObject(json['rootLib']);
-    libraries = new List<LibraryRef>.from(_createObject(json['libraries']));
-    breakpoints = new List<Breakpoint>.from(_createObject(json['breakpoints']));
+    libraries = json['libraries'] == null
+        ? null
+        : new List<LibraryRef>.from(_createObject(json['libraries']));
+    breakpoints = json['breakpoints'] == null
+        ? null
+        : new List<Breakpoint>.from(_createObject(json['breakpoints']));
     error = _createObject(json['error']);
     exceptionPauseMode = json['exceptionPauseMode'];
-    extensionRPCs = new List<String>.from(_createObject(json['extensionRPCs']));
+    extensionRPCs = json['extensionRPCs'] == null
+        ? null
+        : new List<String>.from(_createObject(json['extensionRPCs']));
   }
 
   int get hashCode => id.hashCode;
@@ -2383,12 +2506,21 @@ class Library extends Obj {
     name = json['name'];
     uri = json['uri'];
     debuggable = json['debuggable'];
-    dependencies =
-        new List<LibraryDependency>.from(_createObject(json['dependencies']));
-    scripts = new List<ScriptRef>.from(_createObject(json['scripts']));
-    variables = new List<FieldRef>.from(_createObject(json['variables']));
-    functions = new List<FuncRef>.from(_createObject(json['functions']));
-    classes = new List<ClassRef>.from(_createObject(json['classes']));
+    dependencies = json['dependencies'] == null
+        ? null
+        : new List<LibraryDependency>.from(_createObject(json['dependencies']));
+    scripts = json['scripts'] == null
+        ? null
+        : new List<ScriptRef>.from(_createObject(json['scripts']));
+    variables = json['variables'] == null
+        ? null
+        : new List<FieldRef>.from(_createObject(json['variables']));
+    functions = json['functions'] == null
+        ? null
+        : new List<FuncRef>.from(_createObject(json['functions']));
+    classes = json['classes'] == null
+        ? null
+        : new List<ClassRef>.from(_createObject(json['classes']));
   }
 
   int get hashCode => id.hashCode;
@@ -2728,8 +2860,9 @@ class Script extends Obj {
     uri = json['uri'];
     library = _createObject(json['library']);
     source = json['source'];
-    tokenPosTable =
-        new List<List<int>>.from(_createObject(json['tokenPosTable']));
+    tokenPosTable = json['tokenPosTable'] == null
+        ? null
+        : new List<List<int>>.from(_createObject(json['tokenPosTable']));
   }
 
   int get hashCode => id.hashCode;
@@ -2791,8 +2924,12 @@ class SourceReport extends Response {
   SourceReport();
 
   SourceReport._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
-    ranges = new List<SourceReportRange>.from(_createObject(json['ranges']));
-    scripts = new List<ScriptRef>.from(_createObject(json['scripts']));
+    ranges = json['ranges'] == null
+        ? null
+        : new List<SourceReportRange>.from(_createObject(json['ranges']));
+    scripts = json['scripts'] == null
+        ? null
+        : new List<ScriptRef>.from(_createObject(json['scripts']));
   }
 
   String toString() =>
@@ -2819,8 +2956,12 @@ class SourceReportCoverage {
   SourceReportCoverage();
 
   SourceReportCoverage._fromJson(Map<String, dynamic> json) {
-    hits = new List<int>.from(_createObject(json['hits']));
-    misses = new List<int>.from(_createObject(json['misses']));
+    hits = json['hits'] == null
+        ? null
+        : new List<int>.from(_createObject(json['hits']));
+    misses = json['misses'] == null
+        ? null
+        : new List<int>.from(_createObject(json['misses']));
   }
 
   String toString() =>
@@ -2876,8 +3017,9 @@ class SourceReportRange {
     compiled = json['compiled'];
     error = _createObject(json['error']);
     coverage = _createObject(json['coverage']);
-    possibleBreakpoints =
-        new List<int>.from(_createObject(json['possibleBreakpoints']));
+    possibleBreakpoints = json['possibleBreakpoints'] == null
+        ? null
+        : new List<int>.from(_createObject(json['possibleBreakpoints']));
   }
 
   String toString() => '[SourceReportRange ' //
@@ -2902,11 +3044,18 @@ class Stack extends Response {
   Stack();
 
   Stack._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
-    frames = new List<Frame>.from(_createObject(json['frames']));
-    asyncCausalFrames =
-        new List<Frame>.from(_createObject(json['asyncCausalFrames']));
-    awaiterFrames = new List<Frame>.from(_createObject(json['awaiterFrames']));
-    messages = new List<Message>.from(_createObject(json['messages']));
+    frames = json['frames'] == null
+        ? null
+        : new List<Frame>.from(_createObject(json['frames']));
+    asyncCausalFrames = json['asyncCausalFrames'] == null
+        ? null
+        : new List<Frame>.from(_createObject(json['asyncCausalFrames']));
+    awaiterFrames = json['awaiterFrames'] == null
+        ? null
+        : new List<Frame>.from(_createObject(json['awaiterFrames']));
+    messages = json['messages'] == null
+        ? null
+        : new List<Message>.from(_createObject(json['messages']));
   }
 
   String toString() =>
@@ -2981,7 +3130,9 @@ class TypeArguments extends Obj {
 
   TypeArguments._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     name = json['name'];
-    types = new List<InstanceRef>.from(_createObject(json['types']));
+    types = json['types'] == null
+        ? null
+        : new List<InstanceRef>.from(_createObject(json['types']));
   }
 
   int get hashCode => id.hashCode;
@@ -3121,8 +3272,131 @@ class VM extends Response {
     version = json['version'];
     pid = json['pid'];
     startTime = json['startTime'];
-    isolates = new List<IsolateRef>.from(_createObject(json['isolates']));
+    isolates = json['isolates'] == null
+        ? null
+        : new List<IsolateRef>.from(_createObject(json['isolates']));
   }
 
   String toString() => '[VM]';
+}
+
+@undocumented
+class CpuProfile extends Response {
+  static CpuProfile parse(Map<String, dynamic> json) =>
+      json == null ? null : new CpuProfile._fromJson(json);
+
+  int sampleCount;
+
+  int samplePeriod;
+
+  int stackDepth;
+
+  double timeSpan;
+
+  int timeOriginMicros;
+
+  int timeExtentMicros;
+
+  CpuProfile();
+
+  CpuProfile._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    sampleCount = json['sampleCount'];
+    samplePeriod = json['samplePeriod'];
+    stackDepth = json['stackDepth'];
+    timeSpan = json['timeSpan'];
+    timeOriginMicros = json['timeOriginMicros'];
+    timeExtentMicros = json['timeExtentMicros'];
+  }
+
+  String toString() => '[_CpuProfile ' //
+      'type: ${type}, sampleCount: ${sampleCount}, samplePeriod: ${samplePeriod}, ' //
+      'stackDepth: ${stackDepth}, timeSpan: ${timeSpan}, timeOriginMicros: ${timeOriginMicros}, timeExtentMicros: ${timeExtentMicros}]';
+}
+
+class AllocationProfile extends Response {
+  static AllocationProfile parse(Map<String, dynamic> json) =>
+      json == null ? null : new AllocationProfile._fromJson(json);
+
+  int dateLastServiceGC;
+
+  List<ClassHeapStats> members;
+
+  AllocationProfile();
+
+  AllocationProfile._fromJson(Map<String, dynamic> json)
+      : super._fromJson(json) {
+    dateLastServiceGC = json['dateLastServiceGC'];
+    members = json['members'] == null
+        ? null
+        : new List<ClassHeapStats>.from(_createObject(json['members']));
+  }
+
+  String toString() => '[AllocationProfile ' //
+      'type: ${type}, dateLastServiceGC: ${dateLastServiceGC}, members: ${members}]';
+}
+
+class ClassHeapStats extends Response {
+  static ClassHeapStats parse(Map<String, dynamic> json) =>
+      json == null ? null : new ClassHeapStats._fromJson(json);
+
+  ClassRef classRef;
+
+  List<int> new_;
+
+  List<int> old;
+
+  int promotedBytes;
+
+  int promotedInstances;
+
+  ClassHeapStats();
+
+  ClassHeapStats._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    classRef = _createObject(json['class']);
+    new_ = json['new'] == null
+        ? null
+        : new List<int>.from(_createObject(json['new']));
+    old = json['old'] == null
+        ? null
+        : new List<int>.from(_createObject(json['old']));
+    promotedBytes = json['promotedBytes'];
+    promotedInstances = json['promotedInstances'];
+  }
+
+  String toString() => '[ClassHeapStats ' //
+      'type: ${type}, classRef: ${classRef}, new_: ${new_}, old: ${old}, ' //
+      'promotedBytes: ${promotedBytes}, promotedInstances: ${promotedInstances}]';
+}
+
+class HeapSpace extends Response {
+  static HeapSpace parse(Map<String, dynamic> json) =>
+      json == null ? null : new HeapSpace._fromJson(json);
+
+  double avgCollectionPeriodMillis;
+
+  int capacity;
+
+  int collections;
+
+  int external;
+
+  String name;
+
+  double time;
+
+  int used;
+
+  HeapSpace();
+
+  HeapSpace._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    avgCollectionPeriodMillis = json['avgCollectionPeriodMillis'];
+    capacity = json['capacity'];
+    collections = json['collections'];
+    external = json['external'];
+    name = json['name'];
+    time = json['time'];
+    used = json['used'];
+  }
+
+  String toString() => '[HeapSpace]';
 }

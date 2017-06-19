@@ -20,7 +20,8 @@ const List<String> simpleTypes = const [
   'BigDecimal',
   'boolean',
   'int',
-  'String'
+  'String',
+  'double'
 ];
 
 const vmServiceJavadoc = '''
@@ -149,6 +150,7 @@ class Api extends Member with ApiParseUtil {
       writer.addImport('com.google.gson.JsonArray');
       writer.addImport('com.google.gson.JsonObject');
       writer.addImport('com.google.gson.JsonPrimitive');
+      writer.addImport('java.util.List');
 
       writer.addImport('$servicePackage.consumer.*');
       writer.addImport('$servicePackage.element.*');
@@ -292,10 +294,10 @@ class Api extends Member with ApiParseUtil {
     definition = definition.replaceAll('&lt;', '<').replaceAll('&gt;', '>');
     if (docs != null) docs = docs.trim();
 
-    if (name.substring(0, 1).toLowerCase() == name.substring(0, 1)) {
-      methods.add(new Method(name, definition, docs));
-    } else if (definition.startsWith('class ')) {
+    if (definition.startsWith('class ')) {
       types.add(new Type(this, name, definition, docs));
+    } else if (name.substring(0, 1).toLowerCase() == name.substring(0, 1)) {
+      methods.add(new Method(name, definition, docs));
     } else if (definition.startsWith('enum ')) {
       enums.add(new Enum(name, definition, docs));
     } else {
@@ -486,6 +488,9 @@ class Method extends Member {
     _parse(new Tokenizer(definition).tokenize());
   }
 
+  bool get isUndocumented => name.startsWith('_');
+  String get publicName => isUndocumented ? name.substring(1) : name;
+
   String get consumerTypeName {
     String prefix;
     if (returnType.isMultipleReturns) {
@@ -542,8 +547,15 @@ class Method extends Member {
 //    }
 
     // Update method docs
-    var javadoc = new StringBuffer(docs);
+    var javadoc = new StringBuffer(docs == null ? '' : docs);
     bool firstParamDoc = true;
+    if (isUndocumented) {
+      if (docs != null) {
+        javadoc.writeln();
+      }
+      javadoc.writeln();
+      javadoc.writeln('@undocumented');
+    }
     for (var a in args) {
       if (!includeOptional && a.optional) continue;
       var paramDoc = new StringBuffer(a.docs ?? '');
@@ -577,7 +589,7 @@ class Method extends Member {
         new List.from(mthArgs.map((a) => a.asJavaMethodArg));
     javaMethodArgs
         .add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
-    writer.addMethod(name, javaMethodArgs, (StatementWriter writer) {
+    writer.addMethod(publicName, javaMethodArgs, (StatementWriter writer) {
       writer.addLine('JsonObject params = new JsonObject();');
       for (MethodArg arg in args) {
         if (!includeOptional && arg.optional) continue;
@@ -616,6 +628,9 @@ class MethodArg extends Member {
   get asJavaMethodArg {
     if (optional && type.ref == 'int') {
       return new JavaMethodArg(name, 'Integer');
+    }
+    if (optional && type.ref == 'double') {
+      return new JavaMethodArg(name, 'Double');
     }
     if (optional && type.ref == 'boolean') {
       return new JavaMethodArg(name, 'Boolean');
@@ -750,6 +765,10 @@ class Type extends Member {
 
   bool get isSimple => simpleTypes.contains(name);
 
+  bool get isUndocumented => name.startsWith('_');
+
+  String get publicName => isUndocumented ? name.substring(1) : name;
+
   get jsonTypeName {
     if (name == 'ClassObj') return 'Class';
     if (name == 'ErrorObj') return 'Error';
@@ -760,7 +779,7 @@ class Type extends Member {
       api.types.toList()..retainWhere((t) => t.superName == name);
 
   void generateElement(JavaGenerator gen) {
-    gen.writeType('$servicePackage.element.$name', (TypeWriter writer) {
+    gen.writeType('$servicePackage.element.$publicName', (TypeWriter writer) {
       if (fields.any((f) => f.type.types.any((t) => t.isArray))) {
         writer.addImport('com.google.gson.JsonObject');
       }
@@ -916,7 +935,7 @@ class TypeRef {
 
   String get elementTypeName {
     if (isSimple) return null;
-    return '$servicePackage.element.$name';
+    return '$servicePackage.element.$publicName';
   }
 
   bool get isArray => arrayDepth > 0;
@@ -926,10 +945,14 @@ class TypeRef {
 
   bool get isSimple => simpleTypes.contains(name);
 
+  bool get isUndocumented => name.startsWith('_');
+  String get publicName => isUndocumented ? name.substring(1) : name;
+
   String get javaBoxedName {
     if (name == 'boolean') return 'Boolean';
     if (name == 'int') return 'Integer';
-    return name;
+    if (name == 'double') return 'Double';
+    return publicName;
   }
 
   String get ref {
@@ -976,6 +999,9 @@ class TypeRef {
         writer.addLine(
             'return json.get("$propertyName") == null ? -1 : json.get("$propertyName").getAsInt();');
       }
+    } else if (name == 'double') {
+      writer.addLine(
+          'return json.get("$propertyName") == null ? 0.0 : json.get("$propertyName").getAsDouble();');
     } else if (name == 'BigDecimal') {
       if (isArray) {
         print('skipped accessor body for $propertyName');
