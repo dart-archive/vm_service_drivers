@@ -222,7 +222,9 @@ class _NullLog implements Log {
 
 abstract class Member {
   String get name;
+
   String get docs => null;
+
   void generate(DartGenerator gen);
 
   bool get hasDocs => docs != null;
@@ -278,6 +280,7 @@ class Api extends Member with ApiParseUtil {
   }
 
   String get name => 'api';
+
   String get docs => null;
 
   void _parse(String name, String definition, [String docs]) {
@@ -346,13 +349,17 @@ Object _createObject(dynamic json) {
   }
 }
 
-Object _createSpecificObject(dynamic json, Function creator) {
+dynamic _createSpecificObject(dynamic json, dynamic creator(Map<String, dynamic> map)) {
   if (json == null) return null;
 
   if (json is List) {
     return json.map((e) => creator(e));
   } else if (json is Map) {
-    return creator(json);
+    Map<String, dynamic> map = {};
+    for (dynamic key in json.keys) {
+      map[key as String] = json[key];
+    }
+    return creator(map);
   } else {
     // Handle simple types.
     return json;
@@ -365,8 +372,6 @@ Object _createSpecificObject(dynamic json, Function creator) {
     types.forEach((Type type) {
       gen.writeln("'${type.rawName}': ${type.publicName}.parse,");
     });
-    gen.writeln(
-        "'OK': Success.parse, // TODO: file a bug against _requestHeapSnapshot");
     gen.writeln('};');
     gen.writeln();
     gen.writeStatement('class VmService {');
@@ -485,6 +490,13 @@ List<int> assertInts(List<int> list) {
   return list;
 }
 
+List<String> assertStrings(List<String> list) {
+  for (String elem in list) {
+    assertString(elem);
+  }
+  return list;
+}
+
 String assertString(String obj) {
   assertNotNull(obj);
   if (obj.length == 0) throw 'expected non-zero length string';
@@ -569,6 +581,8 @@ vms.Event assertIsolateEvent(vms.Event event) {
             'Message',
             'SourceReportRange',
             'ClassHeapStats',
+            'CodeRegion',
+            'ProfileFunction',
           ].contains(type.name)) {
         type.generateListAssert(gen);
       }
@@ -752,6 +766,14 @@ class TypeRef {
           name == 'bool' ||
           name == 'double');
 
+  bool get isListTypeSimple =>
+      arrayDepth == 1 &&
+      (name == 'int' ||
+          name == 'num' ||
+          name == 'String' ||
+          name == 'bool' ||
+          name == 'double');
+
   String get namePlural => name.endsWith('y')
       ? name.substring(0, name.length - 1) + 'ies'
       : name + 's';
@@ -877,12 +899,36 @@ class Type extends Member {
         // Special case `Instance.associations`.
         gen.writeln("associations = new List<MapAssociation>.from("
             "_createSpecificObject(json['associations'], MapAssociation.parse));");
+      } else if (name == '_CpuProfile' && field.name == 'codes') {
+        // Special case `_CpuProfile.codes`.
+        gen.writeln("codes = new List<CodeRegion>.from("
+            "_createSpecificObject(json['codes'], CodeRegion.parse));");
+      } else if (name == '_CpuProfile' && field.name == 'functions') {
+        // Special case `_CpuProfile.functions`.
+        gen.writeln("functions = new List<ProfileFunction>.from("
+            "_createSpecificObject(json['functions'], ProfileFunction.parse));");
       } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;
-        if (field.optional) {}
         String ref = "json['${field.name}']";
-        gen.writeln("${field.generatableName} = $ref == null ? null : "
-            "new List<${fieldType.listTypeArg}>.from(_createObject($ref));");
+        if (field.optional) {
+          if (fieldType.isListTypeSimple) {
+            gen.writeln("${field.generatableName} = $ref == null ? null : "
+                "new List<${fieldType.listTypeArg}>.from($ref);");
+          } else {
+            gen.writeln("${field.generatableName} = $ref == null ? null : "
+                "new List<${fieldType
+                .listTypeArg}>.from(_createObject($ref));");
+          }
+        } else {
+          if (fieldType.isListTypeSimple) {
+            gen.writeln("${field.generatableName} = "
+                "new List<${fieldType.listTypeArg}>.from($ref);");
+          } else {
+            gen.writeln("${field.generatableName} = "
+                "new List<${fieldType
+                .listTypeArg}>.from(_createObject($ref));");
+          }
+        }
       } else {
         gen.writeln(
             "${field.generatableName} = _createObject(json['${field.name}']);");

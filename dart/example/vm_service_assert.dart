@@ -35,6 +35,13 @@ List<int> assertInts(List<int> list) {
   return list;
 }
 
+List<String> assertStrings(List<String> list) {
+  for (String elem in list) {
+    assertString(elem);
+  }
+  return list;
+}
+
 String assertString(String obj) {
   assertNotNull(obj);
   if (obj.length == 0) throw 'expected non-zero length string';
@@ -899,13 +906,53 @@ vms.CpuProfile assert_CpuProfile(vms.CpuProfile obj) {
   assertDouble(obj.timeSpan);
   assertInt(obj.timeOriginMicros);
   assertInt(obj.timeExtentMicros);
+  assertCodeRegions(obj.codes);
+  assertProfileFunctions(obj.functions);
+  assertInts(obj.exclusiveCodeTrie);
+  assertInts(obj.inclusiveCodeTrie);
+  assertInts(obj.exclusiveFunctionTrie);
+  assertInts(obj.inclusiveFunctionTrie);
   return obj;
+}
+
+vms.CodeRegion assertCodeRegion(vms.CodeRegion obj) {
+  assertNotNull(obj);
+  assertString(obj.kind);
+  assertInt(obj.inclusiveTicks);
+  assertInt(obj.exclusiveTicks);
+  assertCodeRef(obj.code);
+  return obj;
+}
+
+List<vms.CodeRegion> assertCodeRegions(List<vms.CodeRegion> list) {
+  for (vms.CodeRegion elem in list) {
+    assertCodeRegion(elem);
+  }
+  return list;
+}
+
+vms.ProfileFunction assertProfileFunction(vms.ProfileFunction obj) {
+  assertNotNull(obj);
+  assertString(obj.kind);
+  assertInt(obj.inclusiveTicks);
+  assertInt(obj.exclusiveTicks);
+  assertFuncRef(obj.function);
+  assertInts(obj.codes);
+  return obj;
+}
+
+List<vms.ProfileFunction> assertProfileFunctions(
+    List<vms.ProfileFunction> list) {
+  for (vms.ProfileFunction elem in list) {
+    assertProfileFunction(elem);
+  }
+  return list;
 }
 
 vms.AllocationProfile assertAllocationProfile(vms.AllocationProfile obj) {
   assertNotNull(obj);
   assertString(obj.type);
-  assertInt(obj.dateLastServiceGC);
+  assertString(obj.dateLastServiceGC);
   assertClassHeapStatss(obj.members);
   return obj;
 }
