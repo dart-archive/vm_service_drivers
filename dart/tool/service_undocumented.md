@@ -71,17 +71,52 @@ class _CpuProfile extends Response {
   double timeSpan;
   int timeOriginMicros;
   int timeExtentMicros;
+  CodeRegion[] codes;
+  ProfileFunction[] functions;
+  int[] exclusiveCodeTrie;
+  int[] inclusiveCodeTrie;
+  int[] exclusiveFunctionTrie;
+  int[] inclusiveFunctionTrie;
 }
 ```
+
+### CodeRegion
+
+```
+class CodeRegion {
+  string kind;
+  int inclusiveTicks;
+  int exclusiveTicks;
+  @Code code;
+}
+```
+
+<!-- <string|int>[] ticks -->
+
+### ProfileFunction
+
+```
+class ProfileFunction {
+  string kind;
+  int inclusiveTicks;
+  int exclusiveTicks;
+  @Function function;
+  int[] codes;
+}
+```
+
+<!-- <string|int>[] ticks -->
 
 ### AllocationProfile
 
 ```
 class AllocationProfile extends Response {
-  int dateLastServiceGC;
+  string dateLastServiceGC;
   ClassHeapStats[] members;
 }
 ```
+
+<!-- TODO: int dateLastServiceGC -->
 
 ### ClassHeapStats
 
