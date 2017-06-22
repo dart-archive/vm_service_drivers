@@ -15,26 +15,24 @@ package org.dartlang.vm.service.element;
 
 // This is a generated file.
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
-public class AllocationProfile extends Response {
+public class Tag extends Response {
 
-  public AllocationProfile(JsonObject json) {
+  public Tag(JsonObject json) {
     super(json);
   }
 
-  public String getDateLastServiceGC() {
-    return json.get("dateLastServiceGC").getAsString();
+  public CodeRef getCode() {
+    return new CodeRef((JsonObject) json.get("code"));
   }
 
-  public ElementList<ClassHeapStats> getMembers() {
-    return new ElementList<ClassHeapStats>(json.get("members").getAsJsonArray()) {
-      @Override
-      protected ClassHeapStats basicGet(JsonArray array, int index) {
-        return new ClassHeapStats(array.get(index).getAsJsonObject());
-      }
-    };
+  public int getExclusiveTicks() {
+    return json.get("exclusiveTicks") == null ? -1 : json.get("exclusiveTicks").getAsInt();
+  }
+
+  public int getInclusiveTicks() {
+    return json.get("inclusiveTicks") == null ? -1 : json.get("inclusiveTicks").getAsInt();
   }
 }

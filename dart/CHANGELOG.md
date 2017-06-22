@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.5
+- improve access to the profiling APIs
+
 ## 0.3.4
 - more strong mode runtime fixes
 - expose some undocumented (and unsupported) service protocol methods

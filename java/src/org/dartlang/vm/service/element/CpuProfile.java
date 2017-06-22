@@ -15,13 +15,49 @@ package org.dartlang.vm.service.element;
 
 // This is a generated file.
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.List;
 
 @SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public class CpuProfile extends Response {
 
   public CpuProfile(JsonObject json) {
     super(json);
+  }
+
+  public ElementList<CodeRegion> getCodes() {
+    return new ElementList<CodeRegion>(json.get("codes").getAsJsonArray()) {
+      @Override
+      protected CodeRegion basicGet(JsonArray array, int index) {
+        return new CodeRegion(array.get(index).getAsJsonObject());
+      }
+    };
+  }
+
+  public List<Integer> getExclusiveCodeTrie() {
+    return getListInt("exclusiveCodeTrie");
+  }
+
+  public List<Integer> getExclusiveFunctionTrie() {
+    return getListInt("exclusiveFunctionTrie");
+  }
+
+  public ElementList<ProfileFunction> getFunctions() {
+    return new ElementList<ProfileFunction>(json.get("functions").getAsJsonArray()) {
+      @Override
+      protected ProfileFunction basicGet(JsonArray array, int index) {
+        return new ProfileFunction(array.get(index).getAsJsonObject());
+      }
+    };
+  }
+
+  public List<Integer> getInclusiveCodeTrie() {
+    return getListInt("inclusiveCodeTrie");
+  }
+
+  public List<Integer> getInclusiveFunctionTrie() {
+    return getListInt("inclusiveFunctionTrie");
   }
 
   public int getSampleCount() {
