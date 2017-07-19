@@ -182,6 +182,9 @@ class VmService {
   // _Graph
   Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
 
+  // _Graph
+  Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
+
   // Listen for a specific event name.
   Stream<Event> onEvent(String streamName) =>
       _getEventController(streamName).stream;
@@ -652,6 +655,11 @@ class VmService {
   @undocumented
   Future<Response> getVMTimeline() => _call('_getVMTimeline');
 
+  @undocumented
+  Future<Success> registerService(String service, String alias) {
+    return _call('_registerService', {'service': service, 'alias': alias});
+  }
+
   /// Call an arbitrary service protocol method. This allows clients to call
   /// methods not explicitly exposed by this library.
   Future<Response> callMethod(String method, {String isolateId, Map args}) {
@@ -921,6 +929,14 @@ class EventKind {
 
   /// Event from dart:developer.postEvent.
   static const String kExtension = 'Extension';
+
+  /// Notification that a Service has been registered into the Service Protocol
+  /// from another client.
+  static const String kServiceRegistered = 'ServiceRegistered';
+
+  /// Notification that a Service has been removed from the Service Protocol
+  /// from another client.
+  static const String kServiceUnregistered = 'ServiceUnregistered';
 }
 
 /// Adding new values to `InstanceKind` is considered a backwards compatible
@@ -1623,6 +1639,29 @@ class Event extends Response {
   @optional
   String status;
 
+  /// The service identifier.
+  ///
+  /// This is provided for the event kinds:
+  ///  - ServiceRegistered
+  ///  - ServiceUnregistered
+  @optional
+  String service;
+
+  /// The RPC method that should be used to invoke the service.
+  ///
+  /// This is provided for the event kinds:
+  ///  - ServiceRegistered
+  ///  - ServiceUnregistered
+  @optional
+  String method;
+
+  /// The alias of the registred service.
+  ///
+  /// This is provided for the event kinds:
+  ///  - ServiceRegistered
+  @optional
+  String alias;
+
   Event();
 
   Event._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
@@ -1646,6 +1685,9 @@ class Event extends Response {
         : new List<TimelineEvent>.from(_createObject(json['timelineEvents']));
     atAsyncSuspension = json['atAsyncSuspension'];
     status = json['status'];
+    service = json['service'];
+    method = json['method'];
+    alias = json['alias'];
   }
 
   String toString() =>

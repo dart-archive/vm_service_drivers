@@ -67,6 +67,8 @@ public class VmService extends VmServiceBase {
 
   public static final String VM_STREAM_ID = "VM";
 
+  public static final String SERVICE_STREAM_ID = "_Service";
+
   /**
    * The major version number of the protocol supported by this client.
    */
@@ -380,6 +382,16 @@ public class VmService extends VmServiceBase {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     request("pause", params, consumer);
+  }
+
+  /**
+   * @undocumented
+   */
+  public void registerService(String service, String alias, SuccessConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("service", service);
+    params.addProperty("alias", alias);
+    request("_registerService", params, consumer);
   }
 
   /**

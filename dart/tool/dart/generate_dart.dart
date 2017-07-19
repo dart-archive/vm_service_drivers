@@ -299,6 +299,8 @@ class Api extends Member with ApiParseUtil {
     } else {
       throw 'unexpected entity: ${name}, ${definition}';
     }
+    _mergeTypes();
+    _mergeEnums();
   }
 
   static String printNode(Node n) {
@@ -434,6 +436,9 @@ Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
 // _Graph
 Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
 
+// _Graph
+Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
+
 // Listen for a specific event name.
 Stream<Event> onEvent(String streamName) => _getEventController(streamName).stream;
 ''');
@@ -449,6 +454,30 @@ Stream<Event> onEvent(String streamName) => _getEventController(streamName).stre
     gen.writeln();
     gen.writeln('// types');
     types.where((t) => !t.skip).forEach((t) => t.generate(gen));
+  }
+
+  void _mergeTypes() {
+    final map = {};
+    for (var t in types) {
+      if (map.containsKey(t.name)) {
+        map[t.name] = new Type.merge(map[t.name], t);
+      } else {
+        map[t.name] = t;
+      }
+    }
+    types = map.values.toList();
+  }
+
+  void _mergeEnums() {
+    final map = {};
+    for (var e in enums) {
+      if (map.containsKey(e.name)) {
+        map[e.name] = new Enum.merge(map[e.name], e);
+      } else {
+        map[e.name] = e;
+      }
+    }
+    enums = map.values.toList();
   }
 
   void generateAsserts(DartGenerator gen) {
@@ -808,6 +837,28 @@ class Type extends Member {
     _parse(new Tokenizer(definition).tokenize());
   }
 
+  Type._(this.parent, this.rawName, this.name, this.superName, this.docs);
+
+  factory Type.merge(Type t1, Type t2) {
+    final String parent = t1.parent;
+    final String rawName = t1.rawName;
+    final String name = t1.name;
+    final String superName = t1.superName;
+    final String docs = [t1.docs, t2.docs].where((e) => e != null).join('\n');
+    final Map<String, TypeField> map = <String, TypeField>{};
+    for (var f in t2.fields.reversed) {
+      map[f.name] = f;
+    }
+    // The official service.md is the default
+    for (var f in t1.fields.reversed) {
+      map[f.name] = f;
+    }
+
+    final fields = map.values.toList().reversed.toList();
+
+    return new Type._(parent, rawName, name, superName, docs)..fields = fields;
+  }
+
   bool get isResponse {
     if (superName == null) return false;
     if (name == 'Response' || superName == 'Response') return true;
@@ -1103,6 +1154,25 @@ class Enum extends Member {
 
   Enum(this.name, String definition, [this.docs]) {
     _parse(new Tokenizer(definition).tokenize());
+  }
+
+  Enum._(this.name, this.docs);
+
+  factory Enum.merge(Enum e1, Enum e2) {
+    final String name = e1.name;
+    final String docs = [e1.docs, e2.docs].where((e) => e != null).join('\n');
+    final Map<String, EnumValue> map = <String, EnumValue>{};
+    for (var e in e2.enums.reversed) {
+      map[e.name] = e;
+    }
+    // The official service.md is the default
+    for (var e in e1.enums.reversed) {
+      map[e.name] = e;
+    }
+
+    final enums = map.values.toList().reversed.toList();
+
+    return new Enum._(name, docs)..enums = enums;
   }
 
   String get prefix =>
