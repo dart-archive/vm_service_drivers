@@ -457,8 +457,8 @@ Stream<Event> onEvent(String streamName) => _getEventController(streamName).stre
   }
 
   void _mergeTypes() {
-    final map = {};
-    for (var t in types) {
+    final Map<String, Type> map = <String, Type>{};
+    for (Type t in types) {
       if (map.containsKey(t.name)) {
         map[t.name] = new Type.merge(map[t.name], t);
       } else {
@@ -469,8 +469,8 @@ Stream<Event> onEvent(String streamName) => _getEventController(streamName).stre
   }
 
   void _mergeEnums() {
-    final map = {};
-    for (var e in enums) {
+    final Map<String, Enum> map = <String, Enum>{};
+    for (Enum e in enums) {
       if (map.containsKey(e.name)) {
         map[e.name] = new Enum.merge(map[e.name], e);
       } else {
@@ -840,17 +840,17 @@ class Type extends Member {
   Type._(this.parent, this.rawName, this.name, this.superName, this.docs);
 
   factory Type.merge(Type t1, Type t2) {
-    final String parent = t1.parent;
+    final Api parent = t1.parent;
     final String rawName = t1.rawName;
     final String name = t1.name;
     final String superName = t1.superName;
     final String docs = [t1.docs, t2.docs].where((e) => e != null).join('\n');
     final Map<String, TypeField> map = <String, TypeField>{};
-    for (var f in t2.fields.reversed) {
+    for (TypeField f in t2.fields.reversed) {
       map[f.name] = f;
     }
     // The official service.md is the default
-    for (var f in t1.fields.reversed) {
+    for (TypeField f in t1.fields.reversed) {
       map[f.name] = f;
     }
 
@@ -1162,11 +1162,11 @@ class Enum extends Member {
     final String name = e1.name;
     final String docs = [e1.docs, e2.docs].where((e) => e != null).join('\n');
     final Map<String, EnumValue> map = <String, EnumValue>{};
-    for (var e in e2.enums.reversed) {
+    for (EnumValue e in e2.enums.reversed) {
       map[e.name] = e;
     }
     // The official service.md is the default
-    for (var e in e1.enums.reversed) {
+    for (EnumValue e in e1.enums.reversed) {
       map[e.name] = e;
     }
 

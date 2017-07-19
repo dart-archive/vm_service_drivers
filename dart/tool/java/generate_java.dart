@@ -240,8 +240,8 @@ class Api extends Member with ApiParseUtil {
   }
 
   void _mergeTypes() {
-    final map = {};
-    for (var t in types) {
+    final Map<String, Type> map = <String, Type>{};
+    for (Type t in types) {
       if (map.containsKey(t.name)) {
         map[t.name] = new Type.merge(map[t.name], t);
       } else {
@@ -252,8 +252,8 @@ class Api extends Member with ApiParseUtil {
   }
 
   void _mergeEnums() {
-    final map = {};
-    for (var e in enums) {
+    final Map<String, Enum> map = <String, Enum>{};
+    for (Enum e in enums) {
       if (map.containsKey(e.name)) {
         map[e.name] = new Enum.merge(map[e.name], e);
       } else {
@@ -300,9 +300,8 @@ class Api extends Member with ApiParseUtil {
       } else if (isPara(node)) {
         var children = (node as Element).children;
         if (children.isNotEmpty && children.first is Text) {
-          var text = children.expand<String>((var child) {
-            if (child is Text)
-              return [(child as Text).text];
+          var text = children.expand<String>((child) {
+            if (child is Text) return [(child as Text).text];
             return [];
           }).join();
           if (text.startsWith('streamId |')) {
@@ -397,11 +396,11 @@ class Enum extends Member {
     final String name = e1.name;
     final String docs = [e1.docs, e2.docs].where((e) => e != null).join('\n');
     final Map<String, EnumValue> enums = <String, EnumValue>{};
-    for (var e in e2.enums) {
+    for (EnumValue e in e2.enums) {
       enums[e.name] = e;
     }
     // The official service.md is the default
-    for (var e in e1.enums) {
+    for (EnumValue e in e1.enums) {
       enums[e.name] = e;
     }
 
@@ -804,17 +803,17 @@ class Type extends Member {
   Type._(this.parent, this.rawName, this.name, this.superName, this.docs);
 
   factory Type.merge(Type t1, Type t2) {
-    final String parent = t1.parent;
+    final Api parent = t1.parent;
     final String rawName = t1.rawName;
     final String name = t1.name;
     final String superName = t1.superName;
     final String docs = [t1.docs, t2.docs].where((e) => e != null).join('\n');
     final Map<String, TypeField> fields = <String, TypeField>{};
-    for (var f in t2.fields) {
+    for (TypeField f in t2.fields) {
       fields[f.name] = f;
     }
     // The official service.md is the default
-    for (var f in t1.fields) {
+    for (TypeField f in t1.fields) {
       fields[f.name] = f;
     }
 

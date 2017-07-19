@@ -201,7 +201,7 @@ class Event extends Response {
   //   ServiceUnregistered
   String method [optional];
 
-  // The alias of the registred service.
+  // The alias of the registered service.
   //
   // This is provided for the event kinds:
   //   ServiceRegistered
