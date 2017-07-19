@@ -301,7 +301,7 @@ class Api extends Member with ApiParseUtil {
         var children = (node as Element).children;
         if (children.isNotEmpty && children.first is Text) {
           var text = children.expand<String>((child) {
-            if (child is Text) return [(child as Text).text];
+            if (child is Text) return [child.text];
             return [];
           }).join();
           if (text.startsWith('streamId |')) {
