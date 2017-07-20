@@ -146,6 +146,8 @@ String assertEventKind(String obj) {
   if (obj == "PauseStart") return obj;
   if (obj == "Resume") return obj;
   if (obj == "ServiceExtensionAdded") return obj;
+  if (obj == "ServiceRegistered") return obj;
+  if (obj == "ServiceUnregistered") return obj;
   if (obj == "VMUpdate") return obj;
   if (obj == "WriteEvent") return obj;
   throw "invalid EventKind: $obj";

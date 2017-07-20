@@ -21,7 +21,7 @@ _roots_ is one of User or VM. The results are returned as a stream of
 
 ```
 AllocationProfile _getAllocationProfile(
-  string isolateId, 
+  string isolateId,
   string gc [optional],
   bool reset [optional]
 )
@@ -158,3 +158,53 @@ class HeapSpace extends Response {
 <!-- _getCpuProfileTimeline -->
 
 <!-- _getAllocationSamples -->
+
+streamId | event types provided
+-------- | -----------
+_Service | ServiceRegistered, ServiceUnregistered
+
+### _registerService
+
+```
+Success _registerService(string service, string alias)
+```
+
+### EventKind
+
+```
+enum EventKind {
+  // Notification that a Service has been registered into the Service Protocol
+  // from another client.
+  ServiceRegistered,
+
+  // Notification that a Service has been removed from the Service Protocol
+  // from another client.
+  ServiceUnregistered
+}
+```
+
+### Event
+
+```
+class Event extends Response {
+  // The service identifier.
+  //
+  // This is provided for the event kinds:
+  //   ServiceRegistered
+  //   ServiceUnregistered
+  String service [optional];
+
+  // The RPC method that should be used to invoke the service.
+  //
+  // This is provided for the event kinds:
+  //   ServiceRegistered
+  //   ServiceUnregistered
+  String method [optional];
+
+  // The alias of the registered service.
+  //
+  // This is provided for the event kinds:
+  //   ServiceRegistered
+  String alias [optional];
+}
+```

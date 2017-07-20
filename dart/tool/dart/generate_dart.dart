@@ -96,6 +96,14 @@ final String _implCode = r'''
     return completer.future;
   }
 
+  /// Register a service for invocation.
+  void registerServiceCallback(String service, ServiceCallback cb) {
+    if (_services.containsKey(service)) {
+      throw new Exception('Service \'${service}\' already registered');
+    }
+    _services[service] = cb;
+  }
+
   void _processMessage(dynamic message) {
     // Expect a String, an int[], or a ByteData.
 
@@ -130,36 +138,87 @@ final String _implCode = r'''
   }
 
   void _processMessageStr(String message) {
+    var json;
     try {
       _onReceive.add(message);
 
-      var json = JSON.decode(message);
-      if (json['id'] == null && json['method'] == 'streamNotify') {
-        Map params = json['params'];
-        String streamId = params['streamId'];
-        _getEventController(streamId).add(_createObject(params['event']));
-      } else if (json['id'] != null) {
-        Completer completer = _completers.remove(json['id']);
-        String methodName = _methodCalls.remove(json['id']);
-
-        if (completer == null) {
-          _log.severe('unmatched request response: ${message}');
-        } else if (json['error'] != null) {
-          completer.completeError(RPCError.parse(methodName, json['error']));
-        } else {
-          Map<String, dynamic> result = json['result'] as Map<String, dynamic>;
-          String type = result['type'];
-          if (_typeFactories[type] == null) {
-            completer.complete(Response.parse(result));
-          } else {
-            completer.complete(_createObject(result));
-          }
-        }
-      } else {
-        _log.severe('unknown message type: ${message}');
-      }
+      json = JSON.decode(message);
     } catch (e, s) {
       _log.severe('unable to decode message: ${message}, ${e}\n${s}');
+      return;
+    }
+
+    if (json.containsKey('method')) {
+      if (json.containsKey('id')) {
+        _processRequest(json);
+      } else {
+        _processNotification(json);
+      }
+    } else if(json.containsKey('id') && (
+                json.containsKey('result') || json.containsKey('error')
+              )) {
+      _processResponse(json);
+    }
+    else {
+     _log.severe('unknown message type: ${message}');
+    }
+  }
+
+  void _processResponse(Map<String, dynamic> json) {
+    Completer completer = _completers.remove(json['id']);
+    String methodName = _methodCalls.remove(json['id']);
+
+    if (completer == null) {
+      _log.severe('unmatched request response: ${JSON.encode(json)}');
+    } else if (json['error'] != null) {
+      completer.completeError(RPCError.parse(methodName, json['error']));
+    } else {
+      Map<String, dynamic> result = json['result'] as Map<String, dynamic>;
+      String type = result['type'];
+      if (_typeFactories[type] == null) {
+        completer.complete(Response.parse(result));
+      } else {
+        completer.complete(_createObject(result));
+      }
+    }
+  }
+
+  Future _processRequest(Map<String, dynamic> json) async {
+    final Map m = await _routeRequest(json['method'], json['params']);
+    m['id'] = json['id'];
+    m['jsonrpc'] = '2.0';
+    String message = JSON.encode(m);
+    _onSend.add(message);
+    _writeMessage(message);
+  }
+
+  Future _processNotification(Map<String, dynamic> json) async {
+    final String method = json['method'];
+    final Map params = json['params'];
+    if (method == 'streamNotify') {
+      String streamId = params['streamId'];
+      _getEventController(streamId).add(_createObject(params['event']));
+    } else {
+      await _routeRequest(method, params);
+    }
+  }
+
+  Future<Map> _routeRequest(String method, Map params) async{
+    try {
+      if (_services.containsKey(method)) {
+        return await _services[method](params);
+      }
+      return {
+        'error': {
+          'code': -32601, // Method not found
+          'message': 'Method not found \'${method}\''
+        }
+      };
+    } catch (e, s) {
+      return <String, dynamic>{
+        'code': -32000, // SERVER ERROR
+        'message': 'Unexpected Server Error ${e}\n${s}'
+      };
     }
   }
 ''';
@@ -299,6 +358,13 @@ class Api extends Member with ApiParseUtil {
     } else {
       throw 'unexpected entity: ${name}, ${definition}';
     }
+    // We merge Types and Enums with the same name.
+    // The service.md file contains the public definition of Types and Enums.
+    // The service_undocumented.md potentially contains overloaded definitions
+    // of Types and Enums from the public definition with extra Type fields
+    // or Enum values.
+    _mergeTypes();
+    _mergeEnums();
   }
 
   static String printNode(Node n) {
@@ -366,6 +432,8 @@ dynamic _createSpecificObject(dynamic json, dynamic creator(Map<String, dynamic>
   }
 }
 
+typedef Future<Map<String, dynamic>> ServiceCallback(Map<String, dynamic> params);
+
 ''');
     gen.writeln();
     gen.write('Map<String, Function> _typeFactories = {');
@@ -380,6 +448,7 @@ dynamic _createSpecificObject(dynamic json, dynamic creator(Map<String, dynamic>
     gen.writeStatement('int _id = 0;');
     gen.writeStatement('Map<String, Completer> _completers = {};');
     gen.writeStatement('Map<String, String> _methodCalls = {};');
+    gen.writeStatement('Map<String, ServiceCallback> _services = {};');
     gen.writeStatement('Log _log;');
     gen.write('''
 
@@ -434,6 +503,9 @@ Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
 // _Graph
 Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
 
+// _Graph
+Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
+
 // Listen for a specific event name.
 Stream<Event> onEvent(String streamName) => _getEventController(streamName).stream;
 ''');
@@ -449,6 +521,30 @@ Stream<Event> onEvent(String streamName) => _getEventController(streamName).stre
     gen.writeln();
     gen.writeln('// types');
     types.where((t) => !t.skip).forEach((t) => t.generate(gen));
+  }
+
+  void _mergeTypes() {
+    final Map<String, Type> map = <String, Type>{};
+    for (Type t in types) {
+      if (map.containsKey(t.name)) {
+        map[t.name] = new Type.merge(map[t.name], t);
+      } else {
+        map[t.name] = t;
+      }
+    }
+    types = map.values.toList();
+  }
+
+  void _mergeEnums() {
+    final Map<String, Enum> map = <String, Enum>{};
+    for (Enum e in enums) {
+      if (map.containsKey(e.name)) {
+        map[e.name] = new Enum.merge(map[e.name], e);
+      } else {
+        map[e.name] = e;
+      }
+    }
+    enums = map.values.toList();
   }
 
   void generateAsserts(DartGenerator gen) {
@@ -808,6 +904,28 @@ class Type extends Member {
     _parse(new Tokenizer(definition).tokenize());
   }
 
+  Type._(this.parent, this.rawName, this.name, this.superName, this.docs);
+
+  factory Type.merge(Type t1, Type t2) {
+    final Api parent = t1.parent;
+    final String rawName = t1.rawName;
+    final String name = t1.name;
+    final String superName = t1.superName;
+    final String docs = [t1.docs, t2.docs].where((e) => e != null).join('\n');
+    final Map<String, TypeField> map = <String, TypeField>{};
+    for (TypeField f in t2.fields.reversed) {
+      map[f.name] = f;
+    }
+    // The official service.md is the default
+    for (TypeField f in t1.fields.reversed) {
+      map[f.name] = f;
+    }
+
+    final fields = map.values.toList().reversed.toList();
+
+    return new Type._(parent, rawName, name, superName, docs)..fields = fields;
+  }
+
   bool get isResponse {
     if (superName == null) return false;
     if (name == 'Response' || superName == 'Response') return true;
@@ -1103,6 +1221,25 @@ class Enum extends Member {
 
   Enum(this.name, String definition, [this.docs]) {
     _parse(new Tokenizer(definition).tokenize());
+  }
+
+  Enum._(this.name, this.docs);
+
+  factory Enum.merge(Enum e1, Enum e2) {
+    final String name = e1.name;
+    final String docs = [e1.docs, e2.docs].where((e) => e != null).join('\n');
+    final Map<String, EnumValue> map = <String, EnumValue>{};
+    for (EnumValue e in e2.enums.reversed) {
+      map[e.name] = e;
+    }
+    // The official service.md is the default
+    for (EnumValue e in e1.enums.reversed) {
+      map[e.name] = e;
+    }
+
+    final enums = map.values.toList().reversed.toList();
+
+    return new Enum._(name, docs)..enums = enums;
   }
 
   String get prefix =>

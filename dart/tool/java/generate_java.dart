@@ -158,7 +158,11 @@ class Api extends Member with ApiParseUtil {
       writer.superclassName = '$servicePackage.VmServiceBase';
 
       for (String streamId in streamIdMap.keys.toList()..sort()) {
-        writer.addField('${streamId.toUpperCase()}_STREAM_ID', 'String',
+        String alias = streamId.toUpperCase();
+        while (alias.startsWith('_')) {
+          alias = alias.substring(1);
+        }
+        writer.addField('${alias}_STREAM_ID', 'String',
             modifiers: 'public static final', value: '"$streamId"');
       }
 
@@ -235,6 +239,30 @@ class Api extends Member with ApiParseUtil {
     }
   }
 
+  void _mergeTypes() {
+    final Map<String, Type> map = <String, Type>{};
+    for (Type t in types) {
+      if (map.containsKey(t.name)) {
+        map[t.name] = new Type.merge(map[t.name], t);
+      } else {
+        map[t.name] = t;
+      }
+    }
+    types = map.values.toList();
+  }
+
+  void _mergeEnums() {
+    final Map<String, Enum> map = <String, Enum>{};
+    for (Enum e in enums) {
+      if (map.containsKey(e.name)) {
+        map[e.name] = new Enum.merge(map[e.name], e);
+      } else {
+        map[e.name] = e;
+      }
+    }
+    enums = map.values.toList();
+  }
+
   Type getType(String name) =>
       types.firstWhere((t) => t.name == name, orElse: () => null);
 
@@ -272,13 +300,23 @@ class Api extends Member with ApiParseUtil {
       } else if (isPara(node)) {
         var children = (node as Element).children;
         if (children.isNotEmpty && children.first is Text) {
-          var text = (children.first as Text).text;
+          var text = children.expand<String>((child) {
+            if (child is Text) return [child.text];
+            return [];
+          }).join();
           if (text.startsWith('streamId |')) {
             _parseStreamIds(text);
           }
         }
       }
     }
+    // We merge Types and Enums with the same name.
+    // The service.md file contains the public definition of Types and Enums.
+    // The service_undocumented.md potentially contains overloaded definitions
+    // of Types and Enums from the public definition with extra Type fields
+    // or Enum values.
+    _mergeTypes();
+    _mergeEnums();
   }
 
   void setDefaultValue(String typeName, String propertyName) {
@@ -355,6 +393,23 @@ class Enum extends Member {
 
   Enum(this.name, String definition, [this.docs]) {
     _parse(new Tokenizer(definition).tokenize());
+  }
+
+  Enum._(this.name, this.docs);
+
+  factory Enum.merge(Enum e1, Enum e2) {
+    final String name = e1.name;
+    final String docs = [e1.docs, e2.docs].where((e) => e != null).join('\n');
+    final Map<String, EnumValue> enums = <String, EnumValue>{};
+    for (EnumValue e in e2.enums) {
+      enums[e.name] = e;
+    }
+    // The official service.md is the default
+    for (EnumValue e in e1.enums) {
+      enums[e.name] = e;
+    }
+
+    return new Enum._(name, docs)..enums = enums.values.toList();
   }
 
   String get elementTypeName => '$servicePackage.element.$name';
@@ -748,6 +803,27 @@ class Type extends Member {
 
   Type(this.parent, String categoryName, String definition, [this.docs]) {
     _parse(new Tokenizer(definition).tokenize());
+  }
+
+  Type._(this.parent, this.rawName, this.name, this.superName, this.docs);
+
+  factory Type.merge(Type t1, Type t2) {
+    final Api parent = t1.parent;
+    final String rawName = t1.rawName;
+    final String name = t1.name;
+    final String superName = t1.superName;
+    final String docs = [t1.docs, t2.docs].where((e) => e != null).join('\n');
+    final Map<String, TypeField> fields = <String, TypeField>{};
+    for (TypeField f in t2.fields) {
+      fields[f.name] = f;
+    }
+    // The official service.md is the default
+    for (TypeField f in t1.fields) {
+      fields[f.name] = f;
+    }
+
+    return new Type._(parent, rawName, name, superName, docs)
+        ..fields = fields.values.toList();
   }
 
   String get elementTypeName {

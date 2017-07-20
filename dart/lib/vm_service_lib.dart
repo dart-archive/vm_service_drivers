@@ -61,6 +61,9 @@ dynamic _createSpecificObject(
   }
 }
 
+typedef Future<Map<String, dynamic>> ServiceCallback(
+    Map<String, dynamic> params);
+
 Map<String, Function> _typeFactories = {
   'BoundField': BoundField.parse,
   'BoundVariable': BoundVariable.parse,
@@ -129,6 +132,7 @@ class VmService {
   int _id = 0;
   Map<String, Completer> _completers = {};
   Map<String, String> _methodCalls = {};
+  Map<String, ServiceCallback> _services = {};
   Log _log;
 
   StreamController<String> _onSend = new StreamController.broadcast(sync: true);
@@ -181,6 +185,9 @@ class VmService {
 
   // _Graph
   Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
+
+  // _Graph
+  Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
 
   // Listen for a specific event name.
   Stream<Event> onEvent(String streamName) =>
@@ -652,6 +659,11 @@ class VmService {
   @undocumented
   Future<Response> getVMTimeline() => _call('_getVMTimeline');
 
+  @undocumented
+  Future<Success> registerService(String service, String alias) {
+    return _call('_registerService', {'service': service, 'alias': alias});
+  }
+
   /// Call an arbitrary service protocol method. This allows clients to call
   /// methods not explicitly exposed by this library.
   Future<Response> callMethod(String method, {String isolateId, Map args}) {
@@ -697,6 +709,14 @@ class VmService {
     return completer.future;
   }
 
+  /// Register a service for invocation.
+  void registerServiceCallback(String service, ServiceCallback cb) {
+    if (_services.containsKey(service)) {
+      throw new Exception('Service \'${service}\' already registered');
+    }
+    _services[service] = cb;
+  }
+
   void _processMessage(dynamic message) {
     // Expect a String, an int[], or a ByteData.
 
@@ -731,36 +751,85 @@ class VmService {
   }
 
   void _processMessageStr(String message) {
+    var json;
     try {
       _onReceive.add(message);
 
-      var json = JSON.decode(message);
-      if (json['id'] == null && json['method'] == 'streamNotify') {
-        Map params = json['params'];
-        String streamId = params['streamId'];
-        _getEventController(streamId).add(_createObject(params['event']));
-      } else if (json['id'] != null) {
-        Completer completer = _completers.remove(json['id']);
-        String methodName = _methodCalls.remove(json['id']);
-
-        if (completer == null) {
-          _log.severe('unmatched request response: ${message}');
-        } else if (json['error'] != null) {
-          completer.completeError(RPCError.parse(methodName, json['error']));
-        } else {
-          Map<String, dynamic> result = json['result'] as Map<String, dynamic>;
-          String type = result['type'];
-          if (_typeFactories[type] == null) {
-            completer.complete(Response.parse(result));
-          } else {
-            completer.complete(_createObject(result));
-          }
-        }
-      } else {
-        _log.severe('unknown message type: ${message}');
-      }
+      json = JSON.decode(message);
     } catch (e, s) {
       _log.severe('unable to decode message: ${message}, ${e}\n${s}');
+      return;
+    }
+
+    if (json.containsKey('method')) {
+      if (json.containsKey('id')) {
+        _processRequest(json);
+      } else {
+        _processNotification(json);
+      }
+    } else if (json.containsKey('id') &&
+        (json.containsKey('result') || json.containsKey('error'))) {
+      _processResponse(json);
+    } else {
+      _log.severe('unknown message type: ${message}');
+    }
+  }
+
+  void _processResponse(Map<String, dynamic> json) {
+    Completer completer = _completers.remove(json['id']);
+    String methodName = _methodCalls.remove(json['id']);
+
+    if (completer == null) {
+      _log.severe('unmatched request response: ${JSON.encode(json)}');
+    } else if (json['error'] != null) {
+      completer.completeError(RPCError.parse(methodName, json['error']));
+    } else {
+      Map<String, dynamic> result = json['result'] as Map<String, dynamic>;
+      String type = result['type'];
+      if (_typeFactories[type] == null) {
+        completer.complete(Response.parse(result));
+      } else {
+        completer.complete(_createObject(result));
+      }
+    }
+  }
+
+  Future _processRequest(Map<String, dynamic> json) async {
+    final Map m = await _routeRequest(json['method'], json['params']);
+    m['id'] = json['id'];
+    m['jsonrpc'] = '2.0';
+    String message = JSON.encode(m);
+    _onSend.add(message);
+    _writeMessage(message);
+  }
+
+  Future _processNotification(Map<String, dynamic> json) async {
+    final String method = json['method'];
+    final Map params = json['params'];
+    if (method == 'streamNotify') {
+      String streamId = params['streamId'];
+      _getEventController(streamId).add(_createObject(params['event']));
+    } else {
+      await _routeRequest(method, params);
+    }
+  }
+
+  Future<Map> _routeRequest(String method, Map params) async {
+    try {
+      if (_services.containsKey(method)) {
+        return await _services[method](params);
+      }
+      return {
+        'error': {
+          'code': -32601, // Method not found
+          'message': 'Method not found \'${method}\''
+        }
+      };
+    } catch (e, s) {
+      return <String, dynamic>{
+        'code': -32000, // SERVER ERROR
+        'message': 'Unexpected Server Error ${e}\n${s}'
+      };
     }
   }
 }
@@ -921,6 +990,14 @@ class EventKind {
 
   /// Event from dart:developer.postEvent.
   static const String kExtension = 'Extension';
+
+  /// Notification that a Service has been registered into the Service Protocol
+  /// from another client.
+  static const String kServiceRegistered = 'ServiceRegistered';
+
+  /// Notification that a Service has been removed from the Service Protocol
+  /// from another client.
+  static const String kServiceUnregistered = 'ServiceUnregistered';
 }
 
 /// Adding new values to `InstanceKind` is considered a backwards compatible
@@ -1623,6 +1700,29 @@ class Event extends Response {
   @optional
   String status;
 
+  /// The service identifier.
+  ///
+  /// This is provided for the event kinds:
+  ///  - ServiceRegistered
+  ///  - ServiceUnregistered
+  @optional
+  String service;
+
+  /// The RPC method that should be used to invoke the service.
+  ///
+  /// This is provided for the event kinds:
+  ///  - ServiceRegistered
+  ///  - ServiceUnregistered
+  @optional
+  String method;
+
+  /// The alias of the registered service.
+  ///
+  /// This is provided for the event kinds:
+  ///  - ServiceRegistered
+  @optional
+  String alias;
+
   Event();
 
   Event._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
@@ -1646,6 +1746,9 @@ class Event extends Response {
         : new List<TimelineEvent>.from(_createObject(json['timelineEvents']));
     atAsyncSuspension = json['atAsyncSuspension'];
     status = json['status'];
+    service = json['service'];
+    method = json['method'];
+    alias = json['alias'];
   }
 
   String toString() =>
