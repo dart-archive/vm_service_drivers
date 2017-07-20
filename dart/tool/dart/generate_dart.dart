@@ -164,7 +164,7 @@ final String _implCode = r'''
     }
   }
 
-  void _processResponse(json) {
+  void _processResponse(Map<String, dynamic> json) {
     Completer completer = _completers.remove(json['id']);
     String methodName = _methodCalls.remove(json['id']);
 
@@ -183,16 +183,16 @@ final String _implCode = r'''
     }
   }
 
-  Future _processRequest(json) async {
+  Future _processRequest(Map<String, dynamic> json) async {
     final Map m = await _routeRequest(json['method'], json['params']);
-    m['id'] = json.id;
+    m['id'] = json['id'];
     m['jsonrpc'] = '2.0';
     String message = JSON.encode(m);
     _onSend.add(message);
     _writeMessage(message);
   }
 
-  Future _processNotification(json) async {
+  Future _processNotification(Map<String, dynamic> json) async {
     final String method = json['method'];
     final Map params = json['params'];
     if (method == 'streamNotify') {
@@ -358,6 +358,11 @@ class Api extends Member with ApiParseUtil {
     } else {
       throw 'unexpected entity: ${name}, ${definition}';
     }
+    // We merge Types and Enums with the same name.
+    // The service.md file contains the public definition of Types and Enums.
+    // The service_undocumented.md potentially contains overloaded definitions
+    // of Types and Enums from the public definition with extra Type fields
+    // or Enum values.
     _mergeTypes();
     _mergeEnums();
   }

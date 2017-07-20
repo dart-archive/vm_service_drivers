@@ -310,6 +310,11 @@ class Api extends Member with ApiParseUtil {
         }
       }
     }
+    // We merge Types and Enums with the same name.
+    // The service.md file contains the public definition of Types and Enums.
+    // The service_undocumented.md potentially contains overloaded definitions
+    // of Types and Enums from the public definition with extra Type fields
+    // or Enum values.
     _mergeTypes();
     _mergeEnums();
   }

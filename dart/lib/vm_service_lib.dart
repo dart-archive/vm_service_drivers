@@ -775,7 +775,7 @@ class VmService {
     }
   }
 
-  void _processResponse(json) {
+  void _processResponse(Map<String, dynamic> json) {
     Completer completer = _completers.remove(json['id']);
     String methodName = _methodCalls.remove(json['id']);
 
@@ -794,16 +794,16 @@ class VmService {
     }
   }
 
-  Future _processRequest(json) async {
+  Future _processRequest(Map<String, dynamic> json) async {
     final Map m = await _routeRequest(json['method'], json['params']);
-    m['id'] = json.id;
+    m['id'] = json['id'];
     m['jsonrpc'] = '2.0';
     String message = JSON.encode(m);
     _onSend.add(message);
     _writeMessage(message);
   }
 
-  Future _processNotification(json) async {
+  Future _processNotification(Map<String, dynamic> json) async {
     final String method = json['method'];
     final Map params = json['params'];
     if (method == 'streamNotify') {
