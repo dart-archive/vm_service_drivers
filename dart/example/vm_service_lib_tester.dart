@@ -62,11 +62,40 @@ main(List<String> args) async {
   List<IsolateRef> isolates = await vm.isolates;
   print(isolates);
 
+  await testServiceRegistration();
+
   IsolateRef isolateRef = isolates.first;
   print(await serviceClient.resume(isolateRef.id));
 
   serviceClient.dispose();
   process.kill();
+}
+
+Future testServiceRegistration() async {
+  const String serviceName = 'serviceName';
+  const String serviceAlias = 'serviceAlias';
+  const String movedValue = 'movedValue';
+  serviceClient.registerServiceCallback(serviceName,
+      (Map<String, dynamic> params) async {
+    return <String, dynamic>{'output': params['input']};
+  });
+  await serviceClient.registerService(serviceName, serviceAlias);
+  VmService otherClient =
+      await vmServiceConnect(host, port, log: new StdoutLog());
+  Completer completer = new Completer();
+  otherClient.onServiceEvent.listen((e) async {
+    if (e.service == serviceName) {
+      assert(e.alias == serviceAlias);
+      Response response = await serviceClient.callMethod(
+        e.method,
+        args: <String, dynamic>{'input': movedValue},
+      );
+      assert(response.json['output'] == movedValue);
+      completer.complete();
+    }
+  });
+  await otherClient.streamListen('_Service');
+  await completer.future;
 }
 
 class StdoutLog extends Log {

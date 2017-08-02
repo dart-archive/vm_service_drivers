@@ -217,6 +217,13 @@ abstract class VmServiceBase implements VmServiceConst {
   }
 
   /**
+   * Add a listener to receive {@link Event}s from the VM.
+   */
+  public void addServiceRunner(String service, RemoteServiceRunner runner) {
+    remoteServiceRunners.put(service, runner);
+  }
+
+  /**
    * Disconnect from the VM observatory service.
    */
   public void disconnect() {
@@ -458,7 +465,7 @@ abstract class VmServiceBase implements VmServiceConst {
       return;
     }
 
-    if (remoteServiceRunners.containsKey(method)) {
+    if (!remoteServiceRunners.containsKey(method)) {
       final String message = "Unknown service " + method;
       Logging.getLogger().logError(message);
       final JsonObject error = new JsonObject();
@@ -471,7 +478,7 @@ abstract class VmServiceBase implements VmServiceConst {
 
     final RemoteServiceRunner runner = remoteServiceRunners.get(method);
     try {
-      runner.run(method, params, new RemoteServiceCompleter() {
+      runner.run(params, new RemoteServiceCompleter() {
           public void result(JsonObject result) {
             response.add(RESULT, result);
             requestSink.add(response);
@@ -543,14 +550,14 @@ abstract class VmServiceBase implements VmServiceConst {
       }
       forwardEvent(streamId, event);
     } else {
-      if (remoteServiceRunners.containsKey(method)) {
+      if (!remoteServiceRunners.containsKey(method)) {
         Logging.getLogger().logError("Unknown service " + method);
         return;
       }
 
       final RemoteServiceRunner runner = remoteServiceRunners.get(method);
       try {
-        runner.run(method, params, ignoreCallback);
+        runner.run(params, ignoreCallback);
       } catch (Exception e) {
         Logging.getLogger().logError("Internal Server Error", e);
         return;
