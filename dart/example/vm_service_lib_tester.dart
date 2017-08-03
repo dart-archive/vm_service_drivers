@@ -77,7 +77,10 @@ Future testServiceRegistration() async {
   const String movedValue = 'movedValue';
   serviceClient.registerServiceCallback(serviceName,
       (Map<String, dynamic> params) async {
-    return <String, dynamic>{'output': params['input']};
+    assert(params['input'] == movedValue);
+    return <String, dynamic>{
+      'result': {'output': params['input']}
+    };
   });
   await serviceClient.registerService(serviceName, serviceAlias);
   VmService otherClient =
