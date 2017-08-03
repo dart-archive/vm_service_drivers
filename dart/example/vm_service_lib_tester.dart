@@ -84,7 +84,7 @@ Future testServiceRegistration() async {
       await vmServiceConnect(host, port, log: new StdoutLog());
   Completer completer = new Completer();
   otherClient.onServiceEvent.listen((e) async {
-    if (e.service == serviceName) {
+    if (e.service == serviceName && e.kind == EventKind.kServiceRegistered) {
       assert(e.alias == serviceAlias);
       Response response = await serviceClient.callMethod(
         e.method,
