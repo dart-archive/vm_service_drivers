@@ -62,7 +62,10 @@ main(List<String> args) async {
   List<IsolateRef> isolates = await vm.isolates;
   print(isolates);
 
-  await testServiceRegistration();
+  // TODO(cbernaschina): remote this check when 1.25 is released
+  if (vm.version.contains('1.25.')) {
+    await testServiceRegistration();
+  }
 
   IsolateRef isolateRef = isolates.first;
   print(await serviceClient.resume(isolateRef.id));
