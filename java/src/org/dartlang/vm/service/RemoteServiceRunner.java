@@ -21,9 +21,8 @@ import com.google.gson.JsonObject;
 public interface RemoteServiceRunner {
   /**
    * Called when a service request has been received.
-   * @param service the service identifier
    * @param params the parameters of the request
    * @param completer the completer to invoke at the end of the execution
    */
-  public void run(String service, JsonObject params, RemoteServiceCompleter completer);
+  public void run(JsonObject params, RemoteServiceCompleter completer);
 }
