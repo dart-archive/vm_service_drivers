@@ -320,7 +320,7 @@ class VmService {
   /// If the expression is evaluated successfully, an [InstanceRef] reference
   /// will be returned.
   ///
-  /// The return value can be one of [InstanceRef] or [ErrorRef].
+  /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   Future<dynamic> evaluateInFrame(
       String isolateId, int frameIndex, String expression,
       {Map<String, String> scope}) {
