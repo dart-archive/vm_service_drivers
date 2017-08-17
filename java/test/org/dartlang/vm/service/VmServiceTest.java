@@ -364,6 +364,10 @@ public class VmServiceTest {
         showErrorAndExit(response.getMessage());
       }
 
+      public void received(Sentinel response) {
+        System.out.println(response.getValueAsString());
+      }
+
       @Override
       public void received(InstanceRef response) {
         System.out.println("Received InstanceRef response");
