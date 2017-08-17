@@ -604,6 +604,10 @@ public class VmService extends VmServiceBase {
         ((EvaluateInFrameConsumer) consumer).received(new NullRef(json));
         return;
       }
+      if (responseType.equals("Sentinel")) {
+        ((EvaluateInFrameConsumer) consumer).received(new Sentinel(json));
+        return;
+      }
     }
     if (consumer instanceof FlagListConsumer) {
       if (responseType.equals("FlagList")) {
