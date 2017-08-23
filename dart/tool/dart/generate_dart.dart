@@ -1015,7 +1015,8 @@ class Type extends Member {
             "extensionData = ExtensionData.parse(json['extensionData']);");
       } else if (name == 'Instance' && field.name == 'associations') {
         // Special case `Instance.associations`.
-        gen.writeln("associations = new List<MapAssociation>.from("
+        gen.writeln("associations = json['associations'] == null "
+            "? null : new List<MapAssociation>.from("
             "_createSpecificObject(json['associations'], MapAssociation.parse));");
       } else if (name == '_CpuProfile' && field.name == 'codes') {
         // Special case `_CpuProfile.codes`.

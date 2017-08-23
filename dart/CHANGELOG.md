@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.5+1
+- bug fix for deserializing `Instance` objects
+
 ## 0.3.5
 - improve access to the profiling APIs
 
