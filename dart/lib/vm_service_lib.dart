@@ -2394,8 +2394,10 @@ class Instance extends Obj {
     elements = json['elements'] == null
         ? null
         : new List<dynamic>.from(_createObject(json['elements']));
-    associations = new List<MapAssociation>.from(
-        _createSpecificObject(json['associations'], MapAssociation.parse));
+    associations = json['associations'] == null
+        ? null
+        : new List<MapAssociation>.from(
+            _createSpecificObject(json['associations'], MapAssociation.parse));
     bytes = json['bytes'];
     closureFunction = _createObject(json['closureFunction']);
     closureContext = _createObject(json['closureContext']);
