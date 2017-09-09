@@ -31,7 +31,7 @@ void startIsolate(int val) {
   Isolate.spawn(isolateEntry, val);
 }
 
-isolateEntry(int message) async {
+isolateEntry(message) async {
   print('starting $message');
   await new Future.delayed(new Duration(seconds: message));
   print('ending $message');
