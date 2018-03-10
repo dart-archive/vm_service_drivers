@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.5+2
+- workaround for an issue with the type of @Library refs for VM objects
+
 ## 0.3.5+1
 - bug fix for deserializing `Instance` objects
 
