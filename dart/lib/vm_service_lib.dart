@@ -1308,8 +1308,9 @@ class Class extends Obj {
   /// Is this a const class?
   bool isConst;
 
-  /// The library which contains this class.
-  LibraryRef library;
+  /// The library which contains this class. TODO: This should be @Library, but
+  /// the VM can return @Instance objects here.
+  ObjRef library;
 
   /// The location of this class in the source code.
   @optional
