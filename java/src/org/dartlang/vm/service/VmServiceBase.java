@@ -217,10 +217,24 @@ abstract class VmServiceBase implements VmServiceConst {
   }
 
   /**
-   * Add a listener to receive {@link Event}s from the VM.
+   * Remove the given listener from the VM.
+   */
+  public void removeVmServiceListener(VmServiceListener listener) {
+    vmListeners.remove(listener);
+  }
+
+  /**
+   * Add a VM RemoteServiceRunner.
    */
   public void addServiceRunner(String service, RemoteServiceRunner runner) {
     remoteServiceRunners.put(service, runner);
+  }
+
+  /**
+   * Remove a VM RemoteServiceRunner.
+   */
+  public void removeServiceRunner(String service) {
+    remoteServiceRunners.remove(service);
   }
 
   /**
