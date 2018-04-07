@@ -306,7 +306,7 @@ public class VmService extends VmServiceBase {
    * The [getSourceReport] RPC is used to generate a set of reports tied to source locations in an
    * isolate.
    */
-  public void getSourceReport(String isolateId, ElementList<SourceReportKind> reports, SourceReportConsumer consumer) {
+  public void getSourceReport(String isolateId, List<SourceReportKind> reports, SourceReportConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.add("reports", convertIterableToJsonArray(reports));
@@ -321,7 +321,7 @@ public class VmService extends VmServiceBase {
    * @param endTokenPos This parameter is optional and may be null.
    * @param forceCompile This parameter is optional and may be null.
    */
-  public void getSourceReport(String isolateId, ElementList<SourceReportKind> reports, String scriptId, Integer tokenPos, Integer endTokenPos, Boolean forceCompile, SourceReportConsumer consumer) {
+  public void getSourceReport(String isolateId, List<SourceReportKind> reports, String scriptId, Integer tokenPos, Integer endTokenPos, Boolean forceCompile, SourceReportConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.add("reports", convertIterableToJsonArray(reports));
