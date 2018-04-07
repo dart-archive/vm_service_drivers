@@ -17,7 +17,6 @@ package org.dartlang.vm.service.element;
 
 @SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public enum SourceReportKind {
-
   /**
    * Used to request a code coverage information.
    */
@@ -29,7 +28,7 @@ public enum SourceReportKind {
   PossibleBreakpoints,
 
   /**
-   * Represents a value returned by the VM but unknown to this client
+   * Represents a value returned by the VM but unknown to this client.
    */
   Unknown
 }

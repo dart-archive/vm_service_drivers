@@ -92,7 +92,6 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
-   *
    * @param column This parameter is optional and may be null.
    */
   public void addBreakpoint(String isolateId, String scriptId, int line, Integer column, BreakpointConsumer consumer) {
@@ -131,7 +130,6 @@ public class VmService extends VmServiceBase {
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script. This
    * RPC is useful when a script has not yet been assigned an id, for example, if a script is in a
    * deferred library which has not yet been loaded.
-   *
    * @param column This parameter is optional and may be null.
    */
   public void addBreakpointWithScriptUri(String isolateId, String scriptUri, int line, Integer column, BreakpointConsumer consumer) {
@@ -144,7 +142,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * @undocumented
+   * Note: this API is experimental and may change or be removed.
    */
   public void clearCpuProfile(String isolateId, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -153,7 +151,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * @undocumented
+   * Note: this API is experimental and may change or be removed.
    */
   public void clearVMTimeline(SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -163,7 +161,7 @@ public class VmService extends VmServiceBase {
   /**
    * Trigger a full GC, collecting all unreachable or weakly reachable objects.
    *
-   * @undocumented
+   * Note: this API is experimental and may change or be removed.
    */
   public void collectAllGarbage(String isolateId, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -184,7 +182,6 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [evaluate] RPC is used to evaluate an expression in the context of some target.
-   *
    * @param scope This parameter is optional and may be null.
    */
   public void evaluate(String isolateId, String targetId, String expression, Map<String, String> scope, EvaluateConsumer consumer) {
@@ -213,7 +210,6 @@ public class VmService extends VmServiceBase {
    * The [evaluateInFrame] RPC is used to evaluate an expression in the context of a particular
    * stack frame. [frameIndex] is the index of the desired Frame, with an index of [0] indicating
    * the top (most recent) frame.
-   *
    * @param scope This parameter is optional and may be null.
    */
   public void evaluateInFrame(String isolateId, int frameIndex, String expression, Map<String, String> scope, EvaluateInFrameConsumer consumer) {
@@ -228,7 +224,7 @@ public class VmService extends VmServiceBase {
   /**
    * Valid values for [gc] are 'full'.
    *
-   * @undocumented
+   * Note: this API is experimental and may change or be removed.
    */
   public void getAllocationProfile(String isolateId, AllocationProfileConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -239,8 +235,7 @@ public class VmService extends VmServiceBase {
   /**
    * Valid values for [gc] are 'full'.
    *
-   * @undocumented
-   *
+   * Note: this API is experimental and may change or be removed.
    *
    * @param gc This parameter is optional and may be null.
    * @param reset This parameter is optional and may be null.
@@ -256,7 +251,7 @@ public class VmService extends VmServiceBase {
   /**
    * [tags] is one of UserVM, UserOnly, VMUser, VMOnly, or None.
    *
-   * @undocumented
+   * Note: this API is experimental and may change or be removed.
    */
   public void getCpuProfile(String isolateId, String tags, CpuProfileConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -295,7 +290,6 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [getObject] RPC is used to lookup an [object] from some isolate by its [id].
-   *
    * @param offset This parameter is optional and may be null.
    * @param count This parameter is optional and may be null.
    */
@@ -322,7 +316,6 @@ public class VmService extends VmServiceBase {
   /**
    * The [getSourceReport] RPC is used to generate a set of reports tied to source locations in an
    * isolate.
-   *
    * @param scriptId This parameter is optional and may be null.
    * @param tokenPos This parameter is optional and may be null.
    * @param endTokenPos This parameter is optional and may be null.
@@ -358,7 +351,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * @undocumented
+   * Note: this API is experimental and may change or be removed.
    */
   public void getVMTimeline(ResponseConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -385,7 +378,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * @undocumented
+   * Note: this API is experimental and may change or be removed.
    */
   public void registerService(String service, String alias, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -396,7 +389,6 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [reloadSources] RPC is used to perform a hot reload of an Isolate's sources.
-   *
    * @param force This parameter is optional and may be null.
    * @param pause This parameter is optional and may be null.
    * @param rootLibUri This parameter is optional and may be null.
@@ -434,7 +426,7 @@ public class VmService extends VmServiceBase {
   /**
    * [roots] is one of User or VM. The results are returned as a stream of [_Graph] events.
    *
-   * @undocumented
+   * Note: this API is experimental and may change or be removed.
    */
   public void requestHeapSnapshot(String isolateId, String roots, boolean collectGarbage, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -446,7 +438,6 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [resume] RPC is used to resume execution of a paused isolate.
-   *
    * @param step This parameter is optional and may be null.
    * @param frameIndex This parameter is optional and may be null.
    */
@@ -510,7 +501,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * @undocumented
+   * Note: this API is experimental and may change or be removed.
    */
   public void setVMTimelineFlags(List<String> recordedStreams, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();

@@ -149,8 +149,13 @@ class TypeWriter {
     }
   }
 
-  void addEnumValue(String name, {String javadoc, bool isLast: false}) {
-    _content.writeln();
+  void addEnumValue(
+    String name, {
+    String javadoc,
+    bool isFirst: false,
+    bool isLast: false,
+  }) {
+    if (!isFirst) _content.writeln();
     if (javadoc != null && javadoc.isNotEmpty) {
       _content.writeln('  /**');
       wrap(javadoc.trim(), colBoundary - 6)
@@ -269,8 +274,9 @@ class TypeWriter {
     }
     if (interfaceNames.isNotEmpty) {
       var classNames = interfaceNames.map((t) => classNameFor(t));
-      buffer.write(
-          ' ${isInterface ? 'extends' : 'implements'} ${classNames.join(', ')}');
+      buffer
+          .write(' ${isInterface ? 'extends' : 'implements'} ${classNames.join(
+          ', ')}');
     }
     buffer.writeln(' {');
     buffer.write(_content.toString());

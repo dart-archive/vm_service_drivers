@@ -420,11 +420,12 @@ class Enum extends Member {
       writer.isEnum = true;
       enums.sort((v1, v2) => v1.name.compareTo(v2.name));
       for (var value in enums) {
-        writer.addEnumValue(value.name, javadoc: value.docs);
+        writer.addEnumValue(value.name,
+            javadoc: value.docs, isFirst: value == enums.first);
       }
       writer.addEnumValue('Unknown',
           javadoc: 'Represents a value returned by the VM'
-              ' but unknown to this client',
+              ' but unknown to this client.',
           isLast: true);
     });
   }
@@ -469,6 +470,7 @@ class EnumValue extends Member {
 
 abstract class Member {
   String get docs => null;
+
   bool get hasDocs => docs != null;
 
   String get name;
@@ -544,6 +546,7 @@ class Method extends Member {
   }
 
   bool get isUndocumented => name.startsWith('_');
+
   String get publicName => isUndocumented ? name.substring(1) : name;
 
   String get consumerTypeName {
@@ -609,7 +612,8 @@ class Method extends Member {
         javadoc.writeln();
       }
       javadoc.writeln();
-      javadoc.writeln('@undocumented');
+      javadoc.writeln(
+          'Note: this API is experimental and may change or be removed.');
     }
     for (var a in args) {
       if (!includeOptional && a.optional) continue;
@@ -622,18 +626,15 @@ class Method extends Member {
       if (paramDoc.isNotEmpty) {
         if (firstParamDoc) {
           javadoc.writeln();
-          javadoc.writeln();
           firstParamDoc = false;
         }
         javadoc.writeln('@param ${a.name} $paramDoc');
       }
     }
 
-    args.forEach((MethodArg arg) {
-      if (arg.type.name == 'Map') {
-        writer.addImport('java.util.Map');
-      }
-    });
+    if (args.any((MethodArg arg) => (arg.type.name == 'Map'))) {
+      writer.addImport('java.util.Map');
+    }
 
     List<MethodArg> mthArgs = args;
     if (!includeOptional) {
@@ -751,6 +752,7 @@ class TextOutputVisitor implements NodeVisitor {
   StringBuffer buf = new StringBuffer();
 
   bool _inRef = false;
+
   TextOutputVisitor();
 
   String toString() => buf.toString().trim();
@@ -823,7 +825,7 @@ class Type extends Member {
     }
 
     return new Type._(parent, rawName, name, superName, docs)
-        ..fields = fields.values.toList();
+      ..fields = fields.values.toList();
   }
 
   String get elementTypeName {
@@ -933,7 +935,8 @@ class TypeField extends Member {
     String str = _docs == null ? '' : _docs;
     if (type.isMultipleReturns) {
       str += '\n\n@return one of '
-          '${joinLast(type.types.map((t) => '<code>${t}</code>'), ', ', ' or ')}';
+          '${joinLast(
+          type.types.map((t) => '<code>${t}</code>'), ', ', ' or ')}';
       str = str.trim();
     }
     return str;
@@ -950,7 +953,8 @@ class TypeField extends Member {
           if (refName.endsWith('Ref'))
             refName = "@" + refName.substring(0, refName.length - 3);
           w.addLine(
-              'if (elem.get("type").getAsString().equals("${refName}")) return new ${t.name}(elem);');
+              'if (elem.get("type").getAsString().equals("${refName}")) return new ${t
+                  .name}(elem);');
         }
         w.addLine('return null;');
       }, javadoc: docs, returnType: 'Object');
@@ -1022,6 +1026,7 @@ class TypeRef {
   bool get isSimple => simpleTypes.contains(name);
 
   bool get isUndocumented => name.startsWith('_');
+
   String get publicName => isUndocumented ? name.substring(1) : name;
 
   String get javaBoxedName {

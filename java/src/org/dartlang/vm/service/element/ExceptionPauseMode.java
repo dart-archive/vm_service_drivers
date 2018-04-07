@@ -20,7 +20,6 @@ package org.dartlang.vm.service.element;
  */
 @SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public enum ExceptionPauseMode {
-
   All,
 
   None,
@@ -28,7 +27,7 @@ public enum ExceptionPauseMode {
   Unhandled,
 
   /**
-   * Represents a value returned by the VM but unknown to this client
+   * Represents a value returned by the VM but unknown to this client.
    */
   Unknown
 }
