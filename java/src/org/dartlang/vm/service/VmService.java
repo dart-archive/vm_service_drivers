@@ -142,7 +142,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * Note: this API is experimental and may change or be removed.
+   * @undocumented
    */
   public void clearCpuProfile(String isolateId, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -151,7 +151,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * Note: this API is experimental and may change or be removed.
+   * @undocumented
    */
   public void clearVMTimeline(SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -161,7 +161,7 @@ public class VmService extends VmServiceBase {
   /**
    * Trigger a full GC, collecting all unreachable or weakly reachable objects.
    *
-   * Note: this API is experimental and may change or be removed.
+   * @undocumented
    */
   public void collectAllGarbage(String isolateId, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -224,7 +224,7 @@ public class VmService extends VmServiceBase {
   /**
    * Valid values for [gc] are 'full'.
    *
-   * Note: this API is experimental and may change or be removed.
+   * @undocumented
    */
   public void getAllocationProfile(String isolateId, AllocationProfileConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -235,7 +235,7 @@ public class VmService extends VmServiceBase {
   /**
    * Valid values for [gc] are 'full'.
    *
-   * Note: this API is experimental and may change or be removed.
+   * @undocumented
    *
    * @param gc This parameter is optional and may be null.
    * @param reset This parameter is optional and may be null.
@@ -251,7 +251,7 @@ public class VmService extends VmServiceBase {
   /**
    * [tags] is one of UserVM, UserOnly, VMUser, VMOnly, or None.
    *
-   * Note: this API is experimental and may change or be removed.
+   * @undocumented
    */
   public void getCpuProfile(String isolateId, String tags, CpuProfileConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -351,7 +351,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * Note: this API is experimental and may change or be removed.
+   * @undocumented
    */
   public void getVMTimeline(ResponseConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -378,7 +378,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * Note: this API is experimental and may change or be removed.
+   * @undocumented
    */
   public void registerService(String service, String alias, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -426,7 +426,7 @@ public class VmService extends VmServiceBase {
   /**
    * [roots] is one of User or VM. The results are returned as a stream of [_Graph] events.
    *
-   * Note: this API is experimental and may change or be removed.
+   * @undocumented
    */
   public void requestHeapSnapshot(String isolateId, String roots, boolean collectGarbage, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();
@@ -501,7 +501,7 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * Note: this API is experimental and may change or be removed.
+   * @undocumented
    */
   public void setVMTimelineFlags(List<String> recordedStreams, SuccessConsumer consumer) {
     JsonObject params = new JsonObject();

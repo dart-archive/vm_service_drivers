@@ -157,10 +157,9 @@ class TypeWriter {
   void addEnumValue(
     String name, {
     String javadoc,
-    bool isFirst: false,
     bool isLast: false,
   }) {
-    if (!isFirst) _content.writeln();
+    _content.writeln();
     if (javadoc != null && javadoc.isNotEmpty) {
       _content.writeln('  /**');
       wrap(javadoc.trim(), colBoundary - 6)

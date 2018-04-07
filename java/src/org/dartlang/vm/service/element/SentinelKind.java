@@ -20,6 +20,7 @@ package org.dartlang.vm.service.element;
  */
 @SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public enum SentinelKind {
+
   /**
    * Indicates that a variable or field is in the process of being initialized.
    */

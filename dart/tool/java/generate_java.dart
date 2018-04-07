@@ -420,8 +420,7 @@ class Enum extends Member {
       writer.isEnum = true;
       enums.sort((v1, v2) => v1.name.compareTo(v2.name));
       for (var value in enums) {
-        writer.addEnumValue(value.name,
-            javadoc: value.docs, isFirst: value == enums.first);
+        writer.addEnumValue(value.name, javadoc: value.docs);
       }
       writer.addEnumValue('Unknown',
           javadoc: 'Represents a value returned by the VM'
@@ -612,8 +611,7 @@ class Method extends Member {
         javadoc.writeln();
       }
       javadoc.writeln();
-      javadoc.writeln(
-          'Note: this API is experimental and may change or be removed.');
+      javadoc.writeln('@undocumented');
     }
     for (var a in args) {
       if (!includeOptional && a.optional) continue;

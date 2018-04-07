@@ -21,6 +21,7 @@ package org.dartlang.vm.service.element;
  */
 @SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public enum InstanceKind {
+
   /**
    * true or false.
    */

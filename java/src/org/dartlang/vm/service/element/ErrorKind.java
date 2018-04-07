@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 @SuppressWarnings({"WeakerAccess", "unused", "UnnecessaryInterfaceModifier"})
 public enum ErrorKind {
+
   /**
    * The isolate has encounted an internal error. These errors should be reported as bugs.
    */
