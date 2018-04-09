@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
- package org.dartlang.vm.service;
+package org.dartlang.vm.service;
 
 import com.google.common.base.Charsets;
 
@@ -70,7 +70,7 @@ public class SampleOutPrinter {
   public void assertEmpty() {
     synchronized (currentLineLock) {
       if (currentLine != null) {
-        throw new RuntimeException("Did not expect " + prefix + " output");
+        throw new RuntimeException("Did not expect " + prefix + ": \"" + currentLine + "\"");
       }
     }
   }
@@ -79,7 +79,7 @@ public class SampleOutPrinter {
     synchronized (currentLineLock) {
       if (text == null) {
         if (currentLine != null) {
-          throw new RuntimeException("Did not expect " + prefix + " output");
+          throw new RuntimeException("Did not expect " + prefix + ": \"" + currentLine + "\"");
         }
       } else {
         if (currentLine == null || !currentLine.contains(text)) {

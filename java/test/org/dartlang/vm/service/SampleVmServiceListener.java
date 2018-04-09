@@ -16,6 +16,8 @@ package org.dartlang.vm.service;
 import org.dartlang.vm.service.element.Event;
 import org.dartlang.vm.service.element.EventKind;
 
+import java.util.Set;
+
 /**
  * Sample VmListener for responding to state changes in the running application
  */
@@ -23,6 +25,11 @@ public class SampleVmServiceListener implements VmServiceListener {
   private final Object lock = new Object();
   private String lastStreamId;
   private Event lastEvent;
+  private final Set<EventKind> ignoreAll;
+
+  SampleVmServiceListener(Set<EventKind> ignoreAll) {
+    this.ignoreAll = ignoreAll;
+  }
 
   @Override
   public void connectionOpened() {
@@ -32,6 +39,9 @@ public class SampleVmServiceListener implements VmServiceListener {
   @Override
   public void received(String streamId, Event event) {
     synchronized (lock) {
+      if (ignoreAll.contains(event.getKind())) {
+        return;
+      }
       if (lastStreamId != null) {
         unexpectedEvent(lastStreamId, lastEvent);
       }

@@ -18,6 +18,11 @@ int colBoundary = 100;
 String fileHeader;
 
 String classNameFor(String typeName) {
+  // Convert ElementList<Foo> param declarations to List<Foo> declarations.
+  if (typeName.startsWith('ElementList<')) {
+    return typeName.substring('Element'.length);
+  }
+
   var index = typeName.lastIndexOf('.');
   typeName = index > 0 ? typeName.substring(index + 1) : typeName;
   if (typeName.startsWith('_')) typeName = typeName.substring(1);
@@ -149,7 +154,11 @@ class TypeWriter {
     }
   }
 
-  void addEnumValue(String name, {String javadoc, bool isLast: false}) {
+  void addEnumValue(
+    String name, {
+    String javadoc,
+    bool isLast: false,
+  }) {
     _content.writeln();
     if (javadoc != null && javadoc.isNotEmpty) {
       _content.writeln('  /**');
@@ -197,11 +206,14 @@ class TypeWriter {
   }
 
   void addMethod(
-      String name, Iterable<JavaMethodArg> args, WriteStatements write,
-      {String javadoc,
-      String modifiers: 'public',
-      String returnType: 'void',
-      bool isOverride: false}) {
+    String name,
+    Iterable<JavaMethodArg> args,
+    WriteStatements write, {
+    String javadoc,
+    String modifiers: 'public',
+    String returnType: 'void',
+    bool isOverride: false,
+  }) {
     var methodDecl = new StringBuffer();
     if (javadoc != null && javadoc.isNotEmpty) {
       methodDecl.writeln('  /**');
@@ -269,8 +281,9 @@ class TypeWriter {
     }
     if (interfaceNames.isNotEmpty) {
       var classNames = interfaceNames.map((t) => classNameFor(t));
-      buffer.write(
-          ' ${isInterface ? 'extends' : 'implements'} ${classNames.join(', ')}');
+      buffer
+          .write(' ${isInterface ? 'extends' : 'implements'} ${classNames.join(
+          ', ')}');
     }
     buffer.writeln(' {');
     buffer.write(_content.toString());
