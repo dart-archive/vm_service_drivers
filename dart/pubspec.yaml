@@ -6,7 +6,7 @@ author: Dart Team <misc@dartlang.org>
 homepage: https://github.com/dart-lang/vm_service_drivers
 
 environment:
-  sdk: '>=1.13.0 <2.0.0'
+  sdk: '>=2.0.0-dev.17.0 <2.0.0'
 
 dev_dependencies:
   markdown: '>=0.11.0 < 2.0.0'
