@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.3.5+2
+## 0.3.7
+- ensure the library works with Dart 2
+- regenerate the library based on the 3.8-dev spec
+- now require a minimum of a 2.0.0-dev Dart SDK
+- update to not use deprecated dart:convert constants
+
+## 0.3.6
 - workaround for an issue with the type of @Library refs for VM objects
 
 ## 0.3.5+1

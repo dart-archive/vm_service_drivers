@@ -39,7 +39,7 @@ final String _headerCode = r'''
 library vm_service_lib;
 
 import 'dart:async';
-import 'dart:convert' show BASE64, JSON, UTF8;
+import 'dart:convert' show base64, jsonDecode, jsonEncode, utf8;
 import 'dart:typed_data';
 
 ''';
@@ -90,7 +90,7 @@ final String _implCode = r'''
     _methodCalls[id] = method;
     Map m = {'id': id, 'method': method};
     if (args != null) m['params'] = args;
-    String message = JSON.encode(m);
+    String message = jsonEncode(m);
     _onSend.add(message);
     _writeMessage(message);
     return completer.future;
@@ -121,14 +121,14 @@ final String _implCode = r'''
 
   void _processMessageByteData(ByteData bytes) {
     int offset = 0;
-    int metaSize = bytes.getUint32(offset + 4, Endianness.BIG_ENDIAN);
+    int metaSize = bytes.getUint32(offset + 4, Endian.big);
     offset += 8;
-    String meta = UTF8.decode(new Uint8List.view(
+    String meta = utf8.decode(new Uint8List.view(
         bytes.buffer, bytes.offsetInBytes + offset, metaSize));
     offset += metaSize;
     ByteData data = new ByteData.view(bytes.buffer, bytes.offsetInBytes + offset,
         bytes.lengthInBytes - offset);
-    dynamic map = JSON.decode(meta);
+    dynamic map = jsonDecode(meta);
     if (map != null && map['method'] == 'streamNotify') {
       String streamId = map['params']['streamId'];
       Map event = map['params']['event'];
@@ -142,7 +142,7 @@ final String _implCode = r'''
     try {
       _onReceive.add(message);
 
-      json = JSON.decode(message);
+      json = jsonDecode(message);
     } catch (e, s) {
       _log.severe('unable to decode message: ${message}, ${e}\n${s}');
       return;
@@ -169,7 +169,7 @@ final String _implCode = r'''
     String methodName = _methodCalls.remove(json['id']);
 
     if (completer == null) {
-      _log.severe('unmatched request response: ${JSON.encode(json)}');
+      _log.severe('unmatched request response: ${jsonEncode(json)}');
     } else if (json['error'] != null) {
       completer.completeError(RPCError.parse(methodName, json['error']));
     } else {
@@ -187,7 +187,7 @@ final String _implCode = r'''
     final Map m = await _routeRequest(json['method'], json['params']);
     m['id'] = json['id'];
     m['jsonrpc'] = '2.0';
-    String message = JSON.encode(m);
+    String message = jsonEncode(m);
     _onSend.add(message);
     _writeMessage(message);
   }
@@ -395,7 +395,7 @@ const String undocumented = 'undocumented';
 
 /// Decode a string in Base64 encoding into the equivalent non-encoded string.
 /// This is useful for handling the results of the Stdout or Stderr events.
-String decodeBase64(String str) => new String.fromCharCodes(BASE64.decode(str));
+String decodeBase64(String str) => new String.fromCharCodes(base64.decode(str));
 
 Object _createObject(dynamic json) {
   if (json == null) return null;

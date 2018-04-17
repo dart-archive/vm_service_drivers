@@ -33,9 +33,9 @@ main(List<String> args) async {
 
   process.exitCode.then((code) => print('vm exited: ${code}'));
   // ignore: strong_mode_down_cast_composite
-  process.stdout.transform(UTF8.decoder).listen(print);
+  process.stdout.transform(utf8.decoder).listen(print);
   // ignore: strong_mode_down_cast_composite
-  process.stderr.transform(UTF8.decoder).listen(print);
+  process.stderr.transform(utf8.decoder).listen(print);
 
   await new Future.delayed(new Duration(milliseconds: 500));
 
