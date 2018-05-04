@@ -957,12 +957,17 @@ class TypeField extends Member {
         w.addLine('return null;');
       }, javadoc: docs, returnType: 'Object');
     } else {
+      String returnType = type.valueType.ref;
+      if (name == 'timestamp') {
+        returnType = 'long';
+      }
+
       writer.addMethod(accessorName, [], (StatementWriter writer) {
         type.valueType.generateAccessStatements(writer, name,
             canBeSentinel: type.isValueAndSentinel,
             defaultValue: defaultValue,
             optional: optional);
-      }, javadoc: docs, returnType: type.valueType.ref);
+      }, javadoc: docs, returnType: returnType);
     }
   }
 }
@@ -1075,8 +1080,13 @@ class TypeRef {
         writer.addImport('java.util.List');
         writer.addLine('return getListInt("$propertyName");');
       } else {
-        writer.addLine(
-            'return json.get("$propertyName") == null ? -1 : json.get("$propertyName").getAsInt();');
+        if (propertyName == 'timestamp') {
+          writer.addLine(
+              'return json.get("$propertyName") == null ? -1 : json.get("$propertyName").getAsLong();');
+        } else {
+          writer.addLine(
+              'return json.get("$propertyName") == null ? -1 : json.get("$propertyName").getAsInt();');
+        }
       }
     } else if (name == 'double') {
       writer.addLine(
