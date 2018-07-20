@@ -1,6 +1,6 @@
 # Changelog
 
-0.3.8
+## 0.3.8
 - upgrades for Dart 2 dependencies
 
 ## 0.3.7
