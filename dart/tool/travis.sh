@@ -11,13 +11,10 @@ set -e
 pub get
 
 # Ensure the generator works.
-dart --preview-dart-2 tool/generate.dart
+dart tool/generate.dart
 
 # Ensure all the code analyzes cleanly.
-dartanalyzer --fatal-warnings \
-  example/ \
-  lib/ \
-  tool/
+dartanalyzer --fatal-warnings .
 
 # Run the VM service protocol smoke tester.
-dart --preview-dart-2 example/vm_service_lib_tester.dart
+dart example/vm_service_lib_tester.dart

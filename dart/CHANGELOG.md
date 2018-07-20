@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.8
+- upgrades for Dart 2 dependencies
+
 ## 0.3.7
 - ensure the library works with Dart 2
 - regenerate the library based on the 3.8-dev spec

@@ -2911,7 +2911,8 @@ class ScriptRef extends ObjRef {
 /// line number followed by `(tokenPos, columnNumber)` pairs:
 ///
 /// ```
-/// [lineNumber, (tokenPos, columnNumber)*]
+/// [
+/// ```lineNumber, (tokenPos, columnNumber)*]
 /// ```
 ///
 /// The `tokenPos` is an arbitrary integer value that is used to represent a
@@ -2921,7 +2922,10 @@ class ScriptRef extends ObjRef {
 /// For example, a `tokenPosTable` with the value...
 ///
 /// ```
-/// [[1, 100, 5, 101, 8],[2, 102, 7]]
+/// [
+/// ```[
+/// ```1, 100, 5, 101, 8],[
+/// ```2, 102, 7]]
 /// ```
 ///
 /// ...encodes the mapping:
