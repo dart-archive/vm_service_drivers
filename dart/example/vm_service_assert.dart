@@ -686,7 +686,7 @@ List<vms.Message> assertMessages(List<vms.Message> list) {
   return list;
 }
 
-vms.NullRef assertNullRef(vms.NullRef obj) {
+vms.NullValRef assertNullValRef(vms.NullValRef obj) {
   assertNotNull(obj);
   assertString(obj.type);
   assertString(obj.id);
@@ -695,14 +695,14 @@ vms.NullRef assertNullRef(vms.NullRef obj) {
   return obj;
 }
 
-List<vms.NullRef> assertNullRefs(List<vms.NullRef> list) {
-  for (vms.NullRef elem in list) {
-    assertNullRef(elem);
+List<vms.NullValRef> assertNullValRefs(List<vms.NullValRef> list) {
+  for (vms.NullValRef elem in list) {
+    assertNullValRef(elem);
   }
   return list;
 }
 
-vms.Null assertNull(vms.Null obj) {
+vms.NullVal assertNullVal(vms.NullVal obj) {
   assertNotNull(obj);
   assertString(obj.type);
   assertString(obj.id);

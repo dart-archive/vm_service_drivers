@@ -96,8 +96,8 @@ Map<String, Function> _typeFactories = {
   'LibraryDependency': LibraryDependency.parse,
   'MapAssociation': MapAssociation.parse,
   'Message': Message.parse,
-  '@Null': NullRef.parse,
-  'Null': Null.parse,
+  '@Null': NullValRef.parse,
+  'Null': NullVal.parse,
   '@Object': ObjRef.parse,
   'Object': Obj.parse,
   'ReloadReport': ReloadReport.parse,
@@ -2719,37 +2719,37 @@ class Message extends Response {
       'size: ${size}]';
 }
 
-/// `NullRef` is a reference to an a `Null`.
-class NullRef extends InstanceRef {
-  static NullRef parse(Map<String, dynamic> json) =>
-      json == null ? null : new NullRef._fromJson(json);
+/// `NullValRef` is a reference to an a `NullVal`.
+class NullValRef extends InstanceRef {
+  static NullValRef parse(Map<String, dynamic> json) =>
+      json == null ? null : new NullValRef._fromJson(json);
 
-  NullRef();
+  NullValRef();
 
-  NullRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
+  NullValRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
 
   int get hashCode => id.hashCode;
 
-  operator ==(other) => other is NullRef && id == other.id;
+  operator ==(other) => other is NullValRef && id == other.id;
 
-  String toString() => '[NullRef ' //
+  String toString() => '[NullValRef ' //
       'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
 
-/// A `Null` object represents the Dart language value null.
-class Null extends Instance {
-  static Null parse(Map<String, dynamic> json) =>
-      json == null ? null : new Null._fromJson(json);
+/// A `NullVal` object represents the Dart language value null.
+class NullVal extends Instance {
+  static NullVal parse(Map<String, dynamic> json) =>
+      json == null ? null : new NullVal._fromJson(json);
 
-  Null();
+  NullVal();
 
-  Null._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
+  NullVal._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
 
   int get hashCode => id.hashCode;
 
-  operator ==(other) => other is Null && id == other.id;
+  operator ==(other) => other is NullVal && id == other.id;
 
-  String toString() => '[Null type: ${type}, id: ${id}, kind: ${kind}]';
+  String toString() => '[NullVal type: ${type}, id: ${id}, kind: ${kind}]';
 }
 
 /// `ObjRef` is a reference to a `Obj`.

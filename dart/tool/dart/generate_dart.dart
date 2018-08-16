@@ -18,11 +18,16 @@ Api api;
 String _coerceRefType(String typeName) {
   if (typeName == 'Object') typeName = 'Obj';
   if (typeName == '@Object') typeName = 'ObjRef';
+  if (typeName == 'Null') typeName = 'NullVal';
+  if (typeName == '@Null') typeName = 'NullValRef';
   if (typeName == 'Function') typeName = 'Func';
   if (typeName == '@Function') typeName = 'FuncRef';
+
   if (typeName.startsWith('@')) typeName = typeName.substring(1) + 'Ref';
+
   if (typeName == 'string') typeName = 'String';
   if (typeName == 'map') typeName = 'Map';
+
   return typeName;
 }
 
