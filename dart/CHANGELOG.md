@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.9
+- Rename the `Null` type to `NullVal`
+
 ## 0.3.8
 - upgrades for Dart 2 dependencies
 
