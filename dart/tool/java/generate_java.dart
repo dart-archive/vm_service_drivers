@@ -933,8 +933,7 @@ class TypeField extends Member {
     String str = _docs == null ? '' : _docs;
     if (type.isMultipleReturns) {
       str += '\n\n@return one of '
-          '${joinLast(
-          type.types.map((t) => '<code>${t}</code>'), ', ', ' or ')}';
+          '${joinLast(type.types.map((t) => '<code>${t}</code>'), ', ', ' or ')}';
       str = str.trim();
     }
     return str;
@@ -1113,10 +1112,11 @@ class TypeRef {
           writer.addLine('if (json.get("$propertyName") == null) return null;');
           writer.addLine('');
         }
-        writer
-            .addLine('String name = json.get("$propertyName").getAsString();');
+        writer.addImport('com.google.gson.JsonElement');
+        writer.addLine('JsonElement value = json.get("$propertyName");');
         writer.addLine('try {');
-        writer.addLine('  return $name.valueOf(name);');
+        writer.addLine('  return value == null ? $name.Unknown'
+            ' : $name.valueOf(value.getAsString());');
         writer.addLine('} catch (IllegalArgumentException e) {');
         writer.addLine('  return $name.Unknown;');
         writer.addLine('}');
