@@ -33,7 +33,7 @@ public class Sentinel extends Response {
   public SentinelKind getKind() {
     JsonElement value = json.get("kind");
     try {
-      return value == null ? kind.Unknown : kind.valueOf(value.getAsString());
+      return value == null ? SentinelKind.Unknown : SentinelKind.valueOf(value.getAsString());
     } catch (IllegalArgumentException e) {
       return SentinelKind.Unknown;
     }

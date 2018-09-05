@@ -33,7 +33,7 @@ public class CodeRef extends ObjRef {
   public CodeKind getKind() {
     JsonElement value = json.get("kind");
     try {
-      return value == null ? kind.Unknown : kind.valueOf(value.getAsString());
+      return value == null ? CodeKind.Unknown : CodeKind.valueOf(value.getAsString());
     } catch (IllegalArgumentException e) {
       return CodeKind.Unknown;
     }

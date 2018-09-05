@@ -54,7 +54,7 @@ public class Isolate extends Response {
   public ExceptionPauseMode getExceptionPauseMode() {
     JsonElement value = json.get("exceptionPauseMode");
     try {
-      return value == null ? exceptionPauseMode.Unknown : exceptionPauseMode.valueOf(value.getAsString());
+      return value == null ? ExceptionPauseMode.Unknown : ExceptionPauseMode.valueOf(value.getAsString());
     } catch (IllegalArgumentException e) {
       return ExceptionPauseMode.Unknown;
     }

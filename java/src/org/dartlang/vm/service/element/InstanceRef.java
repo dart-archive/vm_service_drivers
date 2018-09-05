@@ -41,7 +41,7 @@ public class InstanceRef extends ObjRef {
   public InstanceKind getKind() {
     JsonElement value = json.get("kind");
     try {
-      return value == null ? kind.Unknown : kind.valueOf(value.getAsString());
+      return value == null ? InstanceKind.Unknown : InstanceKind.valueOf(value.getAsString());
     } catch (IllegalArgumentException e) {
       return InstanceKind.Unknown;
     }

@@ -42,7 +42,7 @@ public class Frame extends Response {
     
     JsonElement value = json.get("kind");
     try {
-      return value == null ? kind.Unknown : kind.valueOf(value.getAsString());
+      return value == null ? FrameKind.Unknown : FrameKind.valueOf(value.getAsString());
     } catch (IllegalArgumentException e) {
       return FrameKind.Unknown;
     }

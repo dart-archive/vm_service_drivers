@@ -33,7 +33,7 @@ public class ErrorRef extends ObjRef {
   public ErrorKind getKind() {
     JsonElement value = json.get("kind");
     try {
-      return value == null ? kind.Unknown : kind.valueOf(value.getAsString());
+      return value == null ? ErrorKind.Unknown : ErrorKind.valueOf(value.getAsString());
     } catch (IllegalArgumentException e) {
       return ErrorKind.Unknown;
     }
