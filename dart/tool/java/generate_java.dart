@@ -1114,8 +1114,8 @@ class TypeRef {
         }
         writer.addLine('JsonElement value = json.get("$propertyName");');
         writer.addLine('try {');
-        writer.addLine('  return value == null ? InstanceKind.Unknown'
-            ' : InstanceKind.valueOf(value.getAsString());');
+        writer.addLine('  return value == null ? $propertyName.Unknown'
+            ' : $propertyName.valueOf(value.getAsString());');
         writer.addLine('} catch (IllegalArgumentException e) {');
         writer.addLine('  return $name.Unknown;');
         writer.addLine('}');
