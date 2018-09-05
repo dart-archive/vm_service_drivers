@@ -129,9 +129,9 @@ public class Event extends Response {
    * What kind of event is this?
    */
   public EventKind getKind() {
-    String name = json.get("kind").getAsString();
+    JsonElement value = json.get("kind");
     try {
-      return EventKind.valueOf(name);
+      return value == null ? InstanceKind.Unknown : InstanceKind.valueOf(value.getAsString());
     } catch (IllegalArgumentException e) {
       return EventKind.Unknown;
     }

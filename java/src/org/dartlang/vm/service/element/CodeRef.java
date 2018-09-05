@@ -31,9 +31,9 @@ public class CodeRef extends ObjRef {
    * What kind of code object is this?
    */
   public CodeKind getKind() {
-    String name = json.get("kind").getAsString();
+    JsonElement value = json.get("kind");
     try {
-      return CodeKind.valueOf(name);
+      return value == null ? InstanceKind.Unknown : InstanceKind.valueOf(value.getAsString());
     } catch (IllegalArgumentException e) {
       return CodeKind.Unknown;
     }
