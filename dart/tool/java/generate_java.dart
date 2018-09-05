@@ -1112,6 +1112,7 @@ class TypeRef {
           writer.addLine('if (json.get("$propertyName") == null) return null;');
           writer.addLine('');
         }
+        writer.addImport('com.google.gson.JsonElement');
         writer.addLine('JsonElement value = json.get("$propertyName");');
         writer.addLine('try {');
         writer.addLine('  return value == null ? $name.Unknown'

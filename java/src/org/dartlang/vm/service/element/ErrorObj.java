@@ -15,6 +15,7 @@ package org.dartlang.vm.service.element;
 
 // This is a generated file.
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
