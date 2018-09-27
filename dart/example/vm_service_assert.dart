@@ -249,6 +249,8 @@ vms.BoundVariable assertBoundVariable(vms.BoundVariable obj) {
   assertString(obj.name);
   if (obj.value is vms.InstanceRef) {
     assertInstanceRef(obj.value);
+  } else if (obj.value is vms.TypeArgumentsRef) {
+    assertTypeArgumentsRef(obj.value);
   } else if (obj.value is vms.Sentinel) {
     assertSentinel(obj.value);
   } else {

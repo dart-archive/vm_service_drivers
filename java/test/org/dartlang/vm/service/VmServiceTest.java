@@ -229,7 +229,7 @@ public class VmServiceTest {
     System.out.println("    #" + frame.getIndex() + " " + frame.getFunction().getName() + " ("
             + frame.getLocation().getScript().getUri() + ")");
     for (BoundVariable var : frame.getVars()) {
-      InstanceRef instanceRef = var.getValue();
+      InstanceRef instanceRef = (InstanceRef)var.getValue();
       System.out.println("      " + var.getName() + " = " + convert.toString(instanceRef));
     }
   }

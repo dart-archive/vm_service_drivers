@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.9+1
+- rev to version `3.9` of the spec
+- expose `invoke`
+
 ## 0.3.9
 - Rename the `Null` type to `NullVal`
 

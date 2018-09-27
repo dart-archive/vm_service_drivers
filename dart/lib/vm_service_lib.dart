@@ -13,7 +13,7 @@ import 'dart:async';
 import 'dart:convert' show base64, jsonDecode, jsonEncode, utf8;
 import 'dart:typed_data';
 
-const String vmServiceVersion = '3.8.0';
+const String vmServiceVersion = '3.9.0';
 
 /// @optional
 const String optional = 'optional';
@@ -268,6 +268,41 @@ class VmService {
         {'isolateId': isolateId, 'functionId': functionId});
   }
 
+  /// The `invoke` RPC is used to perform regular method invocation on some
+  /// receiver, as if by dart:mirror's ObjectMirror.invoke. Note this does not
+  /// provide a way to perform getter, setter or constructor invocation.
+  ///
+  /// `targetId` may refer to a [Library], [Class], or [Instance].
+  ///
+  /// Each elements of `argumentId` may refer to an [Instance].
+  ///
+  /// If `targetId` or any element of `argumentIds` is a temporary id which has
+  /// expired, then the `Expired` [Sentinel] is returned.
+  ///
+  /// If `targetId` or any element of `argumentIds` refers to an object which
+  /// has been collected by the VM's garbage collector, then the `Collected`
+  /// [Sentinel] is returned.
+  ///
+  /// If invocation triggers a failed compilation then [rpc error] 113
+  /// "Expression compilation error" is returned.
+  ///
+  /// If an runtime error occurs while evaluating the invocation, an [ErrorRef]
+  /// reference will be returned.
+  ///
+  /// If the invocation is evaluated successfully, an [InstanceRef] reference
+  /// will be returned.
+  ///
+  /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
+  Future<dynamic> invoke(String isolateId, String targetId, String selector,
+      List<String> argumentIds) {
+    return _call('invoke', {
+      'isolateId': isolateId,
+      'targetId': targetId,
+      'selector': selector,
+      'argumentIds': argumentIds
+    });
+  }
+
   /// The `evaluate` RPC is used to evaluate an expression in the context of
   /// some target.
   ///
@@ -285,6 +320,9 @@ class VmService {
   /// instance/class or library targets respectively. This means bindings
   /// provided in `scope` may shadow instance members, class members and
   /// top-level members.
+  ///
+  /// If expression is failed to parse and compile, then [rpc error] 113
+  /// "Expression compilation error" is returned.
   ///
   /// If an error occurs while evaluating the expression, an [ErrorRef]
   /// reference will be returned.
@@ -313,6 +351,9 @@ class VmService {
   /// evaluated, which is a child scope of the frame's current scope. This means
   /// bindings provided in `scope` may shadow instance members, class members,
   /// top-level members, parameters and locals.
+  ///
+  /// If expression is failed to parse and compile, then [rpc error] 113
+  /// "Expression compilation error" is returned.
   ///
   /// If an error occurs while evaluating the expression, an [ErrorRef]
   /// reference will be returned.
@@ -453,6 +494,16 @@ class VmService {
   /// See [Success].
   Future<Success> pause(String isolateId) {
     return _call('pause', {'isolateId': isolateId});
+  }
+
+  /// The `kill` RPC is used to kill an isolate as if by dart:isolate's
+  /// <code>Isolate.kill(IMMEDIATE)</code>Isolate.kill(IMMEDIATE).
+  ///
+  /// The isolate is killed regardless of whether it is paused or running.
+  ///
+  /// See [Success].
+  Future<Success> kill(String isolateId) {
+    return _call('kill', {'isolateId': isolateId});
   }
 
   /// The `reloadSources` RPC is used to perform a hot reload of an Isolate's
@@ -1206,7 +1257,7 @@ class BoundVariable {
 
   String name;
 
-  /// [value] can be one of [InstanceRef] or [Sentinel].
+  /// [value] can be one of [InstanceRef], [TypeArgumentsRef] or [Sentinel].
   dynamic value;
 
   /// The token position where this variable was declared.
