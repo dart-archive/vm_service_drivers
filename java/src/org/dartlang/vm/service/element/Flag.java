@@ -54,6 +54,6 @@ public class Flag extends Element {
    * If this property is absent, then the value of the flag was NULL.
    */
   public String getValueAsString() {
-    return json.get("valueAsString").getAsString();
+    return json.get("valueAsString") == null ? null : json.get("valueAsString").getAsString();
   }
 }
