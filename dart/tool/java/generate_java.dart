@@ -1065,8 +1065,8 @@ class TypeRef {
           writer.addLine(
               'return elem != null ? elem.getAsBoolean() : $defaultValue;');
         } else if (optional) {
-          writer.addLine(
-              'return json.get("$propertyName") == null ? false : json.get("$propertyName").getAsBoolean();');
+          writer.addLine('return json.get("$propertyName") == null ? '
+              'false : json.get("$propertyName").getAsBoolean();');
         } else {
           writer.addLine('return json.get("$propertyName").getAsBoolean();');
         }
@@ -1080,16 +1080,16 @@ class TypeRef {
         writer.addLine('return getListInt("$propertyName");');
       } else {
         if (propertyName == 'timestamp') {
-          writer.addLine(
-              'return json.get("$propertyName") == null ? -1 : json.get("$propertyName").getAsLong();');
+          writer.addLine('return json.get("$propertyName") == null ? '
+              '-1 : json.get("$propertyName").getAsLong();');
         } else {
-          writer.addLine(
-              'return json.get("$propertyName") == null ? -1 : json.get("$propertyName").getAsInt();');
+          writer.addLine('return json.get("$propertyName") == null ? '
+              '-1 : json.get("$propertyName").getAsInt();');
         }
       }
     } else if (name == 'double') {
-      writer.addLine(
-          'return json.get("$propertyName") == null ? 0.0 : json.get("$propertyName").getAsDouble();');
+      writer.addLine('return json.get("$propertyName") == null ? '
+          '0.0 : json.get("$propertyName").getAsDouble();');
     } else if (name == 'BigDecimal') {
       if (isArray) {
         print('skipped accessor body for $propertyName');
@@ -1101,6 +1101,9 @@ class TypeRef {
       if (isArray) {
         writer.addImport('java.util.List');
         writer.addLine('return getListString("$propertyName");');
+      } else if (optional) {
+        writer.addLine('return json.get("$propertyName") == null ? '
+            'null : json.get("$propertyName").getAsString();');
       } else {
         writer.addLine('return json.get("$propertyName").getAsString();');
       }

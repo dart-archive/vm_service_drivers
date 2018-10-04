@@ -2996,8 +2996,9 @@ class Script extends Obj {
   /// The library which owns this script.
   LibraryRef library;
 
-  /// The source code for this script. For certain built-in scripts, this may be
-  /// reconstructed without source comments.
+  /// The source code for this script. This can be null for certain built-in
+  /// scripts.
+  @optional
   String source;
 
   /// A table encoding a mapping from token position to line and column.
@@ -3019,7 +3020,7 @@ class Script extends Obj {
 
   String toString() => '[Script ' //
       'type: ${type}, id: ${id}, uri: ${uri}, library: ${library}, ' //
-      'source: ${source}, tokenPosTable: ${tokenPosTable}]';
+      'tokenPosTable: ${tokenPosTable}]';
 }
 
 /// The `SourceLocation` class is used to designate a position or range in some

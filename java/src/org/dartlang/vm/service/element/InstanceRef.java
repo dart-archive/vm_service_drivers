@@ -81,7 +81,7 @@ public class InstanceRef extends ObjRef {
    *  - Type
    */
   public String getName() {
-    return json.get("name").getAsString();
+    return json.get("name") == null ? null : json.get("name").getAsString();
   }
 
   /**
@@ -131,7 +131,7 @@ public class InstanceRef extends ObjRef {
    *  - StackTrace
    */
   public String getValueAsString() {
-    return json.get("valueAsString").getAsString();
+    return json.get("valueAsString") == null ? null : json.get("valueAsString").getAsString();
   }
 
   /**

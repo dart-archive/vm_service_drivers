@@ -81,7 +81,7 @@ public class Instance extends Obj {
    *  - Float64x2List
    */
   public String getBytes() {
-    return json.get("bytes").getAsString();
+    return json.get("bytes") == null ? null : json.get("bytes").getAsString();
   }
 
   /**
@@ -247,7 +247,7 @@ public class Instance extends Obj {
    *  - Type
    */
   public String getName() {
-    return json.get("name").getAsString();
+    return json.get("name") == null ? null : json.get("name").getAsString();
   }
 
   /**
@@ -304,7 +304,7 @@ public class Instance extends Obj {
    *  - RegExp
    */
   public String getPattern() {
-    return json.get("pattern").getAsString();
+    return json.get("pattern") == null ? null : json.get("pattern").getAsString();
   }
 
   /**
@@ -370,7 +370,7 @@ public class Instance extends Obj {
    *  - String (value may be truncated)
    */
   public String getValueAsString() {
-    return json.get("valueAsString").getAsString();
+    return json.get("valueAsString") == null ? null : json.get("valueAsString").getAsString();
   }
 
   /**

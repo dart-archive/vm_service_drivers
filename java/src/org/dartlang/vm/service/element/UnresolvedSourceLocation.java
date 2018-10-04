@@ -56,7 +56,7 @@ public class UnresolvedSourceLocation extends Response {
    * The uri of the script containing the source location if the script has yet to be loaded.
    */
   public String getScriptUri() {
-    return json.get("scriptUri").getAsString();
+    return json.get("scriptUri") == null ? null : json.get("scriptUri").getAsString();
   }
 
   /**

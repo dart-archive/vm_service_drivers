@@ -37,7 +37,7 @@ public class Event extends Response {
    *  - ServiceRegistered
    */
   public String getAlias() {
-    return json.get("alias").getAsString();
+    return json.get("alias") == null ? null : json.get("alias").getAsString();
   }
 
   /**
@@ -70,7 +70,7 @@ public class Event extends Response {
    * This is provided for the WriteEvent event.
    */
   public String getBytes() {
-    return json.get("bytes").getAsString();
+    return json.get("bytes") == null ? null : json.get("bytes").getAsString();
   }
 
   /**
@@ -95,7 +95,7 @@ public class Event extends Response {
    * This is provided for the Extension event.
    */
   public String getExtensionKind() {
-    return json.get("extensionKind").getAsString();
+    return json.get("extensionKind") == null ? null : json.get("extensionKind").getAsString();
   }
 
   /**
@@ -104,7 +104,7 @@ public class Event extends Response {
    * This is provided for the ServiceExtensionAdded event.
    */
   public String getExtensionRPC() {
-    return json.get("extensionRPC").getAsString();
+    return json.get("extensionRPC") == null ? null : json.get("extensionRPC").getAsString();
   }
 
   /**
@@ -146,7 +146,7 @@ public class Event extends Response {
    *  - ServiceUnregistered
    */
   public String getMethod() {
-    return json.get("method").getAsString();
+    return json.get("method") == null ? null : json.get("method").getAsString();
   }
 
   /**
@@ -180,7 +180,7 @@ public class Event extends Response {
    *  - ServiceUnregistered
    */
   public String getService() {
-    return json.get("service").getAsString();
+    return json.get("service") == null ? null : json.get("service").getAsString();
   }
 
   /**
@@ -189,7 +189,7 @@ public class Event extends Response {
    *  - IsolateSpawn
    */
   public String getStatus() {
-    return json.get("status").getAsString();
+    return json.get("status") == null ? null : json.get("status").getAsString();
   }
 
   /**
