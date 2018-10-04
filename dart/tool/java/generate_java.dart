@@ -936,6 +936,10 @@ class TypeField extends Member {
           '${joinLast(type.types.map((t) => '<code>${t}</code>'), ', ', ' or ')}';
       str = str.trim();
     }
+    if (optional) {
+      str += '\n\nCan return <code>null</code>.';
+      str = str.trim();
+    }
     return str;
   }
 
@@ -1100,7 +1104,12 @@ class TypeRef {
     } else if (name == 'String') {
       if (isArray) {
         writer.addImport('java.util.List');
-        writer.addLine('return getListString("$propertyName");');
+        if (optional) {
+          writer.addLine('return json.get("$propertyName") == null ? '
+              'null : getListString("$propertyName");');
+        } else {
+          writer.addLine('return getListString("$propertyName");');
+        }
       } else if (optional) {
         writer.addLine('return json.get("$propertyName") == null ? '
             'null : json.get("$propertyName").getAsString();');

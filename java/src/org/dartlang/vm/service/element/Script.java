@@ -37,6 +37,8 @@ public class Script extends Obj {
 
   /**
    * The source code for this script. This can be null for certain built-in scripts.
+   *
+   * Can return <code>null</code>.
    */
   public String getSource() {
     return json.get("source") == null ? null : json.get("source").getAsString();
