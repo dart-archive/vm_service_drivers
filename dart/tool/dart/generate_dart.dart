@@ -406,7 +406,7 @@ Object _createObject(dynamic json) {
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => _createObject(e));
+    return json.map((e) => _createObject(e)).toList();
   } else if (json is Map) {
     String type = json['type'];
     if (_typeFactories[type] == null) {
@@ -424,7 +424,7 @@ dynamic _createSpecificObject(dynamic json, dynamic creator(Map<String, dynamic>
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => creator(e));
+    return json.map((e) => _createObject(e)).toList();
   } else if (json is Map) {
     Map<String, dynamic> map = {};
     for (dynamic key in json.keys) {
@@ -1031,6 +1031,11 @@ class Type extends Member {
         // Special case `_CpuProfile.functions`.
         gen.writeln("functions = new List<ProfileFunction>.from("
             "_createSpecificObject(json['functions'], ProfileFunction.parse));");
+      } else if (name == 'Script' && field.name == 'tokenPosTable') {
+        // Special case `Script.tokenPosTable`.
+        gen.writeln(
+            "tokenPosTable = new List<List<int>>.from(json['tokenPosTable'].map"
+            "((dynamic list) => new List<int>.from(list)));");
       } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;
         String ref = "json['${field.name}']";
@@ -1040,8 +1045,7 @@ class Type extends Member {
                 "new List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = $ref == null ? null : "
-                "new List<${fieldType
-                .listTypeArg}>.from(_createObject($ref));");
+                "new List<${fieldType.listTypeArg}>.from(_createObject($ref));");
           }
         } else {
           if (fieldType.isListTypeSimple) {
@@ -1049,8 +1053,7 @@ class Type extends Member {
                 "new List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = "
-                "new List<${fieldType
-                .listTypeArg}>.from(_createObject($ref));");
+                "new List<${fieldType.listTypeArg}>.from(_createObject($ref));");
           }
         }
       } else {
