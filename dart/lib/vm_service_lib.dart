@@ -29,7 +29,7 @@ Object _createObject(dynamic json) {
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => _createObject(e));
+    return json.map((e) => _createObject(e)).toList();
   } else if (json is Map) {
     String type = json['type'];
     if (_typeFactories[type] == null) {
@@ -48,7 +48,7 @@ dynamic _createSpecificObject(
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => creator(e));
+    return json.map((e) => _createObject(e)).toList();
   } else if (json is Map) {
     Map<String, dynamic> map = {};
     for (dynamic key in json.keys) {
@@ -3010,8 +3010,8 @@ class Script extends Obj {
     uri = json['uri'];
     library = _createObject(json['library']);
     source = json['source'];
-    tokenPosTable =
-        new List<List<int>>.from(_createObject(json['tokenPosTable']));
+    tokenPosTable = new List<List<int>>.from(
+        json['tokenPosTable'].map((dynamic list) => new List<int>.from(list)));
   }
 
   int get hashCode => id.hashCode;

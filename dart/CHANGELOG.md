@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.9+2
+- handle nulls for `Script.source`
+- fix a decoding issue for `Script.tokenPosTable`
+
 ## 0.3.9+1
 - rev to version `3.9` of the spec
 - expose `invoke`
