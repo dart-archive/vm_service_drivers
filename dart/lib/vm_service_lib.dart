@@ -13,7 +13,7 @@ import 'dart:async';
 import 'dart:convert' show base64, jsonDecode, jsonEncode, utf8;
 import 'dart:typed_data';
 
-const String vmServiceVersion = '3.9.0';
+const String vmServiceVersion = '3.12.0';
 
 /// @optional
 const String optional = 'optional';
@@ -105,6 +105,7 @@ Map<String, Function> _typeFactories = {
   'Sentinel': Sentinel.parse,
   '@Script': ScriptRef.parse,
   'Script': Script.parse,
+  'ScriptList': ScriptList.parse,
   'SourceLocation': SourceLocation.parse,
   'SourceReport': SourceReport.parse,
   'SourceReportCoverage': SourceReportCoverage.parse,
@@ -186,7 +187,7 @@ class VmService {
   // _Graph
   Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
 
-  // _Graph
+  // _Service
   Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
 
   // Listen for a specific event name.
@@ -390,6 +391,14 @@ class VmService {
   /// The return value can be one of [Isolate] or [Sentinel].
   Future<dynamic> getIsolate(String isolateId) {
     return _call('getIsolate', {'isolateId': isolateId});
+  }
+
+  /// The `getScripts` RPC is used to retrieve a `ScriptList` containing all
+  /// scripts for an isolate based on the isolate's `isolateId`.
+  ///
+  /// See [ScriptList].
+  Future<ScriptList> getScripts(String isolateId) {
+    return _call('getScripts', {'isolateId': isolateId});
   }
 
   /// The `getObject` RPC is used to lookup an `object` from some isolate by its
@@ -695,6 +704,13 @@ class VmService {
     if (gc != null) m['gc'] = gc;
     if (reset != null) m['reset'] = reset;
     return _call('_getAllocationProfile', m);
+  }
+
+  /// Returns a ServiceObject (a specialization of an ObjRef).
+  @undocumented
+  Future<ObjRef> getInstances(String isolateId, String classId, int limit) {
+    return _call('_getInstances',
+        {'isolateId': isolateId, 'classId': classId, 'limit': limit});
   }
 
   @undocumented
@@ -3021,6 +3037,21 @@ class Script extends Obj {
   String toString() => '[Script ' //
       'type: ${type}, id: ${id}, uri: ${uri}, library: ${library}, ' //
       'tokenPosTable: ${tokenPosTable}]';
+}
+
+class ScriptList extends Response {
+  static ScriptList parse(Map<String, dynamic> json) =>
+      json == null ? null : new ScriptList._fromJson(json);
+
+  List<ScriptRef> scripts;
+
+  ScriptList();
+
+  ScriptList._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    scripts = new List<ScriptRef>.from(_createObject(json['scripts']));
+  }
+
+  String toString() => '[ScriptList type: ${type}, scripts: ${scripts}]';
 }
 
 /// The `SourceLocation` class is used to designate a position or range in some
