@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.10
+- regenerate for `v3.12`
+- expose `isolate.getScripts()`
+- expose `isolate.getInstances()`
+
 ## 0.3.9+2
 - handle nulls for `Script.source`
 - fix a decoding issue for `Script.tokenPosTable`
