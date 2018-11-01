@@ -508,7 +508,7 @@ Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
 // _Graph
 Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
 
-// _Graph
+// _Service
 Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
 
 // Listen for a specific event name.

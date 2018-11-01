@@ -779,6 +779,13 @@ vms.Script assertScript(vms.Script obj) {
   return obj;
 }
 
+vms.ScriptList assertScriptList(vms.ScriptList obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertScriptRefs(obj.scripts);
+  return obj;
+}
+
 vms.SourceLocation assertSourceLocation(vms.SourceLocation obj) {
   assertNotNull(obj);
   assertString(obj.type);

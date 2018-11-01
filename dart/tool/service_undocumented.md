@@ -29,6 +29,19 @@ AllocationProfile _getAllocationProfile(
 
 Valid values for _gc_ are 'full'.
 
+
+### _getInstances
+
+```
+@Object _getInstances(
+  string isolateId,
+  string classId,
+  int limit
+)
+```
+
+Returns a ServiceObject (a specialization of an ObjRef).
+
 ### _clearCpuProfile
 
 ```
@@ -152,7 +165,7 @@ class HeapSpace extends Response {
     exclusiveCodeTrie: JSArray
     inclusiveCodeTrie: JSArray
     exclusiveFunctionTrie: JSArray
-    inclusiveFunctionTrie: JSArray     
+    inclusiveFunctionTrie: JSArray
   -->
 
 <!-- _getCpuProfileTimeline -->
