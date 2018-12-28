@@ -1,7 +1,10 @@
 language: dart
-sudo: false
 dart:
   - dev
+
+before_install:
+  - sudo apt-get install -y ant
+
 script:
   - (cd dart; ./tool/travis.sh)
   - (cd java; ant -f build.xml)
