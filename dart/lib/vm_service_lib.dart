@@ -48,7 +48,7 @@ dynamic _createSpecificObject(
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => _createObject(e)).toList();
+    return json.map((e) => creator(e)).toList();
   } else if (json is Map) {
     Map<String, dynamic> map = {};
     for (dynamic key in json.keys) {

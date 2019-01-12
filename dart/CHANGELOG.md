@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.10+1
+- fix an issue de-serializing some object types
+
 ## 0.3.10
 - regenerate for `v3.12`
 - expose `isolate.getScripts()`
