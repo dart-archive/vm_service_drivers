@@ -775,7 +775,6 @@ vms.Script assertScript(vms.Script obj) {
   assertString(obj.id);
   assertString(obj.uri);
   assertLibraryRef(obj.library);
-  // assert obj.tokenPosTable is List<List<int>>
   return obj;
 }
 
