@@ -2391,7 +2391,7 @@ class Script extends Object {
   string source [optional];
 
   // A table encoding a mapping from token position to line and column.
-  int[][] tokenPosTable;
+  int[][] tokenPosTable [optional];
 }
 ```
 

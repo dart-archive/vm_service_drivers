@@ -3018,6 +3018,7 @@ class Script extends Obj {
   String source;
 
   /// A table encoding a mapping from token position to line and column.
+  @optional
   List<List<int>> tokenPosTable;
 
   Script();
@@ -3034,9 +3035,8 @@ class Script extends Obj {
 
   operator ==(other) => other is Script && id == other.id;
 
-  String toString() => '[Script ' //
-      'type: ${type}, id: ${id}, uri: ${uri}, library: ${library}, ' //
-      'tokenPosTable: ${tokenPosTable}]';
+  String toString() =>
+      '[Script type: ${type}, id: ${id}, uri: ${uri}, library: ${library}]';
 }
 
 class ScriptList extends Response {
