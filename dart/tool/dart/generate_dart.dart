@@ -309,7 +309,7 @@ class Api extends Member with ApiParseUtil {
     // the pre following it is the definition
     // the optional p following that is the documentation
 
-    String h3Name = null;
+    String h3Name;
 
     for (int i = 0; i < nodes.length; i++) {
       Node node = nodes[i];

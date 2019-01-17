@@ -133,12 +133,12 @@ class Api extends Member with ApiParseUtil {
     for (var m in methods) {
       for (var a in m.args) {
         if (a.hasDocs) continue;
-        var t = types.firstWhere((t) => t.name == a.type, orElse: () => null);
+        var t = types.firstWhere((t) => t.name == a.name, orElse: () => null);
         if (t != null) {
           a.docs = t.docs;
           continue;
         }
-        var e = enums.firstWhere((e) => e.name == a.type, orElse: () => null);
+        var e = enums.firstWhere((e) => e.name == a.name, orElse: () => null);
         if (e != null) {
           a.docs = e.docs;
           continue;
@@ -278,14 +278,14 @@ class Api extends Member with ApiParseUtil {
     // the pre following it is the definition
     // the optional p following that is the documentation
 
-    String h3Name = null;
+    String h3Name;
 
     for (int i = 0; i < nodes.length; i++) {
       Node node = nodes[i];
 
       if (isPre(node) && h3Name != null) {
         String definition = textForCode(node);
-        String docs = null;
+        String docs;
 
         if (i + 1 < nodes.length && isPara(nodes[i + 1])) {
           Element p = nodes[++i];

@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:pedantic/pedantic.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
 
@@ -31,7 +32,7 @@ main(List<String> args) async {
 
   print('dart process started');
 
-  process.exitCode.then((code) => print('vm exited: ${code}'));
+  unawaited(process.exitCode.then((code) => print('vm exited: ${code}')));
   // ignore: strong_mode_down_cast_composite
   process.stdout.transform(utf8.decoder).listen(print);
   // ignore: strong_mode_down_cast_composite
@@ -52,9 +53,9 @@ main(List<String> args) async {
   serviceClient.onStdoutEvent.listen((e) => print('onStdoutEvent: ${e}'));
   serviceClient.onStderrEvent.listen((e) => print('onStderrEvent: ${e}'));
 
-  serviceClient.streamListen('Isolate');
-  serviceClient.streamListen('Debug');
-  serviceClient.streamListen('Stdout');
+  unawaited(serviceClient.streamListen('Isolate'));
+  unawaited(serviceClient.streamListen('Debug'));
+  unawaited(serviceClient.streamListen('Stdout'));
 
   VM vm = await serviceClient.getVM();
   print('hostCPU=${vm.hostCPU}');
@@ -105,5 +106,6 @@ Future testServiceRegistration() async {
 
 class StdoutLog extends Log {
   void warning(String message) => print(message);
+
   void severe(String message) => print(message);
 }

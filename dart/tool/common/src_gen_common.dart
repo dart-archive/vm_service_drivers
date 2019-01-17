@@ -87,7 +87,7 @@ String _simpleWrap(String str, [int col = 80]) {
     }
   }
 
-  if (str.length > 0) lines.add(str);
+  if (str.isNotEmpty) lines.add(str);
 
   return lines.join('\n');
 }

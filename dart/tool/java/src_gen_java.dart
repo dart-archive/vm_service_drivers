@@ -186,11 +186,11 @@ class TypeWriter {
       fieldDecl.writeln('   */');
     }
     fieldDecl.write('  ');
-    if (modifiers != null && modifiers.length > 0) {
+    if (modifiers != null && modifiers.isNotEmpty) {
       fieldDecl.write('$modifiers ');
     }
     fieldDecl.write('$typeName $name');
-    if (value != null && value.length > 0) {
+    if (value != null && value.isNotEmpty) {
       fieldDecl.write(' = $value');
     }
     fieldDecl.writeln(';');
