@@ -133,12 +133,14 @@ class Api extends Member with ApiParseUtil {
     for (var m in methods) {
       for (var a in m.args) {
         if (a.hasDocs) continue;
-        var t = types.firstWhere((t) => t.name == a.type, orElse: () => null);
+        var t = types.firstWhere((Type t) => t.name == a.type.name,
+            orElse: () => null);
         if (t != null) {
           a.docs = t.docs;
           continue;
         }
-        var e = enums.firstWhere((e) => e.name == a.type, orElse: () => null);
+        var e = enums.firstWhere((Enum e) => e.name == a.type.name,
+            orElse: () => null);
         if (e != null) {
           a.docs = e.docs;
           continue;

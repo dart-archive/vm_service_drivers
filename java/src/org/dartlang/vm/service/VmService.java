@@ -485,7 +485,8 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [resume] RPC is used to resume execution of a paused isolate.
-   * @param step This parameter is optional and may be null.
+   * @param step A [StepOption] indicates which form of stepping is requested in a resume RPC. This
+   * parameter is optional and may be null.
    * @param frameIndex This parameter is optional and may be null.
    */
   public void resume(String isolateId, StepOption step, Integer frameIndex, SuccessConsumer consumer) {
@@ -507,6 +508,8 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [setExceptionPauseMode] RPC is used to control if an isolate pauses when an exception is
+   * thrown.
+   * @param mode An [ExceptionPauseMode] indicates how the isolate pauses when an exception is
    * thrown.
    */
   public void setExceptionPauseMode(String isolateId, ExceptionPauseMode mode, SuccessConsumer consumer) {
