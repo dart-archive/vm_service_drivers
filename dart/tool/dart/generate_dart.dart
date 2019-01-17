@@ -72,7 +72,7 @@ final String _implCode = r'''
     } else if (args == null) {
       return _call(method, {'isolateId': isolateId});
     } else {
-      args = new Map.from(args);
+      args = Map.from(args);
       args['isolateId'] = isolateId;
       return _call(method, args);
     }
@@ -90,7 +90,7 @@ final String _implCode = r'''
 
   Future<T> _call<T>(String method, [Map args]) {
     String id = '${++_id}';
-    Completer<T> completer = new Completer<T>();
+    Completer<T> completer = Completer<T>();
     _completers[id] = completer;
     _methodCalls[id] = method;
     Map m = {'id': id, 'method': method};
@@ -104,7 +104,7 @@ final String _implCode = r'''
   /// Register a service for invocation.
   void registerServiceCallback(String service, ServiceCallback cb) {
     if (_services.containsKey(service)) {
-      throw new Exception('Service \'${service}\' already registered');
+      throw Exception('Service \'${service}\' already registered');
     }
     _services[service] = cb;
   }
@@ -115,8 +115,8 @@ final String _implCode = r'''
     if (message is String) {
       _processMessageStr(message);
     } else if (message is List<int>) {
-      Uint8List list = new Uint8List.fromList(message);
-      _processMessageByteData(new ByteData.view(list.buffer));
+      Uint8List list = Uint8List.fromList(message);
+      _processMessageByteData(ByteData.view(list.buffer));
     } else if (message is ByteData) {
       _processMessageByteData(message);
     } else {
@@ -128,10 +128,10 @@ final String _implCode = r'''
     int offset = 0;
     int metaSize = bytes.getUint32(offset + 4, Endian.big);
     offset += 8;
-    String meta = utf8.decode(new Uint8List.view(
+    String meta = utf8.decode(Uint8List.view(
         bytes.buffer, bytes.offsetInBytes + offset, metaSize));
     offset += metaSize;
-    ByteData data = new ByteData.view(bytes.buffer, bytes.offsetInBytes + offset,
+    ByteData data = ByteData.view(bytes.buffer, bytes.offsetInBytes + offset,
         bytes.lengthInBytes - offset);
     dynamic map = jsonDecode(meta);
     if (map != null && map['method'] == 'streamNotify') {
@@ -229,11 +229,11 @@ final String _implCode = r'''
 ''';
 
 final String _rpcError = r'''
-typedef Future DisposeHandler();
+typedef DisposeHandler = Future Function();
 
 class RPCError {
   static RPCError parse(String callingMethod, dynamic json) {
-    return new RPCError(callingMethod, json['code'], json['message'], json['data']);
+    return RPCError(callingMethod, json['code'], json['message'], json['data']);
   }
 
   final String callingMethod;
@@ -257,7 +257,7 @@ class RPCError {
 /// An `ExtensionData` is an arbitrary map that can have any contents.
 class ExtensionData {
   static ExtensionData parse(Map json) =>
-      json == null ? null : new ExtensionData._fromJson(json);
+      json == null ? null : ExtensionData._fromJson(json);
 
   final Map data;
 
@@ -400,7 +400,7 @@ const String undocumented = 'undocumented';
 
 /// Decode a string in Base64 encoding into the equivalent non-encoded string.
 /// This is useful for handling the results of the Stdout or Stderr events.
-String decodeBase64(String str) => new String.fromCharCodes(base64.decode(str));
+String decodeBase64(String str) => String.fromCharCodes(base64.decode(str));
 
 Object _createObject(dynamic json) {
   if (json == null) return null;
@@ -437,7 +437,7 @@ dynamic _createSpecificObject(dynamic json, dynamic creator(Map<String, dynamic>
   }
 }
 
-typedef Future<Map<String, dynamic>> ServiceCallback(Map<String, dynamic> params);
+typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, dynamic> params);
 
 ''');
     gen.writeln();
@@ -457,15 +457,15 @@ typedef Future<Map<String, dynamic>> ServiceCallback(Map<String, dynamic> params
     gen.writeStatement('Log _log;');
     gen.write('''
 
-StreamController<String> _onSend = new StreamController.broadcast(sync: true);
-StreamController<String> _onReceive = new StreamController.broadcast(sync: true);
+StreamController<String> _onSend = StreamController.broadcast(sync: true);
+StreamController<String> _onReceive = StreamController.broadcast(sync: true);
 
 Map<String, StreamController<Event>> _eventControllers = {};
 
 StreamController<Event> _getEventController(String eventName) {
   StreamController<Event> controller = _eventControllers[eventName];
   if (controller == null) {
-    controller = new StreamController.broadcast();
+    controller = StreamController.broadcast();
     _eventControllers[eventName] = controller;
   }
   return controller;
@@ -479,7 +479,7 @@ VmService(Stream<dynamic> /*String|List<int>*/ inStream, void writeMessage(Strin
 }) {
   _streamSub = inStream.listen(_processMessage);
   _writeMessage = writeMessage;
-  _log = log == null ? new _NullLog() : log;
+  _log = log == null ? _NullLog() : log;
   _disposeHandler = disposeHandler;
 }
 
@@ -600,7 +600,7 @@ List<String> assertStrings(List<String> list) {
 
 String assertString(String obj) {
   assertNotNull(obj);
-  if (obj.length == 0) throw 'expected non-zero length string';
+  if (obj.isEmpty) throw 'expected non-zero length string';
   return obj;
 }
 
@@ -979,7 +979,7 @@ class Type extends Member {
     if (superName != null) gen.write('extends ${superName} ');
     gen.writeln('{');
     gen.writeln('static ${publicName} parse(Map<String, dynamic> json) => '
-        'json == null ? null : new ${publicName}._fromJson(json);');
+        'json == null ? null : ${publicName}._fromJson(json);');
     gen.writeln();
 
     if (name == 'Response') {
@@ -1021,39 +1021,39 @@ class Type extends Member {
       } else if (name == 'Instance' && field.name == 'associations') {
         // Special case `Instance.associations`.
         gen.writeln("associations = json['associations'] == null "
-            "? null : new List<MapAssociation>.from("
+            "? null : List<MapAssociation>.from("
             "_createSpecificObject(json['associations'], MapAssociation.parse));");
       } else if (name == '_CpuProfile' && field.name == 'codes') {
         // Special case `_CpuProfile.codes`.
-        gen.writeln("codes = new List<CodeRegion>.from("
+        gen.writeln("codes = List<CodeRegion>.from("
             "_createSpecificObject(json['codes'], CodeRegion.parse));");
       } else if (name == '_CpuProfile' && field.name == 'functions') {
         // Special case `_CpuProfile.functions`.
-        gen.writeln("functions = new List<ProfileFunction>.from("
+        gen.writeln("functions = List<ProfileFunction>.from("
             "_createSpecificObject(json['functions'], ProfileFunction.parse));");
       } else if (name == 'Script' && field.name == 'tokenPosTable') {
         // Special case `Script.tokenPosTable`.
         gen.writeln(
-            "tokenPosTable = new List<List<int>>.from(json['tokenPosTable'].map"
-            "((dynamic list) => new List<int>.from(list)));");
+            "tokenPosTable = List<List<int>>.from(json['tokenPosTable'].map"
+            "((dynamic list) => List<int>.from(list)));");
       } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;
         String ref = "json['${field.name}']";
         if (field.optional) {
           if (fieldType.isListTypeSimple) {
             gen.writeln("${field.generatableName} = $ref == null ? null : "
-                "new List<${fieldType.listTypeArg}>.from($ref);");
+                "List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = $ref == null ? null : "
-                "new List<${fieldType.listTypeArg}>.from(_createObject($ref));");
+                "List<${fieldType.listTypeArg}>.from(_createObject($ref));");
           }
         } else {
           if (fieldType.isListTypeSimple) {
             gen.writeln("${field.generatableName} = "
-                "new List<${fieldType.listTypeArg}>.from($ref);");
+                "List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = "
-                "new List<${fieldType.listTypeArg}>.from(_createObject($ref));");
+                "List<${fieldType.listTypeArg}>.from(_createObject($ref));");
           }
         }
       } else {
