@@ -1,3 +1,7 @@
 linter:
   rules:
     - directives_ordering
+    - prefer_generic_function_type_aliases
+    - slash_for_doc_comments
+    - unnecessary_const
+    - unnecessary_new

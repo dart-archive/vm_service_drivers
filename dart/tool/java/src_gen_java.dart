@@ -34,8 +34,8 @@ String pkgNameFor(String typeName) {
   return index > 0 ? typeName.substring(0, index) : '';
 }
 
-typedef WriteStatements(StatementWriter writer);
-typedef WriteType(TypeWriter writer);
+typedef WriteStatements = Function(StatementWriter writer);
+typedef WriteType = Function(TypeWriter writer);
 
 /// [JavaGenerator] generates java source files, one per Java type.
 /// Typical usage:
@@ -54,13 +54,13 @@ class JavaGenerator {
 
   /// Generate a Java class/interface in the given package
   void writeType(String typeName, WriteType write) {
-    var classWriter = new TypeWriter(typeName);
+    var classWriter = TypeWriter(typeName);
     write(classWriter);
     var pkgDirPath = join(srcDirPath, joinAll(pkgNameFor(typeName).split('.')));
-    var pkgDir = new Directory(pkgDirPath);
+    var pkgDir = Directory(pkgDirPath);
     if (!pkgDir.existsSync()) pkgDir.createSync(recursive: true);
     var classFilePath = join(pkgDirPath, '${classNameFor(typeName)}.java');
-    var classFile = new File(classFilePath);
+    var classFile = File(classFilePath);
     classFile.writeAsStringSync(classWriter.toSource());
   }
 }
@@ -74,7 +74,7 @@ class JavaMethodArg {
 
 class StatementWriter {
   final TypeWriter typeWriter;
-  final StringBuffer _content = new StringBuffer();
+  final StringBuffer _content = StringBuffer();
 
   StatementWriter(this.typeWriter);
 
@@ -112,12 +112,12 @@ class TypeWriter {
   bool isEnum = false;
   String javadoc;
   String modifiers = 'public';
-  final Set<String> _imports = new Set<String>();
+  final Set<String> _imports = Set<String>();
   String superclassName;
   List<String> interfaceNames = <String>[];
-  final StringBuffer _content = new StringBuffer();
+  final StringBuffer _content = StringBuffer();
   final List<String> _fields = <String>[];
-  final Map<String, String> _methods = new Map<String, String>();
+  final Map<String, String> _methods = Map<String, String>();
 
   TypeWriter(String typeName)
       : this.pkgName = pkgNameFor(typeName),
@@ -130,7 +130,7 @@ class TypeWriter {
   }
 
   void addConstructor(Iterable<JavaMethodArg> args, WriteStatements write,
-      {String javadoc, String modifiers: 'public'}) {
+      {String javadoc, String modifiers = 'public'}) {
     _content.writeln();
     if (javadoc != null && javadoc.isNotEmpty) {
       _content.writeln('  /**');
@@ -145,7 +145,7 @@ class TypeWriter {
     _content.write(')');
     if (write != null) {
       _content.writeln(' {');
-      StatementWriter writer = new StatementWriter(this);
+      StatementWriter writer = StatementWriter(this);
       write(writer);
       _content.write(writer.toSource());
       _content.writeln('  }');
@@ -157,7 +157,7 @@ class TypeWriter {
   void addEnumValue(
     String name, {
     String javadoc,
-    bool isLast: false,
+    bool isLast = false,
   }) {
     _content.writeln();
     if (javadoc != null && javadoc.isNotEmpty) {
@@ -176,8 +176,8 @@ class TypeWriter {
   }
 
   void addField(String name, String typeName,
-      {String modifiers: 'public', String value, String javadoc}) {
-    var fieldDecl = new StringBuffer();
+      {String modifiers = 'public', String value, String javadoc}) {
+    var fieldDecl = StringBuffer();
     if (javadoc != null && javadoc.isNotEmpty) {
       fieldDecl.writeln('  /**');
       wrap(javadoc.trim(), colBoundary - 6)
@@ -210,11 +210,11 @@ class TypeWriter {
     Iterable<JavaMethodArg> args,
     WriteStatements write, {
     String javadoc,
-    String modifiers: 'public',
-    String returnType: 'void',
-    bool isOverride: false,
+    String modifiers = 'public',
+    String returnType = 'void',
+    bool isOverride = false,
   }) {
-    var methodDecl = new StringBuffer();
+    var methodDecl = StringBuffer();
     if (javadoc != null && javadoc.isNotEmpty) {
       methodDecl.writeln('  /**');
       wrap(javadoc.trim(), colBoundary - 6)
@@ -236,7 +236,7 @@ class TypeWriter {
     methodDecl.write(')');
     if (write != null) {
       methodDecl.writeln(' {');
-      StatementWriter writer = new StatementWriter(this);
+      StatementWriter writer = StatementWriter(this);
       write(writer);
       methodDecl.write(writer.toSource());
       methodDecl.writeln('  }');
@@ -251,7 +251,7 @@ class TypeWriter {
   }
 
   String toSource() {
-    var buffer = new StringBuffer();
+    var buffer = StringBuffer();
     if (fileHeader != null) buffer.write(fileHeader);
     if (pkgName != null) {
       buffer.writeln('package $pkgName;');
@@ -281,9 +281,8 @@ class TypeWriter {
     }
     if (interfaceNames.isNotEmpty) {
       var classNames = interfaceNames.map((t) => classNameFor(t));
-      buffer
-          .write(' ${isInterface ? 'extends' : 'implements'} ${classNames.join(
-          ', ')}');
+      buffer.write(
+          ' ${isInterface ? 'extends' : 'implements'} ${classNames.join(', ')}');
     }
     buffer.writeln(' {');
     buffer.write(_content.toString());

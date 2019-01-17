@@ -355,11 +355,11 @@ class Api extends Member with ApiParseUtil {
     if (docs != null) docs = docs.trim();
 
     if (definition.startsWith('class ')) {
-      types.add(new Type(this, name, definition, docs));
+      types.add(Type(this, name, definition, docs));
     } else if (name.substring(0, 1).toLowerCase() == name.substring(0, 1)) {
-      methods.add(new Method(name, definition, docs));
+      methods.add(Method(name, definition, docs));
     } else if (definition.startsWith('enum ')) {
-      enums.add(new Enum(name, definition, docs));
+      enums.add(Enum(name, definition, docs));
     } else {
       throw 'unexpected entity: ${name}, ${definition}';
     }
@@ -532,7 +532,7 @@ Stream<Event> onEvent(String streamName) => _getEventController(streamName).stre
     final Map<String, Type> map = <String, Type>{};
     for (Type t in types) {
       if (map.containsKey(t.name)) {
-        map[t.name] = new Type.merge(map[t.name], t);
+        map[t.name] = Type.merge(map[t.name], t);
       } else {
         map[t.name] = t;
       }
@@ -544,7 +544,7 @@ Stream<Event> onEvent(String streamName) => _getEventController(streamName).stre
     final Map<String, Enum> map = <String, Enum>{};
     for (Enum e in enums) {
       if (map.containsKey(e.name)) {
-        map[e.name] = new Enum.merge(map[e.name], e);
+        map[e.name] = Enum.merge(map[e.name], e);
       } else {
         map[e.name] = e;
       }
@@ -708,11 +708,11 @@ class Method extends Member {
   final String name;
   final String docs;
 
-  MemberType returnType = new MemberType();
+  MemberType returnType = MemberType();
   List<MethodArg> args = [];
 
   Method(this.name, String definition, [this.docs]) {
-    _parse(new Tokenizer(definition).tokenize());
+    _parse(Tokenizer(definition).tokenize());
   }
 
   bool get hasArgs => args.isNotEmpty;
@@ -778,7 +778,7 @@ class Method extends Member {
   }
 
   void _parse(Token token) {
-    new MethodParser(token).parseInto(this);
+    MethodParser(token).parseInto(this);
   }
 }
 
@@ -799,7 +799,7 @@ class MemberType extends Member {
           parser.advance();
         }
         parser.consume(')');
-        TypeRef ref = new TypeRef('dynamic');
+        TypeRef ref = TypeRef('dynamic');
         while (parser.consume('[')) {
           parser.expect(']');
           ref.arrayDepth++;
@@ -807,7 +807,7 @@ class MemberType extends Member {
         types.add(ref);
       } else {
         Token t = parser.expectName();
-        TypeRef ref = new TypeRef(_coerceRefType(t.text));
+        TypeRef ref = TypeRef(_coerceRefType(t.text));
         while (parser.consume('[')) {
           parser.expect(']');
           ref.arrayDepth++;
@@ -906,7 +906,7 @@ class Type extends Member {
   List<TypeField> fields = [];
 
   Type(this.parent, String categoryName, String definition, [this.docs]) {
-    _parse(new Tokenizer(definition).tokenize());
+    _parse(Tokenizer(definition).tokenize());
   }
 
   Type._(this.parent, this.rawName, this.name, this.superName, this.docs);
@@ -928,7 +928,7 @@ class Type extends Member {
 
     final fields = map.values.toList().reversed.toList();
 
-    return new Type._(parent, rawName, name, superName, docs)..fields = fields;
+    return Type._(parent, rawName, name, superName, docs)..fields = fields;
   }
 
   bool get isResponse {
@@ -1158,7 +1158,7 @@ class Type extends Member {
   }
 
   void _parse(Token token) {
-    new TypeParser(token).parseInto(this);
+    TypeParser(token).parseInto(this);
   }
 
   void removeDuplicateFieldDefs() {
@@ -1191,7 +1191,7 @@ class TypeField extends Member {
 
   final Type parent;
   final String _docs;
-  MemberType type = new MemberType();
+  MemberType type = MemberType();
   String name;
   bool optional = false;
   String defaultValue;
@@ -1229,7 +1229,7 @@ class Enum extends Member {
   List<EnumValue> enums = [];
 
   Enum(this.name, String definition, [this.docs]) {
-    _parse(new Tokenizer(definition).tokenize());
+    _parse(Tokenizer(definition).tokenize());
   }
 
   Enum._(this.name, this.docs);
@@ -1248,7 +1248,7 @@ class Enum extends Member {
 
     final enums = map.values.toList().reversed.toList();
 
-    return new Enum._(name, docs)..enums = enums;
+    return Enum._(name, docs)..enums = enums;
   }
 
   String get prefix =>
@@ -1277,7 +1277,7 @@ class Enum extends Member {
   }
 
   void _parse(Token token) {
-    new EnumParser(token).parseInto(this);
+    EnumParser(token).parseInto(this);
   }
 }
 
@@ -1298,12 +1298,12 @@ class EnumValue extends Member {
 
 class TextOutputVisitor implements NodeVisitor {
   static String printText(Node node) {
-    TextOutputVisitor visitor = new TextOutputVisitor();
+    TextOutputVisitor visitor = TextOutputVisitor();
     node.accept(visitor);
     return visitor.toString();
   }
 
-  StringBuffer buf = new StringBuffer();
+  StringBuffer buf = StringBuffer();
   bool _em = false;
   bool _href = false;
   bool _blockquote = false;
@@ -1382,7 +1382,7 @@ class MethodParser extends Parser {
 
     while (peek().text != ')') {
       Token type = expectName();
-      TypeRef ref = new TypeRef(_coerceRefType(type.text));
+      TypeRef ref = TypeRef(_coerceRefType(type.text));
       if (peek().text == '[') {
         while (consume('[')) {
           expect(']');
@@ -1394,15 +1394,14 @@ class MethodParser extends Parser {
         ref.genericTypes = [];
         while (peek().text != '>') {
           Token genericTypeName = expectName();
-          ref.genericTypes
-              .add(new TypeRef(_coerceRefType(genericTypeName.text)));
+          ref.genericTypes.add(TypeRef(_coerceRefType(genericTypeName.text)));
           consume(',');
         }
         expect('>');
       }
 
       Token name = expectName();
-      MethodArg arg = new MethodArg(method, ref, name.text);
+      MethodArg arg = MethodArg(method, ref, name.text);
       if (consume('[')) {
         expect('optional');
         expect(']');
@@ -1443,7 +1442,7 @@ class TypeParser extends Parser {
     expect('{');
 
     while (peek().text != '}') {
-      TypeField field = new TypeField(type, collectComments());
+      TypeField field = TypeField(type, collectComments());
       field.type.parse(this);
       field.name = expectName().text;
       if (consume('[')) {
@@ -1477,7 +1476,7 @@ class EnumParser extends Parser {
       t = expectName();
       consume(',');
 
-      e.enums.add(new EnumValue(e, t.text, docs));
+      e.enums.add(EnumValue(e, t.text, docs));
     }
   }
 }

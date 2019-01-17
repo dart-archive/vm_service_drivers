@@ -16,7 +16,7 @@ export 'src_gen_java.dart' show JavaGenerator;
 
 const String servicePackage = 'org.dartlang.vm.service';
 
-const List<String> simpleTypes = const [
+const List<String> simpleTypes = [
   'BigDecimal',
   'boolean',
   'int',
@@ -56,7 +56,7 @@ Api api;
 /// from spec style of [className] to javadoc style {@link className}
 String convertDocLinks(String doc) {
   if (doc == null) return null;
-  var sb = new StringBuffer();
+  var sb = StringBuffer();
   int start = 0;
   int end = doc.indexOf('[');
   while (end != -1) {
@@ -114,10 +114,10 @@ class Api extends Member with ApiParseUtil {
         return;
       }
     }
-    var f = new TypeField(t, javadoc);
+    var f = TypeField(t, javadoc);
     f.name = propertyName;
-    f.type = new MemberType();
-    f.type.types = [new TypeRef('String')];
+    f.type = MemberType();
+    f.type.types = [TypeRef('String')];
     t.fields.add(f);
     print('added $propertyName field to $typeName');
   }
@@ -184,11 +184,11 @@ class Api extends Member with ApiParseUtil {
       }
 
       writer.addMethod('forwardResponse', [
-        new JavaMethodArg('consumer', 'Consumer'),
-        new JavaMethodArg('responseType', 'String'),
-        new JavaMethodArg('json', 'JsonObject')
+        JavaMethodArg('consumer', 'Consumer'),
+        JavaMethodArg('responseType', 'String'),
+        JavaMethodArg('json', 'JsonObject')
       ], (StatementWriter writer) {
-        var generatedForwards = new Set<String>();
+        var generatedForwards = Set<String>();
 
         var sorted = methods.toList()
           ..sort((m1, m2) {
@@ -208,7 +208,7 @@ class Api extends Member with ApiParseUtil {
       }, modifiers: null, isOverride: true);
 
       writer.addMethod("convertMapToJsonObject", [
-        new JavaMethodArg('map', 'Map<String, String>')
+        JavaMethodArg('map', 'Map<String, String>')
       ], (StatementWriter writer) {
         writer.addLine('JsonObject obj = new JsonObject();');
         writer.addLine('for (String key : map.keySet()) {');
@@ -218,7 +218,7 @@ class Api extends Member with ApiParseUtil {
       }, modifiers: "private", returnType: "JsonObject");
 
       writer.addMethod(
-          "convertIterableToJsonArray", [new JavaMethodArg('list', 'Iterable')],
+          "convertIterableToJsonArray", [JavaMethodArg('list', 'Iterable')],
           (StatementWriter writer) {
         writer.addLine('JsonArray arr = new JsonArray();');
         writer.addLine('for (Object element : list) {');
@@ -243,7 +243,7 @@ class Api extends Member with ApiParseUtil {
     final Map<String, Type> map = <String, Type>{};
     for (Type t in types) {
       if (map.containsKey(t.name)) {
-        map[t.name] = new Type.merge(map[t.name], t);
+        map[t.name] = Type.merge(map[t.name], t);
       } else {
         map[t.name] = t;
       }
@@ -255,7 +255,7 @@ class Api extends Member with ApiParseUtil {
     final Map<String, Enum> map = <String, Enum>{};
     for (Enum e in enums) {
       if (map.containsKey(e.name)) {
-        map[e.name] = new Enum.merge(map[e.name], e);
+        map[e.name] = Enum.merge(map[e.name], e);
       } else {
         map[e.name] = e;
       }
@@ -333,11 +333,11 @@ class Api extends Member with ApiParseUtil {
     if (docs != null) docs = docs.trim();
 
     if (definition.startsWith('class ')) {
-      types.add(new Type(this, name, definition, docs));
+      types.add(Type(this, name, definition, docs));
     } else if (name.substring(0, 1).toLowerCase() == name.substring(0, 1)) {
-      methods.add(new Method(name, definition, docs));
+      methods.add(Method(name, definition, docs));
     } else if (definition.startsWith('enum ')) {
-      enums.add(new Enum(name, definition, docs));
+      enums.add(Enum(name, definition, docs));
     } else {
       throw 'unexpected entity: ${name}, ${definition}';
     }
@@ -349,8 +349,8 @@ class Api extends Member with ApiParseUtil {
       if (line.startsWith('---')) continue;
       var index = line.indexOf('|');
       var streamId = line.substring(0, index).trim();
-      List<String> eventTypes = new List.from(
-          line.substring(index + 1).split(',').map((t) => t.trim()));
+      List<String> eventTypes =
+          List.from(line.substring(index + 1).split(',').map((t) => t.trim()));
       eventTypes.sort();
       streamIdMap[streamId] = eventTypes;
     }
@@ -392,7 +392,7 @@ class Enum extends Member {
   List<EnumValue> enums = [];
 
   Enum(this.name, String definition, [this.docs]) {
-    _parse(new Tokenizer(definition).tokenize());
+    _parse(Tokenizer(definition).tokenize());
   }
 
   Enum._(this.name, this.docs);
@@ -409,7 +409,7 @@ class Enum extends Member {
       enums[e.name] = e;
     }
 
-    return new Enum._(name, docs)..enums = enums.values.toList();
+    return Enum._(name, docs)..enums = enums.values.toList();
   }
 
   String get elementTypeName => '$servicePackage.element.$name';
@@ -430,7 +430,7 @@ class Enum extends Member {
   }
 
   void _parse(Token token) {
-    new EnumParser(token).parseInto(this);
+    EnumParser(token).parseInto(this);
   }
 }
 
@@ -452,7 +452,7 @@ class EnumParser extends Parser {
       t = expectName();
       consume(',');
 
-      e.enums.add(new EnumValue(e, t.text, docs));
+      e.enums.add(EnumValue(e, t.text, docs));
     }
   }
 }
@@ -516,7 +516,7 @@ class MemberType extends Member {
       parser.consume('(');
       Token t = parser.expectName();
       if (parser.consume(')')) isMulti = true;
-      TypeRef ref = new TypeRef(_coerceRefType(t.text));
+      TypeRef ref = TypeRef(_coerceRefType(t.text));
       types.add(ref);
 
       while (parser.consume('[')) {
@@ -537,11 +537,11 @@ class Method extends Member {
   final String name;
   final String docs;
 
-  MemberType returnType = new MemberType();
+  MemberType returnType = MemberType();
   List<MethodArg> args = [];
 
   Method(this.name, String definition, [this.docs]) {
-    _parse(new Tokenizer(definition).tokenize());
+    _parse(Tokenizer(definition).tokenize());
   }
 
   bool get isUndocumented => name.startsWith('_');
@@ -569,8 +569,8 @@ class Method extends Member {
       writer.isInterface = true;
       for (var t in returnType.types) {
         writer.addImport(t.elementTypeName);
-        writer.addMethod("received",
-            [new JavaMethodArg('response', t.elementTypeName)], null);
+        writer.addMethod(
+            "received", [JavaMethodArg('response', t.elementTypeName)], null);
       }
     });
   }
@@ -578,7 +578,7 @@ class Method extends Member {
   void generateVmServiceForward(StatementWriter writer) {
     var consumerName = classNameFor(consumerTypeName);
     writer.addLine('if (consumer instanceof $consumerName) {');
-    List<Type> types = new List.from(returnType.types.map((ref) => ref.type));
+    List<Type> types = List.from(returnType.types.map((ref) => ref.type));
     for (int index = 0; index < types.length; ++index) {
       types.addAll(types[index].subtypes);
     }
@@ -594,7 +594,7 @@ class Method extends Member {
     writer.addLine('}');
   }
 
-  void generateVmServiceMethod(TypeWriter writer, {includeOptional: false}) {
+  void generateVmServiceMethod(TypeWriter writer, {includeOptional = false}) {
     // TODO(danrubel) move this to the Consumer's javadoc
 //    String javadoc = docs == null ? '' : docs;
 //    if (returnType.isMultipleReturns) {
@@ -604,7 +604,7 @@ class Method extends Member {
 //    }
 
     // Update method docs
-    var javadoc = new StringBuffer(docs == null ? '' : docs);
+    var javadoc = StringBuffer(docs == null ? '' : docs);
     bool firstParamDoc = true;
     if (isUndocumented) {
       if (docs != null) {
@@ -615,7 +615,7 @@ class Method extends Member {
     }
     for (var a in args) {
       if (!includeOptional && a.optional) continue;
-      var paramDoc = new StringBuffer(a.docs ?? '');
+      var paramDoc = StringBuffer(a.docs ?? '');
       if (paramDoc.isEmpty) {}
       if (a.optional) {
         if (paramDoc.isNotEmpty) paramDoc.write(' ');
@@ -640,9 +640,9 @@ class Method extends Member {
     }
 
     List<JavaMethodArg> javaMethodArgs =
-        new List.from(mthArgs.map((a) => a.asJavaMethodArg));
+        List.from(mthArgs.map((a) => a.asJavaMethodArg));
     javaMethodArgs
-        .add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
+        .add(JavaMethodArg('consumer', classNameFor(consumerTypeName)));
     writer.addMethod(publicName, javaMethodArgs, (StatementWriter writer) {
       writer.addLine('JsonObject params = new JsonObject();');
       for (MethodArg arg in args) {
@@ -666,7 +666,7 @@ class Method extends Member {
   }
 
   void _parse(Token token) {
-    new MethodParser(token).parseInto(this);
+    MethodParser(token).parseInto(this);
   }
 }
 
@@ -681,15 +681,15 @@ class MethodArg extends Member {
 
   get asJavaMethodArg {
     if (optional && type.ref == 'int') {
-      return new JavaMethodArg(name, 'Integer');
+      return JavaMethodArg(name, 'Integer');
     }
     if (optional && type.ref == 'double') {
-      return new JavaMethodArg(name, 'Double');
+      return JavaMethodArg(name, 'Double');
     }
     if (optional && type.ref == 'boolean') {
-      return new JavaMethodArg(name, 'Boolean');
+      return JavaMethodArg(name, 'Boolean');
     }
-    return new JavaMethodArg(name, type.ref);
+    return JavaMethodArg(name, type.ref);
   }
 
   /// TODO: Hacked enum arg type determination
@@ -713,7 +713,7 @@ class MethodParser extends Parser {
 
     while (peek().text != ')') {
       Token type = expectName();
-      TypeRef ref = new TypeRef(_coerceRefType(type.text));
+      TypeRef ref = TypeRef(_coerceRefType(type.text));
       if (peek().text == '[') {
         while (consume('[')) {
           expect(']');
@@ -725,14 +725,13 @@ class MethodParser extends Parser {
         ref.genericTypes = [];
         while (peek().text != '>') {
           Token genericTypeName = expectName();
-          ref.genericTypes
-              .add(new TypeRef(_coerceRefType(genericTypeName.text)));
+          ref.genericTypes.add(TypeRef(_coerceRefType(genericTypeName.text)));
           consume(',');
         }
         expect('>');
       }
       Token name = expectName();
-      MethodArg arg = new MethodArg(method, ref, name.text);
+      MethodArg arg = MethodArg(method, ref, name.text);
       if (consume('[')) {
         expect('optional');
         expect(']');
@@ -747,7 +746,7 @@ class MethodParser extends Parser {
 }
 
 class TextOutputVisitor implements NodeVisitor {
-  StringBuffer buf = new StringBuffer();
+  StringBuffer buf = StringBuffer();
 
   bool _inRef = false;
 
@@ -787,7 +786,7 @@ class TextOutputVisitor implements NodeVisitor {
   }
 
   static String printText(Node node) {
-    TextOutputVisitor visitor = new TextOutputVisitor();
+    TextOutputVisitor visitor = TextOutputVisitor();
     node.accept(visitor);
     return visitor.toString();
   }
@@ -802,7 +801,7 @@ class Type extends Member {
   List<TypeField> fields = [];
 
   Type(this.parent, String categoryName, String definition, [this.docs]) {
-    _parse(new Tokenizer(definition).tokenize());
+    _parse(Tokenizer(definition).tokenize());
   }
 
   Type._(this.parent, this.rawName, this.name, this.superName, this.docs);
@@ -822,7 +821,7 @@ class Type extends Member {
       fields[f.name] = f;
     }
 
-    return new Type._(parent, rawName, name, superName, docs)
+    return Type._(parent, rawName, name, superName, docs)
       ..fields = fields.values.toList();
   }
 
@@ -862,9 +861,9 @@ class Type extends Member {
       writer.addImport('com.google.gson.JsonObject');
       writer.javadoc = convertDocLinks(docs);
       writer.superclassName = superName ?? 'Element';
-      writer.addConstructor(<JavaMethodArg>[
-        new JavaMethodArg('json', 'com.google.gson.JsonObject')
-      ], (StatementWriter writer) {
+      writer.addConstructor(
+          <JavaMethodArg>[JavaMethodArg('json', 'com.google.gson.JsonObject')],
+          (StatementWriter writer) {
         writer.addLine('super(json);');
       });
 
@@ -892,7 +891,7 @@ class Type extends Member {
   Type getSuper() => superName == null ? null : api.getType(superName);
 
   void _parse(Token token) {
-    new TypeParser(token).parseInto(this);
+    TypeParser(token).parseInto(this);
   }
 }
 
@@ -912,7 +911,7 @@ class TypeField extends Member {
 
   final Type parent;
   final String _docs;
-  MemberType type = new MemberType();
+  MemberType type = MemberType();
   String name;
   bool optional = false;
   String defaultValue;
@@ -996,7 +995,7 @@ class TypeParser extends Parser {
     expect('{');
 
     while (peek().text != '}') {
-      TypeField field = new TypeField(type, collectComments());
+      TypeField field = TypeField(type, collectComments());
       field.type.parse(this);
       field.name = expectName().text;
       if (consume('[')) {
@@ -1058,7 +1057,9 @@ class TypeRef {
   Type get type => api.types.firstWhere((t) => t.name == name);
 
   void generateAccessStatements(StatementWriter writer, String propertyName,
-      {bool canBeSentinel: false, String defaultValue, bool optional: false}) {
+      {bool canBeSentinel = false,
+      String defaultValue,
+      bool optional = false}) {
     if (name == 'boolean') {
       if (isArray) {
         print('skipped accessor body for $propertyName');

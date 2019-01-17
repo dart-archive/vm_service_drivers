@@ -7,28 +7,24 @@ library src_gen_dart;
 
 import '../common/src_gen_common.dart';
 
-/**
- * A class used to generate Dart source code. This class facilitates writing out
- * dartdoc comments, automatically manages indent by counting curly braces, and
- * automatically wraps doc comments on 80 char column boundaries.
- */
+/// A class used to generate Dart source code. This class facilitates writing out
+/// dartdoc comments, automatically manages indent by counting curly braces, and
+/// automatically wraps doc comments on 80 char column boundaries.
 class DartGenerator {
   static const DEFAULT_COLUMN_BOUNDARY = 80;
 
   final int colBoundary;
 
   String _indent = "";
-  final StringBuffer _buf = new StringBuffer();
+  final StringBuffer _buf = StringBuffer();
 
   bool _previousWasEol = false;
 
-  DartGenerator({this.colBoundary: DEFAULT_COLUMN_BOUNDARY});
+  DartGenerator({this.colBoundary = DEFAULT_COLUMN_BOUNDARY});
 
-  /**
-   * Write out the given dartdoc text, wrapping lines as necessary to flow
-   * along the column boundary. If [preferSingle] is true, and the docs would
-   * fit on a single line, use `///` dartdoc style.
-   */
+  /// Write out the given dartdoc text, wrapping lines as necessary to flow
+  /// along the column boundary. If [preferSingle] is true, and the docs would
+  /// fit on a single line, use `///` dartdoc style.
   void writeDocs(String docs) {
     if (docs == null) return;
 
@@ -47,11 +43,9 @@ class DartGenerator {
     // }
   }
 
-  /**
-   * Write out the given Dart statement and terminate it with an eol. If the
-   * statement will overflow the column boundary, attempt to wrap it at
-   * reasonable places.
-   */
+  /// Write out the given Dart statement and terminate it with an eol. If the
+  /// statement will overflow the column boundary, attempt to wrap it at
+  /// reasonable places.
   void writeStatement(String str) {
     if (_indent.length + str.length > colBoundary) {
       // Split the line on the first '('. Currently, we don't do anything
@@ -92,7 +86,7 @@ class DartGenerator {
         _buf.write(_indent);
       }
 
-      _buf.write(new String.fromCharCode(rune));
+      _buf.write(String.fromCharCode(rune));
 
       _previousWasEol = rune == RUNE_EOL;
     }

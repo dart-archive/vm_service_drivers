@@ -11,7 +11,7 @@ const int RUNE_EOL = 10;
 const int RUNE_LEFT_CURLY = 123;
 const int RUNE_RIGHT_CURLY = 125;
 
-final RegExp _wsRegexp = new RegExp(r'\s+');
+final RegExp _wsRegexp = RegExp(r'\s+');
 
 String collapseWhitespace(String str) => str.replaceAll(_wsRegexp, ' ');
 
@@ -22,8 +22,10 @@ bool isPre(Node node) => node is Element && node.tag == 'pre';
 bool isH1(Node node) => node is Element && node.tag == 'h1';
 bool isH3(Node node) => node is Element && node.tag == 'h3';
 bool isHeader(Node node) => node is Element && node.tag.startsWith('h');
-String textForElement(Node node) => (((node as Element).children.first) as Text).text;
-String textForCode(Node node) => textForElement((node as Element).children.first);
+String textForElement(Node node) =>
+    (((node as Element).children.first) as Text).text;
+String textForCode(Node node) =>
+    textForElement((node as Element).children.first);
 
 /// foo ==> Foo
 String titleCase(String str) =>
@@ -37,7 +39,7 @@ String joinLast(Iterable<String> strs, String join, [String last]) {
   if (strs.isEmpty) return '';
   List list = strs.toList();
   if (list.length == 1) return list.first;
-  StringBuffer buf = new StringBuffer();
+  StringBuffer buf = StringBuffer();
   for (int i = 0; i < list.length; i++) {
     if (i > 0) {
       if (i + 1 == list.length && last != null) {
