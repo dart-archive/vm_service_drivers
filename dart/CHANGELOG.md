@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.10+2
+- work around an issue de-serializing Instance.closureContext
+
 ## 0.3.10+1
 - fix an issue de-serializing some object types
 
