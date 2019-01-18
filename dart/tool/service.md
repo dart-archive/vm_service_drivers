@@ -1,8 +1,8 @@
-# Dart VM Service Protocol 3.12
+# Dart VM Service Protocol 3.14
 
 > Please post feedback to the [observatory-discuss group][discuss-list]
 
-This document describes of _version 3.12_ of the Dart VM Service Protocol. This
+This document describes of _version 3.14_ of the Dart VM Service Protocol. This
 protocol is used to communicate with a running Dart Virtual Machine.
 
 To use the Service Protocol, start the VM with the *--observe* flag.
@@ -31,7 +31,7 @@ The Service Protocol uses [JSON-RPC 2.0][].
   - [evaluateInFrame](#evaluateinframe)
   - [getFlagList](#getflaglist)
   - [getIsolate](#getisolate)
-  - [getScripts](#getisolatescripts)
+  - [getScripts](#getscripts)
   - [getObject](#getobject)
   - [getSourceReport](#getsourcereport)
   - [getStack](#getstack)
@@ -150,7 +150,7 @@ a parameter:
   "jsonrpc": "2.0",
   "method": "streamListen",
   "params": {
-    "streamId": "GC",
+    "streamId": "GC"
   },
   "id": "2"
 }
@@ -842,6 +842,10 @@ The following flags may be set at runtime:
  * pause_isolates_on_start
  * pause_isolates_on_exit
  * pause_isolates_on_unhandled_exceptions
+ * profile_period
+
+Note: `profile_period` can be set to a minimum value of 50. Attempting to set
+`profile_period` to a lower value will result in a value of 50 being set.
 
 See [Success](#success).
 
@@ -901,7 +905,7 @@ Success streamListen(string streamId)
 The _streamListen_ RPC subscribes to a stream in the VM. Once
 subscribed, the client will begin receiving events from the stream.
 
-If the client is not subscribed to the stream, the _103_ (Stream already
+If the client is already subscribed to the stream, the _103_ (Stream already
 subscribed) error code is returned.
 
 The _streamId_ parameter may have the following published values:
@@ -1113,8 +1117,7 @@ class Class extends Object {
   bool const;
 
   // The library which contains this class.
-  // TODO: This should be @Library, but the VM can return @Instance objects here.
-  @Object library;
+  @Library library;
 
   // The location of this class in the source code.
   SourceLocation location [optional];
@@ -1876,13 +1879,11 @@ class Instance extends Object {
   //   Closure
   @Function closureFunction [optional];
 
-  // TODO(devoncarew): this can return an InstanceRef
-  //
   // The context associated with a Closure instance.
   //
   // Provided for instance kinds:
   //   Closure
-  //@Context closureContext [optional];
+  @Context closureContext [optional];
 
   // The referent of a MirrorReference instance.
   //
@@ -1991,7 +1992,7 @@ enum InstanceKind {
   // Vector instance kinds.
   Float32x4,
   Float64x2,
-  Int32x4
+  Int32x4,
 
   // An instance of the built-in VM TypedData implementations. User-defined
   // TypedDatas will be PlainInstance.
@@ -2393,7 +2394,7 @@ class Script extends Object {
   string source [optional];
 
   // A table encoding a mapping from token position to line and column.
-  int[][] tokenPosTable [optional];
+  int[][] tokenPosTable;
 }
 ```
 
@@ -2734,5 +2735,7 @@ version | comments
 3.10 | Add 'invoke'.
 3.11 | Rename 'invoke' parameter 'receiverId' to 'targetId.
 3.12 | Add 'getScripts' RPC and `ScriptList` object.
+3.13 | Class 'mixin' field now properly set for kernel transformed mixin applications.
+3.14 | Flag 'profile_period' can now be set at runtime, allowing for the profiler sample rate to be changed while the program is running.
 
 [discuss-list]: https://groups.google.com/a/dartlang.org/forum/#!forum/observatory-discuss
