@@ -229,7 +229,7 @@ final String _implCode = r'''
 ''';
 
 final String _rpcError = r'''
-typedef Future DisposeHandler();
+typedef DisposeHandler = Future Function();
 
 class RPCError {
   static RPCError parse(String callingMethod, dynamic json) {
@@ -309,7 +309,7 @@ class Api extends Member with ApiParseUtil {
     // the pre following it is the definition
     // the optional p following that is the documentation
 
-    String h3Name = null;
+    String h3Name;
 
     for (int i = 0; i < nodes.length; i++) {
       Node node = nodes[i];
@@ -437,7 +437,8 @@ dynamic _createSpecificObject(dynamic json, dynamic creator(Map<String, dynamic>
   }
 }
 
-typedef Future<Map<String, dynamic>> ServiceCallback(Map<String, dynamic> params);
+typedef ServiceCallback = Future<Map<String, dynamic>> Function(
+    Map<String, dynamic> params);
 
 ''');
     gen.writeln();
@@ -600,7 +601,7 @@ List<String> assertStrings(List<String> list) {
 
 String assertString(String obj) {
   assertNotNull(obj);
-  if (obj.length == 0) throw 'expected non-zero length string';
+  if (obj.isEmpty) throw 'expected non-zero length string';
   return obj;
 }
 

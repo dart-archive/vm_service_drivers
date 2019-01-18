@@ -34,8 +34,8 @@ String pkgNameFor(String typeName) {
   return index > 0 ? typeName.substring(0, index) : '';
 }
 
-typedef WriteStatements(StatementWriter writer);
-typedef WriteType(TypeWriter writer);
+typedef WriteStatements = void Function(StatementWriter writer);
+typedef WriteType = void Function(TypeWriter writer);
 
 /// [JavaGenerator] generates java source files, one per Java type.
 /// Typical usage:
@@ -130,7 +130,7 @@ class TypeWriter {
   }
 
   void addConstructor(Iterable<JavaMethodArg> args, WriteStatements write,
-      {String javadoc, String modifiers: 'public'}) {
+      {String javadoc, String modifiers = 'public'}) {
     _content.writeln();
     if (javadoc != null && javadoc.isNotEmpty) {
       _content.writeln('  /**');
@@ -157,7 +157,7 @@ class TypeWriter {
   void addEnumValue(
     String name, {
     String javadoc,
-    bool isLast: false,
+    bool isLast = false,
   }) {
     _content.writeln();
     if (javadoc != null && javadoc.isNotEmpty) {
@@ -176,7 +176,7 @@ class TypeWriter {
   }
 
   void addField(String name, String typeName,
-      {String modifiers: 'public', String value, String javadoc}) {
+      {String modifiers = 'public', String value, String javadoc}) {
     var fieldDecl = new StringBuffer();
     if (javadoc != null && javadoc.isNotEmpty) {
       fieldDecl.writeln('  /**');
@@ -186,11 +186,11 @@ class TypeWriter {
       fieldDecl.writeln('   */');
     }
     fieldDecl.write('  ');
-    if (modifiers != null && modifiers.length > 0) {
+    if (modifiers != null && modifiers.isNotEmpty) {
       fieldDecl.write('$modifiers ');
     }
     fieldDecl.write('$typeName $name');
-    if (value != null && value.length > 0) {
+    if (value != null && value.isNotEmpty) {
       fieldDecl.write(' = $value');
     }
     fieldDecl.writeln(';');
@@ -210,9 +210,9 @@ class TypeWriter {
     Iterable<JavaMethodArg> args,
     WriteStatements write, {
     String javadoc,
-    String modifiers: 'public',
-    String returnType: 'void',
-    bool isOverride: false,
+    String modifiers = 'public',
+    String returnType = 'void',
+    bool isOverride = false,
   }) {
     var methodDecl = new StringBuffer();
     if (javadoc != null && javadoc.isNotEmpty) {
@@ -281,9 +281,8 @@ class TypeWriter {
     }
     if (interfaceNames.isNotEmpty) {
       var classNames = interfaceNames.map((t) => classNameFor(t));
-      buffer
-          .write(' ${isInterface ? 'extends' : 'implements'} ${classNames.join(
-          ', ')}');
+      buffer.write(
+          ' ${isInterface ? 'extends' : 'implements'} ${classNames.join(', ')}');
     }
     buffer.writeln(' {');
     buffer.write(_content.toString());

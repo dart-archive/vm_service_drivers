@@ -31,6 +31,7 @@ main(List<String> args) async {
 
   print('dart process started');
 
+  // ignore: unawaited_futures
   process.exitCode.then((code) => print('vm exited: ${code}'));
   // ignore: strong_mode_down_cast_composite
   process.stdout.transform(utf8.decoder).listen(print);
@@ -52,8 +53,11 @@ main(List<String> args) async {
   serviceClient.onStdoutEvent.listen((e) => print('onStdoutEvent: ${e}'));
   serviceClient.onStderrEvent.listen((e) => print('onStderrEvent: ${e}'));
 
+  // ignore: unawaited_futures
   serviceClient.streamListen('Isolate');
+  // ignore: unawaited_futures
   serviceClient.streamListen('Debug');
+  // ignore: unawaited_futures
   serviceClient.streamListen('Stdout');
 
   VM vm = await serviceClient.getVM();
@@ -106,5 +110,6 @@ Future testServiceRegistration() async {
 
 class StdoutLog extends Log {
   void warning(String message) => print(message);
+
   void severe(String message) => print(message);
 }
