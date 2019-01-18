@@ -2367,14 +2367,13 @@ class Instance extends Obj {
   @optional
   FuncRef closureFunction;
 
+  /// TODO(devoncarew): this can return an InstanceRef
+  ///
   /// The context associated with a Closure instance.
   ///
   /// Provided for instance kinds:
-  ///  - Closure
-  @optional
-  ContextRef closureContext;
-
-  /// The referent of a MirrorReference instance.
+  /// - Closure@Context closureContext [optional]; The referent of a
+  /// MirrorReference instance.
   ///
   /// Provided for instance kinds:
   ///  - MirrorReference
@@ -2477,7 +2476,6 @@ class Instance extends Obj {
             _createSpecificObject(json['associations'], MapAssociation.parse));
     bytes = json['bytes'];
     closureFunction = _createObject(json['closureFunction']);
-    closureContext = _createObject(json['closureContext']);
     mirrorReferent = _createObject(json['mirrorReferent']);
     pattern = json['pattern'];
     isCaseSensitive = json['isCaseSensitive'];
