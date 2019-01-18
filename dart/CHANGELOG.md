@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.14.0
+- regenerate for `v3.14`
+- bump to a major version numbering scheme
+
 ## 0.3.10+2
 - work around an issue de-serializing Instance.closureContext
 
