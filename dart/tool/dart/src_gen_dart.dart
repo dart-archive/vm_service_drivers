@@ -22,7 +22,7 @@ class DartGenerator {
 
   bool _previousWasEol = false;
 
-  DartGenerator({this.colBoundary: DEFAULT_COLUMN_BOUNDARY});
+  DartGenerator({this.colBoundary = DEFAULT_COLUMN_BOUNDARY});
 
   /**
    * Write out the given dartdoc text, wrapping lines as necessary to flow

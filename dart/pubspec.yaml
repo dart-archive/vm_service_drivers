@@ -11,4 +11,5 @@ environment:
 dev_dependencies:
   markdown: ^2.0.0
   path: ^1.0.0
+  pedantic: ^1.0.0
   pub_semver: ^1.0.0

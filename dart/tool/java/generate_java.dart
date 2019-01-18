@@ -280,14 +280,14 @@ class Api extends Member with ApiParseUtil {
     // the pre following it is the definition
     // the optional p following that is the documentation
 
-    String h3Name = null;
+    String h3Name;
 
     for (int i = 0; i < nodes.length; i++) {
       Node node = nodes[i];
 
       if (isPre(node) && h3Name != null) {
         String definition = textForCode(node);
-        String docs = null;
+        String docs;
 
         if (i + 1 < nodes.length && isPara(nodes[i + 1])) {
           Element p = nodes[++i];
@@ -596,7 +596,7 @@ class Method extends Member {
     writer.addLine('}');
   }
 
-  void generateVmServiceMethod(TypeWriter writer, {includeOptional: false}) {
+  void generateVmServiceMethod(TypeWriter writer, {includeOptional = false}) {
     // TODO(danrubel) move this to the Consumer's javadoc
 //    String javadoc = docs == null ? '' : docs;
 //    if (returnType.isMultipleReturns) {
@@ -1060,7 +1060,7 @@ class TypeRef {
   Type get type => api.types.firstWhere((t) => t.name == name);
 
   void generateAccessStatements(StatementWriter writer, String propertyName,
-      {bool canBeSentinel: false, String defaultValue, bool optional: false}) {
+      {bool canBeSentinel = false, String defaultValue, bool optional = false}) {
     if (name == 'boolean') {
       if (isArray) {
         print('skipped accessor body for $propertyName');

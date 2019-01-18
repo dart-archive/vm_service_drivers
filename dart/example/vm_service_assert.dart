@@ -44,7 +44,7 @@ List<String> assertStrings(List<String> list) {
 
 String assertString(String obj) {
   assertNotNull(obj);
-  if (obj.length == 0) throw 'expected non-zero length string';
+  if (obj.isEmpty) throw 'expected non-zero length string';
   return obj;
 }
 

@@ -61,7 +61,7 @@ dynamic _createSpecificObject(
   }
 }
 
-typedef Future<Map<String, dynamic>> ServiceCallback(
+typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     Map<String, dynamic> params);
 
 Map<String, Function> _typeFactories = {
@@ -910,7 +910,7 @@ class VmService {
   }
 }
 
-typedef Future DisposeHandler();
+typedef DisposeHandler = Future Function();
 
 class RPCError {
   static RPCError parse(String callingMethod, dynamic json) {
