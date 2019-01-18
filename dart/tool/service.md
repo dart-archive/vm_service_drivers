@@ -1876,11 +1876,13 @@ class Instance extends Object {
   //   Closure
   @Function closureFunction [optional];
 
+  // TODO(devoncarew): this can return an InstanceRef
+  //
   // The context associated with a Closure instance.
   //
   // Provided for instance kinds:
   //   Closure
-  @Context closureContext [optional];
+  //@Context closureContext [optional];
 
   // The referent of a MirrorReference instance.
   //
