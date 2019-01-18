@@ -13,7 +13,7 @@ import 'dart:async';
 import 'dart:convert' show base64, jsonDecode, jsonEncode, utf8;
 import 'dart:typed_data';
 
-const String vmServiceVersion = '3.12.0';
+const String vmServiceVersion = '3.14.0';
 
 /// @optional
 const String optional = 'optional';
@@ -643,8 +643,8 @@ class VmService {
   /// The `streamListen` RPC subscribes to a stream in the VM. Once subscribed,
   /// the client will begin receiving events from the stream.
   ///
-  /// If the client is not subscribed to the stream, the `103` (Stream already
-  /// subscribed) error code is returned.
+  /// If the client is already subscribed to the stream, the `103` (Stream
+  /// already subscribed) error code is returned.
   ///
   /// The `streamId` parameter may have the following published values:
   ///
