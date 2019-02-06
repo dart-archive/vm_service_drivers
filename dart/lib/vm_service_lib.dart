@@ -23,7 +23,7 @@ const String undocumented = 'undocumented';
 
 /// Decode a string in Base64 encoding into the equivalent non-encoded string.
 /// This is useful for handling the results of the Stdout or Stderr events.
-String decodeBase64(String str) => new String.fromCharCodes(base64.decode(str));
+String decodeBase64(String str) => utf8.decode(base64.decode(str));
 
 Object _createObject(dynamic json) {
   if (json == null) return null;
