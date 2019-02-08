@@ -1253,6 +1253,17 @@ class BoundField {
     value = _createObject(json['value']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "BoundField";
+    var nextVal;
+    nextVal = decl.toJson();
+    json['decl'] = nextVal;
+    nextVal = value.toJson();
+    json['value'] = nextVal;
+    return json;
+  }
+
   String toString() => '[BoundField decl: ${decl}, value: ${value}]';
 }
 
@@ -1293,6 +1304,23 @@ class BoundVariable {
     declarationTokenPos = json['declarationTokenPos'];
     scopeStartTokenPos = json['scopeStartTokenPos'];
     scopeEndTokenPos = json['scopeEndTokenPos'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "BoundVariable";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = value.toJson();
+    json['value'] = nextVal;
+    nextVal = declarationTokenPos;
+    json['declarationTokenPos'] = nextVal;
+    nextVal = scopeStartTokenPos;
+    json['scopeStartTokenPos'] = nextVal;
+    nextVal = scopeEndTokenPos;
+    json['scopeEndTokenPos'] = nextVal;
+    return json;
   }
 
   String toString() => '[BoundVariable ' //
@@ -1336,6 +1364,23 @@ class Breakpoint extends Obj {
     location = _createObject(json['location']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Breakpoint";
+    var nextVal;
+    nextVal = breakpointNumber;
+    json['breakpointNumber'] = nextVal;
+    nextVal = resolved;
+    json['resolved'] = nextVal;
+    nextVal = isSyntheticAsyncContinuation;
+    if (nextVal != null) {
+      json['isSyntheticAsyncContinuation'] = nextVal;
+    }
+    nextVal = location.toJson();
+    json['location'] = nextVal;
+    return json;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Breakpoint && id == other.id;
@@ -1357,6 +1402,15 @@ class ClassRef extends ObjRef {
 
   ClassRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     name = json['name'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "ClassRef";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -1441,6 +1495,49 @@ class Class extends Obj {
     subclasses = new List<ClassRef>.from(_createObject(json['subclasses']));
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Class";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = error.toJson();
+    if (nextVal != null) {
+      json['error'] = nextVal;
+    }
+    nextVal = isAbstract;
+    json['abstract'] = nextVal;
+    nextVal = isConst;
+    json['const'] = nextVal;
+    nextVal = library.toJson();
+    json['library'] = nextVal;
+    nextVal = location.toJson();
+    if (nextVal != null) {
+      json['location'] = nextVal;
+    }
+    nextVal = superClass.toJson();
+    if (nextVal != null) {
+      json['super'] = nextVal;
+    }
+    nextVal = superType.toJson();
+    if (nextVal != null) {
+      json['superType'] = nextVal;
+    }
+    nextVal = interfaces.map((f) => f.toJson()).toList();
+    json['interfaces'] = nextVal;
+    nextVal = mixin.toJson();
+    if (nextVal != null) {
+      json['mixin'] = nextVal;
+    }
+    nextVal = fields.map((f) => f.toJson()).toList();
+    json['fields'] = nextVal;
+    nextVal = functions.map((f) => f.toJson()).toList();
+    json['functions'] = nextVal;
+    nextVal = subclasses.map((f) => f.toJson()).toList();
+    json['subclasses'] = nextVal;
+    return json;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Class && id == other.id;
@@ -1458,6 +1555,15 @@ class ClassList extends Response {
 
   ClassList._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     classes = new List<ClassRef>.from(_createObject(json['classes']));
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "ClassList";
+    var nextVal;
+    nextVal = classes.map((f) => f.toJson()).toList();
+    json['classes'] = nextVal;
+    return json;
   }
 
   String toString() => '[ClassList type: ${type}, classes: ${classes}]';
@@ -1479,6 +1585,17 @@ class CodeRef extends ObjRef {
   CodeRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     name = json['name'];
     kind = json['kind'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "CodeRef";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = kind;
+    json['kind'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -1507,6 +1624,17 @@ class Code extends ObjRef {
     kind = json['kind'];
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Code";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = kind;
+    json['kind'] = nextVal;
+    return json;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Code && id == other.id;
@@ -1526,6 +1654,15 @@ class ContextRef extends ObjRef {
 
   ContextRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     length = json['length'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "ContextRef";
+    var nextVal;
+    nextVal = length;
+    json['length'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -1560,6 +1697,21 @@ class Context extends Obj {
     variables = new List<ContextElement>.from(_createObject(json['variables']));
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Context";
+    var nextVal;
+    nextVal = length;
+    json['length'] = nextVal;
+    nextVal = parent.toJson();
+    if (nextVal != null) {
+      json['parent'] = nextVal;
+    }
+    nextVal = variables.map((f) => f.toJson()).toList();
+    json['variables'] = nextVal;
+    return json;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Context && id == other.id;
@@ -1581,6 +1733,15 @@ class ContextElement {
     value = _createObject(json['value']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "ContextElement";
+    var nextVal;
+    nextVal = value.toJson();
+    json['value'] = nextVal;
+    return json;
+  }
+
   String toString() => '[ContextElement value: ${value}]';
 }
 
@@ -1600,6 +1761,17 @@ class ErrorRef extends ObjRef {
   ErrorRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     kind = json['kind'];
     message = json['message'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "ErrorRef";
+    var nextVal;
+    nextVal = kind;
+    json['kind'] = nextVal;
+    nextVal = message;
+    json['message'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -1639,6 +1811,25 @@ class Error extends Obj {
     message = json['message'];
     exception = _createObject(json['exception']);
     stacktrace = _createObject(json['stacktrace']);
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Error";
+    var nextVal;
+    nextVal = kind;
+    json['kind'] = nextVal;
+    nextVal = message;
+    json['message'] = nextVal;
+    nextVal = exception.toJson();
+    if (nextVal != null) {
+      json['exception'] = nextVal;
+    }
+    nextVal = stacktrace.toJson();
+    if (nextVal != null) {
+      json['stacktrace'] = nextVal;
+    }
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -1828,6 +2019,85 @@ class Event extends Response {
     alias = json['alias'];
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Event";
+    var nextVal;
+    nextVal = kind;
+    json['kind'] = nextVal;
+    nextVal = isolate.toJson();
+    if (nextVal != null) {
+      json['isolate'] = nextVal;
+    }
+    nextVal = vm.toJson();
+    if (nextVal != null) {
+      json['vm'] = nextVal;
+    }
+    nextVal = timestamp;
+    json['timestamp'] = nextVal;
+    nextVal = breakpoint.toJson();
+    if (nextVal != null) {
+      json['breakpoint'] = nextVal;
+    }
+    nextVal = pauseBreakpoints.map((f) => f.toJson()).toList();
+    if (nextVal != null) {
+      json['pauseBreakpoints'] = nextVal;
+    }
+    nextVal = topFrame.toJson();
+    if (nextVal != null) {
+      json['topFrame'] = nextVal;
+    }
+    nextVal = exception.toJson();
+    if (nextVal != null) {
+      json['exception'] = nextVal;
+    }
+    nextVal = bytes;
+    if (nextVal != null) {
+      json['bytes'] = nextVal;
+    }
+    nextVal = inspectee.toJson();
+    if (nextVal != null) {
+      json['inspectee'] = nextVal;
+    }
+    nextVal = extensionRPC;
+    if (nextVal != null) {
+      json['extensionRPC'] = nextVal;
+    }
+    nextVal = extensionKind;
+    if (nextVal != null) {
+      json['extensionKind'] = nextVal;
+    }
+    nextVal = extensionData.data;
+    if (nextVal != null) {
+      json['extensionData'] = nextVal;
+    }
+    nextVal = timelineEvents.map((f) => f.toJson()).toList();
+    if (nextVal != null) {
+      json['timelineEvents'] = nextVal;
+    }
+    nextVal = atAsyncSuspension;
+    if (nextVal != null) {
+      json['atAsyncSuspension'] = nextVal;
+    }
+    nextVal = status;
+    if (nextVal != null) {
+      json['status'] = nextVal;
+    }
+    nextVal = service;
+    if (nextVal != null) {
+      json['service'] = nextVal;
+    }
+    nextVal = method;
+    if (nextVal != null) {
+      json['method'] = nextVal;
+    }
+    nextVal = alias;
+    if (nextVal != null) {
+      json['alias'] = nextVal;
+    }
+    return json;
+  }
+
   String toString() =>
       '[Event type: ${type}, kind: ${kind}, timestamp: ${timestamp}]';
 }
@@ -1867,6 +2137,25 @@ class FieldRef extends ObjRef {
     isConst = json['const'];
     isFinal = json['final'];
     isStatic = json['static'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "FieldRef";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = owner.toJson();
+    json['owner'] = nextVal;
+    nextVal = declaredType.toJson();
+    json['declaredType'] = nextVal;
+    nextVal = isConst;
+    json['const'] = nextVal;
+    nextVal = isFinal;
+    json['final'] = nextVal;
+    nextVal = isStatic;
+    json['static'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -1923,6 +2212,33 @@ class Field extends Obj {
     location = _createObject(json['location']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Field";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = owner.toJson();
+    json['owner'] = nextVal;
+    nextVal = declaredType.toJson();
+    json['declaredType'] = nextVal;
+    nextVal = isConst;
+    json['const'] = nextVal;
+    nextVal = isFinal;
+    json['final'] = nextVal;
+    nextVal = isStatic;
+    json['static'] = nextVal;
+    nextVal = staticValue.toJson();
+    if (nextVal != null) {
+      json['staticValue'] = nextVal;
+    }
+    nextVal = location.toJson();
+    if (nextVal != null) {
+      json['location'] = nextVal;
+    }
+    return json;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Field && id == other.id;
@@ -1959,6 +2275,23 @@ class Flag {
     valueAsString = json['valueAsString'];
   }
 
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "Flag";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = comment;
+    json['comment'] = nextVal;
+    nextVal = modified;
+    json['modified'] = nextVal;
+    nextVal = valueAsString;
+    if (nextVal != null) {
+      json['valueAsString'] = nextVal;
+    }
+    return json;
+  }
+
   String toString() =>
       '[Flag name: ${name}, comment: ${comment}, modified: ${modified}]';
 }
@@ -1975,6 +2308,15 @@ class FlagList extends Response {
 
   FlagList._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     flags = new List<Flag>.from(_createObject(json['flags']));
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "FlagList";
+    var nextVal;
+    nextVal = flags.map((f) => f.toJson()).toList();
+    json['flags'] = nextVal;
+    return json;
   }
 
   String toString() => '[FlagList type: ${type}, flags: ${flags}]';
@@ -2015,6 +2357,35 @@ class Frame extends Response {
     kind = json['kind'];
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Frame";
+    var nextVal;
+    nextVal = index;
+    json['index'] = nextVal;
+    nextVal = function.toJson();
+    if (nextVal != null) {
+      json['function'] = nextVal;
+    }
+    nextVal = code.toJson();
+    if (nextVal != null) {
+      json['code'] = nextVal;
+    }
+    nextVal = location.toJson();
+    if (nextVal != null) {
+      json['location'] = nextVal;
+    }
+    nextVal = vars.map((f) => f.toJson()).toList();
+    if (nextVal != null) {
+      json['vars'] = nextVal;
+    }
+    nextVal = kind;
+    if (nextVal != null) {
+      json['kind'] = nextVal;
+    }
+    return json;
+  }
+
   String toString() => '[Frame type: ${type}, index: ${index}]';
 }
 
@@ -2044,6 +2415,21 @@ class FuncRef extends ObjRef {
     owner = _createObject(json['owner']);
     isStatic = json['static'];
     isConst = json['const'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "FuncRef";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = owner.toJson();
+    json['owner'] = nextVal;
+    nextVal = isStatic;
+    json['static'] = nextVal;
+    nextVal = isConst;
+    json['const'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -2083,6 +2469,25 @@ class Func extends Obj {
     owner = _createObject(json['owner']);
     location = _createObject(json['location']);
     code = _createObject(json['code']);
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Func";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = owner.toJson();
+    json['owner'] = nextVal;
+    nextVal = location.toJson();
+    if (nextVal != null) {
+      json['location'] = nextVal;
+    }
+    nextVal = code.toJson();
+    if (nextVal != null) {
+      json['code'] = nextVal;
+    }
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -2192,6 +2597,45 @@ class InstanceRef extends ObjRef {
     typeClass = _createObject(json['typeClass']);
     parameterizedClass = _createObject(json['parameterizedClass']);
     pattern = _createObject(json['pattern']);
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "InstanceRef";
+    var nextVal;
+    nextVal = kind;
+    json['kind'] = nextVal;
+    nextVal = classRef.toJson();
+    json['class'] = nextVal;
+    nextVal = valueAsString;
+    if (nextVal != null) {
+      json['valueAsString'] = nextVal;
+    }
+    nextVal = valueAsStringIsTruncated ?? false;
+    if (nextVal != null) {
+      json['valueAsStringIsTruncated'] = nextVal;
+    }
+    nextVal = length;
+    if (nextVal != null) {
+      json['length'] = nextVal;
+    }
+    nextVal = name;
+    if (nextVal != null) {
+      json['name'] = nextVal;
+    }
+    nextVal = typeClass.toJson();
+    if (nextVal != null) {
+      json['typeClass'] = nextVal;
+    }
+    nextVal = parameterizedClass.toJson();
+    if (nextVal != null) {
+      json['parameterizedClass'] = nextVal;
+    }
+    nextVal = pattern.toJson();
+    if (nextVal != null) {
+      json['pattern'] = nextVal;
+    }
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -2488,6 +2932,107 @@ class Instance extends Obj {
     bound = _createObject(json['bound']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Instance";
+    var nextVal;
+    nextVal = kind;
+    json['kind'] = nextVal;
+    nextVal = valueAsString;
+    if (nextVal != null) {
+      json['valueAsString'] = nextVal;
+    }
+    nextVal = valueAsStringIsTruncated ?? false;
+    if (nextVal != null) {
+      json['valueAsStringIsTruncated'] = nextVal;
+    }
+    nextVal = length;
+    if (nextVal != null) {
+      json['length'] = nextVal;
+    }
+    nextVal = offset;
+    if (nextVal != null) {
+      json['offset'] = nextVal;
+    }
+    nextVal = count;
+    if (nextVal != null) {
+      json['count'] = nextVal;
+    }
+    nextVal = name;
+    if (nextVal != null) {
+      json['name'] = nextVal;
+    }
+    nextVal = typeClass.toJson();
+    if (nextVal != null) {
+      json['typeClass'] = nextVal;
+    }
+    nextVal = parameterizedClass.toJson();
+    if (nextVal != null) {
+      json['parameterizedClass'] = nextVal;
+    }
+    nextVal = fields.map((f) => f.toJson()).toList();
+    if (nextVal != null) {
+      json['fields'] = nextVal;
+    }
+    nextVal = elements.map((f) => f.toJson()).toList();
+    if (nextVal != null) {
+      json['elements'] = nextVal;
+    }
+    nextVal = associations.map((f) => f.toJson()).toList();
+    if (nextVal != null) {
+      json['associations'] = nextVal;
+    }
+    nextVal = bytes;
+    if (nextVal != null) {
+      json['bytes'] = nextVal;
+    }
+    nextVal = closureFunction.toJson();
+    if (nextVal != null) {
+      json['closureFunction'] = nextVal;
+    }
+    nextVal = mirrorReferent.toJson();
+    if (nextVal != null) {
+      json['mirrorReferent'] = nextVal;
+    }
+    nextVal = pattern;
+    if (nextVal != null) {
+      json['pattern'] = nextVal;
+    }
+    nextVal = isCaseSensitive;
+    if (nextVal != null) {
+      json['isCaseSensitive'] = nextVal;
+    }
+    nextVal = isMultiLine;
+    if (nextVal != null) {
+      json['isMultiLine'] = nextVal;
+    }
+    nextVal = propertyKey.toJson();
+    if (nextVal != null) {
+      json['propertyKey'] = nextVal;
+    }
+    nextVal = propertyValue.toJson();
+    if (nextVal != null) {
+      json['propertyValue'] = nextVal;
+    }
+    nextVal = typeArguments.toJson();
+    if (nextVal != null) {
+      json['typeArguments'] = nextVal;
+    }
+    nextVal = parameterIndex;
+    if (nextVal != null) {
+      json['parameterIndex'] = nextVal;
+    }
+    nextVal = targetType.toJson();
+    if (nextVal != null) {
+      json['targetType'] = nextVal;
+    }
+    nextVal = bound.toJson();
+    if (nextVal != null) {
+      json['bound'] = nextVal;
+    }
+    return json;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Instance && id == other.id;
@@ -2515,6 +3060,19 @@ class IsolateRef extends Response {
     id = json['id'];
     number = json['number'];
     name = json['name'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "IsolateRef";
+    var nextVal;
+    nextVal = id;
+    json['id'] = nextVal;
+    nextVal = number;
+    json['number'] = nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -2604,6 +3162,47 @@ class Isolate extends Response {
         : new List<String>.from(json['extensionRPCs']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Isolate";
+    var nextVal;
+    nextVal = id;
+    json['id'] = nextVal;
+    nextVal = number;
+    json['number'] = nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = startTime;
+    json['startTime'] = nextVal;
+    nextVal = runnable;
+    json['runnable'] = nextVal;
+    nextVal = livePorts;
+    json['livePorts'] = nextVal;
+    nextVal = pauseOnExit;
+    json['pauseOnExit'] = nextVal;
+    nextVal = pauseEvent.toJson();
+    json['pauseEvent'] = nextVal;
+    nextVal = rootLib.toJson();
+    if (nextVal != null) {
+      json['rootLib'] = nextVal;
+    }
+    nextVal = libraries.map((f) => f.toJson()).toList();
+    json['libraries'] = nextVal;
+    nextVal = breakpoints.map((f) => f.toJson()).toList();
+    json['breakpoints'] = nextVal;
+    nextVal = error.toJson();
+    if (nextVal != null) {
+      json['error'] = nextVal;
+    }
+    nextVal = exceptionPauseMode;
+    json['exceptionPauseMode'] = nextVal;
+    nextVal = extensionRPCs.map((f) => f).toList();
+    if (nextVal != null) {
+      json['extensionRPCs'] = nextVal;
+    }
+    return json;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Isolate && id == other.id;
@@ -2627,6 +3226,17 @@ class LibraryRef extends ObjRef {
   LibraryRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     name = json['name'];
     uri = json['uri'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "LibraryRef";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = uri;
+    json['uri'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -2682,6 +3292,29 @@ class Library extends Obj {
     classes = new List<ClassRef>.from(_createObject(json['classes']));
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Library";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = uri;
+    json['uri'] = nextVal;
+    nextVal = debuggable;
+    json['debuggable'] = nextVal;
+    nextVal = dependencies.map((f) => f.toJson()).toList();
+    json['dependencies'] = nextVal;
+    nextVal = scripts.map((f) => f.toJson()).toList();
+    json['scripts'] = nextVal;
+    nextVal = variables.map((f) => f.toJson()).toList();
+    json['variables'] = nextVal;
+    nextVal = functions.map((f) => f.toJson()).toList();
+    json['functions'] = nextVal;
+    nextVal = classes.map((f) => f.toJson()).toList();
+    json['classes'] = nextVal;
+    return json;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Library && id == other.id;
@@ -2715,6 +3348,21 @@ class LibraryDependency {
     target = _createObject(json['target']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "LibraryDependency";
+    var nextVal;
+    nextVal = isImport;
+    json['isImport'] = nextVal;
+    nextVal = isDeferred;
+    json['isDeferred'] = nextVal;
+    nextVal = prefix;
+    json['prefix'] = nextVal;
+    nextVal = target.toJson();
+    json['target'] = nextVal;
+    return json;
+  }
+
   String toString() => '[LibraryDependency ' //
       'isImport: ${isImport}, isDeferred: ${isDeferred}, prefix: ${prefix}, ' //
       'target: ${target}]';
@@ -2735,6 +3383,17 @@ class MapAssociation {
   MapAssociation._fromJson(Map<String, dynamic> json) {
     key = _createObject(json['key']);
     value = _createObject(json['value']);
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "MapAssociation";
+    var nextVal;
+    nextVal = key.toJson();
+    json['key'] = nextVal;
+    nextVal = value.toJson();
+    json['value'] = nextVal;
+    return json;
   }
 
   String toString() => '[MapAssociation key: ${key}, value: ${value}]';
@@ -2779,6 +3438,29 @@ class Message extends Response {
     location = _createObject(json['location']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Message";
+    var nextVal;
+    nextVal = index;
+    json['index'] = nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = messageObjectId;
+    json['messageObjectId'] = nextVal;
+    nextVal = size;
+    json['size'] = nextVal;
+    nextVal = handler.toJson();
+    if (nextVal != null) {
+      json['handler'] = nextVal;
+    }
+    nextVal = location.toJson();
+    if (nextVal != null) {
+      json['location'] = nextVal;
+    }
+    return json;
+  }
+
   String toString() => '[Message ' //
       'type: ${type}, index: ${index}, name: ${name}, messageObjectId: ${messageObjectId}, ' //
       'size: ${size}]';
@@ -2792,6 +3474,13 @@ class NullValRef extends InstanceRef {
   NullValRef();
 
   NullValRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "NullValRef";
+    var nextVal;
+    return json;
+  }
 
   int get hashCode => id.hashCode;
 
@@ -2809,6 +3498,13 @@ class NullVal extends Instance {
   NullVal();
 
   NullVal._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "NullVal";
+    var nextVal;
+    return json;
+  }
 
   int get hashCode => id.hashCode;
 
@@ -2830,6 +3526,15 @@ class ObjRef extends Response {
 
   ObjRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     id = json['id'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "ObjRef";
+    var nextVal;
+    nextVal = id;
+    json['id'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -2879,6 +3584,23 @@ class Obj extends Response {
     size = json['size'];
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Obj";
+    var nextVal;
+    nextVal = id;
+    json['id'] = nextVal;
+    nextVal = classRef.toJson();
+    if (nextVal != null) {
+      json['class'] = nextVal;
+    }
+    nextVal = size;
+    if (nextVal != null) {
+      json['size'] = nextVal;
+    }
+    return json;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Obj && id == other.id;
@@ -2897,6 +3619,15 @@ class ReloadReport extends Response {
 
   ReloadReport._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     success = json['success'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "ReloadReport";
+    var nextVal;
+    nextVal = success;
+    json['success'] = nextVal;
+    return json;
   }
 
   String toString() => '[ReloadReport type: ${type}, success: ${success}]';
@@ -2920,6 +3651,8 @@ class Response {
   Response._fromJson(this.json) {
     type = json['type'];
   }
+
+  Map<String, dynamic> toJson() => json;
 
   String toString() => '[Response type: ${type}]';
 }
@@ -2945,6 +3678,17 @@ class Sentinel extends Response {
     valueAsString = json['valueAsString'];
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Sentinel";
+    var nextVal;
+    nextVal = kind;
+    json['kind'] = nextVal;
+    nextVal = valueAsString;
+    json['valueAsString'] = nextVal;
+    return json;
+  }
+
   String toString() => '[Sentinel ' //
       'type: ${type}, kind: ${kind}, valueAsString: ${valueAsString}]';
 }
@@ -2961,6 +3705,15 @@ class ScriptRef extends ObjRef {
 
   ScriptRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     uri = json['uri'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "ScriptRef";
+    var nextVal;
+    nextVal = uri;
+    json['uri'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -3029,6 +3782,25 @@ class Script extends Obj {
         json['tokenPosTable'].map((dynamic list) => new List<int>.from(list)));
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Script";
+    var nextVal;
+    nextVal = uri;
+    json['uri'] = nextVal;
+    nextVal = library.toJson();
+    json['library'] = nextVal;
+    nextVal = source;
+    if (nextVal != null) {
+      json['source'] = nextVal;
+    }
+    nextVal = tokenPosTable.map((f) => f.toList()).toList();
+    if (nextVal != null) {
+      json['tokenPosTable'] = nextVal;
+    }
+    return json;
+  }
+
   int get hashCode => id.hashCode;
 
   operator ==(other) => other is Script && id == other.id;
@@ -3047,6 +3819,15 @@ class ScriptList extends Response {
 
   ScriptList._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     scripts = new List<ScriptRef>.from(_createObject(json['scripts']));
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "ScriptList";
+    var nextVal;
+    nextVal = scripts.map((f) => f.toJson()).toList();
+    json['scripts'] = nextVal;
+    return json;
   }
 
   String toString() => '[ScriptList type: ${type}, scripts: ${scripts}]';
@@ -3074,6 +3855,21 @@ class SourceLocation extends Response {
     script = _createObject(json['script']);
     tokenPos = json['tokenPos'];
     endTokenPos = json['endTokenPos'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "SourceLocation";
+    var nextVal;
+    nextVal = script.toJson();
+    json['script'] = nextVal;
+    nextVal = tokenPos;
+    json['tokenPos'] = nextVal;
+    nextVal = endTokenPos;
+    if (nextVal != null) {
+      json['endTokenPos'] = nextVal;
+    }
+    return json;
   }
 
   String toString() =>
@@ -3106,6 +3902,17 @@ class SourceReport extends Response {
     scripts = new List<ScriptRef>.from(_createObject(json['scripts']));
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "SourceReport";
+    var nextVal;
+    nextVal = ranges.map((f) => f.toJson()).toList();
+    json['ranges'] = nextVal;
+    nextVal = scripts.map((f) => f.toJson()).toList();
+    json['scripts'] = nextVal;
+    return json;
+  }
+
   String toString() =>
       '[SourceReport type: ${type}, ranges: ${ranges}, scripts: ${scripts}]';
 }
@@ -3132,6 +3939,17 @@ class SourceReportCoverage {
   SourceReportCoverage._fromJson(Map<String, dynamic> json) {
     hits = new List<int>.from(json['hits']);
     misses = new List<int>.from(json['misses']);
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "SourceReportCoverage";
+    var nextVal;
+    nextVal = hits.map((f) => f).toList();
+    json['hits'] = nextVal;
+    nextVal = misses.map((f) => f).toList();
+    json['misses'] = nextVal;
+    return json;
   }
 
   String toString() =>
@@ -3192,6 +4010,33 @@ class SourceReportRange {
         : new List<int>.from(json['possibleBreakpoints']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "SourceReportRange";
+    var nextVal;
+    nextVal = scriptIndex;
+    json['scriptIndex'] = nextVal;
+    nextVal = startPos;
+    json['startPos'] = nextVal;
+    nextVal = endPos;
+    json['endPos'] = nextVal;
+    nextVal = compiled;
+    json['compiled'] = nextVal;
+    nextVal = error.toJson();
+    if (nextVal != null) {
+      json['error'] = nextVal;
+    }
+    nextVal = coverage.toJson();
+    if (nextVal != null) {
+      json['coverage'] = nextVal;
+    }
+    nextVal = possibleBreakpoints.map((f) => f).toList();
+    if (nextVal != null) {
+      json['possibleBreakpoints'] = nextVal;
+    }
+    return json;
+  }
+
   String toString() => '[SourceReportRange ' //
       'scriptIndex: ${scriptIndex}, startPos: ${startPos}, endPos: ${endPos}, ' //
       'compiled: ${compiled}]';
@@ -3224,6 +4069,25 @@ class Stack extends Response {
     messages = new List<Message>.from(_createObject(json['messages']));
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Stack";
+    var nextVal;
+    nextVal = frames.map((f) => f.toJson()).toList();
+    json['frames'] = nextVal;
+    nextVal = asyncCausalFrames.map((f) => f.toJson()).toList();
+    if (nextVal != null) {
+      json['asyncCausalFrames'] = nextVal;
+    }
+    nextVal = awaiterFrames.map((f) => f.toJson()).toList();
+    if (nextVal != null) {
+      json['awaiterFrames'] = nextVal;
+    }
+    nextVal = messages.map((f) => f.toJson()).toList();
+    json['messages'] = nextVal;
+    return json;
+  }
+
   String toString() =>
       '[Stack type: ${type}, frames: ${frames}, messages: ${messages}]';
 }
@@ -3238,6 +4102,13 @@ class Success extends Response {
 
   Success._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Success";
+    var nextVal;
+    return json;
+  }
+
   String toString() => '[Success type: ${type}]';
 }
 
@@ -3250,6 +4121,13 @@ class TimelineEvent {
   TimelineEvent();
 
   TimelineEvent._fromJson(Map<String, dynamic> json) {}
+
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "TimelineEvent";
+    var nextVal;
+    return json;
+  }
 
   String toString() => '[TimelineEvent ]';
 }
@@ -3267,6 +4145,15 @@ class TypeArgumentsRef extends ObjRef {
   TypeArgumentsRef._fromJson(Map<String, dynamic> json)
       : super._fromJson(json) {
     name = json['name'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "TypeArgumentsRef";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -3297,6 +4184,17 @@ class TypeArguments extends Obj {
   TypeArguments._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     name = json['name'];
     types = new List<InstanceRef>.from(_createObject(json['types']));
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "TypeArguments";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = types.map((f) => f.toJson()).toList();
+    json['types'] = nextVal;
+    return json;
   }
 
   int get hashCode => id.hashCode;
@@ -3356,6 +4254,33 @@ class UnresolvedSourceLocation extends Response {
     column = json['column'];
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "UnresolvedSourceLocation";
+    var nextVal;
+    nextVal = script.toJson();
+    if (nextVal != null) {
+      json['script'] = nextVal;
+    }
+    nextVal = scriptUri;
+    if (nextVal != null) {
+      json['scriptUri'] = nextVal;
+    }
+    nextVal = tokenPos;
+    if (nextVal != null) {
+      json['tokenPos'] = nextVal;
+    }
+    nextVal = line;
+    if (nextVal != null) {
+      json['line'] = nextVal;
+    }
+    nextVal = column;
+    if (nextVal != null) {
+      json['column'] = nextVal;
+    }
+    return json;
+  }
+
   String toString() => '[UnresolvedSourceLocation type: ${type}]';
 }
 
@@ -3379,6 +4304,17 @@ class Version extends Response {
     minor = json['minor'];
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "Version";
+    var nextVal;
+    nextVal = major;
+    json['major'] = nextVal;
+    nextVal = minor;
+    json['minor'] = nextVal;
+    return json;
+  }
+
   String toString() =>
       '[Version type: ${type}, major: ${major}, minor: ${minor}]';
 }
@@ -3395,6 +4331,15 @@ class VMRef extends Response {
 
   VMRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     name = json['name'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "VMRef";
+    var nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    return json;
   }
 
   String toString() => '[VMRef type: ${type}, name: ${name}]';
@@ -3437,6 +4382,27 @@ class VM extends Response {
     pid = json['pid'];
     startTime = json['startTime'];
     isolates = new List<IsolateRef>.from(_createObject(json['isolates']));
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "VM";
+    var nextVal;
+    nextVal = architectureBits;
+    json['architectureBits'] = nextVal;
+    nextVal = targetCPU;
+    json['targetCPU'] = nextVal;
+    nextVal = hostCPU;
+    json['hostCPU'] = nextVal;
+    nextVal = version;
+    json['version'] = nextVal;
+    nextVal = pid;
+    json['pid'] = nextVal;
+    nextVal = startTime;
+    json['startTime'] = nextVal;
+    nextVal = isolates.map((f) => f.toJson()).toList();
+    json['isolates'] = nextVal;
+    return json;
   }
 
   String toString() => '[VM]';
@@ -3490,6 +4456,37 @@ class CpuProfile extends Response {
     inclusiveFunctionTrie = new List<int>.from(json['inclusiveFunctionTrie']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "_CpuProfile";
+    var nextVal;
+    nextVal = sampleCount;
+    json['sampleCount'] = nextVal;
+    nextVal = samplePeriod;
+    json['samplePeriod'] = nextVal;
+    nextVal = stackDepth;
+    json['stackDepth'] = nextVal;
+    nextVal = timeSpan;
+    json['timeSpan'] = nextVal;
+    nextVal = timeOriginMicros;
+    json['timeOriginMicros'] = nextVal;
+    nextVal = timeExtentMicros;
+    json['timeExtentMicros'] = nextVal;
+    nextVal = codes.map((f) => f.toJson()).toList();
+    json['codes'] = nextVal;
+    nextVal = functions.map((f) => f.toJson()).toList();
+    json['functions'] = nextVal;
+    nextVal = exclusiveCodeTrie.map((f) => f).toList();
+    json['exclusiveCodeTrie'] = nextVal;
+    nextVal = inclusiveCodeTrie.map((f) => f).toList();
+    json['inclusiveCodeTrie'] = nextVal;
+    nextVal = exclusiveFunctionTrie.map((f) => f).toList();
+    json['exclusiveFunctionTrie'] = nextVal;
+    nextVal = inclusiveFunctionTrie.map((f) => f).toList();
+    json['inclusiveFunctionTrie'] = nextVal;
+    return json;
+  }
+
   String toString() => '[_CpuProfile]';
 }
 
@@ -3512,6 +4509,21 @@ class CodeRegion {
     inclusiveTicks = json['inclusiveTicks'];
     exclusiveTicks = json['exclusiveTicks'];
     code = _createObject(json['code']);
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "CodeRegion";
+    var nextVal;
+    nextVal = kind;
+    json['kind'] = nextVal;
+    nextVal = inclusiveTicks;
+    json['inclusiveTicks'] = nextVal;
+    nextVal = exclusiveTicks;
+    json['exclusiveTicks'] = nextVal;
+    nextVal = code.toJson();
+    json['code'] = nextVal;
+    return json;
   }
 
   String toString() => '[CodeRegion ' //
@@ -3543,6 +4555,23 @@ class ProfileFunction {
     codes = new List<int>.from(json['codes']);
   }
 
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json["type"] = "ProfileFunction";
+    var nextVal;
+    nextVal = kind;
+    json['kind'] = nextVal;
+    nextVal = inclusiveTicks;
+    json['inclusiveTicks'] = nextVal;
+    nextVal = exclusiveTicks;
+    json['exclusiveTicks'] = nextVal;
+    nextVal = function.toJson();
+    json['function'] = nextVal;
+    nextVal = codes.map((f) => f).toList();
+    json['codes'] = nextVal;
+    return json;
+  }
+
   String toString() => '[ProfileFunction ' //
       'kind: ${kind}, inclusiveTicks: ${inclusiveTicks}, exclusiveTicks: ${exclusiveTicks}, ' //
       'function: ${function}, codes: ${codes}]';
@@ -3562,6 +4591,17 @@ class AllocationProfile extends Response {
       : super._fromJson(json) {
     dateLastServiceGC = json['dateLastServiceGC'];
     members = new List<ClassHeapStats>.from(_createObject(json['members']));
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "AllocationProfile";
+    var nextVal;
+    nextVal = dateLastServiceGC;
+    json['dateLastServiceGC'] = nextVal;
+    nextVal = members.map((f) => f.toJson()).toList();
+    json['members'] = nextVal;
+    return json;
   }
 
   String toString() => '[AllocationProfile ' //
@@ -3590,6 +4630,23 @@ class ClassHeapStats extends Response {
     old = new List<int>.from(json['old']);
     promotedBytes = json['promotedBytes'];
     promotedInstances = json['promotedInstances'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "ClassHeapStats";
+    var nextVal;
+    nextVal = classRef.toJson();
+    json['class'] = nextVal;
+    nextVal = new_.map((f) => f).toList();
+    json['new'] = nextVal;
+    nextVal = old.map((f) => f).toList();
+    json['old'] = nextVal;
+    nextVal = promotedBytes;
+    json['promotedBytes'] = nextVal;
+    nextVal = promotedInstances;
+    json['promotedInstances'] = nextVal;
+    return json;
   }
 
   String toString() => '[ClassHeapStats ' //
@@ -3625,6 +4682,27 @@ class HeapSpace extends Response {
     name = json['name'];
     time = json['time'];
     used = json['used'];
+  }
+
+  Map<String, dynamic> toJson() {
+    var json = super.toJson();
+    json["type"] = "HeapSpace";
+    var nextVal;
+    nextVal = avgCollectionPeriodMillis;
+    json['avgCollectionPeriodMillis'] = nextVal;
+    nextVal = capacity;
+    json['capacity'] = nextVal;
+    nextVal = collections;
+    json['collections'] = nextVal;
+    nextVal = external;
+    json['external'] = nextVal;
+    nextVal = name;
+    json['name'] = nextVal;
+    nextVal = time;
+    json['time'] = nextVal;
+    nextVal = used;
+    json['used'] = nextVal;
+    return json;
   }
 
   String toString() => '[HeapSpace]';

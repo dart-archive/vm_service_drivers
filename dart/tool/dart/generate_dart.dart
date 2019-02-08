@@ -1065,6 +1065,52 @@ class Type extends Member {
     gen.writeln('}');
     gen.writeln();
 
+    // toJson
+    if (name == 'Response') {
+      gen.writeln('Map<String, dynamic> toJson() => json;');
+    } else {
+      gen.writeln('Map<String, dynamic> toJson() {');
+      if (superName == null) {
+        gen.writeln('var json = <String, dynamic>{};');
+      } else {
+        gen.writeln('var json = super.toJson();');
+      }
+      // Overwrites "type" from the super class if we had one.
+      gen.writeln('json["type"] = "$name";');
+
+      gen.writeln('var nextVal;');
+      fields.forEach((TypeField field) {
+        gen.write('nextVal = ');
+        if (field.type.isSimple || field.type.isEnum) {
+          gen.write('${field.generatableName}');
+          if (field.defaultValue != null) {
+            gen.write(' ?? ${field.defaultValue}');
+          }
+        } else if (name == 'Event' && field.name == 'extensionData') {
+          // Special case `Event.extensionData`.
+          gen.writeln('extensionData.data');
+        } else if (field.type.isArray) {
+          gen.write('${field.generatableName}.map((f) => f');
+          // Special case `tokenPosTable` which is a List<List<int>>.
+          if (field.name == 'tokenPosTable') {
+            gen.write('.toList()');
+          } else if (!field.type.types.first.isListTypeSimple) {
+            gen.write('.toJson()');
+          }
+          gen.write(').toList()');
+        } else {
+          gen.write('${field.generatableName}.toJson()');
+        }
+        gen.writeln(';');
+        if (field.optional) gen.writeln('if (nextVal != null) {');
+        gen.writeln("json['${field.name}'] = nextVal;");
+        if (field.optional) gen.writeln('}');
+      });
+      gen.writeln('return json;');
+      gen.writeln('}');
+    }
+    gen.writeln();
+
     // equals and hashCode
     if (supportsIdentity) {
       gen.writeStatement('int get hashCode => id.hashCode;');
