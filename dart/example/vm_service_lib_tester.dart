@@ -17,7 +17,7 @@ final int port = 7575;
 
 VmService serviceClient;
 
-main(List<String> args) async {
+void main(List<String> args) async {
   String sdk = path.dirname(path.dirname(Platform.resolvedExecutable));
 
   print('Using sdk at ${sdk}.');
@@ -66,10 +66,9 @@ main(List<String> args) async {
   List<IsolateRef> isolates = await vm.isolates;
   print(isolates);
 
-  // TODO(cbernaschina): remote this check when 1.25 is released
-  if (vm.version.contains('1.25.')) {
-    await testServiceRegistration();
-  }
+  await testServiceRegistration();
+
+  await testSourceReport(vm.isolates.first);
 
   IsolateRef isolateRef = isolates.first;
   print(await serviceClient.resume(isolateRef.id));
@@ -106,6 +105,28 @@ Future testServiceRegistration() async {
   });
   await otherClient.streamListen('_Service');
   await completer.future;
+}
+
+Future testSourceReport(IsolateRef isolateRef) async {
+  final Isolate isolate = await serviceClient.getIsolate(isolateRef.id);
+  final Library rootLibrary =
+      await serviceClient.getObject(isolateRef.id, isolate.rootLib.id);
+  final ScriptRef scriptRef = rootLibrary.scripts.first;
+
+  // make sure some code has run
+  await serviceClient.resume(isolateRef.id);
+  await Future.delayed(const Duration(milliseconds: 25));
+
+  final SourceReport sourceReport = await serviceClient.getSourceReport(
+      isolateRef.id, [SourceReportKind.kCoverage],
+      scriptId: scriptRef.id);
+  for (SourceReportRange range in sourceReport.ranges) {
+    print('  $range');
+    if (range.coverage != null) {
+      print('  ${range.coverage}');
+    }
+  }
+  print(sourceReport);
 }
 
 class StdoutLog extends Log {

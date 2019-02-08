@@ -473,7 +473,7 @@ class VmService {
   ///
   /// See [SourceReport].
   Future<SourceReport> getSourceReport(
-      String isolateId, List<SourceReportKind> reports,
+      String isolateId, /*List<SourceReportKind>*/ List<String> reports,
       {String scriptId, int tokenPos, int endTokenPos, bool forceCompile}) {
     Map m = {'isolateId': isolateId, 'reports': reports};
     if (scriptId != null) m['scriptId'] = scriptId;
@@ -3102,7 +3102,8 @@ class SourceReport extends Response {
   SourceReport();
 
   SourceReport._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
-    ranges = new List<SourceReportRange>.from(_createObject(json['ranges']));
+    ranges = new List<SourceReportRange>.from(
+        _createSpecificObject(json['ranges'], SourceReportRange.parse));
     scripts = new List<ScriptRef>.from(_createObject(json['scripts']));
   }
 
@@ -3186,7 +3187,8 @@ class SourceReportRange {
     endPos = json['endPos'];
     compiled = json['compiled'];
     error = _createObject(json['error']);
-    coverage = _createObject(json['coverage']);
+    coverage =
+        _createSpecificObject(json['coverage'], SourceReportCoverage.parse);
     possibleBreakpoints = json['possibleBreakpoints'] == null
         ? null
         : new List<int>.from(json['possibleBreakpoints']);

@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.14.2
+- fix code generation for the `getSourceReport` call
+
 ## 3.14.1
 - address an encoding issue with stdout / stderr text
 
