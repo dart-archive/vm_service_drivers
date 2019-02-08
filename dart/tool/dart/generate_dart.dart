@@ -1099,7 +1099,7 @@ class Type extends Member {
           }
           gen.write(').toList()');
         } else {
-          gen.write('${field.generatableName}.toJson()');
+          gen.write('${field.generatableName}?.toJson()');
         }
         gen.writeln(';');
         if (field.optional) gen.writeln('if (nextVal != null) {');

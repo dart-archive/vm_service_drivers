@@ -1257,9 +1257,9 @@ class BoundField {
     var json = <String, dynamic>{};
     json["type"] = "BoundField";
     var nextVal;
-    nextVal = decl.toJson();
+    nextVal = decl?.toJson();
     json['decl'] = nextVal;
-    nextVal = value.toJson();
+    nextVal = value?.toJson();
     json['value'] = nextVal;
     return json;
   }
@@ -1312,7 +1312,7 @@ class BoundVariable {
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
-    nextVal = value.toJson();
+    nextVal = value?.toJson();
     json['value'] = nextVal;
     nextVal = declarationTokenPos;
     json['declarationTokenPos'] = nextVal;
@@ -1376,7 +1376,7 @@ class Breakpoint extends Obj {
     if (nextVal != null) {
       json['isSyntheticAsyncContinuation'] = nextVal;
     }
-    nextVal = location.toJson();
+    nextVal = location?.toJson();
     json['location'] = nextVal;
     return json;
   }
@@ -1501,7 +1501,7 @@ class Class extends Obj {
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
-    nextVal = error.toJson();
+    nextVal = error?.toJson();
     if (nextVal != null) {
       json['error'] = nextVal;
     }
@@ -1509,23 +1509,23 @@ class Class extends Obj {
     json['abstract'] = nextVal;
     nextVal = isConst;
     json['const'] = nextVal;
-    nextVal = library.toJson();
+    nextVal = library?.toJson();
     json['library'] = nextVal;
-    nextVal = location.toJson();
+    nextVal = location?.toJson();
     if (nextVal != null) {
       json['location'] = nextVal;
     }
-    nextVal = superClass.toJson();
+    nextVal = superClass?.toJson();
     if (nextVal != null) {
       json['super'] = nextVal;
     }
-    nextVal = superType.toJson();
+    nextVal = superType?.toJson();
     if (nextVal != null) {
       json['superType'] = nextVal;
     }
     nextVal = interfaces.map((f) => f.toJson()).toList();
     json['interfaces'] = nextVal;
-    nextVal = mixin.toJson();
+    nextVal = mixin?.toJson();
     if (nextVal != null) {
       json['mixin'] = nextVal;
     }
@@ -1703,7 +1703,7 @@ class Context extends Obj {
     var nextVal;
     nextVal = length;
     json['length'] = nextVal;
-    nextVal = parent.toJson();
+    nextVal = parent?.toJson();
     if (nextVal != null) {
       json['parent'] = nextVal;
     }
@@ -1737,7 +1737,7 @@ class ContextElement {
     var json = <String, dynamic>{};
     json["type"] = "ContextElement";
     var nextVal;
-    nextVal = value.toJson();
+    nextVal = value?.toJson();
     json['value'] = nextVal;
     return json;
   }
@@ -1821,11 +1821,11 @@ class Error extends Obj {
     json['kind'] = nextVal;
     nextVal = message;
     json['message'] = nextVal;
-    nextVal = exception.toJson();
+    nextVal = exception?.toJson();
     if (nextVal != null) {
       json['exception'] = nextVal;
     }
-    nextVal = stacktrace.toJson();
+    nextVal = stacktrace?.toJson();
     if (nextVal != null) {
       json['stacktrace'] = nextVal;
     }
@@ -2025,17 +2025,17 @@ class Event extends Response {
     var nextVal;
     nextVal = kind;
     json['kind'] = nextVal;
-    nextVal = isolate.toJson();
+    nextVal = isolate?.toJson();
     if (nextVal != null) {
       json['isolate'] = nextVal;
     }
-    nextVal = vm.toJson();
+    nextVal = vm?.toJson();
     if (nextVal != null) {
       json['vm'] = nextVal;
     }
     nextVal = timestamp;
     json['timestamp'] = nextVal;
-    nextVal = breakpoint.toJson();
+    nextVal = breakpoint?.toJson();
     if (nextVal != null) {
       json['breakpoint'] = nextVal;
     }
@@ -2043,11 +2043,11 @@ class Event extends Response {
     if (nextVal != null) {
       json['pauseBreakpoints'] = nextVal;
     }
-    nextVal = topFrame.toJson();
+    nextVal = topFrame?.toJson();
     if (nextVal != null) {
       json['topFrame'] = nextVal;
     }
-    nextVal = exception.toJson();
+    nextVal = exception?.toJson();
     if (nextVal != null) {
       json['exception'] = nextVal;
     }
@@ -2055,7 +2055,7 @@ class Event extends Response {
     if (nextVal != null) {
       json['bytes'] = nextVal;
     }
-    nextVal = inspectee.toJson();
+    nextVal = inspectee?.toJson();
     if (nextVal != null) {
       json['inspectee'] = nextVal;
     }
@@ -2145,9 +2145,9 @@ class FieldRef extends ObjRef {
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
-    nextVal = owner.toJson();
+    nextVal = owner?.toJson();
     json['owner'] = nextVal;
-    nextVal = declaredType.toJson();
+    nextVal = declaredType?.toJson();
     json['declaredType'] = nextVal;
     nextVal = isConst;
     json['const'] = nextVal;
@@ -2218,9 +2218,9 @@ class Field extends Obj {
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
-    nextVal = owner.toJson();
+    nextVal = owner?.toJson();
     json['owner'] = nextVal;
-    nextVal = declaredType.toJson();
+    nextVal = declaredType?.toJson();
     json['declaredType'] = nextVal;
     nextVal = isConst;
     json['const'] = nextVal;
@@ -2228,11 +2228,11 @@ class Field extends Obj {
     json['final'] = nextVal;
     nextVal = isStatic;
     json['static'] = nextVal;
-    nextVal = staticValue.toJson();
+    nextVal = staticValue?.toJson();
     if (nextVal != null) {
       json['staticValue'] = nextVal;
     }
-    nextVal = location.toJson();
+    nextVal = location?.toJson();
     if (nextVal != null) {
       json['location'] = nextVal;
     }
@@ -2363,15 +2363,15 @@ class Frame extends Response {
     var nextVal;
     nextVal = index;
     json['index'] = nextVal;
-    nextVal = function.toJson();
+    nextVal = function?.toJson();
     if (nextVal != null) {
       json['function'] = nextVal;
     }
-    nextVal = code.toJson();
+    nextVal = code?.toJson();
     if (nextVal != null) {
       json['code'] = nextVal;
     }
-    nextVal = location.toJson();
+    nextVal = location?.toJson();
     if (nextVal != null) {
       json['location'] = nextVal;
     }
@@ -2423,7 +2423,7 @@ class FuncRef extends ObjRef {
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
-    nextVal = owner.toJson();
+    nextVal = owner?.toJson();
     json['owner'] = nextVal;
     nextVal = isStatic;
     json['static'] = nextVal;
@@ -2477,13 +2477,13 @@ class Func extends Obj {
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
-    nextVal = owner.toJson();
+    nextVal = owner?.toJson();
     json['owner'] = nextVal;
-    nextVal = location.toJson();
+    nextVal = location?.toJson();
     if (nextVal != null) {
       json['location'] = nextVal;
     }
-    nextVal = code.toJson();
+    nextVal = code?.toJson();
     if (nextVal != null) {
       json['code'] = nextVal;
     }
@@ -2605,7 +2605,7 @@ class InstanceRef extends ObjRef {
     var nextVal;
     nextVal = kind;
     json['kind'] = nextVal;
-    nextVal = classRef.toJson();
+    nextVal = classRef?.toJson();
     json['class'] = nextVal;
     nextVal = valueAsString;
     if (nextVal != null) {
@@ -2623,15 +2623,15 @@ class InstanceRef extends ObjRef {
     if (nextVal != null) {
       json['name'] = nextVal;
     }
-    nextVal = typeClass.toJson();
+    nextVal = typeClass?.toJson();
     if (nextVal != null) {
       json['typeClass'] = nextVal;
     }
-    nextVal = parameterizedClass.toJson();
+    nextVal = parameterizedClass?.toJson();
     if (nextVal != null) {
       json['parameterizedClass'] = nextVal;
     }
-    nextVal = pattern.toJson();
+    nextVal = pattern?.toJson();
     if (nextVal != null) {
       json['pattern'] = nextVal;
     }
@@ -2962,11 +2962,11 @@ class Instance extends Obj {
     if (nextVal != null) {
       json['name'] = nextVal;
     }
-    nextVal = typeClass.toJson();
+    nextVal = typeClass?.toJson();
     if (nextVal != null) {
       json['typeClass'] = nextVal;
     }
-    nextVal = parameterizedClass.toJson();
+    nextVal = parameterizedClass?.toJson();
     if (nextVal != null) {
       json['parameterizedClass'] = nextVal;
     }
@@ -2986,11 +2986,11 @@ class Instance extends Obj {
     if (nextVal != null) {
       json['bytes'] = nextVal;
     }
-    nextVal = closureFunction.toJson();
+    nextVal = closureFunction?.toJson();
     if (nextVal != null) {
       json['closureFunction'] = nextVal;
     }
-    nextVal = mirrorReferent.toJson();
+    nextVal = mirrorReferent?.toJson();
     if (nextVal != null) {
       json['mirrorReferent'] = nextVal;
     }
@@ -3006,15 +3006,15 @@ class Instance extends Obj {
     if (nextVal != null) {
       json['isMultiLine'] = nextVal;
     }
-    nextVal = propertyKey.toJson();
+    nextVal = propertyKey?.toJson();
     if (nextVal != null) {
       json['propertyKey'] = nextVal;
     }
-    nextVal = propertyValue.toJson();
+    nextVal = propertyValue?.toJson();
     if (nextVal != null) {
       json['propertyValue'] = nextVal;
     }
-    nextVal = typeArguments.toJson();
+    nextVal = typeArguments?.toJson();
     if (nextVal != null) {
       json['typeArguments'] = nextVal;
     }
@@ -3022,11 +3022,11 @@ class Instance extends Obj {
     if (nextVal != null) {
       json['parameterIndex'] = nextVal;
     }
-    nextVal = targetType.toJson();
+    nextVal = targetType?.toJson();
     if (nextVal != null) {
       json['targetType'] = nextVal;
     }
-    nextVal = bound.toJson();
+    nextVal = bound?.toJson();
     if (nextVal != null) {
       json['bound'] = nextVal;
     }
@@ -3180,9 +3180,9 @@ class Isolate extends Response {
     json['livePorts'] = nextVal;
     nextVal = pauseOnExit;
     json['pauseOnExit'] = nextVal;
-    nextVal = pauseEvent.toJson();
+    nextVal = pauseEvent?.toJson();
     json['pauseEvent'] = nextVal;
-    nextVal = rootLib.toJson();
+    nextVal = rootLib?.toJson();
     if (nextVal != null) {
       json['rootLib'] = nextVal;
     }
@@ -3190,7 +3190,7 @@ class Isolate extends Response {
     json['libraries'] = nextVal;
     nextVal = breakpoints.map((f) => f.toJson()).toList();
     json['breakpoints'] = nextVal;
-    nextVal = error.toJson();
+    nextVal = error?.toJson();
     if (nextVal != null) {
       json['error'] = nextVal;
     }
@@ -3358,7 +3358,7 @@ class LibraryDependency {
     json['isDeferred'] = nextVal;
     nextVal = prefix;
     json['prefix'] = nextVal;
-    nextVal = target.toJson();
+    nextVal = target?.toJson();
     json['target'] = nextVal;
     return json;
   }
@@ -3389,9 +3389,9 @@ class MapAssociation {
     var json = <String, dynamic>{};
     json["type"] = "MapAssociation";
     var nextVal;
-    nextVal = key.toJson();
+    nextVal = key?.toJson();
     json['key'] = nextVal;
-    nextVal = value.toJson();
+    nextVal = value?.toJson();
     json['value'] = nextVal;
     return json;
   }
@@ -3450,11 +3450,11 @@ class Message extends Response {
     json['messageObjectId'] = nextVal;
     nextVal = size;
     json['size'] = nextVal;
-    nextVal = handler.toJson();
+    nextVal = handler?.toJson();
     if (nextVal != null) {
       json['handler'] = nextVal;
     }
-    nextVal = location.toJson();
+    nextVal = location?.toJson();
     if (nextVal != null) {
       json['location'] = nextVal;
     }
@@ -3590,7 +3590,7 @@ class Obj extends Response {
     var nextVal;
     nextVal = id;
     json['id'] = nextVal;
-    nextVal = classRef.toJson();
+    nextVal = classRef?.toJson();
     if (nextVal != null) {
       json['class'] = nextVal;
     }
@@ -3788,7 +3788,7 @@ class Script extends Obj {
     var nextVal;
     nextVal = uri;
     json['uri'] = nextVal;
-    nextVal = library.toJson();
+    nextVal = library?.toJson();
     json['library'] = nextVal;
     nextVal = source;
     if (nextVal != null) {
@@ -3861,7 +3861,7 @@ class SourceLocation extends Response {
     var json = super.toJson();
     json["type"] = "SourceLocation";
     var nextVal;
-    nextVal = script.toJson();
+    nextVal = script?.toJson();
     json['script'] = nextVal;
     nextVal = tokenPos;
     json['tokenPos'] = nextVal;
@@ -4022,11 +4022,11 @@ class SourceReportRange {
     json['endPos'] = nextVal;
     nextVal = compiled;
     json['compiled'] = nextVal;
-    nextVal = error.toJson();
+    nextVal = error?.toJson();
     if (nextVal != null) {
       json['error'] = nextVal;
     }
-    nextVal = coverage.toJson();
+    nextVal = coverage?.toJson();
     if (nextVal != null) {
       json['coverage'] = nextVal;
     }
@@ -4258,7 +4258,7 @@ class UnresolvedSourceLocation extends Response {
     var json = super.toJson();
     json["type"] = "UnresolvedSourceLocation";
     var nextVal;
-    nextVal = script.toJson();
+    nextVal = script?.toJson();
     if (nextVal != null) {
       json['script'] = nextVal;
     }
@@ -4521,7 +4521,7 @@ class CodeRegion {
     json['inclusiveTicks'] = nextVal;
     nextVal = exclusiveTicks;
     json['exclusiveTicks'] = nextVal;
-    nextVal = code.toJson();
+    nextVal = code?.toJson();
     json['code'] = nextVal;
     return json;
   }
@@ -4565,7 +4565,7 @@ class ProfileFunction {
     json['inclusiveTicks'] = nextVal;
     nextVal = exclusiveTicks;
     json['exclusiveTicks'] = nextVal;
-    nextVal = function.toJson();
+    nextVal = function?.toJson();
     json['function'] = nextVal;
     nextVal = codes.map((f) => f).toList();
     json['codes'] = nextVal;
@@ -4636,7 +4636,7 @@ class ClassHeapStats extends Response {
     var json = super.toJson();
     json["type"] = "ClassHeapStats";
     var nextVal;
-    nextVal = classRef.toJson();
+    nextVal = classRef?.toJson();
     json['class'] = nextVal;
     nextVal = new_.map((f) => f).toList();
     json['new'] = nextVal;
