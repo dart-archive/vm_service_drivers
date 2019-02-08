@@ -1406,7 +1406,7 @@ class ClassRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "ClassRef";
+    json["type"] = "@Class";
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
@@ -1589,7 +1589,7 @@ class CodeRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "CodeRef";
+    json["type"] = "@Code";
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
@@ -1658,7 +1658,7 @@ class ContextRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "ContextRef";
+    json["type"] = "@Context";
     var nextVal;
     nextVal = length;
     json['length'] = nextVal;
@@ -1765,7 +1765,7 @@ class ErrorRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "ErrorRef";
+    json["type"] = "@Error";
     var nextVal;
     nextVal = kind;
     json['kind'] = nextVal;
@@ -2141,7 +2141,7 @@ class FieldRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "FieldRef";
+    json["type"] = "@Field";
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
@@ -2419,7 +2419,7 @@ class FuncRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "FuncRef";
+    json["type"] = "@Function";
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
@@ -2473,7 +2473,7 @@ class Func extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Func";
+    json["type"] = "Function";
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
@@ -2601,7 +2601,7 @@ class InstanceRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "InstanceRef";
+    json["type"] = "@Instance";
     var nextVal;
     nextVal = kind;
     json['kind'] = nextVal;
@@ -3064,7 +3064,7 @@ class IsolateRef extends Response {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "IsolateRef";
+    json["type"] = "@Isolate";
     var nextVal;
     nextVal = id;
     json['id'] = nextVal;
@@ -3230,7 +3230,7 @@ class LibraryRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "LibraryRef";
+    json["type"] = "@Library";
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
@@ -3477,7 +3477,7 @@ class NullValRef extends InstanceRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "NullValRef";
+    json["type"] = "@Null";
     var nextVal;
     return json;
   }
@@ -3501,7 +3501,7 @@ class NullVal extends Instance {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "NullVal";
+    json["type"] = "Null";
     var nextVal;
     return json;
   }
@@ -3530,7 +3530,7 @@ class ObjRef extends Response {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "ObjRef";
+    json["type"] = "@Object";
     var nextVal;
     nextVal = id;
     json['id'] = nextVal;
@@ -3586,7 +3586,7 @@ class Obj extends Response {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Obj";
+    json["type"] = "Object";
     var nextVal;
     nextVal = id;
     json['id'] = nextVal;
@@ -3709,7 +3709,7 @@ class ScriptRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "ScriptRef";
+    json["type"] = "@Script";
     var nextVal;
     nextVal = uri;
     json['uri'] = nextVal;
@@ -4149,7 +4149,7 @@ class TypeArgumentsRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "TypeArgumentsRef";
+    json["type"] = "@TypeArguments";
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;
@@ -4335,7 +4335,7 @@ class VMRef extends Response {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "VMRef";
+    json["type"] = "@VM";
     var nextVal;
     nextVal = name;
     json['name'] = nextVal;

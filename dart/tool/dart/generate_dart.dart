@@ -1076,7 +1076,7 @@ class Type extends Member {
         gen.writeln('var json = super.toJson();');
       }
       // Overwrites "type" from the super class if we had one.
-      gen.writeln('json["type"] = "$name";');
+      gen.writeln('json["type"] = "$rawName";');
 
       gen.writeln('var nextVal;');
       fields.forEach((TypeField field) {
