@@ -112,12 +112,12 @@ public class VmServiceTest {
         return;
       }
     }
-    sampleDart = new File(projDir, "dart/example/sample_main.dart".replace("/", File.separator));
+    sampleDart = new File(projDir, "java/example/sample_main.dart".replace("/", File.separator));
     if (!sampleDart.isFile()) {
       showErrorAndExit("Cannot find sample: " + sampleDart);
     }
     sampleDartWithException = new File(projDir,
-            "dart/example/sample_exception.dart".replace("/", File.separator));
+            "java/example/sample_exception.dart".replace("/", File.separator));
     if (!sampleDartWithException.isFile()) {
       showErrorAndExit("Cannot find sample: " + sampleDartWithException);
     }

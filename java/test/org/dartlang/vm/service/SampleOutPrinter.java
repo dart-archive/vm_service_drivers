@@ -24,11 +24,11 @@ import java.io.InputStreamReader;
  * Echo the content of a stream to {@link System.out} with the given prefix.
  */
 public class SampleOutPrinter {
-  private class LinesReaderThread extends Thread {
-    public LinesReaderThread() {
-      setName("SampleOutPrinter.LinesReaderThread - " + prefix);
-      setDaemon(true);
-    }
+    private class LinesReaderThread extends Thread {
+        public LinesReaderThread() {
+            setName("SampleOutPrinter.LinesReaderThread - " + prefix);
+            setDaemon(true);
+        }
 
     @Override
     public void run() {
@@ -49,43 +49,45 @@ public class SampleOutPrinter {
           currentLine = line;
           currentLineLock.notifyAll();
         }
-        System.out.println(prefix + ": " + line);
+        System.out.println("[" + prefix + "] " + line);
       }
     }
   }
 
-  private String currentLine;
+    private String currentLine;
 
-  private final Object currentLineLock = new Object();
+    private final Object currentLineLock = new Object();
 
-  private final String prefix;
-  private final BufferedReader reader;
+    private final String prefix;
+    private final BufferedReader reader;
 
-  public SampleOutPrinter(String prefix, InputStream stream) {
-    this.prefix = prefix;
-    this.reader = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
-    new LinesReaderThread().start();
-  }
-
-  public void assertEmpty() {
-    synchronized (currentLineLock) {
-      if (currentLine != null) {
-        throw new RuntimeException("Did not expect " + prefix + ": \"" + currentLine + "\"");
-      }
+    public SampleOutPrinter(String prefix, InputStream stream) {
+        this.prefix = prefix;
+        this.reader = new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8));
+        new LinesReaderThread().start();
     }
-  }
 
-  public void assertLastLine(String text) {
-    synchronized (currentLineLock) {
-      if (text == null) {
-        if (currentLine != null) {
-          throw new RuntimeException("Did not expect " + prefix + ": \"" + currentLine + "\"");
+    public void assertEmpty() {
+        synchronized (currentLineLock) {
+            if (currentLine != null) {
+                throw new RuntimeException("Did not expect " + prefix + ": \"" + currentLine + "\"");
+            }
         }
-      } else {
-        if (currentLine == null || !currentLine.contains(text)) {
-          throw new RuntimeException("Expected current line to contain: " + text);
-        }
-      }
     }
-  }
+
+    public void assertLastLine(String text) {
+        synchronized (currentLineLock) {
+            if (text == null) {
+                if (currentLine != null) {
+                    throw new RuntimeException("Did not expect " + prefix + ": \"" + currentLine + "\"");
+                }
+            } else {
+                if (currentLine == null || !currentLine.contains(text)) {
+                    throw new RuntimeException("Expected current line to contain text\n"
+                            + "\nexpected: [" + text + "]"
+                            + "\nactual: [" + currentLine + "]");
+                }
+            }
+        }
+    }
 }
