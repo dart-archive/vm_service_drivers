@@ -26,7 +26,7 @@
     <!-- compile tests -->
     <mkdir dir="build/test"/>
     <javac srcdir="test" destdir="build/test" includeantruntime="false"
-        classpath="${path};build/classes"/>
+        classpath="${path};build/classes" debug="true"/>
   </target>
 
   <target name="jar" depends="compile">
