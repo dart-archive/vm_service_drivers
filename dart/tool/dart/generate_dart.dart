@@ -1065,12 +1065,11 @@ class Type extends Member {
     gen.writeln('}');
     gen.writeln();
 
-    // toJson
-    if (name == 'Response') {
-      gen.writeln('Map<String, dynamic> toJson() => json;');
-    } else {
+    // toJson support, the base Response type is not supported
+    if (name != 'Response') {
       gen.writeln('Map<String, dynamic> toJson() {');
-      if (superName == null) {
+      if (superName == null || superName == 'Response') {
+        // The base Response type doesn't have a toJson
         gen.writeln('var json = <String, dynamic>{};');
       } else {
         gen.writeln('var json = super.toJson();');
@@ -1088,16 +1087,16 @@ class Type extends Member {
           }
         } else if (name == 'Event' && field.name == 'extensionData') {
           // Special case `Event.extensionData`.
-          gen.writeln('extensionData.data');
+          gen.writeln('extensionData?.data');
         } else if (field.type.isArray) {
-          gen.write('${field.generatableName}.map((f) => f');
+          gen.write('${field.generatableName}?.map((f) => f');
           // Special case `tokenPosTable` which is a List<List<int>>.
           if (field.name == 'tokenPosTable') {
-            gen.write('.toList()');
+            gen.write('?.toList()');
           } else if (!field.type.types.first.isListTypeSimple) {
-            gen.write('.toJson()');
+            gen.write('?.toJson()');
           }
-          gen.write(').toList()');
+          gen.write(')?.toList()');
         } else {
           gen.write('${field.generatableName}?.toJson()');
         }
@@ -1108,8 +1107,8 @@ class Type extends Member {
       });
       gen.writeln('return json;');
       gen.writeln('}');
+      gen.writeln();
     }
-    gen.writeln();
 
     // equals and hashCode
     if (supportsIdentity) {
