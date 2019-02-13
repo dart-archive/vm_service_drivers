@@ -138,7 +138,7 @@ final String _implCode = r'''
       String streamId = map['params']['streamId'];
       Map event = map['params']['event'];
       event['_data'] = data;
-      _getEventController(streamId).add(_createObject(event));
+      _getEventController(streamId).add(createObject(event));
     }
   }
 
@@ -183,7 +183,7 @@ final String _implCode = r'''
       if (_typeFactories[type] == null) {
         completer.complete(Response.parse(result));
       } else {
-        completer.complete(_createObject(result));
+        completer.complete(createObject(result));
       }
     }
   }
@@ -202,7 +202,7 @@ final String _implCode = r'''
     final Map params = json['params'];
     if (method == 'streamNotify') {
       String streamId = params['streamId'];
-      _getEventController(streamId).add(_createObject(params['event']));
+      _getEventController(streamId).add(createObject(params['event']));
     } else {
       await _routeRequest(method, params);
     }
@@ -402,11 +402,11 @@ const String undocumented = 'undocumented';
 /// This is useful for handling the results of the Stdout or Stderr events.
 String decodeBase64(String str) => utf8.decode(base64.decode(str));
 
-Object _createObject(dynamic json) {
+Object createObject(dynamic json) {
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => _createObject(e)).toList();
+    return json.map((e) => createObject(e)).toList();
   } else if (json is Map) {
     String type = json['type'];
     if (_typeFactories[type] == null) {
@@ -908,6 +908,23 @@ class Type extends Member {
 
   Type(this.parent, String categoryName, String definition, [this.docs]) {
     _parse(new Tokenizer(definition).tokenize());
+    if (fields.any((f) => f.name == 'id') &&
+        !fields.any((f) => f.name == 'fixedId')) {
+      var field = TypeField(this, '')
+        ..type = (MemberType()..types = [TypeRef('bool')])
+        ..name = 'fixedId'
+        ..optional = true;
+      fields.add(field);
+    }
+    // The vm sends a name for VM objects even though that isn't in the
+    // protocol.
+    if (name == 'VM' && !fields.any((f) => f.name == 'name')) {
+      var field = TypeField(this, '')
+        ..type = (MemberType()..types = [TypeRef('String')])
+        ..name = 'name'
+        ..optional = true;
+      fields.add(field);
+    }
   }
 
   Type._(this.parent, this.rawName, this.name, this.superName, this.docs);
@@ -1046,7 +1063,7 @@ class Type extends Member {
                 "new List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = $ref == null ? null : "
-                "new List<${fieldType.listTypeArg}>.from(_createObject($ref));");
+                "new List<${fieldType.listTypeArg}>.from(createObject($ref));");
           }
         } else {
           if (fieldType.isListTypeSimple) {
@@ -1054,12 +1071,12 @@ class Type extends Member {
                 "new List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = "
-                "new List<${fieldType.listTypeArg}>.from(_createObject($ref));");
+                "new List<${fieldType.listTypeArg}>.from(createObject($ref));");
           }
         }
       } else {
         gen.writeln(
-            "${field.generatableName} = _createObject(json['${field.name}']);");
+            "${field.generatableName} = createObject(json['${field.name}']);");
       }
     });
     gen.writeln('}');

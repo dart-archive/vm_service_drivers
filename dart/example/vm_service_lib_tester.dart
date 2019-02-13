@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/equality.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
@@ -45,7 +46,39 @@ main(List<String> args) async {
   print('socket connected');
 
   serviceClient.onSend.listen((str) => print('--> ${str}'));
-  serviceClient.onReceive.listen((str) => print('<-- ${str}'));
+  serviceClient.onReceive.listen((str) {
+    print('<-- ${str}');
+
+    // For each received event, check that we can deserialize it and
+    // reserialize it back to the same exact representation (minus
+    // private fields).
+    var json = jsonDecode(str);
+    var originalJson = json['result'] as Map<String, dynamic>;
+    if (originalJson == null && json['method'] == 'streamNotify') {
+      originalJson = json['params']['event'];
+    }
+    if (originalJson == null) {
+      throw StateError('Unrecognized event type! $json');
+    }
+
+    var instance = createObject(originalJson);
+    if (instance == null) {
+      throw 'failed to deserialize object $originalJson!';
+    }
+    var reserializedJson = (instance as dynamic).toJson();
+
+    // Remove private fields that aren't a part of the protocol, we don't
+    // reproduce those.
+    originalJson.removeWhere((k, v) => k.startsWith('_'));
+
+    if (!DeepCollectionEquality().equals(originalJson, reserializedJson)) {
+      throw StateError('''
+Serialized result did not match original!
+  Original: $originalJson
+  Encoded: $reserializedJson
+''');
+    }
+  });
 
   serviceClient.onIsolateEvent.listen((e) => print('onIsolateEvent: ${e}'));
   serviceClient.onDebugEvent.listen((e) => print('onDebugEvent: ${e}'));
