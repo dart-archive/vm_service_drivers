@@ -2,8 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:developer' as developer;
-
 void main(List<String> args) {
   String local1 = 'abcd';
   int local2 = 2;
@@ -31,8 +29,6 @@ void main(List<String> args) {
 
   print(longList);
   print(deepList);
-
-  developer.debugger();
 
   print('exiting...');
 }

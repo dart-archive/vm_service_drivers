@@ -739,9 +739,17 @@ class Method extends Member {
     gen.write('Future<${returnType.name}> ${publicName}(');
     bool startedOptional = false;
     gen.write(args.map((MethodArg arg) {
-      String typeName = (!arg.type.isArray && api.isEnumName(arg.type.name))
-          ? '/*${arg.type}*/ String'
-          : arg.type.ref;
+      String typeName;
+      if (api.isEnumName(arg.type.name)) {
+        if (arg.type.isArray) {
+          typeName = typeName = '/*${arg.type}*/ List<String>';
+        } else {
+          typeName = '/*${arg.type}*/ String';
+        }
+      } else {
+        typeName = arg.type.ref;
+      }
+
       if (arg.optional && !startedOptional) {
         startedOptional = true;
         return '{${typeName} ${arg.name}';
@@ -1049,6 +1057,14 @@ class Type extends Member {
         // Special case `_CpuProfile.functions`.
         gen.writeln("functions = new List<ProfileFunction>.from("
             "_createSpecificObject(json['functions'], ProfileFunction.parse));");
+      } else if (name == 'SourceReport' && field.name == 'ranges') {
+        // Special case `SourceReport.ranges`.
+        gen.writeln("ranges = new List<SourceReportRange>.from("
+            "_createSpecificObject(json['ranges'], SourceReportRange.parse));");
+      } else if (name == 'SourceReportRange' && field.name == 'coverage') {
+        // Special case `SourceReportRange.coverage`.
+        gen.writeln("coverage = _createSpecificObject("
+            "json['coverage'], SourceReportCoverage.parse);");
       } else if (name == 'Script' && field.name == 'tokenPosTable') {
         // Special case `Script.tokenPosTable`.
         gen.writeln(
