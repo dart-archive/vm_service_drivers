@@ -1256,11 +1256,10 @@ class BoundField {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "BoundField";
-    var nextVal;
-    nextVal = decl?.toJson();
-    json['decl'] = nextVal;
-    nextVal = value?.toJson();
-    json['value'] = nextVal;
+    json.addAll({
+      'decl': decl?.toJson(),
+      'value': value?.toJson(),
+    });
     return json;
   }
 
@@ -1309,17 +1308,13 @@ class BoundVariable {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "BoundVariable";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = value?.toJson();
-    json['value'] = nextVal;
-    nextVal = declarationTokenPos;
-    json['declarationTokenPos'] = nextVal;
-    nextVal = scopeStartTokenPos;
-    json['scopeStartTokenPos'] = nextVal;
-    nextVal = scopeEndTokenPos;
-    json['scopeEndTokenPos'] = nextVal;
+    json.addAll({
+      'name': name,
+      'value': value?.toJson(),
+      'declarationTokenPos': declarationTokenPos,
+      'scopeStartTokenPos': scopeStartTokenPos,
+      'scopeEndTokenPos': scopeEndTokenPos,
+    });
     return json;
   }
 
@@ -1367,17 +1362,16 @@ class Breakpoint extends Obj {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Breakpoint";
+    json.addAll({
+      'breakpointNumber': breakpointNumber,
+      'resolved': resolved,
+      'location': location?.toJson(),
+    });
     var nextVal;
-    nextVal = breakpointNumber;
-    json['breakpointNumber'] = nextVal;
-    nextVal = resolved;
-    json['resolved'] = nextVal;
     nextVal = isSyntheticAsyncContinuation;
     if (nextVal != null) {
       json['isSyntheticAsyncContinuation'] = nextVal;
     }
-    nextVal = location?.toJson();
-    json['location'] = nextVal;
     return json;
   }
 
@@ -1407,9 +1401,9 @@ class ClassRef extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@Class";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
+    json.addAll({
+      'name': name,
+    });
     return json;
   }
 
@@ -1498,19 +1492,21 @@ class Class extends Obj {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Class";
+    json.addAll({
+      'name': name,
+      'abstract': isAbstract,
+      'const': isConst,
+      'library': library?.toJson(),
+      'interfaces': interfaces?.map((f) => f?.toJson())?.toList(),
+      'fields': fields?.map((f) => f?.toJson())?.toList(),
+      'functions': functions?.map((f) => f?.toJson())?.toList(),
+      'subclasses': subclasses?.map((f) => f?.toJson())?.toList(),
+    });
     var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
     nextVal = error?.toJson();
     if (nextVal != null) {
       json['error'] = nextVal;
     }
-    nextVal = isAbstract;
-    json['abstract'] = nextVal;
-    nextVal = isConst;
-    json['const'] = nextVal;
-    nextVal = library?.toJson();
-    json['library'] = nextVal;
     nextVal = location?.toJson();
     if (nextVal != null) {
       json['location'] = nextVal;
@@ -1523,18 +1519,10 @@ class Class extends Obj {
     if (nextVal != null) {
       json['superType'] = nextVal;
     }
-    nextVal = interfaces?.map((f) => f?.toJson())?.toList();
-    json['interfaces'] = nextVal;
     nextVal = mixin?.toJson();
     if (nextVal != null) {
       json['mixin'] = nextVal;
     }
-    nextVal = fields?.map((f) => f?.toJson())?.toList();
-    json['fields'] = nextVal;
-    nextVal = functions?.map((f) => f?.toJson())?.toList();
-    json['functions'] = nextVal;
-    nextVal = subclasses?.map((f) => f?.toJson())?.toList();
-    json['subclasses'] = nextVal;
     return json;
   }
 
@@ -1560,9 +1548,9 @@ class ClassList extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "ClassList";
-    var nextVal;
-    nextVal = classes?.map((f) => f?.toJson())?.toList();
-    json['classes'] = nextVal;
+    json.addAll({
+      'classes': classes?.map((f) => f?.toJson())?.toList(),
+    });
     return json;
   }
 
@@ -1590,11 +1578,10 @@ class CodeRef extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@Code";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = kind;
-    json['kind'] = nextVal;
+    json.addAll({
+      'name': name,
+      'kind': kind,
+    });
     return json;
   }
 
@@ -1627,11 +1614,10 @@ class Code extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Code";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = kind;
-    json['kind'] = nextVal;
+    json.addAll({
+      'name': name,
+      'kind': kind,
+    });
     return json;
   }
 
@@ -1659,9 +1645,9 @@ class ContextRef extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@Context";
-    var nextVal;
-    nextVal = length;
-    json['length'] = nextVal;
+    json.addAll({
+      'length': length,
+    });
     return json;
   }
 
@@ -1700,15 +1686,15 @@ class Context extends Obj {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Context";
+    json.addAll({
+      'length': length,
+      'variables': variables?.map((f) => f?.toJson())?.toList(),
+    });
     var nextVal;
-    nextVal = length;
-    json['length'] = nextVal;
     nextVal = parent?.toJson();
     if (nextVal != null) {
       json['parent'] = nextVal;
     }
-    nextVal = variables?.map((f) => f?.toJson())?.toList();
-    json['variables'] = nextVal;
     return json;
   }
 
@@ -1736,9 +1722,9 @@ class ContextElement {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "ContextElement";
-    var nextVal;
-    nextVal = value?.toJson();
-    json['value'] = nextVal;
+    json.addAll({
+      'value': value?.toJson(),
+    });
     return json;
   }
 
@@ -1766,11 +1752,10 @@ class ErrorRef extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@Error";
-    var nextVal;
-    nextVal = kind;
-    json['kind'] = nextVal;
-    nextVal = message;
-    json['message'] = nextVal;
+    json.addAll({
+      'kind': kind,
+      'message': message,
+    });
     return json;
   }
 
@@ -1816,11 +1801,11 @@ class Error extends Obj {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Error";
+    json.addAll({
+      'kind': kind,
+      'message': message,
+    });
     var nextVal;
-    nextVal = kind;
-    json['kind'] = nextVal;
-    nextVal = message;
-    json['message'] = nextVal;
     nextVal = exception?.toJson();
     if (nextVal != null) {
       json['exception'] = nextVal;
@@ -2022,9 +2007,11 @@ class Event extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "Event";
+    json.addAll({
+      'kind': kind,
+      'timestamp': timestamp,
+    });
     var nextVal;
-    nextVal = kind;
-    json['kind'] = nextVal;
     nextVal = isolate?.toJson();
     if (nextVal != null) {
       json['isolate'] = nextVal;
@@ -2033,8 +2020,6 @@ class Event extends Response {
     if (nextVal != null) {
       json['vm'] = nextVal;
     }
-    nextVal = timestamp;
-    json['timestamp'] = nextVal;
     nextVal = breakpoint?.toJson();
     if (nextVal != null) {
       json['breakpoint'] = nextVal;
@@ -2142,19 +2127,14 @@ class FieldRef extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@Field";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = owner?.toJson();
-    json['owner'] = nextVal;
-    nextVal = declaredType?.toJson();
-    json['declaredType'] = nextVal;
-    nextVal = isConst;
-    json['const'] = nextVal;
-    nextVal = isFinal;
-    json['final'] = nextVal;
-    nextVal = isStatic;
-    json['static'] = nextVal;
+    json.addAll({
+      'name': name,
+      'owner': owner?.toJson(),
+      'declaredType': declaredType?.toJson(),
+      'const': isConst,
+      'final': isFinal,
+      'static': isStatic,
+    });
     return json;
   }
 
@@ -2215,19 +2195,15 @@ class Field extends Obj {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Field";
+    json.addAll({
+      'name': name,
+      'owner': owner?.toJson(),
+      'declaredType': declaredType?.toJson(),
+      'const': isConst,
+      'final': isFinal,
+      'static': isStatic,
+    });
     var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = owner?.toJson();
-    json['owner'] = nextVal;
-    nextVal = declaredType?.toJson();
-    json['declaredType'] = nextVal;
-    nextVal = isConst;
-    json['const'] = nextVal;
-    nextVal = isFinal;
-    json['final'] = nextVal;
-    nextVal = isStatic;
-    json['static'] = nextVal;
     nextVal = staticValue?.toJson();
     if (nextVal != null) {
       json['staticValue'] = nextVal;
@@ -2278,13 +2254,12 @@ class Flag {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "Flag";
+    json.addAll({
+      'name': name,
+      'comment': comment,
+      'modified': modified,
+    });
     var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = comment;
-    json['comment'] = nextVal;
-    nextVal = modified;
-    json['modified'] = nextVal;
     nextVal = valueAsString;
     if (nextVal != null) {
       json['valueAsString'] = nextVal;
@@ -2313,9 +2288,9 @@ class FlagList extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "FlagList";
-    var nextVal;
-    nextVal = flags?.map((f) => f?.toJson())?.toList();
-    json['flags'] = nextVal;
+    json.addAll({
+      'flags': flags?.map((f) => f?.toJson())?.toList(),
+    });
     return json;
   }
 
@@ -2360,9 +2335,10 @@ class Frame extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "Frame";
+    json.addAll({
+      'index': index,
+    });
     var nextVal;
-    nextVal = index;
-    json['index'] = nextVal;
     nextVal = function?.toJson();
     if (nextVal != null) {
       json['function'] = nextVal;
@@ -2420,15 +2396,12 @@ class FuncRef extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@Function";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = owner?.toJson();
-    json['owner'] = nextVal;
-    nextVal = isStatic;
-    json['static'] = nextVal;
-    nextVal = isConst;
-    json['const'] = nextVal;
+    json.addAll({
+      'name': name,
+      'owner': owner?.toJson(),
+      'static': isStatic,
+      'const': isConst,
+    });
     return json;
   }
 
@@ -2474,11 +2447,11 @@ class Func extends Obj {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Function";
+    json.addAll({
+      'name': name,
+      'owner': owner?.toJson(),
+    });
     var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = owner?.toJson();
-    json['owner'] = nextVal;
     nextVal = location?.toJson();
     if (nextVal != null) {
       json['location'] = nextVal;
@@ -2602,11 +2575,11 @@ class InstanceRef extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@Instance";
+    json.addAll({
+      'kind': kind,
+      'class': classRef?.toJson(),
+    });
     var nextVal;
-    nextVal = kind;
-    json['kind'] = nextVal;
-    nextVal = classRef?.toJson();
-    json['class'] = nextVal;
     nextVal = valueAsString;
     if (nextVal != null) {
       json['valueAsString'] = nextVal;
@@ -2935,9 +2908,10 @@ class Instance extends Obj {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Instance";
+    json.addAll({
+      'kind': kind,
+    });
     var nextVal;
-    nextVal = kind;
-    json['kind'] = nextVal;
     nextVal = valueAsString;
     if (nextVal != null) {
       json['valueAsString'] = nextVal;
@@ -3069,13 +3043,12 @@ class IsolateRef extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "@Isolate";
+    json.addAll({
+      'id': id,
+      'number': number,
+      'name': name,
+    });
     var nextVal;
-    nextVal = id;
-    json['id'] = nextVal;
-    nextVal = number;
-    json['number'] = nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
     nextVal = fixedId;
     if (nextVal != null) {
       json['fixedId'] = nextVal;
@@ -3177,37 +3150,28 @@ class Isolate extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "Isolate";
+    json.addAll({
+      'id': id,
+      'number': number,
+      'name': name,
+      'startTime': startTime,
+      'runnable': runnable,
+      'livePorts': livePorts,
+      'pauseOnExit': pauseOnExit,
+      'pauseEvent': pauseEvent?.toJson(),
+      'libraries': libraries?.map((f) => f?.toJson())?.toList(),
+      'breakpoints': breakpoints?.map((f) => f?.toJson())?.toList(),
+      'exceptionPauseMode': exceptionPauseMode,
+    });
     var nextVal;
-    nextVal = id;
-    json['id'] = nextVal;
-    nextVal = number;
-    json['number'] = nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = startTime;
-    json['startTime'] = nextVal;
-    nextVal = runnable;
-    json['runnable'] = nextVal;
-    nextVal = livePorts;
-    json['livePorts'] = nextVal;
-    nextVal = pauseOnExit;
-    json['pauseOnExit'] = nextVal;
-    nextVal = pauseEvent?.toJson();
-    json['pauseEvent'] = nextVal;
     nextVal = rootLib?.toJson();
     if (nextVal != null) {
       json['rootLib'] = nextVal;
     }
-    nextVal = libraries?.map((f) => f?.toJson())?.toList();
-    json['libraries'] = nextVal;
-    nextVal = breakpoints?.map((f) => f?.toJson())?.toList();
-    json['breakpoints'] = nextVal;
     nextVal = error?.toJson();
     if (nextVal != null) {
       json['error'] = nextVal;
     }
-    nextVal = exceptionPauseMode;
-    json['exceptionPauseMode'] = nextVal;
     nextVal = extensionRPCs?.map((f) => f)?.toList();
     if (nextVal != null) {
       json['extensionRPCs'] = nextVal;
@@ -3247,11 +3211,10 @@ class LibraryRef extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@Library";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = uri;
-    json['uri'] = nextVal;
+    json.addAll({
+      'name': name,
+      'uri': uri,
+    });
     return json;
   }
 
@@ -3311,23 +3274,16 @@ class Library extends Obj {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Library";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = uri;
-    json['uri'] = nextVal;
-    nextVal = debuggable;
-    json['debuggable'] = nextVal;
-    nextVal = dependencies?.map((f) => f?.toJson())?.toList();
-    json['dependencies'] = nextVal;
-    nextVal = scripts?.map((f) => f?.toJson())?.toList();
-    json['scripts'] = nextVal;
-    nextVal = variables?.map((f) => f?.toJson())?.toList();
-    json['variables'] = nextVal;
-    nextVal = functions?.map((f) => f?.toJson())?.toList();
-    json['functions'] = nextVal;
-    nextVal = classes?.map((f) => f?.toJson())?.toList();
-    json['classes'] = nextVal;
+    json.addAll({
+      'name': name,
+      'uri': uri,
+      'debuggable': debuggable,
+      'dependencies': dependencies?.map((f) => f?.toJson())?.toList(),
+      'scripts': scripts?.map((f) => f?.toJson())?.toList(),
+      'variables': variables?.map((f) => f?.toJson())?.toList(),
+      'functions': functions?.map((f) => f?.toJson())?.toList(),
+      'classes': classes?.map((f) => f?.toJson())?.toList(),
+    });
     return json;
   }
 
@@ -3367,15 +3323,12 @@ class LibraryDependency {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "LibraryDependency";
-    var nextVal;
-    nextVal = isImport;
-    json['isImport'] = nextVal;
-    nextVal = isDeferred;
-    json['isDeferred'] = nextVal;
-    nextVal = prefix;
-    json['prefix'] = nextVal;
-    nextVal = target?.toJson();
-    json['target'] = nextVal;
+    json.addAll({
+      'isImport': isImport,
+      'isDeferred': isDeferred,
+      'prefix': prefix,
+      'target': target?.toJson(),
+    });
     return json;
   }
 
@@ -3404,11 +3357,10 @@ class MapAssociation {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "MapAssociation";
-    var nextVal;
-    nextVal = key?.toJson();
-    json['key'] = nextVal;
-    nextVal = value?.toJson();
-    json['value'] = nextVal;
+    json.addAll({
+      'key': key?.toJson(),
+      'value': value?.toJson(),
+    });
     return json;
   }
 
@@ -3457,15 +3409,13 @@ class Message extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "Message";
+    json.addAll({
+      'index': index,
+      'name': name,
+      'messageObjectId': messageObjectId,
+      'size': size,
+    });
     var nextVal;
-    nextVal = index;
-    json['index'] = nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = messageObjectId;
-    json['messageObjectId'] = nextVal;
-    nextVal = size;
-    json['size'] = nextVal;
     nextVal = handler?.toJson();
     if (nextVal != null) {
       json['handler'] = nextVal;
@@ -3494,7 +3444,6 @@ class NullValRef extends InstanceRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@Null";
-    var nextVal;
     return json;
   }
 
@@ -3518,7 +3467,6 @@ class NullVal extends Instance {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Null";
-    var nextVal;
     return json;
   }
 
@@ -3551,9 +3499,10 @@ class ObjRef extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "@Object";
+    json.addAll({
+      'id': id,
+    });
     var nextVal;
-    nextVal = id;
-    json['id'] = nextVal;
     nextVal = fixedId;
     if (nextVal != null) {
       json['fixedId'] = nextVal;
@@ -3615,9 +3564,10 @@ class Obj extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "Object";
+    json.addAll({
+      'id': id,
+    });
     var nextVal;
-    nextVal = id;
-    json['id'] = nextVal;
     nextVal = classRef?.toJson();
     if (nextVal != null) {
       json['class'] = nextVal;
@@ -3656,9 +3606,9 @@ class ReloadReport extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "ReloadReport";
-    var nextVal;
-    nextVal = success;
-    json['success'] = nextVal;
+    json.addAll({
+      'success': success,
+    });
     return json;
   }
 
@@ -3711,11 +3661,10 @@ class Sentinel extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "Sentinel";
-    var nextVal;
-    nextVal = kind;
-    json['kind'] = nextVal;
-    nextVal = valueAsString;
-    json['valueAsString'] = nextVal;
+    json.addAll({
+      'kind': kind,
+      'valueAsString': valueAsString,
+    });
     return json;
   }
 
@@ -3740,9 +3689,9 @@ class ScriptRef extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@Script";
-    var nextVal;
-    nextVal = uri;
-    json['uri'] = nextVal;
+    json.addAll({
+      'uri': uri,
+    });
     return json;
   }
 
@@ -3815,11 +3764,11 @@ class Script extends Obj {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "Script";
+    json.addAll({
+      'uri': uri,
+      'library': library?.toJson(),
+    });
     var nextVal;
-    nextVal = uri;
-    json['uri'] = nextVal;
-    nextVal = library?.toJson();
-    json['library'] = nextVal;
     nextVal = source;
     if (nextVal != null) {
       json['source'] = nextVal;
@@ -3854,9 +3803,9 @@ class ScriptList extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "ScriptList";
-    var nextVal;
-    nextVal = scripts?.map((f) => f?.toJson())?.toList();
-    json['scripts'] = nextVal;
+    json.addAll({
+      'scripts': scripts?.map((f) => f?.toJson())?.toList(),
+    });
     return json;
   }
 
@@ -3890,11 +3839,11 @@ class SourceLocation extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "SourceLocation";
+    json.addAll({
+      'script': script?.toJson(),
+      'tokenPos': tokenPos,
+    });
     var nextVal;
-    nextVal = script?.toJson();
-    json['script'] = nextVal;
-    nextVal = tokenPos;
-    json['tokenPos'] = nextVal;
     nextVal = endTokenPos;
     if (nextVal != null) {
       json['endTokenPos'] = nextVal;
@@ -3936,11 +3885,10 @@ class SourceReport extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "SourceReport";
-    var nextVal;
-    nextVal = ranges?.map((f) => f?.toJson())?.toList();
-    json['ranges'] = nextVal;
-    nextVal = scripts?.map((f) => f?.toJson())?.toList();
-    json['scripts'] = nextVal;
+    json.addAll({
+      'ranges': ranges?.map((f) => f?.toJson())?.toList(),
+      'scripts': scripts?.map((f) => f?.toJson())?.toList(),
+    });
     return json;
   }
 
@@ -3975,11 +3923,10 @@ class SourceReportCoverage {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "SourceReportCoverage";
-    var nextVal;
-    nextVal = hits?.map((f) => f)?.toList();
-    json['hits'] = nextVal;
-    nextVal = misses?.map((f) => f)?.toList();
-    json['misses'] = nextVal;
+    json.addAll({
+      'hits': hits?.map((f) => f)?.toList(),
+      'misses': misses?.map((f) => f)?.toList(),
+    });
     return json;
   }
 
@@ -4045,15 +3992,13 @@ class SourceReportRange {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "SourceReportRange";
+    json.addAll({
+      'scriptIndex': scriptIndex,
+      'startPos': startPos,
+      'endPos': endPos,
+      'compiled': compiled,
+    });
     var nextVal;
-    nextVal = scriptIndex;
-    json['scriptIndex'] = nextVal;
-    nextVal = startPos;
-    json['startPos'] = nextVal;
-    nextVal = endPos;
-    json['endPos'] = nextVal;
-    nextVal = compiled;
-    json['compiled'] = nextVal;
     nextVal = error?.toJson();
     if (nextVal != null) {
       json['error'] = nextVal;
@@ -4104,9 +4049,11 @@ class Stack extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "Stack";
+    json.addAll({
+      'frames': frames?.map((f) => f?.toJson())?.toList(),
+      'messages': messages?.map((f) => f?.toJson())?.toList(),
+    });
     var nextVal;
-    nextVal = frames?.map((f) => f?.toJson())?.toList();
-    json['frames'] = nextVal;
     nextVal = asyncCausalFrames?.map((f) => f?.toJson())?.toList();
     if (nextVal != null) {
       json['asyncCausalFrames'] = nextVal;
@@ -4115,8 +4062,6 @@ class Stack extends Response {
     if (nextVal != null) {
       json['awaiterFrames'] = nextVal;
     }
-    nextVal = messages?.map((f) => f?.toJson())?.toList();
-    json['messages'] = nextVal;
     return json;
   }
 
@@ -4137,7 +4082,6 @@ class Success extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "Success";
-    var nextVal;
     return json;
   }
 
@@ -4157,7 +4101,6 @@ class TimelineEvent {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "TimelineEvent";
-    var nextVal;
     return json;
   }
 
@@ -4182,9 +4125,9 @@ class TypeArgumentsRef extends ObjRef {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "@TypeArguments";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
+    json.addAll({
+      'name': name,
+    });
     return json;
   }
 
@@ -4221,11 +4164,10 @@ class TypeArguments extends Obj {
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json["type"] = "TypeArguments";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = types?.map((f) => f?.toJson())?.toList();
-    json['types'] = nextVal;
+    json.addAll({
+      'name': name,
+      'types': types?.map((f) => f?.toJson())?.toList(),
+    });
     return json;
   }
 
@@ -4339,11 +4281,10 @@ class Version extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "Version";
-    var nextVal;
-    nextVal = major;
-    json['major'] = nextVal;
-    nextVal = minor;
-    json['minor'] = nextVal;
+    json.addAll({
+      'major': major,
+      'minor': minor,
+    });
     return json;
   }
 
@@ -4368,9 +4309,9 @@ class VMRef extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "@VM";
-    var nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
+    json.addAll({
+      'name': name,
+    });
     return json;
   }
 
@@ -4423,21 +4364,16 @@ class VM extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "VM";
+    json.addAll({
+      'architectureBits': architectureBits,
+      'targetCPU': targetCPU,
+      'hostCPU': hostCPU,
+      'version': version,
+      'pid': pid,
+      'startTime': startTime,
+      'isolates': isolates?.map((f) => f?.toJson())?.toList(),
+    });
     var nextVal;
-    nextVal = architectureBits;
-    json['architectureBits'] = nextVal;
-    nextVal = targetCPU;
-    json['targetCPU'] = nextVal;
-    nextVal = hostCPU;
-    json['hostCPU'] = nextVal;
-    nextVal = version;
-    json['version'] = nextVal;
-    nextVal = pid;
-    json['pid'] = nextVal;
-    nextVal = startTime;
-    json['startTime'] = nextVal;
-    nextVal = isolates?.map((f) => f?.toJson())?.toList();
-    json['isolates'] = nextVal;
     nextVal = name;
     if (nextVal != null) {
       json['name'] = nextVal;
@@ -4499,31 +4435,20 @@ class CpuProfile extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "_CpuProfile";
-    var nextVal;
-    nextVal = sampleCount;
-    json['sampleCount'] = nextVal;
-    nextVal = samplePeriod;
-    json['samplePeriod'] = nextVal;
-    nextVal = stackDepth;
-    json['stackDepth'] = nextVal;
-    nextVal = timeSpan;
-    json['timeSpan'] = nextVal;
-    nextVal = timeOriginMicros;
-    json['timeOriginMicros'] = nextVal;
-    nextVal = timeExtentMicros;
-    json['timeExtentMicros'] = nextVal;
-    nextVal = codes?.map((f) => f?.toJson())?.toList();
-    json['codes'] = nextVal;
-    nextVal = functions?.map((f) => f?.toJson())?.toList();
-    json['functions'] = nextVal;
-    nextVal = exclusiveCodeTrie?.map((f) => f)?.toList();
-    json['exclusiveCodeTrie'] = nextVal;
-    nextVal = inclusiveCodeTrie?.map((f) => f)?.toList();
-    json['inclusiveCodeTrie'] = nextVal;
-    nextVal = exclusiveFunctionTrie?.map((f) => f)?.toList();
-    json['exclusiveFunctionTrie'] = nextVal;
-    nextVal = inclusiveFunctionTrie?.map((f) => f)?.toList();
-    json['inclusiveFunctionTrie'] = nextVal;
+    json.addAll({
+      'sampleCount': sampleCount,
+      'samplePeriod': samplePeriod,
+      'stackDepth': stackDepth,
+      'timeSpan': timeSpan,
+      'timeOriginMicros': timeOriginMicros,
+      'timeExtentMicros': timeExtentMicros,
+      'codes': codes?.map((f) => f?.toJson())?.toList(),
+      'functions': functions?.map((f) => f?.toJson())?.toList(),
+      'exclusiveCodeTrie': exclusiveCodeTrie?.map((f) => f)?.toList(),
+      'inclusiveCodeTrie': inclusiveCodeTrie?.map((f) => f)?.toList(),
+      'exclusiveFunctionTrie': exclusiveFunctionTrie?.map((f) => f)?.toList(),
+      'inclusiveFunctionTrie': inclusiveFunctionTrie?.map((f) => f)?.toList(),
+    });
     return json;
   }
 
@@ -4554,15 +4479,12 @@ class CodeRegion {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "CodeRegion";
-    var nextVal;
-    nextVal = kind;
-    json['kind'] = nextVal;
-    nextVal = inclusiveTicks;
-    json['inclusiveTicks'] = nextVal;
-    nextVal = exclusiveTicks;
-    json['exclusiveTicks'] = nextVal;
-    nextVal = code?.toJson();
-    json['code'] = nextVal;
+    json.addAll({
+      'kind': kind,
+      'inclusiveTicks': inclusiveTicks,
+      'exclusiveTicks': exclusiveTicks,
+      'code': code?.toJson(),
+    });
     return json;
   }
 
@@ -4598,17 +4520,13 @@ class ProfileFunction {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "ProfileFunction";
-    var nextVal;
-    nextVal = kind;
-    json['kind'] = nextVal;
-    nextVal = inclusiveTicks;
-    json['inclusiveTicks'] = nextVal;
-    nextVal = exclusiveTicks;
-    json['exclusiveTicks'] = nextVal;
-    nextVal = function?.toJson();
-    json['function'] = nextVal;
-    nextVal = codes?.map((f) => f)?.toList();
-    json['codes'] = nextVal;
+    json.addAll({
+      'kind': kind,
+      'inclusiveTicks': inclusiveTicks,
+      'exclusiveTicks': exclusiveTicks,
+      'function': function?.toJson(),
+      'codes': codes?.map((f) => f)?.toList(),
+    });
     return json;
   }
 
@@ -4636,11 +4554,10 @@ class AllocationProfile extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "AllocationProfile";
-    var nextVal;
-    nextVal = dateLastServiceGC;
-    json['dateLastServiceGC'] = nextVal;
-    nextVal = members?.map((f) => f?.toJson())?.toList();
-    json['members'] = nextVal;
+    json.addAll({
+      'dateLastServiceGC': dateLastServiceGC,
+      'members': members?.map((f) => f?.toJson())?.toList(),
+    });
     return json;
   }
 
@@ -4675,17 +4592,13 @@ class ClassHeapStats extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "ClassHeapStats";
-    var nextVal;
-    nextVal = classRef?.toJson();
-    json['class'] = nextVal;
-    nextVal = new_?.map((f) => f)?.toList();
-    json['new'] = nextVal;
-    nextVal = old?.map((f) => f)?.toList();
-    json['old'] = nextVal;
-    nextVal = promotedBytes;
-    json['promotedBytes'] = nextVal;
-    nextVal = promotedInstances;
-    json['promotedInstances'] = nextVal;
+    json.addAll({
+      'class': classRef?.toJson(),
+      'new': new_?.map((f) => f)?.toList(),
+      'old': old?.map((f) => f)?.toList(),
+      'promotedBytes': promotedBytes,
+      'promotedInstances': promotedInstances,
+    });
     return json;
   }
 
@@ -4727,21 +4640,15 @@ class HeapSpace extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json["type"] = "HeapSpace";
-    var nextVal;
-    nextVal = avgCollectionPeriodMillis;
-    json['avgCollectionPeriodMillis'] = nextVal;
-    nextVal = capacity;
-    json['capacity'] = nextVal;
-    nextVal = collections;
-    json['collections'] = nextVal;
-    nextVal = external;
-    json['external'] = nextVal;
-    nextVal = name;
-    json['name'] = nextVal;
-    nextVal = time;
-    json['time'] = nextVal;
-    nextVal = used;
-    json['used'] = nextVal;
+    json.addAll({
+      'avgCollectionPeriodMillis': avgCollectionPeriodMillis,
+      'capacity': capacity,
+      'collections': collections,
+      'external': external,
+      'name': name,
+      'time': time,
+      'used': used,
+    });
     return json;
   }
 

@@ -1110,34 +1110,29 @@ class Type extends Member {
       // Overwrites "type" from the super class if we had one.
       gen.writeln('json["type"] = "$rawName";');
 
-      gen.writeln('var nextVal;');
-      fields.forEach((TypeField field) {
-        gen.write('nextVal = ');
-        if (field.type.isSimple || field.type.isEnum) {
-          gen.write('${field.generatableName}');
-          if (field.defaultValue != null) {
-            gen.write(' ?? ${field.defaultValue}');
-          }
-        } else if (name == 'Event' && field.name == 'extensionData') {
-          // Special case `Event.extensionData`.
-          gen.writeln('extensionData?.data');
-        } else if (field.type.isArray) {
-          gen.write('${field.generatableName}?.map((f) => f');
-          // Special case `tokenPosTable` which is a List<List<int>>.
-          if (field.name == 'tokenPosTable') {
-            gen.write('?.toList()');
-          } else if (!field.type.types.first.isListTypeSimple) {
-            gen.write('?.toJson()');
-          }
-          gen.write(')?.toList()');
-        } else {
-          gen.write('${field.generatableName}?.toJson()');
-        }
-        gen.writeln(';');
-        if (field.optional) gen.writeln('if (nextVal != null) {');
-        gen.writeln("json['${field.name}'] = nextVal;");
-        if (field.optional) gen.writeln('}');
-      });
+      var requiredFields = fields.where((f) => !f.optional);
+      if (requiredFields.isNotEmpty) {
+        gen.writeln('json.addAll({');
+        requiredFields.forEach((TypeField field) {
+          gen.write("'${field.name}': ");
+          generateSerializedFieldAccess(field, gen);
+          gen.writeln(',');
+        });
+        gen.writeln('});');
+      }
+
+      var optionalFields = fields.where((f) => f.optional);
+      if (optionalFields.isNotEmpty) {
+        gen.writeln('var nextVal;');
+        optionalFields.forEach((TypeField field) {
+          gen.write('nextVal = ');
+          generateSerializedFieldAccess(field, gen);
+          gen.writeln(';');
+          if (field.optional) gen.writeln('if (nextVal != null) {');
+          gen.writeln("json['${field.name}'] = nextVal;");
+          if (field.optional) gen.writeln('}');
+        });
+      }
       gen.writeln('return json;');
       gen.writeln('}');
       gen.writeln();
@@ -1177,6 +1172,30 @@ class Type extends Member {
     }
 
     gen.writeln('}');
+  }
+
+  // Writes the code to retrieve the serialized value of a field.
+  void generateSerializedFieldAccess(TypeField field, DartGenerator gen) {
+    if (field.type.isSimple || field.type.isEnum) {
+      gen.write('${field.generatableName}');
+      if (field.defaultValue != null) {
+        gen.write(' ?? ${field.defaultValue}');
+      }
+    } else if (name == 'Event' && field.name == 'extensionData') {
+      // Special case `Event.extensionData`.
+      gen.writeln('extensionData?.data');
+    } else if (field.type.isArray) {
+      gen.write('${field.generatableName}?.map((f) => f');
+      // Special case `tokenPosTable` which is a List<List<int>>.
+      if (field.name == 'tokenPosTable') {
+        gen.write('?.toList()');
+      } else if (!field.type.types.first.isListTypeSimple) {
+        gen.write('?.toJson()');
+      }
+      gen.write(')?.toList()');
+    } else {
+      gen.write('${field.generatableName}?.toJson()');
+    }
   }
 
   void generateAssert(DartGenerator gen) {

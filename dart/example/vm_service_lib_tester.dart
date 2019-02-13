@@ -8,7 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:collection/equality.dart';
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
@@ -63,7 +63,7 @@ void main(List<String> args) async {
 
     var instance = createObject(originalJson);
     if (instance == null) {
-      throw 'failed to deserialize object $originalJson!';
+      throw StateError('failed to deserialize object $originalJson!');
     }
     var reserializedJson = (instance as dynamic).toJson();
 
