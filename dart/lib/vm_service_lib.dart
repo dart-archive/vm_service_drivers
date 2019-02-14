@@ -1306,6 +1306,7 @@ class BoundVariable {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
+    json["type"] = "BoundVariable";
     json.addAll({
       'name': name,
       'value': value?.toJson(),

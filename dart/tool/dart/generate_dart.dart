@@ -1113,9 +1113,9 @@ class Type extends Member {
         gen.writeln('var json = super.toJson();');
       }
 
-      // Only Response objects have a `type` field, as defined by
-      // protocol.
-      if (isResponse) {
+      // Only Response objects have a `type` field, as defined by protocol,
+      // except `BoundVariable` which does have a `type` field.
+      if (isResponse || rawName == 'BoundVariable') {
         // Overwrites "type" from the super class if we had one.
         gen.writeln('json["type"] = "$rawName";');
       }
