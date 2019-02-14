@@ -170,24 +170,24 @@ Future testServiceRegistration() async {
 
 Future testSourceReport(IsolateRef isolateRef) async {
   final Isolate isolate = await serviceClient.getIsolate(isolateRef.id);
-  // final Library rootLibrary =
-  //     await serviceClient.getObject(isolateRef.id, isolate.rootLib.id);
-  // final ScriptRef scriptRef = rootLibrary.scripts.first;
+  final Library rootLibrary =
+      await serviceClient.getObject(isolateRef.id, isolate.rootLib.id);
+  final ScriptRef scriptRef = rootLibrary.scripts.first;
 
-  // // make sure some code has run
-  // await serviceClient.resume(isolateRef.id);
+  // make sure some code has run
+  await serviceClient.resume(isolateRef.id);
   await Future.delayed(const Duration(milliseconds: 25));
 
-  // final SourceReport sourceReport = await serviceClient.getSourceReport(
-  //     isolateRef.id, [SourceReportKind.kCoverage],
-  //     scriptId: scriptRef.id);
-  // for (SourceReportRange range in sourceReport.ranges) {
-  //   print('  $range');
-  //   if (range.coverage != null) {
-  //     print('  ${range.coverage}');
-  //   }
-  // }
-  // print(sourceReport);
+  final SourceReport sourceReport = await serviceClient.getSourceReport(
+      isolateRef.id, [SourceReportKind.kCoverage],
+      scriptId: scriptRef.id);
+  for (SourceReportRange range in sourceReport.ranges) {
+    print('  $range');
+    if (range.coverage != null) {
+      print('  ${range.coverage}');
+    }
+  }
+  print(sourceReport);
 }
 
 class StdoutLog extends Log {
