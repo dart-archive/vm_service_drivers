@@ -1255,7 +1255,6 @@ class BoundField {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "BoundField";
     json.addAll({
       'decl': decl?.toJson(),
       'value': value?.toJson(),
@@ -1307,7 +1306,6 @@ class BoundVariable {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "BoundVariable";
     json.addAll({
       'name': name,
       'value': value?.toJson(),
@@ -1721,7 +1719,6 @@ class ContextElement {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "ContextElement";
     json.addAll({
       'value': value?.toJson(),
     });
@@ -2253,7 +2250,6 @@ class Flag {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "Flag";
     json.addAll({
       'name': name,
       'comment': comment,
@@ -3322,7 +3318,6 @@ class LibraryDependency {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "LibraryDependency";
     json.addAll({
       'isImport': isImport,
       'isDeferred': isDeferred,
@@ -3356,7 +3351,6 @@ class MapAssociation {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "MapAssociation";
     json.addAll({
       'key': key?.toJson(),
       'value': value?.toJson(),
@@ -3922,7 +3916,6 @@ class SourceReportCoverage {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "SourceReportCoverage";
     json.addAll({
       'hits': hits?.map((f) => f)?.toList(),
       'misses': misses?.map((f) => f)?.toList(),
@@ -3991,7 +3984,6 @@ class SourceReportRange {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "SourceReportRange";
     json.addAll({
       'scriptIndex': scriptIndex,
       'startPos': startPos,
@@ -4100,7 +4092,6 @@ class TimelineEvent {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "TimelineEvent";
     return json;
   }
 
@@ -4478,7 +4469,6 @@ class CodeRegion {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "CodeRegion";
     json.addAll({
       'kind': kind,
       'inclusiveTicks': inclusiveTicks,
@@ -4519,7 +4509,6 @@ class ProfileFunction {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "ProfileFunction";
     json.addAll({
       'kind': kind,
       'inclusiveTicks': inclusiveTicks,

@@ -1112,8 +1112,13 @@ class Type extends Member {
       } else {
         gen.writeln('var json = super.toJson();');
       }
-      // Overwrites "type" from the super class if we had one.
-      gen.writeln('json["type"] = "$rawName";');
+
+      // Only Response objects have a `type` field, as defined by
+      // protocol.
+      if (isResponse) {
+        // Overwrites "type" from the super class if we had one.
+        gen.writeln('json["type"] = "$rawName";');
+      }
 
       var requiredFields = fields.where((f) => !f.optional);
       if (requiredFields.isNotEmpty) {
