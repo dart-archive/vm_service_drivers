@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.15.0-dev.0
+- Add `toJson` methods to all classes.
+- Add a public `createObject` method which takes a json object and parses it
+  into an instance if it is recognized.
+
 ## 3.14.2
 - fix code generation for the `getSourceReport` call
 
