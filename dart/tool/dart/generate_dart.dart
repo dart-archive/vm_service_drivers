@@ -916,6 +916,8 @@ class Type extends Member {
 
   Type(this.parent, String categoryName, String definition, [this.docs]) {
     _parse(new Tokenizer(definition).tokenize());
+    // Anything with an `id` should have a `fixedId` boolean also, but that
+    // isn't in the protocol definition.
     if (fields.any((f) => f.name == 'id') &&
         !fields.any((f) => f.name == 'fixedId')) {
       var field = TypeField(this, '')
@@ -924,6 +926,7 @@ class Type extends Member {
         ..optional = true;
       fields.add(field);
     }
+
     // The vm sends a name for VM objects even though that isn't in the
     // protocol.
     if (name == 'VM' && !fields.any((f) => f.name == 'name')) {
