@@ -1065,6 +1065,11 @@ class Type extends Member {
         // Special case `SourceReportRange.coverage`.
         gen.writeln("coverage = _createSpecificObject("
             "json['coverage'], SourceReportCoverage.parse);");
+      } else if (name == 'Library' && field.name == 'dependencies') {
+        // Special case `Library.dependencies`.
+        gen.writeln("dependencies = new List<LibraryDependency>.from("
+            "_createSpecificObject(json['dependencies'], "
+            "LibraryDependency.parse));");
       } else if (name == 'Script' && field.name == 'tokenPosTable') {
         // Special case `Script.tokenPosTable`.
         gen.writeln(

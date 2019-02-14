@@ -46,8 +46,14 @@ void main(List<String> args) async {
   print('socket connected');
 
   serviceClient.onSend.listen((str) => print('--> ${str}'));
+
+  // The next listener will bail out if you toggle this to false, which we need
+  // to do for some things like the custom service registration tests.
+  var checkResponseJsonCompatibility = true;
   serviceClient.onReceive.listen((str) {
     print('<-- ${str}');
+
+    if (!checkResponseJsonCompatibility) return;
 
     // For each received event, check that we can deserialize it and
     // reserialize it back to the same exact representation (minus
@@ -99,7 +105,11 @@ Serialized result did not match original!
   List<IsolateRef> isolates = await vm.isolates;
   print(isolates);
 
+  // Disable the json reserialization checks since custom services are not
+  // supported.
+  checkResponseJsonCompatibility = false;
   await testServiceRegistration();
+  checkResponseJsonCompatibility = true;
 
   await testSourceReport(vm.isolates.first);
 

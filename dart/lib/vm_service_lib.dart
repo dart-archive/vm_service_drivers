@@ -3263,8 +3263,8 @@ class Library extends Obj {
     name = json['name'];
     uri = json['uri'];
     debuggable = json['debuggable'];
-    dependencies =
-        new List<LibraryDependency>.from(createObject(json['dependencies']));
+    dependencies = new List<LibraryDependency>.from(
+        _createSpecificObject(json['dependencies'], LibraryDependency.parse));
     scripts = new List<ScriptRef>.from(createObject(json['scripts']));
     variables = new List<FieldRef>.from(createObject(json['variables']));
     functions = new List<FuncRef>.from(createObject(json['functions']));
