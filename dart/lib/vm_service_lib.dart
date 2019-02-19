@@ -61,6 +61,11 @@ dynamic _createSpecificObject(
   }
 }
 
+void _setIfNotNull(Map<String, Object> json, String key, Object value) {
+  if (value == null) return;
+  json[key] = value;
+}
+
 typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     Map<String, dynamic> params);
 
@@ -1366,11 +1371,8 @@ class Breakpoint extends Obj {
       'resolved': resolved,
       'location': location.toJson(),
     });
-    var nextVal;
-    nextVal = isSyntheticAsyncContinuation;
-    if (nextVal != null) {
-      json['isSyntheticAsyncContinuation'] = nextVal;
-    }
+    _setIfNotNull(
+        json, 'isSyntheticAsyncContinuation', isSyntheticAsyncContinuation);
     return json;
   }
 
@@ -1503,27 +1505,11 @@ class Class extends Obj {
       'functions': functions.map((f) => f.toJson()).toList(),
       'subclasses': subclasses.map((f) => f.toJson()).toList(),
     });
-    var nextVal;
-    nextVal = error?.toJson();
-    if (nextVal != null) {
-      json['error'] = nextVal;
-    }
-    nextVal = location?.toJson();
-    if (nextVal != null) {
-      json['location'] = nextVal;
-    }
-    nextVal = superClass?.toJson();
-    if (nextVal != null) {
-      json['super'] = nextVal;
-    }
-    nextVal = superType?.toJson();
-    if (nextVal != null) {
-      json['superType'] = nextVal;
-    }
-    nextVal = mixin?.toJson();
-    if (nextVal != null) {
-      json['mixin'] = nextVal;
-    }
+    _setIfNotNull(json, 'error', error?.toJson());
+    _setIfNotNull(json, 'location', location?.toJson());
+    _setIfNotNull(json, 'super', superClass?.toJson());
+    _setIfNotNull(json, 'superType', superType?.toJson());
+    _setIfNotNull(json, 'mixin', mixin?.toJson());
     return json;
   }
 
@@ -1692,11 +1678,7 @@ class Context extends Obj {
       'length': length,
       'variables': variables.map((f) => f.toJson()).toList(),
     });
-    var nextVal;
-    nextVal = parent?.toJson();
-    if (nextVal != null) {
-      json['parent'] = nextVal;
-    }
+    _setIfNotNull(json, 'parent', parent?.toJson());
     return json;
   }
 
@@ -1806,15 +1788,8 @@ class Error extends Obj {
       'kind': kind,
       'message': message,
     });
-    var nextVal;
-    nextVal = exception?.toJson();
-    if (nextVal != null) {
-      json['exception'] = nextVal;
-    }
-    nextVal = stacktrace?.toJson();
-    if (nextVal != null) {
-      json['stacktrace'] = nextVal;
-    }
+    _setIfNotNull(json, 'exception', exception?.toJson());
+    _setIfNotNull(json, 'stacktrace', stacktrace?.toJson());
     return json;
   }
 
@@ -2014,75 +1989,25 @@ class Event extends Response {
       'kind': kind,
       'timestamp': timestamp,
     });
-    var nextVal;
-    nextVal = isolate?.toJson();
-    if (nextVal != null) {
-      json['isolate'] = nextVal;
-    }
-    nextVal = vm?.toJson();
-    if (nextVal != null) {
-      json['vm'] = nextVal;
-    }
-    nextVal = breakpoint?.toJson();
-    if (nextVal != null) {
-      json['breakpoint'] = nextVal;
-    }
-    nextVal = pauseBreakpoints?.map((f) => f?.toJson())?.toList();
-    if (nextVal != null) {
-      json['pauseBreakpoints'] = nextVal;
-    }
-    nextVal = topFrame?.toJson();
-    if (nextVal != null) {
-      json['topFrame'] = nextVal;
-    }
-    nextVal = exception?.toJson();
-    if (nextVal != null) {
-      json['exception'] = nextVal;
-    }
-    nextVal = bytes;
-    if (nextVal != null) {
-      json['bytes'] = nextVal;
-    }
-    nextVal = inspectee?.toJson();
-    if (nextVal != null) {
-      json['inspectee'] = nextVal;
-    }
-    nextVal = extensionRPC;
-    if (nextVal != null) {
-      json['extensionRPC'] = nextVal;
-    }
-    nextVal = extensionKind;
-    if (nextVal != null) {
-      json['extensionKind'] = nextVal;
-    }
-    nextVal = extensionData?.data;
-    if (nextVal != null) {
-      json['extensionData'] = nextVal;
-    }
-    nextVal = timelineEvents?.map((f) => f?.toJson())?.toList();
-    if (nextVal != null) {
-      json['timelineEvents'] = nextVal;
-    }
-    nextVal = atAsyncSuspension;
-    if (nextVal != null) {
-      json['atAsyncSuspension'] = nextVal;
-    }
-    nextVal = status;
-    if (nextVal != null) {
-      json['status'] = nextVal;
-    }
-    nextVal = service;
-    if (nextVal != null) {
-      json['service'] = nextVal;
-    }
-    nextVal = method;
-    if (nextVal != null) {
-      json['method'] = nextVal;
-    }
-    nextVal = alias;
-    if (nextVal != null) {
-      json['alias'] = nextVal;
-    }
+    _setIfNotNull(json, 'isolate', isolate?.toJson());
+    _setIfNotNull(json, 'vm', vm?.toJson());
+    _setIfNotNull(json, 'breakpoint', breakpoint?.toJson());
+    _setIfNotNull(json, 'pauseBreakpoints',
+        pauseBreakpoints?.map((f) => f?.toJson())?.toList());
+    _setIfNotNull(json, 'topFrame', topFrame?.toJson());
+    _setIfNotNull(json, 'exception', exception?.toJson());
+    _setIfNotNull(json, 'bytes', bytes);
+    _setIfNotNull(json, 'inspectee', inspectee?.toJson());
+    _setIfNotNull(json, 'extensionRPC', extensionRPC);
+    _setIfNotNull(json, 'extensionKind', extensionKind);
+    _setIfNotNull(json, 'extensionData', extensionData?.data);
+    _setIfNotNull(json, 'timelineEvents',
+        timelineEvents?.map((f) => f?.toJson())?.toList());
+    _setIfNotNull(json, 'atAsyncSuspension', atAsyncSuspension);
+    _setIfNotNull(json, 'status', status);
+    _setIfNotNull(json, 'service', service);
+    _setIfNotNull(json, 'method', method);
+    _setIfNotNull(json, 'alias', alias);
     return json;
   }
 
@@ -2206,15 +2131,8 @@ class Field extends Obj {
       'final': isFinal,
       'static': isStatic,
     });
-    var nextVal;
-    nextVal = staticValue?.toJson();
-    if (nextVal != null) {
-      json['staticValue'] = nextVal;
-    }
-    nextVal = location?.toJson();
-    if (nextVal != null) {
-      json['location'] = nextVal;
-    }
+    _setIfNotNull(json, 'staticValue', staticValue?.toJson());
+    _setIfNotNull(json, 'location', location?.toJson());
     return json;
   }
 
@@ -2261,11 +2179,7 @@ class Flag {
       'comment': comment,
       'modified': modified,
     });
-    var nextVal;
-    nextVal = valueAsString;
-    if (nextVal != null) {
-      json['valueAsString'] = nextVal;
-    }
+    _setIfNotNull(json, 'valueAsString', valueAsString);
     return json;
   }
 
@@ -2340,27 +2254,11 @@ class Frame extends Response {
     json.addAll({
       'index': index,
     });
-    var nextVal;
-    nextVal = function?.toJson();
-    if (nextVal != null) {
-      json['function'] = nextVal;
-    }
-    nextVal = code?.toJson();
-    if (nextVal != null) {
-      json['code'] = nextVal;
-    }
-    nextVal = location?.toJson();
-    if (nextVal != null) {
-      json['location'] = nextVal;
-    }
-    nextVal = vars?.map((f) => f?.toJson())?.toList();
-    if (nextVal != null) {
-      json['vars'] = nextVal;
-    }
-    nextVal = kind;
-    if (nextVal != null) {
-      json['kind'] = nextVal;
-    }
+    _setIfNotNull(json, 'function', function?.toJson());
+    _setIfNotNull(json, 'code', code?.toJson());
+    _setIfNotNull(json, 'location', location?.toJson());
+    _setIfNotNull(json, 'vars', vars?.map((f) => f?.toJson())?.toList());
+    _setIfNotNull(json, 'kind', kind);
     return json;
   }
 
@@ -2453,15 +2351,8 @@ class Func extends Obj {
       'name': name,
       'owner': owner.toJson(),
     });
-    var nextVal;
-    nextVal = location?.toJson();
-    if (nextVal != null) {
-      json['location'] = nextVal;
-    }
-    nextVal = code?.toJson();
-    if (nextVal != null) {
-      json['code'] = nextVal;
-    }
+    _setIfNotNull(json, 'location', location?.toJson());
+    _setIfNotNull(json, 'code', code?.toJson());
     return json;
   }
 
@@ -2581,35 +2472,14 @@ class InstanceRef extends ObjRef {
       'kind': kind,
       'class': classRef.toJson(),
     });
-    var nextVal;
-    nextVal = valueAsString;
-    if (nextVal != null) {
-      json['valueAsString'] = nextVal;
-    }
-    nextVal = valueAsStringIsTruncated ?? false;
-    if (nextVal != null) {
-      json['valueAsStringIsTruncated'] = nextVal;
-    }
-    nextVal = length;
-    if (nextVal != null) {
-      json['length'] = nextVal;
-    }
-    nextVal = name;
-    if (nextVal != null) {
-      json['name'] = nextVal;
-    }
-    nextVal = typeClass?.toJson();
-    if (nextVal != null) {
-      json['typeClass'] = nextVal;
-    }
-    nextVal = parameterizedClass?.toJson();
-    if (nextVal != null) {
-      json['parameterizedClass'] = nextVal;
-    }
-    nextVal = pattern?.toJson();
-    if (nextVal != null) {
-      json['pattern'] = nextVal;
-    }
+    _setIfNotNull(json, 'valueAsString', valueAsString);
+    _setIfNotNull(
+        json, 'valueAsStringIsTruncated', valueAsStringIsTruncated ?? false);
+    _setIfNotNull(json, 'length', length);
+    _setIfNotNull(json, 'name', name);
+    _setIfNotNull(json, 'typeClass', typeClass?.toJson());
+    _setIfNotNull(json, 'parameterizedClass', parameterizedClass?.toJson());
+    _setIfNotNull(json, 'pattern', pattern?.toJson());
     return json;
   }
 
@@ -2913,99 +2783,32 @@ class Instance extends Obj {
     json.addAll({
       'kind': kind,
     });
-    var nextVal;
-    nextVal = valueAsString;
-    if (nextVal != null) {
-      json['valueAsString'] = nextVal;
-    }
-    nextVal = valueAsStringIsTruncated ?? false;
-    if (nextVal != null) {
-      json['valueAsStringIsTruncated'] = nextVal;
-    }
-    nextVal = length;
-    if (nextVal != null) {
-      json['length'] = nextVal;
-    }
-    nextVal = offset;
-    if (nextVal != null) {
-      json['offset'] = nextVal;
-    }
-    nextVal = count;
-    if (nextVal != null) {
-      json['count'] = nextVal;
-    }
-    nextVal = name;
-    if (nextVal != null) {
-      json['name'] = nextVal;
-    }
-    nextVal = typeClass?.toJson();
-    if (nextVal != null) {
-      json['typeClass'] = nextVal;
-    }
-    nextVal = parameterizedClass?.toJson();
-    if (nextVal != null) {
-      json['parameterizedClass'] = nextVal;
-    }
-    nextVal = fields?.map((f) => f?.toJson())?.toList();
-    if (nextVal != null) {
-      json['fields'] = nextVal;
-    }
-    nextVal = elements?.map((f) => f?.toJson())?.toList();
-    if (nextVal != null) {
-      json['elements'] = nextVal;
-    }
-    nextVal = associations?.map((f) => f?.toJson())?.toList();
-    if (nextVal != null) {
-      json['associations'] = nextVal;
-    }
-    nextVal = bytes;
-    if (nextVal != null) {
-      json['bytes'] = nextVal;
-    }
-    nextVal = closureFunction?.toJson();
-    if (nextVal != null) {
-      json['closureFunction'] = nextVal;
-    }
-    nextVal = mirrorReferent?.toJson();
-    if (nextVal != null) {
-      json['mirrorReferent'] = nextVal;
-    }
-    nextVal = pattern;
-    if (nextVal != null) {
-      json['pattern'] = nextVal;
-    }
-    nextVal = isCaseSensitive;
-    if (nextVal != null) {
-      json['isCaseSensitive'] = nextVal;
-    }
-    nextVal = isMultiLine;
-    if (nextVal != null) {
-      json['isMultiLine'] = nextVal;
-    }
-    nextVal = propertyKey?.toJson();
-    if (nextVal != null) {
-      json['propertyKey'] = nextVal;
-    }
-    nextVal = propertyValue?.toJson();
-    if (nextVal != null) {
-      json['propertyValue'] = nextVal;
-    }
-    nextVal = typeArguments?.toJson();
-    if (nextVal != null) {
-      json['typeArguments'] = nextVal;
-    }
-    nextVal = parameterIndex;
-    if (nextVal != null) {
-      json['parameterIndex'] = nextVal;
-    }
-    nextVal = targetType?.toJson();
-    if (nextVal != null) {
-      json['targetType'] = nextVal;
-    }
-    nextVal = bound?.toJson();
-    if (nextVal != null) {
-      json['bound'] = nextVal;
-    }
+    _setIfNotNull(json, 'valueAsString', valueAsString);
+    _setIfNotNull(
+        json, 'valueAsStringIsTruncated', valueAsStringIsTruncated ?? false);
+    _setIfNotNull(json, 'length', length);
+    _setIfNotNull(json, 'offset', offset);
+    _setIfNotNull(json, 'count', count);
+    _setIfNotNull(json, 'name', name);
+    _setIfNotNull(json, 'typeClass', typeClass?.toJson());
+    _setIfNotNull(json, 'parameterizedClass', parameterizedClass?.toJson());
+    _setIfNotNull(json, 'fields', fields?.map((f) => f?.toJson())?.toList());
+    _setIfNotNull(
+        json, 'elements', elements?.map((f) => f?.toJson())?.toList());
+    _setIfNotNull(
+        json, 'associations', associations?.map((f) => f?.toJson())?.toList());
+    _setIfNotNull(json, 'bytes', bytes);
+    _setIfNotNull(json, 'closureFunction', closureFunction?.toJson());
+    _setIfNotNull(json, 'mirrorReferent', mirrorReferent?.toJson());
+    _setIfNotNull(json, 'pattern', pattern);
+    _setIfNotNull(json, 'isCaseSensitive', isCaseSensitive);
+    _setIfNotNull(json, 'isMultiLine', isMultiLine);
+    _setIfNotNull(json, 'propertyKey', propertyKey?.toJson());
+    _setIfNotNull(json, 'propertyValue', propertyValue?.toJson());
+    _setIfNotNull(json, 'typeArguments', typeArguments?.toJson());
+    _setIfNotNull(json, 'parameterIndex', parameterIndex);
+    _setIfNotNull(json, 'targetType', targetType?.toJson());
+    _setIfNotNull(json, 'bound', bound?.toJson());
     return json;
   }
 
@@ -3050,11 +2853,7 @@ class IsolateRef extends Response {
       'number': number,
       'name': name,
     });
-    var nextVal;
-    nextVal = fixedId;
-    if (nextVal != null) {
-      json['fixedId'] = nextVal;
-    }
+    _setIfNotNull(json, 'fixedId', fixedId);
     return json;
   }
 
@@ -3167,23 +2966,11 @@ class Isolate extends Response {
       'breakpoints': breakpoints.map((f) => f.toJson()).toList(),
       'exceptionPauseMode': exceptionPauseMode,
     });
-    var nextVal;
-    nextVal = rootLib?.toJson();
-    if (nextVal != null) {
-      json['rootLib'] = nextVal;
-    }
-    nextVal = error?.toJson();
-    if (nextVal != null) {
-      json['error'] = nextVal;
-    }
-    nextVal = extensionRPCs?.map((f) => f)?.toList();
-    if (nextVal != null) {
-      json['extensionRPCs'] = nextVal;
-    }
-    nextVal = fixedId;
-    if (nextVal != null) {
-      json['fixedId'] = nextVal;
-    }
+    _setIfNotNull(json, 'rootLib', rootLib?.toJson());
+    _setIfNotNull(json, 'error', error?.toJson());
+    _setIfNotNull(
+        json, 'extensionRPCs', extensionRPCs?.map((f) => f)?.toList());
+    _setIfNotNull(json, 'fixedId', fixedId);
     return json;
   }
 
@@ -3417,15 +3204,8 @@ class Message extends Response {
       'messageObjectId': messageObjectId,
       'size': size,
     });
-    var nextVal;
-    nextVal = handler?.toJson();
-    if (nextVal != null) {
-      json['handler'] = nextVal;
-    }
-    nextVal = location?.toJson();
-    if (nextVal != null) {
-      json['location'] = nextVal;
-    }
+    _setIfNotNull(json, 'handler', handler?.toJson());
+    _setIfNotNull(json, 'location', location?.toJson());
     return json;
   }
 
@@ -3504,11 +3284,7 @@ class ObjRef extends Response {
     json.addAll({
       'id': id,
     });
-    var nextVal;
-    nextVal = fixedId;
-    if (nextVal != null) {
-      json['fixedId'] = nextVal;
-    }
+    _setIfNotNull(json, 'fixedId', fixedId);
     return json;
   }
 
@@ -3569,19 +3345,9 @@ class Obj extends Response {
     json.addAll({
       'id': id,
     });
-    var nextVal;
-    nextVal = classRef?.toJson();
-    if (nextVal != null) {
-      json['class'] = nextVal;
-    }
-    nextVal = size;
-    if (nextVal != null) {
-      json['size'] = nextVal;
-    }
-    nextVal = fixedId;
-    if (nextVal != null) {
-      json['fixedId'] = nextVal;
-    }
+    _setIfNotNull(json, 'class', classRef?.toJson());
+    _setIfNotNull(json, 'size', size);
+    _setIfNotNull(json, 'fixedId', fixedId);
     return json;
   }
 
@@ -3770,15 +3536,9 @@ class Script extends Obj {
       'uri': uri,
       'library': library.toJson(),
     });
-    var nextVal;
-    nextVal = source;
-    if (nextVal != null) {
-      json['source'] = nextVal;
-    }
-    nextVal = tokenPosTable?.map((f) => f?.toList())?.toList();
-    if (nextVal != null) {
-      json['tokenPosTable'] = nextVal;
-    }
+    _setIfNotNull(json, 'source', source);
+    _setIfNotNull(json, 'tokenPosTable',
+        tokenPosTable?.map((f) => f?.toList())?.toList());
     return json;
   }
 
@@ -3845,11 +3605,7 @@ class SourceLocation extends Response {
       'script': script.toJson(),
       'tokenPos': tokenPos,
     });
-    var nextVal;
-    nextVal = endTokenPos;
-    if (nextVal != null) {
-      json['endTokenPos'] = nextVal;
-    }
+    _setIfNotNull(json, 'endTokenPos', endTokenPos);
     return json;
   }
 
@@ -3998,19 +3754,10 @@ class SourceReportRange {
       'endPos': endPos,
       'compiled': compiled,
     });
-    var nextVal;
-    nextVal = error?.toJson();
-    if (nextVal != null) {
-      json['error'] = nextVal;
-    }
-    nextVal = coverage?.toJson();
-    if (nextVal != null) {
-      json['coverage'] = nextVal;
-    }
-    nextVal = possibleBreakpoints?.map((f) => f)?.toList();
-    if (nextVal != null) {
-      json['possibleBreakpoints'] = nextVal;
-    }
+    _setIfNotNull(json, 'error', error?.toJson());
+    _setIfNotNull(json, 'coverage', coverage?.toJson());
+    _setIfNotNull(json, 'possibleBreakpoints',
+        possibleBreakpoints?.map((f) => f)?.toList());
     return json;
   }
 
@@ -4053,15 +3800,10 @@ class Stack extends Response {
       'frames': frames.map((f) => f.toJson()).toList(),
       'messages': messages.map((f) => f.toJson()).toList(),
     });
-    var nextVal;
-    nextVal = asyncCausalFrames?.map((f) => f?.toJson())?.toList();
-    if (nextVal != null) {
-      json['asyncCausalFrames'] = nextVal;
-    }
-    nextVal = awaiterFrames?.map((f) => f?.toJson())?.toList();
-    if (nextVal != null) {
-      json['awaiterFrames'] = nextVal;
-    }
+    _setIfNotNull(json, 'asyncCausalFrames',
+        asyncCausalFrames?.map((f) => f?.toJson())?.toList());
+    _setIfNotNull(json, 'awaiterFrames',
+        awaiterFrames?.map((f) => f?.toJson())?.toList());
     return json;
   }
 
@@ -4230,27 +3972,11 @@ class UnresolvedSourceLocation extends Response {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'UnresolvedSourceLocation';
-    var nextVal;
-    nextVal = script?.toJson();
-    if (nextVal != null) {
-      json['script'] = nextVal;
-    }
-    nextVal = scriptUri;
-    if (nextVal != null) {
-      json['scriptUri'] = nextVal;
-    }
-    nextVal = tokenPos;
-    if (nextVal != null) {
-      json['tokenPos'] = nextVal;
-    }
-    nextVal = line;
-    if (nextVal != null) {
-      json['line'] = nextVal;
-    }
-    nextVal = column;
-    if (nextVal != null) {
-      json['column'] = nextVal;
-    }
+    _setIfNotNull(json, 'script', script?.toJson());
+    _setIfNotNull(json, 'scriptUri', scriptUri);
+    _setIfNotNull(json, 'tokenPos', tokenPos);
+    _setIfNotNull(json, 'line', line);
+    _setIfNotNull(json, 'column', column);
     return json;
   }
 
@@ -4372,11 +4098,7 @@ class VM extends Response {
       'startTime': startTime,
       'isolates': isolates.map((f) => f.toJson()).toList(),
     });
-    var nextVal;
-    nextVal = name;
-    if (nextVal != null) {
-      json['name'] = nextVal;
-    }
+    _setIfNotNull(json, 'name', name);
     return json;
   }
 

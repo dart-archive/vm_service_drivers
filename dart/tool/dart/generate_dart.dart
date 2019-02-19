@@ -437,6 +437,11 @@ dynamic _createSpecificObject(dynamic json, dynamic creator(Map<String, dynamic>
   }
 }
 
+void _setIfNotNull(Map<String, Object> json, String key, Object value) {
+  if (value == null) return;
+  json[key] = value;
+}
+
 typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     Map<String, dynamic> params);
 
@@ -1135,17 +1140,11 @@ class Type extends Member {
       }
 
       var optionalFields = fields.where((f) => f.optional);
-      if (optionalFields.isNotEmpty) {
-        gen.writeln('var nextVal;');
-        optionalFields.forEach((TypeField field) {
-          gen.write('nextVal = ');
-          generateSerializedFieldAccess(field, gen);
-          gen.writeln(';');
-          if (field.optional) gen.writeln('if (nextVal != null) {');
-          gen.writeln("json['${field.name}'] = nextVal;");
-          if (field.optional) gen.writeln('}');
-        });
-      }
+      optionalFields.forEach((TypeField field) {
+        gen.write("_setIfNotNull(json, '${field.name}', ");
+        generateSerializedFieldAccess(field, gen);
+        gen.writeln(');');
+      });
       gen.writeln('return json;');
       gen.writeln('}');
       gen.writeln();
