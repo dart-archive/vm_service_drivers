@@ -1120,7 +1120,7 @@ class Type extends Member {
       // except `BoundVariable` which does have a `type` field.
       if (isResponse || rawName == 'BoundVariable') {
         // Overwrites "type" from the super class if we had one.
-        gen.writeln('json["type"] = "$rawName";');
+        gen.writeln("json['type'] = '$rawName';");
       }
 
       var requiredFields = fields.where((f) => !f.optional);

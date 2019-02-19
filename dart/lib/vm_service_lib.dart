@@ -1306,7 +1306,7 @@ class BoundVariable {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "BoundVariable";
+    json['type'] = 'BoundVariable';
     json.addAll({
       'name': name,
       'value': value?.toJson(),
@@ -1360,7 +1360,7 @@ class Breakpoint extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Breakpoint";
+    json['type'] = 'Breakpoint';
     json.addAll({
       'breakpointNumber': breakpointNumber,
       'resolved': resolved,
@@ -1399,7 +1399,7 @@ class ClassRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@Class";
+    json['type'] = '@Class';
     json.addAll({
       'name': name,
     });
@@ -1492,7 +1492,7 @@ class Class extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Class";
+    json['type'] = 'Class';
     json.addAll({
       'name': name,
       'abstract': isAbstract,
@@ -1548,7 +1548,7 @@ class ClassList extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "ClassList";
+    json['type'] = 'ClassList';
     json.addAll({
       'classes': classes?.map((f) => f?.toJson())?.toList(),
     });
@@ -1578,7 +1578,7 @@ class CodeRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@Code";
+    json['type'] = '@Code';
     json.addAll({
       'name': name,
       'kind': kind,
@@ -1614,7 +1614,7 @@ class Code extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Code";
+    json['type'] = 'Code';
     json.addAll({
       'name': name,
       'kind': kind,
@@ -1645,7 +1645,7 @@ class ContextRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@Context";
+    json['type'] = '@Context';
     json.addAll({
       'length': length,
     });
@@ -1687,7 +1687,7 @@ class Context extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Context";
+    json['type'] = 'Context';
     json.addAll({
       'length': length,
       'variables': variables?.map((f) => f?.toJson())?.toList(),
@@ -1752,7 +1752,7 @@ class ErrorRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@Error";
+    json['type'] = '@Error';
     json.addAll({
       'kind': kind,
       'message': message,
@@ -1801,7 +1801,7 @@ class Error extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Error";
+    json['type'] = 'Error';
     json.addAll({
       'kind': kind,
       'message': message,
@@ -2009,7 +2009,7 @@ class Event extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "Event";
+    json['type'] = 'Event';
     json.addAll({
       'kind': kind,
       'timestamp': timestamp,
@@ -2129,7 +2129,7 @@ class FieldRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@Field";
+    json['type'] = '@Field';
     json.addAll({
       'name': name,
       'owner': owner?.toJson(),
@@ -2197,7 +2197,7 @@ class Field extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Field";
+    json['type'] = 'Field';
     json.addAll({
       'name': name,
       'owner': owner?.toJson(),
@@ -2289,7 +2289,7 @@ class FlagList extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "FlagList";
+    json['type'] = 'FlagList';
     json.addAll({
       'flags': flags?.map((f) => f?.toJson())?.toList(),
     });
@@ -2336,7 +2336,7 @@ class Frame extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "Frame";
+    json['type'] = 'Frame';
     json.addAll({
       'index': index,
     });
@@ -2397,7 +2397,7 @@ class FuncRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@Function";
+    json['type'] = '@Function';
     json.addAll({
       'name': name,
       'owner': owner?.toJson(),
@@ -2448,7 +2448,7 @@ class Func extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Function";
+    json['type'] = 'Function';
     json.addAll({
       'name': name,
       'owner': owner?.toJson(),
@@ -2576,7 +2576,7 @@ class InstanceRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@Instance";
+    json['type'] = '@Instance';
     json.addAll({
       'kind': kind,
       'class': classRef?.toJson(),
@@ -2909,7 +2909,7 @@ class Instance extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Instance";
+    json['type'] = 'Instance';
     json.addAll({
       'kind': kind,
     });
@@ -3044,7 +3044,7 @@ class IsolateRef extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "@Isolate";
+    json['type'] = '@Isolate';
     json.addAll({
       'id': id,
       'number': number,
@@ -3153,7 +3153,7 @@ class Isolate extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "Isolate";
+    json['type'] = 'Isolate';
     json.addAll({
       'id': id,
       'number': number,
@@ -3214,7 +3214,7 @@ class LibraryRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@Library";
+    json['type'] = '@Library';
     json.addAll({
       'name': name,
       'uri': uri,
@@ -3277,7 +3277,7 @@ class Library extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Library";
+    json['type'] = 'Library';
     json.addAll({
       'name': name,
       'uri': uri,
@@ -3410,7 +3410,7 @@ class Message extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "Message";
+    json['type'] = 'Message';
     json.addAll({
       'index': index,
       'name': name,
@@ -3445,7 +3445,7 @@ class NullValRef extends InstanceRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@Null";
+    json['type'] = '@Null';
     return json;
   }
 
@@ -3468,7 +3468,7 @@ class NullVal extends Instance {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Null";
+    json['type'] = 'Null';
     return json;
   }
 
@@ -3500,7 +3500,7 @@ class ObjRef extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "@Object";
+    json['type'] = '@Object';
     json.addAll({
       'id': id,
     });
@@ -3565,7 +3565,7 @@ class Obj extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "Object";
+    json['type'] = 'Object';
     json.addAll({
       'id': id,
     });
@@ -3607,7 +3607,7 @@ class ReloadReport extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "ReloadReport";
+    json['type'] = 'ReloadReport';
     json.addAll({
       'success': success,
     });
@@ -3662,7 +3662,7 @@ class Sentinel extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "Sentinel";
+    json['type'] = 'Sentinel';
     json.addAll({
       'kind': kind,
       'valueAsString': valueAsString,
@@ -3690,7 +3690,7 @@ class ScriptRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@Script";
+    json['type'] = '@Script';
     json.addAll({
       'uri': uri,
     });
@@ -3765,7 +3765,7 @@ class Script extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "Script";
+    json['type'] = 'Script';
     json.addAll({
       'uri': uri,
       'library': library?.toJson(),
@@ -3804,7 +3804,7 @@ class ScriptList extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "ScriptList";
+    json['type'] = 'ScriptList';
     json.addAll({
       'scripts': scripts?.map((f) => f?.toJson())?.toList(),
     });
@@ -3840,7 +3840,7 @@ class SourceLocation extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "SourceLocation";
+    json['type'] = 'SourceLocation';
     json.addAll({
       'script': script?.toJson(),
       'tokenPos': tokenPos,
@@ -3886,7 +3886,7 @@ class SourceReport extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "SourceReport";
+    json['type'] = 'SourceReport';
     json.addAll({
       'ranges': ranges?.map((f) => f?.toJson())?.toList(),
       'scripts': scripts?.map((f) => f?.toJson())?.toList(),
@@ -4048,7 +4048,7 @@ class Stack extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "Stack";
+    json['type'] = 'Stack';
     json.addAll({
       'frames': frames?.map((f) => f?.toJson())?.toList(),
       'messages': messages?.map((f) => f?.toJson())?.toList(),
@@ -4081,7 +4081,7 @@ class Success extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "Success";
+    json['type'] = 'Success';
     return json;
   }
 
@@ -4123,7 +4123,7 @@ class TypeArgumentsRef extends ObjRef {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "@TypeArguments";
+    json['type'] = '@TypeArguments';
     json.addAll({
       'name': name,
     });
@@ -4162,7 +4162,7 @@ class TypeArguments extends Obj {
 
   Map<String, dynamic> toJson() {
     var json = super.toJson();
-    json["type"] = "TypeArguments";
+    json['type'] = 'TypeArguments';
     json.addAll({
       'name': name,
       'types': types?.map((f) => f?.toJson())?.toList(),
@@ -4229,7 +4229,7 @@ class UnresolvedSourceLocation extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "UnresolvedSourceLocation";
+    json['type'] = 'UnresolvedSourceLocation';
     var nextVal;
     nextVal = script?.toJson();
     if (nextVal != null) {
@@ -4279,7 +4279,7 @@ class Version extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "Version";
+    json['type'] = 'Version';
     json.addAll({
       'major': major,
       'minor': minor,
@@ -4307,7 +4307,7 @@ class VMRef extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "@VM";
+    json['type'] = '@VM';
     json.addAll({
       'name': name,
     });
@@ -4362,7 +4362,7 @@ class VM extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "VM";
+    json['type'] = 'VM';
     json.addAll({
       'architectureBits': architectureBits,
       'targetCPU': targetCPU,
@@ -4433,7 +4433,7 @@ class CpuProfile extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "_CpuProfile";
+    json['type'] = '_CpuProfile';
     json.addAll({
       'sampleCount': sampleCount,
       'samplePeriod': samplePeriod,
@@ -4551,7 +4551,7 @@ class AllocationProfile extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "AllocationProfile";
+    json['type'] = 'AllocationProfile';
     json.addAll({
       'dateLastServiceGC': dateLastServiceGC,
       'members': members?.map((f) => f?.toJson())?.toList(),
@@ -4589,7 +4589,7 @@ class ClassHeapStats extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "ClassHeapStats";
+    json['type'] = 'ClassHeapStats';
     json.addAll({
       'class': classRef?.toJson(),
       'new': new_?.map((f) => f)?.toList(),
@@ -4637,7 +4637,7 @@ class HeapSpace extends Response {
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
-    json["type"] = "HeapSpace";
+    json['type'] = 'HeapSpace';
     json.addAll({
       'avgCollectionPeriodMillis': avgCollectionPeriodMillis,
       'capacity': capacity,
