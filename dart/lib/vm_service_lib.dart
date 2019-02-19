@@ -571,179 +571,192 @@ class VmServer {
   }
 
   void _delegateRequest(Map<String, Object> request) async {
-    var method = request['method'];
-    if (method == null) {
-      throw UnimplementedError('Unexpected request with no method: $request');
+    try {
+      var method = request['method'];
+      if (method == null) {
+        throw RPCError(null, -32600, 'Invalid Request', request);
+      }
+      var params = request['params'] as Map<String, Object>;
+      Response response;
+      switch (method) {
+        case 'addBreakpoint':
+          response = await serviceImpl.addBreakpoint(
+            params['isolateId'],
+            params['scriptId'],
+            params['line'],
+            column: params['column'],
+          );
+          break;
+        case 'addBreakpointWithScriptUri':
+          response = await serviceImpl.addBreakpointWithScriptUri(
+            params['isolateId'],
+            params['scriptUri'],
+            params['line'],
+            column: params['column'],
+          );
+          break;
+        case 'addBreakpointAtEntry':
+          response = await serviceImpl.addBreakpointAtEntry(
+            params['isolateId'],
+            params['functionId'],
+          );
+          break;
+        case 'invoke':
+          response = await serviceImpl.invoke(
+            params['isolateId'],
+            params['targetId'],
+            params['selector'],
+            params['argumentIds'],
+          );
+          break;
+        case 'evaluate':
+          response = await serviceImpl.evaluate(
+            params['isolateId'],
+            params['targetId'],
+            params['expression'],
+            scope: params['scope'],
+          );
+          break;
+        case 'evaluateInFrame':
+          response = await serviceImpl.evaluateInFrame(
+            params['isolateId'],
+            params['frameIndex'],
+            params['expression'],
+            scope: params['scope'],
+          );
+          break;
+        case 'getFlagList':
+          response = await serviceImpl.getFlagList();
+          break;
+        case 'getIsolate':
+          response = await serviceImpl.getIsolate(
+            params['isolateId'],
+          );
+          break;
+        case 'getScripts':
+          response = await serviceImpl.getScripts(
+            params['isolateId'],
+          );
+          break;
+        case 'getObject':
+          response = await serviceImpl.getObject(
+            params['isolateId'],
+            params['objectId'],
+            offset: params['offset'],
+            count: params['count'],
+          );
+          break;
+        case 'getStack':
+          response = await serviceImpl.getStack(
+            params['isolateId'],
+          );
+          break;
+        case 'getSourceReport':
+          response = await serviceImpl.getSourceReport(
+            params['isolateId'],
+            params['reports'],
+            scriptId: params['scriptId'],
+            tokenPos: params['tokenPos'],
+            endTokenPos: params['endTokenPos'],
+            forceCompile: params['forceCompile'],
+          );
+          break;
+        case 'getVersion':
+          response = await serviceImpl.getVersion();
+          break;
+        case 'getVM':
+          response = await serviceImpl.getVM();
+          break;
+        case 'pause':
+          response = await serviceImpl.pause(
+            params['isolateId'],
+          );
+          break;
+        case 'kill':
+          response = await serviceImpl.kill(
+            params['isolateId'],
+          );
+          break;
+        case 'reloadSources':
+          response = await serviceImpl.reloadSources(
+            params['isolateId'],
+            force: params['force'],
+            pause: params['pause'],
+            rootLibUri: params['rootLibUri'],
+            packagesUri: params['packagesUri'],
+          );
+          break;
+        case 'removeBreakpoint':
+          response = await serviceImpl.removeBreakpoint(
+            params['isolateId'],
+            params['breakpointId'],
+          );
+          break;
+        case 'resume':
+          response = await serviceImpl.resume(
+            params['isolateId'],
+            step: params['step'],
+            frameIndex: params['frameIndex'],
+          );
+          break;
+        case 'setExceptionPauseMode':
+          response = await serviceImpl.setExceptionPauseMode(
+            params['isolateId'],
+            params['mode'],
+          );
+          break;
+        case 'setFlag':
+          response = await serviceImpl.setFlag(
+            params['name'],
+            params['value'],
+          );
+          break;
+        case 'setLibraryDebuggable':
+          response = await serviceImpl.setLibraryDebuggable(
+            params['isolateId'],
+            params['libraryId'],
+            params['isDebuggable'],
+          );
+          break;
+        case 'setName':
+          response = await serviceImpl.setName(
+            params['isolateId'],
+            params['name'],
+          );
+          break;
+        case 'setVMName':
+          response = await serviceImpl.setVMName(
+            params['name'],
+          );
+          break;
+        case 'streamCancel':
+          response = await serviceImpl.streamCancel(
+            params['streamId'],
+          );
+          break;
+        case 'streamListen':
+          response = await serviceImpl.streamListen(
+            params['streamId'],
+          );
+          break;
+        default:
+          throw RPCError(method, -32601, 'Method not found', request);
+      }
+      responseSink.add({
+        'jsonrpc': '2.0',
+        'result': response.toJson(),
+        'id': request['id'],
+      });
+    } catch (e) {
+      var error = e is RPCError
+          ? {'error': e.code, 'data': e.data, 'message': e.message}
+          : {'error': -32603, 'message': e.toString()};
+      responseSink.add({
+        'jsonrpc': '2.0',
+        'error': error,
+        'id': request['id'],
+      });
     }
-    var params = request['params'] as Map<String, Object>;
-    Response response;
-    switch (method) {
-      case 'addBreakpoint':
-        response = await serviceImpl.addBreakpoint(
-          params['isolateId'],
-          params['scriptId'],
-          params['line'],
-          column: params['column'],
-        );
-        break;
-      case 'addBreakpointWithScriptUri':
-        response = await serviceImpl.addBreakpointWithScriptUri(
-          params['isolateId'],
-          params['scriptUri'],
-          params['line'],
-          column: params['column'],
-        );
-        break;
-      case 'addBreakpointAtEntry':
-        response = await serviceImpl.addBreakpointAtEntry(
-          params['isolateId'],
-          params['functionId'],
-        );
-        break;
-      case 'invoke':
-        response = await serviceImpl.invoke(
-          params['isolateId'],
-          params['targetId'],
-          params['selector'],
-          params['argumentIds'],
-        );
-        break;
-      case 'evaluate':
-        response = await serviceImpl.evaluate(
-          params['isolateId'],
-          params['targetId'],
-          params['expression'],
-          scope: params['scope'],
-        );
-        break;
-      case 'evaluateInFrame':
-        response = await serviceImpl.evaluateInFrame(
-          params['isolateId'],
-          params['frameIndex'],
-          params['expression'],
-          scope: params['scope'],
-        );
-        break;
-      case 'getFlagList':
-        response = await serviceImpl.getFlagList();
-        break;
-      case 'getIsolate':
-        response = await serviceImpl.getIsolate(
-          params['isolateId'],
-        );
-        break;
-      case 'getScripts':
-        response = await serviceImpl.getScripts(
-          params['isolateId'],
-        );
-        break;
-      case 'getObject':
-        response = await serviceImpl.getObject(
-          params['isolateId'],
-          params['objectId'],
-          offset: params['offset'],
-          count: params['count'],
-        );
-        break;
-      case 'getStack':
-        response = await serviceImpl.getStack(
-          params['isolateId'],
-        );
-        break;
-      case 'getSourceReport':
-        response = await serviceImpl.getSourceReport(
-          params['isolateId'],
-          params['reports'],
-          scriptId: params['scriptId'],
-          tokenPos: params['tokenPos'],
-          endTokenPos: params['endTokenPos'],
-          forceCompile: params['forceCompile'],
-        );
-        break;
-      case 'getVersion':
-        response = await serviceImpl.getVersion();
-        break;
-      case 'getVM':
-        response = await serviceImpl.getVM();
-        break;
-      case 'pause':
-        response = await serviceImpl.pause(
-          params['isolateId'],
-        );
-        break;
-      case 'kill':
-        response = await serviceImpl.kill(
-          params['isolateId'],
-        );
-        break;
-      case 'reloadSources':
-        response = await serviceImpl.reloadSources(
-          params['isolateId'],
-          force: params['force'],
-          pause: params['pause'],
-          rootLibUri: params['rootLibUri'],
-          packagesUri: params['packagesUri'],
-        );
-        break;
-      case 'removeBreakpoint':
-        response = await serviceImpl.removeBreakpoint(
-          params['isolateId'],
-          params['breakpointId'],
-        );
-        break;
-      case 'resume':
-        response = await serviceImpl.resume(
-          params['isolateId'],
-          step: params['step'],
-          frameIndex: params['frameIndex'],
-        );
-        break;
-      case 'setExceptionPauseMode':
-        response = await serviceImpl.setExceptionPauseMode(
-          params['isolateId'],
-          params['mode'],
-        );
-        break;
-      case 'setFlag':
-        response = await serviceImpl.setFlag(
-          params['name'],
-          params['value'],
-        );
-        break;
-      case 'setLibraryDebuggable':
-        response = await serviceImpl.setLibraryDebuggable(
-          params['isolateId'],
-          params['libraryId'],
-          params['isDebuggable'],
-        );
-        break;
-      case 'setName':
-        response = await serviceImpl.setName(
-          params['isolateId'],
-          params['name'],
-        );
-        break;
-      case 'setVMName':
-        response = await serviceImpl.setVMName(
-          params['name'],
-        );
-        break;
-      case 'streamCancel':
-        response = await serviceImpl.streamCancel(
-          params['streamId'],
-        );
-        break;
-      case 'streamListen':
-        response = await serviceImpl.streamListen(
-          params['streamId'],
-        );
-        break;
-    }
-    responseSink.add({
-      'jsonrpc': '2.0',
-      'result': response.toJson(),
-      'id': request['id'],
-    });
   }
 }
 

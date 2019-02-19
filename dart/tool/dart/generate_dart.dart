@@ -476,13 +476,14 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     }
 
     void _delegateRequest(Map<String, Object> request) async {
-      var method = request['method'];
-      if (method == null) {
-        throw UnimplementedError('Unexpected request with no method: \$request');
-      }
-      var params = request['params'] as Map<String, Object>;
-      Response response;
-      switch(method) {
+      try {
+        var method = request['method'];
+        if (method == null) {
+          throw RPCError(null, -32600, 'Invalid Request', request);
+        }
+        var params = request['params'] as Map<String, Object>;
+        Response response;
+        switch(method) {
     ''');
     methods.where((m) => !m.isUndocumented).forEach((m) {
       gen.writeln("case '${m.name}':");
@@ -501,6 +502,9 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
       gen.writeln(");");
       gen.writeln('break;');
     });
+    // Throw for unrecognized methods.
+    gen.writeln('default:');
+    gen.writeln("throw RPCError(method, -32601, 'Method not found', request);");
     // terminate the switch
     gen.writeln('}');
 
@@ -511,6 +515,20 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
   'id': request['id'],
 });
 """);
+
+    // Close the try block, handle errors
+    gen.write('''
+      } catch (e) {
+        var error = e is RPCError
+            ? {'error': e.code, 'data': e.data, 'message': e.message}
+            : {'error': -32603, 'message': e.toString()};
+        responseSink.add({
+          'jsonrpc': '2.0',
+          'error': error,
+          'id': request['id'],
+        });
+      }
+''');
 
     // terminate the _delegateRequest method
     gen.write('}');
