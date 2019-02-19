@@ -1189,6 +1189,7 @@ class Type extends Member {
 
   // Writes the code to retrieve the serialized value of a field.
   void generateSerializedFieldAccess(TypeField field, DartGenerator gen) {
+    var nullAware = field.optional ? '?' : '';
     if (field.type.isSimple || field.type.isEnum) {
       gen.write('${field.generatableName}');
       if (field.defaultValue != null) {
@@ -1196,18 +1197,18 @@ class Type extends Member {
       }
     } else if (name == 'Event' && field.name == 'extensionData') {
       // Special case `Event.extensionData`.
-      gen.writeln('extensionData?.data');
+      gen.writeln('extensionData$nullAware.data');
     } else if (field.type.isArray) {
-      gen.write('${field.generatableName}?.map((f) => f');
+      gen.write('${field.generatableName}$nullAware.map((f) => f');
       // Special case `tokenPosTable` which is a List<List<int>>.
       if (field.name == 'tokenPosTable') {
-        gen.write('?.toList()');
+        gen.write('$nullAware.toList()');
       } else if (!field.type.types.first.isListTypeSimple) {
-        gen.write('?.toJson()');
+        gen.write('$nullAware.toJson()');
       }
-      gen.write(')?.toList()');
+      gen.write(')$nullAware.toList()');
     } else {
-      gen.write('${field.generatableName}?.toJson()');
+      gen.write('${field.generatableName}$nullAware.toJson()');
     }
   }
 

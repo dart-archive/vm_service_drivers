@@ -1256,8 +1256,8 @@ class BoundField {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
-      'decl': decl?.toJson(),
-      'value': value?.toJson(),
+      'decl': decl.toJson(),
+      'value': value.toJson(),
     });
     return json;
   }
@@ -1309,7 +1309,7 @@ class BoundVariable {
     json['type'] = 'BoundVariable';
     json.addAll({
       'name': name,
-      'value': value?.toJson(),
+      'value': value.toJson(),
       'declarationTokenPos': declarationTokenPos,
       'scopeStartTokenPos': scopeStartTokenPos,
       'scopeEndTokenPos': scopeEndTokenPos,
@@ -1364,7 +1364,7 @@ class Breakpoint extends Obj {
     json.addAll({
       'breakpointNumber': breakpointNumber,
       'resolved': resolved,
-      'location': location?.toJson(),
+      'location': location.toJson(),
     });
     var nextVal;
     nextVal = isSyntheticAsyncContinuation;
@@ -1497,11 +1497,11 @@ class Class extends Obj {
       'name': name,
       'abstract': isAbstract,
       'const': isConst,
-      'library': library?.toJson(),
-      'interfaces': interfaces?.map((f) => f?.toJson())?.toList(),
-      'fields': fields?.map((f) => f?.toJson())?.toList(),
-      'functions': functions?.map((f) => f?.toJson())?.toList(),
-      'subclasses': subclasses?.map((f) => f?.toJson())?.toList(),
+      'library': library.toJson(),
+      'interfaces': interfaces.map((f) => f.toJson()).toList(),
+      'fields': fields.map((f) => f.toJson()).toList(),
+      'functions': functions.map((f) => f.toJson()).toList(),
+      'subclasses': subclasses.map((f) => f.toJson()).toList(),
     });
     var nextVal;
     nextVal = error?.toJson();
@@ -1550,7 +1550,7 @@ class ClassList extends Response {
     var json = <String, dynamic>{};
     json['type'] = 'ClassList';
     json.addAll({
-      'classes': classes?.map((f) => f?.toJson())?.toList(),
+      'classes': classes.map((f) => f.toJson()).toList(),
     });
     return json;
   }
@@ -1690,7 +1690,7 @@ class Context extends Obj {
     json['type'] = 'Context';
     json.addAll({
       'length': length,
-      'variables': variables?.map((f) => f?.toJson())?.toList(),
+      'variables': variables.map((f) => f.toJson()).toList(),
     });
     var nextVal;
     nextVal = parent?.toJson();
@@ -1724,7 +1724,7 @@ class ContextElement {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
-      'value': value?.toJson(),
+      'value': value.toJson(),
     });
     return json;
   }
@@ -2132,8 +2132,8 @@ class FieldRef extends ObjRef {
     json['type'] = '@Field';
     json.addAll({
       'name': name,
-      'owner': owner?.toJson(),
-      'declaredType': declaredType?.toJson(),
+      'owner': owner.toJson(),
+      'declaredType': declaredType.toJson(),
       'const': isConst,
       'final': isFinal,
       'static': isStatic,
@@ -2200,8 +2200,8 @@ class Field extends Obj {
     json['type'] = 'Field';
     json.addAll({
       'name': name,
-      'owner': owner?.toJson(),
-      'declaredType': declaredType?.toJson(),
+      'owner': owner.toJson(),
+      'declaredType': declaredType.toJson(),
       'const': isConst,
       'final': isFinal,
       'static': isStatic,
@@ -2291,7 +2291,7 @@ class FlagList extends Response {
     var json = <String, dynamic>{};
     json['type'] = 'FlagList';
     json.addAll({
-      'flags': flags?.map((f) => f?.toJson())?.toList(),
+      'flags': flags.map((f) => f.toJson()).toList(),
     });
     return json;
   }
@@ -2400,7 +2400,7 @@ class FuncRef extends ObjRef {
     json['type'] = '@Function';
     json.addAll({
       'name': name,
-      'owner': owner?.toJson(),
+      'owner': owner.toJson(),
       'static': isStatic,
       'const': isConst,
     });
@@ -2451,7 +2451,7 @@ class Func extends Obj {
     json['type'] = 'Function';
     json.addAll({
       'name': name,
-      'owner': owner?.toJson(),
+      'owner': owner.toJson(),
     });
     var nextVal;
     nextVal = location?.toJson();
@@ -2579,7 +2579,7 @@ class InstanceRef extends ObjRef {
     json['type'] = '@Instance';
     json.addAll({
       'kind': kind,
-      'class': classRef?.toJson(),
+      'class': classRef.toJson(),
     });
     var nextVal;
     nextVal = valueAsString;
@@ -3162,9 +3162,9 @@ class Isolate extends Response {
       'runnable': runnable,
       'livePorts': livePorts,
       'pauseOnExit': pauseOnExit,
-      'pauseEvent': pauseEvent?.toJson(),
-      'libraries': libraries?.map((f) => f?.toJson())?.toList(),
-      'breakpoints': breakpoints?.map((f) => f?.toJson())?.toList(),
+      'pauseEvent': pauseEvent.toJson(),
+      'libraries': libraries.map((f) => f.toJson()).toList(),
+      'breakpoints': breakpoints.map((f) => f.toJson()).toList(),
       'exceptionPauseMode': exceptionPauseMode,
     });
     var nextVal;
@@ -3282,11 +3282,11 @@ class Library extends Obj {
       'name': name,
       'uri': uri,
       'debuggable': debuggable,
-      'dependencies': dependencies?.map((f) => f?.toJson())?.toList(),
-      'scripts': scripts?.map((f) => f?.toJson())?.toList(),
-      'variables': variables?.map((f) => f?.toJson())?.toList(),
-      'functions': functions?.map((f) => f?.toJson())?.toList(),
-      'classes': classes?.map((f) => f?.toJson())?.toList(),
+      'dependencies': dependencies.map((f) => f.toJson()).toList(),
+      'scripts': scripts.map((f) => f.toJson()).toList(),
+      'variables': variables.map((f) => f.toJson()).toList(),
+      'functions': functions.map((f) => f.toJson()).toList(),
+      'classes': classes.map((f) => f.toJson()).toList(),
     });
     return json;
   }
@@ -3330,7 +3330,7 @@ class LibraryDependency {
       'isImport': isImport,
       'isDeferred': isDeferred,
       'prefix': prefix,
-      'target': target?.toJson(),
+      'target': target.toJson(),
     });
     return json;
   }
@@ -3360,8 +3360,8 @@ class MapAssociation {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
-      'key': key?.toJson(),
-      'value': value?.toJson(),
+      'key': key.toJson(),
+      'value': value.toJson(),
     });
     return json;
   }
@@ -3768,7 +3768,7 @@ class Script extends Obj {
     json['type'] = 'Script';
     json.addAll({
       'uri': uri,
-      'library': library?.toJson(),
+      'library': library.toJson(),
     });
     var nextVal;
     nextVal = source;
@@ -3806,7 +3806,7 @@ class ScriptList extends Response {
     var json = <String, dynamic>{};
     json['type'] = 'ScriptList';
     json.addAll({
-      'scripts': scripts?.map((f) => f?.toJson())?.toList(),
+      'scripts': scripts.map((f) => f.toJson()).toList(),
     });
     return json;
   }
@@ -3842,7 +3842,7 @@ class SourceLocation extends Response {
     var json = <String, dynamic>{};
     json['type'] = 'SourceLocation';
     json.addAll({
-      'script': script?.toJson(),
+      'script': script.toJson(),
       'tokenPos': tokenPos,
     });
     var nextVal;
@@ -3888,8 +3888,8 @@ class SourceReport extends Response {
     var json = <String, dynamic>{};
     json['type'] = 'SourceReport';
     json.addAll({
-      'ranges': ranges?.map((f) => f?.toJson())?.toList(),
-      'scripts': scripts?.map((f) => f?.toJson())?.toList(),
+      'ranges': ranges.map((f) => f.toJson()).toList(),
+      'scripts': scripts.map((f) => f.toJson()).toList(),
     });
     return json;
   }
@@ -3925,8 +3925,8 @@ class SourceReportCoverage {
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
-      'hits': hits?.map((f) => f)?.toList(),
-      'misses': misses?.map((f) => f)?.toList(),
+      'hits': hits.map((f) => f).toList(),
+      'misses': misses.map((f) => f).toList(),
     });
     return json;
   }
@@ -4050,8 +4050,8 @@ class Stack extends Response {
     var json = <String, dynamic>{};
     json['type'] = 'Stack';
     json.addAll({
-      'frames': frames?.map((f) => f?.toJson())?.toList(),
-      'messages': messages?.map((f) => f?.toJson())?.toList(),
+      'frames': frames.map((f) => f.toJson()).toList(),
+      'messages': messages.map((f) => f.toJson()).toList(),
     });
     var nextVal;
     nextVal = asyncCausalFrames?.map((f) => f?.toJson())?.toList();
@@ -4165,7 +4165,7 @@ class TypeArguments extends Obj {
     json['type'] = 'TypeArguments';
     json.addAll({
       'name': name,
-      'types': types?.map((f) => f?.toJson())?.toList(),
+      'types': types.map((f) => f.toJson()).toList(),
     });
     return json;
   }
@@ -4370,7 +4370,7 @@ class VM extends Response {
       'version': version,
       'pid': pid,
       'startTime': startTime,
-      'isolates': isolates?.map((f) => f?.toJson())?.toList(),
+      'isolates': isolates.map((f) => f.toJson()).toList(),
     });
     var nextVal;
     nextVal = name;
@@ -4441,12 +4441,12 @@ class CpuProfile extends Response {
       'timeSpan': timeSpan,
       'timeOriginMicros': timeOriginMicros,
       'timeExtentMicros': timeExtentMicros,
-      'codes': codes?.map((f) => f?.toJson())?.toList(),
-      'functions': functions?.map((f) => f?.toJson())?.toList(),
-      'exclusiveCodeTrie': exclusiveCodeTrie?.map((f) => f)?.toList(),
-      'inclusiveCodeTrie': inclusiveCodeTrie?.map((f) => f)?.toList(),
-      'exclusiveFunctionTrie': exclusiveFunctionTrie?.map((f) => f)?.toList(),
-      'inclusiveFunctionTrie': inclusiveFunctionTrie?.map((f) => f)?.toList(),
+      'codes': codes.map((f) => f.toJson()).toList(),
+      'functions': functions.map((f) => f.toJson()).toList(),
+      'exclusiveCodeTrie': exclusiveCodeTrie.map((f) => f).toList(),
+      'inclusiveCodeTrie': inclusiveCodeTrie.map((f) => f).toList(),
+      'exclusiveFunctionTrie': exclusiveFunctionTrie.map((f) => f).toList(),
+      'inclusiveFunctionTrie': inclusiveFunctionTrie.map((f) => f).toList(),
     });
     return json;
   }
@@ -4481,7 +4481,7 @@ class CodeRegion {
       'kind': kind,
       'inclusiveTicks': inclusiveTicks,
       'exclusiveTicks': exclusiveTicks,
-      'code': code?.toJson(),
+      'code': code.toJson(),
     });
     return json;
   }
@@ -4521,8 +4521,8 @@ class ProfileFunction {
       'kind': kind,
       'inclusiveTicks': inclusiveTicks,
       'exclusiveTicks': exclusiveTicks,
-      'function': function?.toJson(),
-      'codes': codes?.map((f) => f)?.toList(),
+      'function': function.toJson(),
+      'codes': codes.map((f) => f).toList(),
     });
     return json;
   }
@@ -4554,7 +4554,7 @@ class AllocationProfile extends Response {
     json['type'] = 'AllocationProfile';
     json.addAll({
       'dateLastServiceGC': dateLastServiceGC,
-      'members': members?.map((f) => f?.toJson())?.toList(),
+      'members': members.map((f) => f.toJson()).toList(),
     });
     return json;
   }
@@ -4591,9 +4591,9 @@ class ClassHeapStats extends Response {
     var json = <String, dynamic>{};
     json['type'] = 'ClassHeapStats';
     json.addAll({
-      'class': classRef?.toJson(),
-      'new': new_?.map((f) => f)?.toList(),
-      'old': old?.map((f) => f)?.toList(),
+      'class': classRef.toJson(),
+      'new': new_.map((f) => f).toList(),
+      'old': old.map((f) => f).toList(),
       'promotedBytes': promotedBytes,
       'promotedInstances': promotedInstances,
     });
