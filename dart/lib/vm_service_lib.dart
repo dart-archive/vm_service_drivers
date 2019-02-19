@@ -561,6 +561,192 @@ abstract class VmServiceInterface {
   Future<Success> registerService(String service, String alias);
 }
 
+class VmServer {
+  final Stream<Map<String, Object>> requestStream;
+  final StreamSink<Map<String, Object>> responseSink;
+  final VmServiceInterface serviceImpl;
+
+  VmServer(this.requestStream, this.responseSink, this.serviceImpl) {
+    requestStream.listen(_delegateRequest);
+  }
+
+  void _delegateRequest(Map<String, Object> request) async {
+    var method = request['method'];
+    if (method == null) {
+      throw UnimplementedError('Unexpected request with no method: $request');
+    }
+    var params = request['params'] as Map<String, Object>;
+    Response response;
+    switch (method) {
+      case 'addBreakpoint':
+        response = await serviceImpl.addBreakpoint(
+          params['isolateId'],
+          params['scriptId'],
+          params['line'],
+          column: params['column'],
+        );
+        break;
+      case 'addBreakpointWithScriptUri':
+        response = await serviceImpl.addBreakpointWithScriptUri(
+          params['isolateId'],
+          params['scriptUri'],
+          params['line'],
+          column: params['column'],
+        );
+        break;
+      case 'addBreakpointAtEntry':
+        response = await serviceImpl.addBreakpointAtEntry(
+          params['isolateId'],
+          params['functionId'],
+        );
+        break;
+      case 'invoke':
+        response = await serviceImpl.invoke(
+          params['isolateId'],
+          params['targetId'],
+          params['selector'],
+          params['argumentIds'],
+        );
+        break;
+      case 'evaluate':
+        response = await serviceImpl.evaluate(
+          params['isolateId'],
+          params['targetId'],
+          params['expression'],
+          scope: params['scope'],
+        );
+        break;
+      case 'evaluateInFrame':
+        response = await serviceImpl.evaluateInFrame(
+          params['isolateId'],
+          params['frameIndex'],
+          params['expression'],
+          scope: params['scope'],
+        );
+        break;
+      case 'getFlagList':
+        response = await serviceImpl.getFlagList();
+        break;
+      case 'getIsolate':
+        response = await serviceImpl.getIsolate(
+          params['isolateId'],
+        );
+        break;
+      case 'getScripts':
+        response = await serviceImpl.getScripts(
+          params['isolateId'],
+        );
+        break;
+      case 'getObject':
+        response = await serviceImpl.getObject(
+          params['isolateId'],
+          params['objectId'],
+          offset: params['offset'],
+          count: params['count'],
+        );
+        break;
+      case 'getStack':
+        response = await serviceImpl.getStack(
+          params['isolateId'],
+        );
+        break;
+      case 'getSourceReport':
+        response = await serviceImpl.getSourceReport(
+          params['isolateId'],
+          params['reports'],
+          scriptId: params['scriptId'],
+          tokenPos: params['tokenPos'],
+          endTokenPos: params['endTokenPos'],
+          forceCompile: params['forceCompile'],
+        );
+        break;
+      case 'getVersion':
+        response = await serviceImpl.getVersion();
+        break;
+      case 'getVM':
+        response = await serviceImpl.getVM();
+        break;
+      case 'pause':
+        response = await serviceImpl.pause(
+          params['isolateId'],
+        );
+        break;
+      case 'kill':
+        response = await serviceImpl.kill(
+          params['isolateId'],
+        );
+        break;
+      case 'reloadSources':
+        response = await serviceImpl.reloadSources(
+          params['isolateId'],
+          force: params['force'],
+          pause: params['pause'],
+          rootLibUri: params['rootLibUri'],
+          packagesUri: params['packagesUri'],
+        );
+        break;
+      case 'removeBreakpoint':
+        response = await serviceImpl.removeBreakpoint(
+          params['isolateId'],
+          params['breakpointId'],
+        );
+        break;
+      case 'resume':
+        response = await serviceImpl.resume(
+          params['isolateId'],
+          step: params['step'],
+          frameIndex: params['frameIndex'],
+        );
+        break;
+      case 'setExceptionPauseMode':
+        response = await serviceImpl.setExceptionPauseMode(
+          params['isolateId'],
+          params['mode'],
+        );
+        break;
+      case 'setFlag':
+        response = await serviceImpl.setFlag(
+          params['name'],
+          params['value'],
+        );
+        break;
+      case 'setLibraryDebuggable':
+        response = await serviceImpl.setLibraryDebuggable(
+          params['isolateId'],
+          params['libraryId'],
+          params['isDebuggable'],
+        );
+        break;
+      case 'setName':
+        response = await serviceImpl.setName(
+          params['isolateId'],
+          params['name'],
+        );
+        break;
+      case 'setVMName':
+        response = await serviceImpl.setVMName(
+          params['name'],
+        );
+        break;
+      case 'streamCancel':
+        response = await serviceImpl.streamCancel(
+          params['streamId'],
+        );
+        break;
+      case 'streamListen':
+        response = await serviceImpl.streamListen(
+          params['streamId'],
+        );
+        break;
+    }
+    responseSink.add({
+      'jsonrpc': '2.0',
+      'result': response.toJson(),
+      'id': request['id'],
+    });
+  }
+}
+
 class VmService implements VmServiceInterface {
   StreamSubscription _streamSub;
   Function _writeMessage;
@@ -1723,6 +1909,7 @@ class BoundField {
     value = createServiceObject(json['value']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -1774,6 +1961,7 @@ class BoundVariable {
     scopeEndTokenPos = json['scopeEndTokenPos'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'BoundVariable';
@@ -1828,6 +2016,7 @@ class Breakpoint extends Obj {
     location = createServiceObject(json['location']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Breakpoint';
@@ -1864,6 +2053,7 @@ class ClassRef extends ObjRef {
     name = json['name'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Class';
@@ -1957,6 +2147,7 @@ class Class extends Obj {
         new List<ClassRef>.from(createServiceObject(json['subclasses']));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Class';
@@ -1997,6 +2188,7 @@ class ClassList extends Response {
     classes = new List<ClassRef>.from(createServiceObject(json['classes']));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'ClassList';
@@ -2027,6 +2219,7 @@ class CodeRef extends ObjRef {
     kind = json['kind'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Code';
@@ -2063,6 +2256,7 @@ class Code extends ObjRef {
     kind = json['kind'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Code';
@@ -2094,6 +2288,7 @@ class ContextRef extends ObjRef {
     length = json['length'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Context';
@@ -2136,6 +2331,7 @@ class Context extends Obj {
         new List<ContextElement>.from(createServiceObject(json['variables']));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Context';
@@ -2168,6 +2364,7 @@ class ContextElement {
     value = createServiceObject(json['value']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -2197,6 +2394,7 @@ class ErrorRef extends ObjRef {
     message = json['message'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Error';
@@ -2246,6 +2444,7 @@ class Error extends Obj {
     stacktrace = createServiceObject(json['stacktrace']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Error';
@@ -2447,6 +2646,7 @@ class Event extends Response {
     alias = json['alias'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'Event';
@@ -2517,6 +2717,7 @@ class FieldRef extends ObjRef {
     isStatic = json['static'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Field';
@@ -2585,6 +2786,7 @@ class Field extends Obj {
     location = createServiceObject(json['location']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Field';
@@ -2637,6 +2839,7 @@ class Flag {
     valueAsString = json['valueAsString'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -2666,6 +2869,7 @@ class FlagList extends Response {
     flags = new List<Flag>.from(createServiceObject(json['flags']));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'FlagList';
@@ -2713,6 +2917,7 @@ class Frame extends Response {
     kind = json['kind'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'Frame';
@@ -2758,6 +2963,7 @@ class FuncRef extends ObjRef {
     isConst = json['const'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Function';
@@ -2809,6 +3015,7 @@ class Func extends Obj {
     code = createServiceObject(json['code']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Function';
@@ -2930,6 +3137,7 @@ class InstanceRef extends ObjRef {
     pattern = createServiceObject(json['pattern']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Instance';
@@ -3242,6 +3450,7 @@ class Instance extends Obj {
     bound = createServiceObject(json['bound']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Instance';
@@ -3310,6 +3519,7 @@ class IsolateRef extends Response {
     fixedId = json['fixedId'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = '@Isolate';
@@ -3415,6 +3625,7 @@ class Isolate extends Response {
     fixedId = json['fixedId'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'Isolate';
@@ -3464,6 +3675,7 @@ class LibraryRef extends ObjRef {
     uri = json['uri'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Library';
@@ -3527,6 +3739,7 @@ class Library extends Obj {
     classes = new List<ClassRef>.from(createServiceObject(json['classes']));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Library';
@@ -3576,6 +3789,7 @@ class LibraryDependency {
     target = createServiceObject(json['target']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -3609,6 +3823,7 @@ class MapAssociation {
     value = createServiceObject(json['value']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -3660,6 +3875,7 @@ class Message extends Response {
     location = createServiceObject(json['location']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'Message';
@@ -3688,6 +3904,7 @@ class NullValRef extends InstanceRef {
 
   NullValRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Null';
@@ -3711,6 +3928,7 @@ class NullVal extends Instance {
 
   NullVal._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Null';
@@ -3743,6 +3961,7 @@ class ObjRef extends Response {
     fixedId = json['fixedId'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = '@Object';
@@ -3804,6 +4023,7 @@ class Obj extends Response {
     fixedId = json['fixedId'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'Object';
@@ -3836,6 +4056,7 @@ class ReloadReport extends Response {
     success = json['success'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'ReloadReport';
@@ -3867,6 +4088,7 @@ class Response {
     type = json['type'];
   }
 
+  Map<String, dynamic> toJson() => throw UnimplementedError();
   String toString() => '[Response type: ${type}]';
 }
 
@@ -3891,6 +4113,7 @@ class Sentinel extends Response {
     valueAsString = json['valueAsString'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'Sentinel';
@@ -3919,6 +4142,7 @@ class ScriptRef extends ObjRef {
     uri = json['uri'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Script';
@@ -3994,6 +4218,7 @@ class Script extends Obj {
         json['tokenPosTable'].map((dynamic list) => new List<int>.from(list)));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Script';
@@ -4027,6 +4252,7 @@ class ScriptList extends Response {
     scripts = new List<ScriptRef>.from(createServiceObject(json['scripts']));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'ScriptList';
@@ -4063,6 +4289,7 @@ class SourceLocation extends Response {
     endTokenPos = json['endTokenPos'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'SourceLocation';
@@ -4105,6 +4332,7 @@ class SourceReport extends Response {
     scripts = new List<ScriptRef>.from(createServiceObject(json['scripts']));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'SourceReport';
@@ -4143,6 +4371,7 @@ class SourceReportCoverage {
     misses = new List<int>.from(json['misses']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4211,6 +4440,7 @@ class SourceReportRange {
         : new List<int>.from(json['possibleBreakpoints']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4258,6 +4488,7 @@ class Stack extends Response {
     messages = new List<Message>.from(createServiceObject(json['messages']));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'Stack';
@@ -4286,6 +4517,7 @@ class Success extends Response {
 
   Success._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'Success';
@@ -4305,6 +4537,7 @@ class TimelineEvent {
 
   TimelineEvent._fromJson(Map<String, dynamic> json) {}
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     return json;
@@ -4328,6 +4561,7 @@ class TypeArgumentsRef extends ObjRef {
     name = json['name'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@TypeArguments';
@@ -4367,6 +4601,7 @@ class TypeArguments extends Obj {
     types = new List<InstanceRef>.from(createServiceObject(json['types']));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'TypeArguments';
@@ -4434,6 +4669,7 @@ class UnresolvedSourceLocation extends Response {
     column = json['column'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'UnresolvedSourceLocation';
@@ -4468,6 +4704,7 @@ class Version extends Response {
     minor = json['minor'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'Version';
@@ -4496,6 +4733,7 @@ class VMRef extends Response {
     name = json['name'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = '@VM';
@@ -4551,6 +4789,7 @@ class VM extends Response {
     name = json['name'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'VM';
@@ -4618,6 +4857,7 @@ class CpuProfile extends Response {
     inclusiveFunctionTrie = new List<int>.from(json['inclusiveFunctionTrie']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = '_CpuProfile';
@@ -4662,6 +4902,7 @@ class CodeRegion {
     code = createServiceObject(json['code']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4702,6 +4943,7 @@ class ProfileFunction {
     codes = new List<int>.from(json['codes']);
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4736,6 +4978,7 @@ class AllocationProfile extends Response {
         new List<ClassHeapStats>.from(createServiceObject(json['members']));
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'AllocationProfile';
@@ -4774,6 +5017,7 @@ class ClassHeapStats extends Response {
     promotedInstances = json['promotedInstances'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'ClassHeapStats';
@@ -4822,6 +5066,7 @@ class HeapSpace extends Response {
     used = json['used'];
   }
 
+  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json['type'] = 'HeapSpace';

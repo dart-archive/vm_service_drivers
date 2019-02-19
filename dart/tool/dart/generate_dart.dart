@@ -463,6 +463,62 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     gen.write('}');
     gen.writeln();
 
+    // The server class, takes a VmServiceInterface and delegates to it
+    // automatically.
+    gen.write('''
+  class VmServer {
+    final Stream<Map<String, Object>> requestStream;
+    final StreamSink<Map<String, Object>> responseSink;
+    final VmServiceInterface serviceImpl;
+
+    VmServer(this.requestStream, this.responseSink, this.serviceImpl) {
+      requestStream.listen(_delegateRequest);
+    }
+
+    void _delegateRequest(Map<String, Object> request) async {
+      var method = request['method'];
+      if (method == null) {
+        throw UnimplementedError('Unexpected request with no method: \$request');
+      }
+      var params = request['params'] as Map<String, Object>;
+      Response response;
+      switch(method) {
+    ''');
+    methods.where((m) => !m.isUndocumented).forEach((m) {
+      gen.writeln("case '${m.name}':");
+      gen.write("response = await serviceImpl.${m.name}(");
+      // Positional args
+      m.args.where((arg) => !arg.optional).forEach((arg) {
+        gen.write("params['${arg.name}'], ");
+      });
+      // Optional named args
+      var namedArgs = m.args.where((arg) => arg.optional);
+      if (namedArgs.isNotEmpty) {
+        namedArgs.forEach((arg) {
+          gen.writeln("${arg.name}: params['${arg.name}'], ");
+        });
+      }
+      gen.writeln(");");
+      gen.writeln('break;');
+    });
+    // terminate the switch
+    gen.writeln('}');
+
+    // Generate the json success response
+    gen.write("""responseSink.add({
+  'jsonrpc': '2.0',
+  'result': response.toJson(),
+  'id': request['id'],
+});
+""");
+
+    // terminate the _delegateRequest method
+    gen.write('}');
+    gen.writeln();
+
+    gen.write('}');
+    gen.writeln();
+
     // The client side service implementation.
     gen.writeStatement('class VmService implements VmServiceInterface {');
     gen.writeStatement('StreamSubscription _streamSub;');
@@ -1134,7 +1190,11 @@ class Type extends Member {
     gen.writeln();
 
     // toJson support, the base Response type is not supported
-    if (name != 'Response') {
+    if (name == 'Response') {
+      gen.writeln(
+          'Map<String, dynamic> toJson() => throw UnimplementedError();');
+    } else {
+      gen.writeln('@override');
       gen.writeln('Map<String, dynamic> toJson() {');
       if (superName == null || superName == 'Response') {
         // The base Response type doesn't have a toJson
