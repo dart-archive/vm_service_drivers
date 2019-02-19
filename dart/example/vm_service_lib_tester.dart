@@ -67,7 +67,8 @@ void main() {
       }
       expect(originalJson, isNotNull, reason: 'Unrecognized event type! $json');
 
-      var instance = createObject(originalJson);
+      // ignore: invalid_use_of_visible_for_testing_member
+      var instance = createServiceObject(originalJson);
       expect(instance, isNotNull,
           reason: 'failed to deserialize object $originalJson!');
 

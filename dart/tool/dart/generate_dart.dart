@@ -138,7 +138,7 @@ final String _implCode = r'''
       String streamId = map['params']['streamId'];
       Map event = map['params']['event'];
       event['_data'] = data;
-      _getEventController(streamId).add(createObject(event));
+      _getEventController(streamId).add(createServiceObject(event));
     }
   }
 
@@ -183,7 +183,7 @@ final String _implCode = r'''
       if (_typeFactories[type] == null) {
         completer.complete(Response.parse(result));
       } else {
-        completer.complete(createObject(result));
+        completer.complete(createServiceObject(result));
       }
     }
   }
@@ -202,7 +202,7 @@ final String _implCode = r'''
     final Map params = json['params'];
     if (method == 'streamNotify') {
       String streamId = params['streamId'];
-      _getEventController(streamId).add(createObject(params['event']));
+      _getEventController(streamId).add(createServiceObject(params['event']));
     } else {
       await _routeRequest(method, params);
     }
@@ -402,11 +402,11 @@ const String undocumented = 'undocumented';
 /// This is useful for handling the results of the Stdout or Stderr events.
 String decodeBase64(String str) => utf8.decode(base64.decode(str));
 
-Object createObject(dynamic json) {
+Object createServiceObject(dynamic json) {
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => createObject(e)).toList();
+    return json.map((e) => createServiceObject(e)).toList();
   } else if (json is Map) {
     String type = json['type'];
     if (_typeFactories[type] == null) {
@@ -1087,7 +1087,7 @@ class Type extends Member {
                 "new List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = $ref == null ? null : "
-                "new List<${fieldType.listTypeArg}>.from(createObject($ref));");
+                "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref));");
           }
         } else {
           if (fieldType.isListTypeSimple) {
@@ -1095,12 +1095,12 @@ class Type extends Member {
                 "new List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = "
-                "new List<${fieldType.listTypeArg}>.from(createObject($ref));");
+                "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref));");
           }
         }
       } else {
-        gen.writeln(
-            "${field.generatableName} = createObject(json['${field.name}']);");
+        gen.writeln("${field.generatableName} = "
+            "createServiceObject(json['${field.name}']);");
       }
     });
     gen.writeln('}');
