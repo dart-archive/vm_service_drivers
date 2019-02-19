@@ -453,7 +453,18 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     });
     gen.writeln('};');
     gen.writeln();
-    gen.writeStatement('class VmService {');
+
+    // The service interface, both servers and clients implement this.
+    gen.writeStatement('abstract class VmServiceInterface {');
+    methods.forEach((m) {
+      m.generateDefinition(gen);
+      gen.write(';');
+    });
+    gen.write('}');
+    gen.writeln();
+
+    // The client side service implementation.
+    gen.writeStatement('class VmService implements VmServiceInterface {');
     gen.writeStatement('StreamSubscription _streamSub;');
     gen.writeStatement('Function _writeMessage;');
     gen.writeStatement('int _id = 0;');
@@ -730,40 +741,7 @@ class Method extends Member {
   String get publicName => isUndocumented ? name.substring(1) : name;
 
   void generate(DartGenerator gen) {
-    gen.writeln();
-    if (docs != null) {
-      String _docs = docs == null ? '' : docs;
-      if (returnType.isMultipleReturns) {
-        _docs += '\n\nThe return value can be one of '
-            '${joinLast(returnType.types.map((t) => '[${t}]'), ', ', ' or ')}.';
-        _docs = _docs.trim();
-      }
-      if (_docs.isNotEmpty) gen.writeDocs(_docs);
-    }
-    if (isUndocumented) gen.writeln('@undocumented');
-    gen.write('Future<${returnType.name}> ${publicName}(');
-    bool startedOptional = false;
-    gen.write(args.map((MethodArg arg) {
-      String typeName;
-      if (api.isEnumName(arg.type.name)) {
-        if (arg.type.isArray) {
-          typeName = typeName = '/*${arg.type}*/ List<String>';
-        } else {
-          typeName = '/*${arg.type}*/ String';
-        }
-      } else {
-        typeName = arg.type.ref;
-      }
-
-      if (arg.optional && !startedOptional) {
-        startedOptional = true;
-        return '{${typeName} ${arg.name}';
-      } else {
-        return '${typeName} ${arg.name}';
-      }
-    }).join(', '));
-    if (startedOptional) gen.write('}');
-    gen.write(') ');
+    generateDefinition(gen, withOverrides: true);
     if (!hasArgs) {
       gen.writeStatement("=> _call('${name}');");
     } else if (hasOptionalArgs) {
@@ -789,6 +767,50 @@ class Method extends Member {
       gen.writeStatement('});');
       gen.writeStatement('}');
     }
+  }
+
+  /// Writes the method definition without the body.
+  ///
+  /// Does not write an opening or closing bracket, or a trailing semicolon.
+  ///
+  /// If [withOverrides] is `true` then it will add an `@override` annotation
+  /// before each method.
+  void generateDefinition(DartGenerator gen, {bool withOverrides = false}) {
+    gen.writeln();
+    if (docs != null) {
+      String _docs = docs == null ? '' : docs;
+      if (returnType.isMultipleReturns) {
+        _docs += '\n\nThe return value can be one of '
+            '${joinLast(returnType.types.map((t) => '[${t}]'), ', ', ' or ')}.';
+        _docs = _docs.trim();
+      }
+      if (_docs.isNotEmpty) gen.writeDocs(_docs);
+    }
+    if (isUndocumented) gen.writeln('@undocumented');
+    if (withOverrides) gen.writeln('@override');
+    gen.write('Future<${returnType.name}> ${publicName}(');
+    bool startedOptional = false;
+    gen.write(args.map((MethodArg arg) {
+      String typeName;
+      if (api.isEnumName(arg.type.name)) {
+        if (arg.type.isArray) {
+          typeName = typeName = '/*${arg.type}*/ List<String>';
+        } else {
+          typeName = '/*${arg.type}*/ String';
+        }
+      } else {
+        typeName = arg.type.ref;
+      }
+
+      if (arg.optional && !startedOptional) {
+        startedOptional = true;
+        return '{${typeName} ${arg.name}';
+      } else {
+        return '${typeName} ${arg.name}';
+      }
+    }).join(', '));
+    if (startedOptional) gen.write('}');
+    gen.write(') ');
   }
 
   void _parse(Token token) {
