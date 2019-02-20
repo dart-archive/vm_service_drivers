@@ -23,6 +23,9 @@ if [ "$BOT" = "dart" ]; then
     # Run the VM service protocol smoke tester.
     dart example/vm_service_lib_tester.dart
 
+    # Run the unit tests
+    pub run test
+
 elif [ "$BOT" = "java" ]; then
 
     popd
