@@ -27,54 +27,58 @@ void main() {
     responsesController.close();
   });
 
-  test('can delegate simple methods to the service', () {
-    var request = rpcRequest("getVersion");
-    var version = Version()
-      ..major = 1
-      ..minor = 0;
-    when(serviceMock.getVersion()).thenAnswer((_) => Future.value(version));
-    expect(responsesController.stream, emits(rpcResponse(version)));
-    requestsController.add(request);
-  });
-
-  test('can delegate methods with parameters to the service', () {
-    var isolate = Isolate()
-      ..id = '123'
-      ..number = '0'
-      ..startTime = 1
-      ..runnable = true
-      ..livePorts = 2
-      ..pauseOnExit = false
-      ..pauseEvent = (Event()
-        ..kind = EventKind.kResume
-        ..timestamp = 3)
-      ..libraries = []
-      ..breakpoints = [];
-    var request = rpcRequest("getIsolate", params: {'isolateId': isolate.id});
-    when(serviceMock.getIsolate(isolate.id))
-        .thenAnswer((Invocation invocation) {
-      expect(invocation.positionalArguments, equals([isolate.id]));
-      return Future.value(isolate);
+  group('method delegation', () {
+    test('works for simple methods', () {
+      var request = rpcRequest("getVersion");
+      var version = Version()
+        ..major = 1
+        ..minor = 0;
+      when(serviceMock.getVersion()).thenAnswer((_) => Future.value(version));
+      expect(responsesController.stream, emits(rpcResponse(version)));
+      requestsController.add(request);
     });
-    expect(responsesController.stream, emits(rpcResponse(isolate)));
-    requestsController.add(request);
+
+    test('works for methods with parameters', () {
+      var isolate = Isolate()
+        ..id = '123'
+        ..number = '0'
+        ..startTime = 1
+        ..runnable = true
+        ..livePorts = 2
+        ..pauseOnExit = false
+        ..pauseEvent = (Event()
+          ..kind = EventKind.kResume
+          ..timestamp = 3)
+        ..libraries = []
+        ..breakpoints = [];
+      var request = rpcRequest("getIsolate", params: {'isolateId': isolate.id});
+      when(serviceMock.getIsolate(isolate.id))
+          .thenAnswer((Invocation invocation) {
+        expect(invocation.positionalArguments, equals([isolate.id]));
+        return Future.value(isolate);
+      });
+      expect(responsesController.stream, emits(rpcResponse(isolate)));
+      requestsController.add(request);
+    });
   });
 
-  test('can handle RPCError instances specially', () {
-    var request = rpcRequest("getVersion");
-    var error =
-        RPCError('getVersion', 1234, 'custom message', {'custom': 'data'});
-    when(serviceMock.getVersion()).thenAnswer((_) => Future.error(error));
-    expect(responsesController.stream, emits(rpcErrorResponse(error)));
-    requestsController.add(request);
-  });
+  group('error handling', () {
+    test('special cases RPCError instances', () {
+      var request = rpcRequest("getVersion");
+      var error =
+          RPCError('getVersion', 1234, 'custom message', {'custom': 'data'});
+      when(serviceMock.getVersion()).thenAnswer((_) => Future.error(error));
+      expect(responsesController.stream, emits(rpcErrorResponse(error)));
+      requestsController.add(request);
+    });
 
-  test('can handle generic exceptions with a fallback', () {
-    var request = rpcRequest("getVersion");
-    var error = UnimplementedError();
-    when(serviceMock.getVersion()).thenAnswer((_) => Future.error(error));
-    expect(responsesController.stream, emits(rpcErrorResponse(error)));
-    requestsController.add(request);
+    test('has a fallback for generic exceptions', () {
+      var request = rpcRequest("getVersion");
+      var error = UnimplementedError();
+      when(serviceMock.getVersion()).thenAnswer((_) => Future.error(error));
+      expect(responsesController.stream, emits(rpcErrorResponse(error)));
+      requestsController.add(request);
+    });
   });
 }
 
