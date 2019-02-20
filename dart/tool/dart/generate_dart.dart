@@ -481,7 +481,7 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
         if (method == null) {
           throw RPCError(null, -32600, 'Invalid Request', request);
         }
-        var params = request['params'] as Map<String, Object>;
+        var params = request['params'] as Map;
         Response response;
         switch(method) {
     ''');
@@ -520,8 +520,8 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     gen.write('''
       } catch (e) {
         var error = e is RPCError
-            ? {'error': e.code, 'data': e.data, 'message': e.message}
-            : {'error': -32603, 'message': e.toString()};
+            ? {'code': e.code, 'data': e.data, 'message': e.message}
+            : {'code': -32603, 'message': e.toString()};
         responseSink.add({
           'jsonrpc': '2.0',
           'error': error,

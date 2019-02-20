@@ -576,7 +576,7 @@ class VmServer {
       if (method == null) {
         throw RPCError(null, -32600, 'Invalid Request', request);
       }
-      var params = request['params'] as Map<String, Object>;
+      var params = request['params'] as Map;
       Response response;
       switch (method) {
         case 'addBreakpoint':
@@ -749,8 +749,8 @@ class VmServer {
       });
     } catch (e) {
       var error = e is RPCError
-          ? {'error': e.code, 'data': e.data, 'message': e.message}
-          : {'error': -32603, 'message': e.toString()};
+          ? {'code': e.code, 'data': e.data, 'message': e.message}
+          : {'code': -32603, 'message': e.toString()};
       responseSink.add({
         'jsonrpc': '2.0',
         'error': error,
