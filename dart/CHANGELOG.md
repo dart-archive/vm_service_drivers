@@ -1,4 +1,8 @@
 # Changelog
+## 3.14.3-dev.1
+- Add `VmServiceInterface` class, and `VmServer` class which can handle routing
+  jsonrpc2 requests to a `VmServiceInterface` instance, and serializing the
+  responses back.
 
 ## 3.14.3-dev.0
 - Add `toJson` methods to all classes.
