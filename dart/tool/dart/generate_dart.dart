@@ -138,7 +138,7 @@ final String _implCode = r'''
       String streamId = map['params']['streamId'];
       Map event = map['params']['event'];
       event['_data'] = data;
-      _getEventController(streamId).add(_createObject(event));
+      _getEventController(streamId).add(createServiceObject(event));
     }
   }
 
@@ -183,7 +183,7 @@ final String _implCode = r'''
       if (_typeFactories[type] == null) {
         completer.complete(Response.parse(result));
       } else {
-        completer.complete(_createObject(result));
+        completer.complete(createServiceObject(result));
       }
     }
   }
@@ -202,7 +202,7 @@ final String _implCode = r'''
     final Map params = json['params'];
     if (method == 'streamNotify') {
       String streamId = params['streamId'];
-      _getEventController(streamId).add(_createObject(params['event']));
+      _getEventController(streamId).add(createServiceObject(params['event']));
     } else {
       await _routeRequest(method, params);
     }
@@ -402,11 +402,11 @@ const String undocumented = 'undocumented';
 /// This is useful for handling the results of the Stdout or Stderr events.
 String decodeBase64(String str) => utf8.decode(base64.decode(str));
 
-Object _createObject(dynamic json) {
+Object createServiceObject(dynamic json) {
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => _createObject(e)).toList();
+    return json.map((e) => createServiceObject(e)).toList();
   } else if (json is Map) {
     String type = json['type'];
     if (_typeFactories[type] == null) {
@@ -435,6 +435,11 @@ dynamic _createSpecificObject(dynamic json, dynamic creator(Map<String, dynamic>
     // Handle simple types.
     return json;
   }
+}
+
+void _setIfNotNull(Map<String, Object> json, String key, Object value) {
+  if (value == null) return;
+  json[key] = value;
 }
 
 typedef ServiceCallback = Future<Map<String, dynamic>> Function(
@@ -916,6 +921,26 @@ class Type extends Member {
 
   Type(this.parent, String categoryName, String definition, [this.docs]) {
     _parse(new Tokenizer(definition).tokenize());
+    // Anything with an `id` should have a `fixedId` boolean also, but that
+    // isn't in the protocol definition.
+    if (fields.any((f) => f.name == 'id') &&
+        !fields.any((f) => f.name == 'fixedId')) {
+      var field = TypeField(this, '')
+        ..type = (MemberType()..types = [TypeRef('bool')])
+        ..name = 'fixedId'
+        ..optional = true;
+      fields.add(field);
+    }
+
+    // The vm sends a name for VM objects even though that isn't in the
+    // protocol.
+    if (name == 'VM' && !fields.any((f) => f.name == 'name')) {
+      var field = TypeField(this, '')
+        ..type = (MemberType()..types = [TypeRef('String')])
+        ..name = 'name'
+        ..optional = true;
+      fields.add(field);
+    }
   }
 
   Type._(this.parent, this.rawName, this.name, this.superName, this.docs);
@@ -1048,6 +1073,11 @@ class Type extends Member {
         // Special case `SourceReportRange.coverage`.
         gen.writeln("coverage = _createSpecificObject("
             "json['coverage'], SourceReportCoverage.parse);");
+      } else if (name == 'Library' && field.name == 'dependencies') {
+        // Special case `Library.dependencies`.
+        gen.writeln("dependencies = new List<LibraryDependency>.from("
+            "_createSpecificObject(json['dependencies'], "
+            "LibraryDependency.parse));");
       } else if (name == 'Script' && field.name == 'tokenPosTable') {
         // Special case `Script.tokenPosTable`.
         gen.writeln(
@@ -1062,7 +1092,7 @@ class Type extends Member {
                 "new List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = $ref == null ? null : "
-                "new List<${fieldType.listTypeArg}>.from(_createObject($ref));");
+                "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref));");
           }
         } else {
           if (fieldType.isListTypeSimple) {
@@ -1070,16 +1100,55 @@ class Type extends Member {
                 "new List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = "
-                "new List<${fieldType.listTypeArg}>.from(_createObject($ref));");
+                "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref));");
           }
         }
       } else {
-        gen.writeln(
-            "${field.generatableName} = _createObject(json['${field.name}']);");
+        gen.writeln("${field.generatableName} = "
+            "createServiceObject(json['${field.name}']);");
       }
     });
     gen.writeln('}');
     gen.writeln();
+
+    // toJson support, the base Response type is not supported
+    if (name != 'Response') {
+      gen.writeln('Map<String, dynamic> toJson() {');
+      if (superName == null || superName == 'Response') {
+        // The base Response type doesn't have a toJson
+        gen.writeln('var json = <String, dynamic>{};');
+      } else {
+        gen.writeln('var json = super.toJson();');
+      }
+
+      // Only Response objects have a `type` field, as defined by protocol,
+      // except `BoundVariable` which does have a `type` field.
+      if (isResponse || rawName == 'BoundVariable') {
+        // Overwrites "type" from the super class if we had one.
+        gen.writeln("json['type'] = '$rawName';");
+      }
+
+      var requiredFields = fields.where((f) => !f.optional);
+      if (requiredFields.isNotEmpty) {
+        gen.writeln('json.addAll({');
+        requiredFields.forEach((TypeField field) {
+          gen.write("'${field.name}': ");
+          generateSerializedFieldAccess(field, gen);
+          gen.writeln(',');
+        });
+        gen.writeln('});');
+      }
+
+      var optionalFields = fields.where((f) => f.optional);
+      optionalFields.forEach((TypeField field) {
+        gen.write("_setIfNotNull(json, '${field.name}', ");
+        generateSerializedFieldAccess(field, gen);
+        gen.writeln(');');
+      });
+      gen.writeln('return json;');
+      gen.writeln('}');
+      gen.writeln();
+    }
 
     // equals and hashCode
     if (supportsIdentity) {
@@ -1115,6 +1184,31 @@ class Type extends Member {
     }
 
     gen.writeln('}');
+  }
+
+  // Writes the code to retrieve the serialized value of a field.
+  void generateSerializedFieldAccess(TypeField field, DartGenerator gen) {
+    var nullAware = field.optional ? '?' : '';
+    if (field.type.isSimple || field.type.isEnum) {
+      gen.write('${field.generatableName}');
+      if (field.defaultValue != null) {
+        gen.write(' ?? ${field.defaultValue}');
+      }
+    } else if (name == 'Event' && field.name == 'extensionData') {
+      // Special case `Event.extensionData`.
+      gen.writeln('extensionData$nullAware.data');
+    } else if (field.type.isArray) {
+      gen.write('${field.generatableName}$nullAware.map((f) => f');
+      // Special case `tokenPosTable` which is a List<List<int>>.
+      if (field.name == 'tokenPosTable') {
+        gen.write('$nullAware.toList()');
+      } else if (!field.type.types.first.isListTypeSimple) {
+        gen.write('$nullAware.toJson()');
+      }
+      gen.write(')$nullAware.toList()');
+    } else {
+      gen.write('${field.generatableName}$nullAware.toJson()');
+    }
   }
 
   void generateAssert(DartGenerator gen) {

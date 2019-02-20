@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.14.3-dev.0
+- Add `toJson` methods to all classes.
+
 ## 3.14.2
 - fix code generation for the `getSourceReport` call
 
