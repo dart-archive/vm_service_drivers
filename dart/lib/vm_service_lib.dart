@@ -133,6 +133,9 @@ Map<String, Function> _typeFactories = {
 };
 
 abstract class VmServiceInterface {
+  /// Returns the stream for a given stream id.
+  Stream<Event> onEvent(String streamId);
+
   /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
   /// some script.
   ///
@@ -566,6 +569,9 @@ class VmServer {
   final StreamSink<Map<String, Object>> responseSink;
   final VmServiceInterface serviceImpl;
 
+  /// Manages streams for `streamListen` and `streamCancel` requests.
+  final _streamSubscriptions = <String, StreamSubscription>{};
+
   VmServer(this.requestStream, this.responseSink, this.serviceImpl) {
     requestStream.listen(_delegateRequest);
   }
@@ -730,14 +736,34 @@ class VmServer {
           );
           break;
         case 'streamCancel':
-          response = await serviceImpl.streamCancel(
-            params['streamId'],
-          );
+          var id = params['streamId'];
+          var existing = _streamSubscriptions.remove(id);
+          if (existing == null) {
+            throw RPCError('streamCancel', 104, 'Stream not subscribed', {
+              'details': "The stream '$id' is not subscribed",
+            });
+          }
+          await existing.cancel();
+          response = Success();
           break;
         case 'streamListen':
-          response = await serviceImpl.streamListen(
-            params['streamId'],
-          );
+          var id = params['streamId'];
+          if (_streamSubscriptions.containsKey(id)) {
+            throw RPCError('streamListen', 103, 'Stream already subscribed', {
+              'details': "The stream '$id' is already subscribed",
+            });
+          }
+          _streamSubscriptions[id] = serviceImpl.onEvent(id).listen((e) {
+            responseSink.add({
+              'json-rpc': '2.0',
+              'method': 'streamNotify',
+              'params': {
+                'streamId': id,
+                'event': e.toJson(),
+              },
+            });
+          });
+          response = Success();
           break;
         default:
           throw RPCError(method, -32601, 'Method not found', request);
@@ -823,9 +849,10 @@ class VmService implements VmServiceInterface {
   // _Service
   Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
 
-  // Listen for a specific event name.
-  Stream<Event> onEvent(String streamName) =>
-      _getEventController(streamName).stream;
+  // Listen for a specific stream id.
+  @override
+  Stream<Event> onEvent(String streamId) =>
+      _getEventController(streamId).stream;
 
   /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
   /// some script.

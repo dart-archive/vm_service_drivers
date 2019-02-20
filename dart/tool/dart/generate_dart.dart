@@ -284,6 +284,36 @@ class _NullLog implements Log {
 }
 ''';
 
+final _streamListenCaseImpl = '''
+var id = params['streamId'];
+if (_streamSubscriptions.containsKey(id)) {
+  throw RPCError('streamListen', 103, 'Stream already subscribed', {
+      'details': "The stream '\$id' is already subscribed",
+    });
+}
+_streamSubscriptions[id] = serviceImpl.onEvent(id).listen((e) {
+  responseSink.add({
+    'json-rpc': '2.0',
+    'method': 'streamNotify',
+    'params': {
+      'streamId': id,
+      'event': e.toJson(),
+    },
+  });
+});
+response = Success();''';
+
+final _streamCancelCaseImpl = '''
+var id = params['streamId'];
+var existing = _streamSubscriptions.remove(id);
+if (existing == null) {
+  throw RPCError('streamCancel', 104, 'Stream not subscribed', {
+      'details': "The stream '\$id' is not subscribed",
+    });
+}
+await existing.cancel();
+response = Success();''';
+
 abstract class Member {
   String get name;
 
@@ -455,7 +485,11 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     gen.writeln();
 
     // The service interface, both servers and clients implement this.
-    gen.writeStatement('abstract class VmServiceInterface {');
+    gen.writeStatement('''
+abstract class VmServiceInterface {
+  /// Returns the stream for a given stream id.
+  Stream<Event> onEvent(String streamId);
+''');
     methods.forEach((m) {
       m.generateDefinition(gen);
       gen.write(';');
@@ -470,6 +504,9 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     final Stream<Map<String, Object>> requestStream;
     final StreamSink<Map<String, Object>> responseSink;
     final VmServiceInterface serviceImpl;
+
+    /// Manages streams for `streamListen` and `streamCancel` requests.
+    final _streamSubscriptions = <String, StreamSubscription>{};
 
     VmServer(this.requestStream, this.responseSink, this.serviceImpl) {
       requestStream.listen(_delegateRequest);
@@ -487,19 +524,25 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     ''');
     methods.where((m) => !m.isUndocumented).forEach((m) {
       gen.writeln("case '${m.name}':");
-      gen.write("response = await serviceImpl.${m.name}(");
-      // Positional args
-      m.args.where((arg) => !arg.optional).forEach((arg) {
-        gen.write("params['${arg.name}'], ");
-      });
-      // Optional named args
-      var namedArgs = m.args.where((arg) => arg.optional);
-      if (namedArgs.isNotEmpty) {
-        namedArgs.forEach((arg) {
-          gen.writeln("${arg.name}: params['${arg.name}'], ");
+      if (m.name == 'streamListen') {
+        gen.writeln(_streamListenCaseImpl);
+      } else if (m.name == 'streamCancel') {
+        gen.writeln(_streamCancelCaseImpl);
+      } else {
+        gen.write("response = await serviceImpl.${m.name}(");
+        // Positional args
+        m.args.where((arg) => !arg.optional).forEach((arg) {
+          gen.write("params['${arg.name}'], ");
         });
+        // Optional named args
+        var namedArgs = m.args.where((arg) => arg.optional);
+        if (namedArgs.isNotEmpty) {
+          namedArgs.forEach((arg) {
+            gen.writeln("${arg.name}: params['${arg.name}'], ");
+          });
+        }
+        gen.writeln(");");
       }
-      gen.writeln(");");
       gen.writeln('break;');
     });
     // Throw for unrecognized methods.
@@ -602,8 +645,9 @@ Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
 // _Service
 Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
 
-// Listen for a specific event name.
-Stream<Event> onEvent(String streamName) => _getEventController(streamName).stream;
+// Listen for a specific stream id.
+@override
+Stream<Event> onEvent(String streamId) => _getEventController(streamId).stream;
 ''');
 
     gen.writeln();
