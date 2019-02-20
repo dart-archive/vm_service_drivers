@@ -293,7 +293,7 @@ if (_streamSubscriptions.containsKey(id)) {
 }
 _streamSubscriptions[id] = serviceImpl.onEvent(id).listen((e) {
   responseSink.add({
-    'json-rpc': '2.0',
+    'jsonrpc': '2.0',
     'method': 'streamNotify',
     'params': {
       'streamId': id,
@@ -488,6 +488,9 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     gen.writeStatement('''
 abstract class VmServiceInterface {
   /// Returns the stream for a given stream id.
+  ///
+  /// This is not a part of the spec, but is needed for both the client and
+  /// server to get access to the real event streams.
   Stream<Event> onEvent(String streamId);
 ''');
     methods.forEach((m) {

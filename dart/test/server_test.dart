@@ -5,13 +5,14 @@
 @TestOn('vm')
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 void main() {
-  VmServiceInterface serviceMock;
+  MockVmService serviceMock;
   StreamController<Map<String, Object>> requestsController;
   StreamController<Map<String, Object>> responsesController;
 
@@ -80,6 +81,103 @@ void main() {
       requestsController.add(request);
     });
   });
+
+  group('streams', () {
+    test('can be listened to and canceled', () async {
+      var streamId = 'Isolate';
+      var responseQueue = StreamQueue(responsesController.stream);
+      StreamController<Event> eventController;
+      {
+        var request =
+            rpcRequest('streamListen', params: {'streamId': streamId});
+        var response = Success();
+        when(serviceMock.streamListen(streamId))
+            .thenAnswer((_) => Future.value(response));
+        requestsController.add(request);
+        await expect(responseQueue, emitsThrough(rpcResponse(response)));
+
+        eventController = serviceMock.streamControllers[streamId];
+
+        var events = [
+          Event()
+            ..kind = EventKind.kIsolateStart
+            ..timestamp = 0,
+          Event()
+            ..kind = EventKind.kIsolateExit
+            ..timestamp = 1,
+        ];
+        events.forEach(eventController.add);
+        await expect(
+            responseQueue,
+            emitsInOrder(
+                events.map((event) => streamNotifyResponse(streamId, event))));
+      }
+      {
+        var request =
+            rpcRequest('streamCancel', params: {'streamId': streamId});
+        var response = Success();
+        when(serviceMock.streamListen(streamId))
+            .thenAnswer((_) => Future.value(response));
+        requestsController.add(request);
+        await expect(responseQueue, emitsThrough(rpcResponse(response)));
+
+        var nextEvent = Event()
+          ..kind = EventKind.kIsolateReload
+          ..timestamp = 2;
+        eventController.add(nextEvent);
+        expect(responseQueue,
+            neverEmits(streamNotifyResponse(streamId, nextEvent)));
+
+        await pumpEventQueue();
+        await eventController.close();
+        await responsesController.close();
+      }
+    });
+    test("can't be listened to twice", () {
+      var streamId = 'Isolate';
+      var responseQueue = StreamQueue(responsesController.stream);
+      {
+        var request =
+            rpcRequest('streamListen', params: {'streamId': streamId});
+        var response = Success();
+        when(serviceMock.streamListen(streamId))
+            .thenAnswer((_) => Future.value(response));
+        requestsController.add(request);
+        expect(responseQueue, emitsThrough(rpcResponse(response)));
+      }
+      {
+        var request =
+            rpcRequest('streamListen', params: {'streamId': streamId});
+        var response = Success();
+        when(serviceMock.streamListen(streamId))
+            .thenAnswer((_) => Future.value(response));
+        requestsController.add(request);
+        expect(
+            responseQueue,
+            emitsThrough(rpcErrorResponse(
+                RPCError('streamSubcribe', 103, 'Stream already subscribed', {
+              'details': "The stream '$streamId' is already subscribed",
+            }))));
+      }
+    });
+
+    test("can't cancel a stream that isn't being listened to", () {
+      var streamId = 'Isolate';
+      var responseQueue = StreamQueue(responsesController.stream);
+
+      var request = rpcRequest('streamCancel', params: {'streamId': streamId});
+      var response = Success();
+      when(serviceMock.streamListen(streamId))
+          .thenAnswer((_) => Future.value(response));
+      requestsController.add(request);
+      expect(
+          responseQueue,
+          emitsThrough(rpcErrorResponse(
+              RPCError('streamCancel', 104, 'Stream not subscribed', {
+            'details': "The stream '$streamId' is not subscribed",
+          }))));
+    });
+  });
 }
 
 Map<String, Object> rpcRequest(String method,
@@ -120,4 +218,22 @@ Map<String, Object> rpcErrorResponse(Object error, {String id = "1"}) {
   };
 }
 
-class MockVmService extends Mock implements VmServiceInterface {}
+Map<String, Object> streamNotifyResponse(String streamId, Event event) {
+  return {
+    'jsonrpc': '2.0',
+    'method': 'streamNotify',
+    'params': {
+      'streamId': '$streamId',
+      'event': event.toJson(),
+    },
+  };
+}
+
+class MockVmService extends Mock implements VmServiceInterface {
+  final streamControllers = <String, StreamController<Event>>{};
+
+  @override
+  Stream<Event> onEvent(String streamId) => streamControllers
+      .putIfAbsent(streamId, () => StreamController<Event>())
+      .stream;
+}
