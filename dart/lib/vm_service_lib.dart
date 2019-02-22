@@ -132,6 +132,9 @@ Map<String, Function> _typeFactories = {
   'HeapSpace': HeapSpace.parse,
 };
 
+/// A class representation of the Dart VM Service Protocol.
+///
+/// Both clients and servers should implement this interface.
 abstract class VmServiceInterface {
   /// Returns the stream for a given stream id.
   ///
@@ -567,15 +570,17 @@ abstract class VmServiceInterface {
   Future<Success> registerService(String service, String alias);
 }
 
+/// A Dart VM Service Protocol server that delegates requests to a
+/// [VmServiceInterface] implementation.
 class VmServer {
   final Stream<Map<String, Object>> requestStream;
   final StreamSink<Map<String, Object>> responseSink;
-  final VmServiceInterface serviceImpl;
+  final VmServiceInterface serviceImplementation;
 
   /// Manages streams for `streamListen` and `streamCancel` requests.
   final _streamSubscriptions = <String, StreamSubscription>{};
 
-  VmServer(this.requestStream, this.responseSink, this.serviceImpl) {
+  VmServer(this.requestStream, this.responseSink, this.serviceImplementation) {
     requestStream.listen(_delegateRequest);
   }
 
@@ -589,7 +594,7 @@ class VmServer {
       Response response;
       switch (method) {
         case 'addBreakpoint':
-          response = await serviceImpl.addBreakpoint(
+          response = await serviceImplementation.addBreakpoint(
             params['isolateId'],
             params['scriptId'],
             params['line'],
@@ -597,7 +602,7 @@ class VmServer {
           );
           break;
         case 'addBreakpointWithScriptUri':
-          response = await serviceImpl.addBreakpointWithScriptUri(
+          response = await serviceImplementation.addBreakpointWithScriptUri(
             params['isolateId'],
             params['scriptUri'],
             params['line'],
@@ -605,13 +610,13 @@ class VmServer {
           );
           break;
         case 'addBreakpointAtEntry':
-          response = await serviceImpl.addBreakpointAtEntry(
+          response = await serviceImplementation.addBreakpointAtEntry(
             params['isolateId'],
             params['functionId'],
           );
           break;
         case 'invoke':
-          response = await serviceImpl.invoke(
+          response = await serviceImplementation.invoke(
             params['isolateId'],
             params['targetId'],
             params['selector'],
@@ -619,7 +624,7 @@ class VmServer {
           );
           break;
         case 'evaluate':
-          response = await serviceImpl.evaluate(
+          response = await serviceImplementation.evaluate(
             params['isolateId'],
             params['targetId'],
             params['expression'],
@@ -627,7 +632,7 @@ class VmServer {
           );
           break;
         case 'evaluateInFrame':
-          response = await serviceImpl.evaluateInFrame(
+          response = await serviceImplementation.evaluateInFrame(
             params['isolateId'],
             params['frameIndex'],
             params['expression'],
@@ -635,20 +640,20 @@ class VmServer {
           );
           break;
         case 'getFlagList':
-          response = await serviceImpl.getFlagList();
+          response = await serviceImplementation.getFlagList();
           break;
         case 'getIsolate':
-          response = await serviceImpl.getIsolate(
+          response = await serviceImplementation.getIsolate(
             params['isolateId'],
           );
           break;
         case 'getScripts':
-          response = await serviceImpl.getScripts(
+          response = await serviceImplementation.getScripts(
             params['isolateId'],
           );
           break;
         case 'getObject':
-          response = await serviceImpl.getObject(
+          response = await serviceImplementation.getObject(
             params['isolateId'],
             params['objectId'],
             offset: params['offset'],
@@ -656,12 +661,12 @@ class VmServer {
           );
           break;
         case 'getStack':
-          response = await serviceImpl.getStack(
+          response = await serviceImplementation.getStack(
             params['isolateId'],
           );
           break;
         case 'getSourceReport':
-          response = await serviceImpl.getSourceReport(
+          response = await serviceImplementation.getSourceReport(
             params['isolateId'],
             params['reports'],
             scriptId: params['scriptId'],
@@ -671,23 +676,23 @@ class VmServer {
           );
           break;
         case 'getVersion':
-          response = await serviceImpl.getVersion();
+          response = await serviceImplementation.getVersion();
           break;
         case 'getVM':
-          response = await serviceImpl.getVM();
+          response = await serviceImplementation.getVM();
           break;
         case 'pause':
-          response = await serviceImpl.pause(
+          response = await serviceImplementation.pause(
             params['isolateId'],
           );
           break;
         case 'kill':
-          response = await serviceImpl.kill(
+          response = await serviceImplementation.kill(
             params['isolateId'],
           );
           break;
         case 'reloadSources':
-          response = await serviceImpl.reloadSources(
+          response = await serviceImplementation.reloadSources(
             params['isolateId'],
             force: params['force'],
             pause: params['pause'],
@@ -696,45 +701,45 @@ class VmServer {
           );
           break;
         case 'removeBreakpoint':
-          response = await serviceImpl.removeBreakpoint(
+          response = await serviceImplementation.removeBreakpoint(
             params['isolateId'],
             params['breakpointId'],
           );
           break;
         case 'resume':
-          response = await serviceImpl.resume(
+          response = await serviceImplementation.resume(
             params['isolateId'],
             step: params['step'],
             frameIndex: params['frameIndex'],
           );
           break;
         case 'setExceptionPauseMode':
-          response = await serviceImpl.setExceptionPauseMode(
+          response = await serviceImplementation.setExceptionPauseMode(
             params['isolateId'],
             params['mode'],
           );
           break;
         case 'setFlag':
-          response = await serviceImpl.setFlag(
+          response = await serviceImplementation.setFlag(
             params['name'],
             params['value'],
           );
           break;
         case 'setLibraryDebuggable':
-          response = await serviceImpl.setLibraryDebuggable(
+          response = await serviceImplementation.setLibraryDebuggable(
             params['isolateId'],
             params['libraryId'],
             params['isDebuggable'],
           );
           break;
         case 'setName':
-          response = await serviceImpl.setName(
+          response = await serviceImplementation.setName(
             params['isolateId'],
             params['name'],
           );
           break;
         case 'setVMName':
-          response = await serviceImpl.setVMName(
+          response = await serviceImplementation.setVMName(
             params['name'],
           );
           break;
@@ -756,7 +761,8 @@ class VmServer {
               'details': "The stream '$id' is already subscribed",
             });
           }
-          _streamSubscriptions[id] = serviceImpl.onEvent(id).listen((e) {
+          _streamSubscriptions[id] =
+              serviceImplementation.onEvent(id).listen((e) {
             responseSink.add({
               'jsonrpc': '2.0',
               'method': 'streamNotify',
@@ -852,33 +858,10 @@ class VmService implements VmServiceInterface {
   // _Service
   Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
 
-  // Listen for a specific stream id.
   @override
   Stream<Event> onEvent(String streamId) =>
       _getEventController(streamId).stream;
 
-  /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
-  /// some script.
-  ///
-  /// The `scriptId` parameter is used to specify the target script.
-  ///
-  /// The `line` parameter is used to specify the target line for the
-  /// breakpoint. If there are multiple possible breakpoints on the target line,
-  /// then the VM will place the breakpoint at the location which would execute
-  /// soonest. If it is not possible to set a breakpoint at the target line, the
-  /// breakpoint will be added at the next possible breakpoint location within
-  /// the same function.
-  ///
-  /// The `column` parameter may be optionally specified. This is useful for
-  /// targeting a specific breakpoint on a line with multiple possible
-  /// breakpoints.
-  ///
-  /// If no breakpoint is possible at that line, the `102` (Cannot add
-  /// breakpoint) error code is returned.
-  ///
-  /// Note that breakpoints are added and removed on a per-isolate basis.
-  ///
-  /// See [Breakpoint].
   @override
   Future<Breakpoint> addBreakpoint(String isolateId, String scriptId, int line,
       {int column}) {
@@ -887,30 +870,6 @@ class VmService implements VmServiceInterface {
     return _call('addBreakpoint', m);
   }
 
-  /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
-  /// some script. This RPC is useful when a script has not yet been assigned an
-  /// id, for example, if a script is in a deferred library which has not yet
-  /// been loaded.
-  ///
-  /// The `scriptUri` parameter is used to specify the target script.
-  ///
-  /// The `line` parameter is used to specify the target line for the
-  /// breakpoint. If there are multiple possible breakpoints on the target line,
-  /// then the VM will place the breakpoint at the location which would execute
-  /// soonest. If it is not possible to set a breakpoint at the target line, the
-  /// breakpoint will be added at the next possible breakpoint location within
-  /// the same function.
-  ///
-  /// The `column` parameter may be optionally specified. This is useful for
-  /// targeting a specific breakpoint on a line with multiple possible
-  /// breakpoints.
-  ///
-  /// If no breakpoint is possible at that line, the `102` (Cannot add
-  /// breakpoint) error code is returned.
-  ///
-  /// Note that breakpoints are added and removed on a per-isolate basis.
-  ///
-  /// See [Breakpoint].
   @override
   Future<Breakpoint> addBreakpointWithScriptUri(
       String isolateId, String scriptUri, int line,
@@ -920,46 +879,12 @@ class VmService implements VmServiceInterface {
     return _call('addBreakpointWithScriptUri', m);
   }
 
-  /// The `addBreakpointAtEntry` RPC is used to add a breakpoint at the
-  /// entrypoint of some function.
-  ///
-  /// If no breakpoint is possible at the function entry, the `102` (Cannot add
-  /// breakpoint) error code is returned.
-  ///
-  /// See [Breakpoint].
-  ///
-  /// Note that breakpoints are added and removed on a per-isolate basis.
   @override
   Future<Breakpoint> addBreakpointAtEntry(String isolateId, String functionId) {
     return _call('addBreakpointAtEntry',
         {'isolateId': isolateId, 'functionId': functionId});
   }
 
-  /// The `invoke` RPC is used to perform regular method invocation on some
-  /// receiver, as if by dart:mirror's ObjectMirror.invoke. Note this does not
-  /// provide a way to perform getter, setter or constructor invocation.
-  ///
-  /// `targetId` may refer to a [Library], [Class], or [Instance].
-  ///
-  /// Each elements of `argumentId` may refer to an [Instance].
-  ///
-  /// If `targetId` or any element of `argumentIds` is a temporary id which has
-  /// expired, then the `Expired` [Sentinel] is returned.
-  ///
-  /// If `targetId` or any element of `argumentIds` refers to an object which
-  /// has been collected by the VM's garbage collector, then the `Collected`
-  /// [Sentinel] is returned.
-  ///
-  /// If invocation triggers a failed compilation then [rpc error] 113
-  /// "Expression compilation error" is returned.
-  ///
-  /// If an runtime error occurs while evaluating the invocation, an [ErrorRef]
-  /// reference will be returned.
-  ///
-  /// If the invocation is evaluated successfully, an [InstanceRef] reference
-  /// will be returned.
-  ///
-  /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   @override
   Future<dynamic> invoke(String isolateId, String targetId, String selector,
       List<String> argumentIds) {
@@ -971,34 +896,6 @@ class VmService implements VmServiceInterface {
     });
   }
 
-  /// The `evaluate` RPC is used to evaluate an expression in the context of
-  /// some target.
-  ///
-  /// `targetId` may refer to a [Library], [Class], or [Instance].
-  ///
-  /// If `targetId` is a temporary id which has expired, then the `Expired`
-  /// [Sentinel] is returned.
-  ///
-  /// If `targetId` refers to an object which has been collected by the VM's
-  /// garbage collector, then the `Collected` [Sentinel] is returned.
-  ///
-  /// If `scope` is provided, it should be a map from identifiers to object ids.
-  /// These bindings will be added to the scope in which the expression is
-  /// evaluated, which is a child scope of the class or library for
-  /// instance/class or library targets respectively. This means bindings
-  /// provided in `scope` may shadow instance members, class members and
-  /// top-level members.
-  ///
-  /// If expression is failed to parse and compile, then [rpc error] 113
-  /// "Expression compilation error" is returned.
-  ///
-  /// If an error occurs while evaluating the expression, an [ErrorRef]
-  /// reference will be returned.
-  ///
-  /// If the expression is evaluated successfully, an [InstanceRef] reference
-  /// will be returned.
-  ///
-  /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   @override
   Future<dynamic> evaluate(String isolateId, String targetId, String expression,
       {Map<String, String> scope}) {
@@ -1011,26 +908,6 @@ class VmService implements VmServiceInterface {
     return _call('evaluate', m);
   }
 
-  /// The `evaluateInFrame` RPC is used to evaluate an expression in the context
-  /// of a particular stack frame. `frameIndex` is the index of the desired
-  /// [Frame], with an index of `0` indicating the top (most recent) frame.
-  ///
-  /// If `scope` is provided, it should be a map from identifiers to object ids.
-  /// These bindings will be added to the scope in which the expression is
-  /// evaluated, which is a child scope of the frame's current scope. This means
-  /// bindings provided in `scope` may shadow instance members, class members,
-  /// top-level members, parameters and locals.
-  ///
-  /// If expression is failed to parse and compile, then [rpc error] 113
-  /// "Expression compilation error" is returned.
-  ///
-  /// If an error occurs while evaluating the expression, an [ErrorRef]
-  /// reference will be returned.
-  ///
-  /// If the expression is evaluated successfully, an [InstanceRef] reference
-  /// will be returned.
-  ///
-  /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   @override
   Future<dynamic> evaluateInFrame(
       String isolateId, int frameIndex, String expression,
@@ -1044,57 +921,19 @@ class VmService implements VmServiceInterface {
     return _call('evaluateInFrame', m);
   }
 
-  /// The `getFlagList` RPC returns a list of all command line flags in the VM
-  /// along with their current values.
-  ///
-  /// See [FlagList].
   @override
   Future<FlagList> getFlagList() => _call('getFlagList');
 
-  /// The `getIsolate` RPC is used to lookup an `Isolate` object by its `id`.
-  ///
-  /// If `isolateId` refers to an isolate which has exited, then the `Collected`
-  /// [Sentinel] is returned.
-  ///
-  /// See [Isolate].
-  ///
-  /// The return value can be one of [Isolate] or [Sentinel].
   @override
   Future<dynamic> getIsolate(String isolateId) {
     return _call('getIsolate', {'isolateId': isolateId});
   }
 
-  /// The `getScripts` RPC is used to retrieve a `ScriptList` containing all
-  /// scripts for an isolate based on the isolate's `isolateId`.
-  ///
-  /// See [ScriptList].
   @override
   Future<ScriptList> getScripts(String isolateId) {
     return _call('getScripts', {'isolateId': isolateId});
   }
 
-  /// The `getObject` RPC is used to lookup an `object` from some isolate by its
-  /// `id`.
-  ///
-  /// If `objectId` is a temporary id which has expired, then the `Expired`
-  /// [Sentinel] is returned.
-  ///
-  /// If `objectId` refers to a heap object which has been collected by the VM's
-  /// garbage collector, then the `Collected` [Sentinel] is returned.
-  ///
-  /// If `objectId` refers to a non-heap object which has been deleted, then the
-  /// `Collected` [Sentinel] is returned.
-  ///
-  /// If the object handle has not expired and the object has not been
-  /// collected, then an [Obj] will be returned.
-  ///
-  /// The `offset` and `count` parameters are used to request subranges of
-  /// Instance objects with the kinds: String, List, Map, Uint8ClampedList,
-  /// Uint8List, Uint16List, Uint32List, Uint64List, Int8List, Int16List,
-  /// Int32List, Int64List, Flooat32List, Float64List, Inst32x3List,
-  /// Float32x4List, and Float64x2List. These parameters are otherwise ignored.
-  ///
-  /// The return value can be one of [Obj] or [Sentinel].
   @override
   Future<dynamic> getObject(String isolateId, String objectId,
       {int offset, int count}) {
@@ -1104,48 +943,11 @@ class VmService implements VmServiceInterface {
     return _call('getObject', m);
   }
 
-  /// The `getStack` RPC is used to retrieve the current execution stack and
-  /// message queue for an isolate. The isolate does not need to be paused.
-  ///
-  /// See [Stack].
   @override
   Future<Stack> getStack(String isolateId) {
     return _call('getStack', {'isolateId': isolateId});
   }
 
-  /// The `getSourceReport` RPC is used to generate a set of reports tied to
-  /// source locations in an isolate.
-  ///
-  /// The `reports` parameter is used to specify which reports should be
-  /// generated. The `reports` parameter is a list, which allows multiple
-  /// reports to be generated simultaneously from a consistent isolate state.
-  /// The `reports` parameter is allowed to be empty (this might be used to
-  /// force compilation of a particular subrange of some script).
-  ///
-  /// The available report kinds are:
-  ///
-  /// report kind | meaning
-  /// ----------- | -------
-  /// Coverage | Provide code coverage information
-  /// PossibleBreakpoints | Provide a list of token positions which correspond
-  /// to possible breakpoints.
-  ///
-  /// The `scriptId` parameter is used to restrict the report to a particular
-  /// script. When analyzing a particular script, either or both of the
-  /// `tokenPos` and `endTokenPos` parameters may be provided to restrict the
-  /// analysis to a subrange of a script (for example, these can be used to
-  /// restrict the report to the range of a particular class or function).
-  ///
-  /// If the `scriptId` parameter is not provided then the reports are generated
-  /// for all loaded scripts and the `tokenPos` and `endTokenPos` parameters are
-  /// disallowed.
-  ///
-  /// The `forceCompilation` parameter can be used to force compilation of all
-  /// functions in the range of the report. Forcing compilation can cause a
-  /// compilation error, which could terminate the running Dart program. If this
-  /// parameter is not provided, it is considered to have the value `false`.
-  ///
-  /// See [SourceReport].
   @override
   Future<SourceReport> getSourceReport(
       String isolateId, /*List<SourceReportKind>*/ List<String> reports,
@@ -1158,56 +960,22 @@ class VmService implements VmServiceInterface {
     return _call('getSourceReport', m);
   }
 
-  /// The `getVersion` RPC is used to determine what version of the Service
-  /// Protocol is served by a VM.
-  ///
-  /// See [Version].
   @override
   Future<Version> getVersion() => _call('getVersion');
 
-  /// The `getVM` RPC returns global information about a Dart virtual machine.
-  ///
-  /// See [VM].
   @override
   Future<VM> getVM() => _call('getVM');
 
-  /// The `pause` RPC is used to interrupt a running isolate. The RPC enqueues
-  /// the interrupt request and potentially returns before the isolate is
-  /// paused.
-  ///
-  /// When the isolate is paused an event will be sent on the `Debug` stream.
-  ///
-  /// See [Success].
   @override
   Future<Success> pause(String isolateId) {
     return _call('pause', {'isolateId': isolateId});
   }
 
-  /// The `kill` RPC is used to kill an isolate as if by dart:isolate's
-  /// <code>Isolate.kill(IMMEDIATE)</code>Isolate.kill(IMMEDIATE).
-  ///
-  /// The isolate is killed regardless of whether it is paused or running.
-  ///
-  /// See [Success].
   @override
   Future<Success> kill(String isolateId) {
     return _call('kill', {'isolateId': isolateId});
   }
 
-  /// The `reloadSources` RPC is used to perform a hot reload of an Isolate's
-  /// sources.
-  ///
-  /// if the `force` parameter is provided, it indicates that all of the
-  /// Isolate's sources should be reloaded regardless of modification time.
-  ///
-  /// if the `pause` parameter is provided, the isolate will pause immediately
-  /// after the reload.
-  ///
-  /// if the `rootLibUri` parameter is provided, it indicates the new uri to the
-  /// Isolate's root library.
-  ///
-  /// if the `packagesUri` parameter is provided, it indicates the new uri to
-  /// the Isolate's package map (.packages) file.
   @override
   Future<ReloadReport> reloadSources(String isolateId,
       {bool force, bool pause, String rootLibUri, String packagesUri}) {
@@ -1219,40 +987,12 @@ class VmService implements VmServiceInterface {
     return _call('reloadSources', m);
   }
 
-  /// The `removeBreakpoint` RPC is used to remove a breakpoint by its `id`.
-  ///
-  /// Note that breakpoints are added and removed on a per-isolate basis.
-  ///
-  /// See [Success].
   @override
   Future<Success> removeBreakpoint(String isolateId, String breakpointId) {
     return _call('removeBreakpoint',
         {'isolateId': isolateId, 'breakpointId': breakpointId});
   }
 
-  /// The `resume` RPC is used to resume execution of a paused isolate.
-  ///
-  /// If the `step` parameter is not provided, the program will resume regular
-  /// execution.
-  ///
-  /// If the `step` parameter is provided, it indicates what form of
-  /// single-stepping to use.
-  ///
-  /// step | meaning
-  /// ---- | -------
-  /// Into | Single step, entering function calls
-  /// Over | Single step, skipping over function calls
-  /// Out | Single step until the current function exits
-  /// Rewind | Immediately exit the top frame(s) without executing any code.
-  /// Isolate will be paused at the call of the last exited function.
-  ///
-  /// The `frameIndex` parameter is only used when the `step` parameter is
-  /// Rewind. It specifies the stack frame to rewind to. Stack frame 0 is the
-  /// currently executing function, so `frameIndex` must be at least 1.
-  ///
-  /// If the `frameIndex` parameter is not provided, it defaults to 1.
-  ///
-  /// See [Success], [StepOption].
   @override
   Future<Success> resume(String isolateId,
       {/*StepOption*/ String step, int frameIndex}) {
@@ -1262,14 +1002,6 @@ class VmService implements VmServiceInterface {
     return _call('resume', m);
   }
 
-  /// The `setExceptionPauseMode` RPC is used to control if an isolate pauses
-  /// when an exception is thrown.
-  ///
-  /// mode | meaning
-  /// ---- | -------
-  /// None | Do not pause isolate on thrown exceptions
-  /// Unhandled | Pause isolate on unhandled exceptions
-  /// All  | Pause isolate on all thrown exceptions
   @override
   Future<Success> setExceptionPauseMode(
       String isolateId, /*ExceptionPauseMode*/ String mode) {
@@ -1277,20 +1009,11 @@ class VmService implements VmServiceInterface {
         'setExceptionPauseMode', {'isolateId': isolateId, 'mode': mode});
   }
 
-  /// The `setFlag` RPC is used to set a VM flag at runtime. Returns an error if
-  /// the named flag does not exist, the flag may not be set at runtime, or the
-  /// value is of the wrong type for the flag.
-  ///
-  /// The following flags may be set at runtime:
   @override
   Future<Success> setFlag(String name, String value) {
     return _call('setFlag', {'name': name, 'value': value});
   }
 
-  /// The `setLibraryDebuggable` RPC is used to enable or disable whether
-  /// breakpoints and stepping work for a given library.
-  ///
-  /// See [Success].
   @override
   Future<Success> setLibraryDebuggable(
       String isolateId, String libraryId, bool isDebuggable) {
@@ -1301,81 +1024,32 @@ class VmService implements VmServiceInterface {
     });
   }
 
-  /// The `setName` RPC is used to change the debugging name for an isolate.
-  ///
-  /// See [Success].
   @override
   Future<Success> setName(String isolateId, String name) {
     return _call('setName', {'isolateId': isolateId, 'name': name});
   }
 
-  /// The `setVMName` RPC is used to change the debugging name for the vm.
-  ///
-  /// See [Success].
   @override
   Future<Success> setVMName(String name) {
     return _call('setVMName', {'name': name});
   }
 
-  /// The `streamCancel` RPC cancels a stream subscription in the VM.
-  ///
-  /// If the client is not subscribed to the stream, the `104` (Stream not
-  /// subscribed) error code is returned.
-  ///
-  /// See [Success].
   @override
   Future<Success> streamCancel(String streamId) {
     return _call('streamCancel', {'streamId': streamId});
   }
 
-  /// The `streamListen` RPC subscribes to a stream in the VM. Once subscribed,
-  /// the client will begin receiving events from the stream.
-  ///
-  /// If the client is already subscribed to the stream, the `103` (Stream
-  /// already subscribed) error code is returned.
-  ///
-  /// The `streamId` parameter may have the following published values:
-  ///
-  /// streamId | event types provided
-  /// -------- | -----------
-  /// VM | VMUpdate
-  /// Isolate | IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate,
-  /// IsolateReload, ServiceExtensionAdded
-  /// Debug | PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted,
-  /// PauseException, PausePostRequest, Resume, BreakpointAdded,
-  /// BreakpointResolved, BreakpointRemoved, Inspect, None
-  /// GC | GC
-  /// Extension | Extension
-  /// Timeline | TimelineEvents
-  ///
-  /// Additionally, some embedders provide the `Stdout` and `Stderr` streams.
-  /// These streams allow the client to subscribe to writes to stdout and
-  /// stderr.
-  ///
-  /// streamId | event types provided
-  /// -------- | -----------
-  /// Stdout | WriteEvent
-  /// Stderr | WriteEvent
-  ///
-  /// It is considered a `backwards compatible` change to add a new type of
-  /// event to an existing stream. Clients should be written to handle this
-  /// gracefully, perhaps by warning and ignoring.
-  ///
-  /// See [Success].
   @override
   Future<Success> streamListen(String streamId) {
     return _call('streamListen', {'streamId': streamId});
   }
 
-  /// Trigger a full GC, collecting all unreachable or weakly reachable objects.
   @undocumented
   @override
   Future<Success> collectAllGarbage(String isolateId) {
     return _call('_collectAllGarbage', {'isolateId': isolateId});
   }
 
-  /// `roots` is one of User or VM. The results are returned as a stream of
-  /// [_Graph] events.
   @undocumented
   @override
   Future<Success> requestHeapSnapshot(
@@ -1387,7 +1061,6 @@ class VmService implements VmServiceInterface {
     });
   }
 
-  /// Valid values for `gc` are 'full'.
   @undocumented
   @override
   Future<AllocationProfile> getAllocationProfile(String isolateId,
@@ -1398,7 +1071,6 @@ class VmService implements VmServiceInterface {
     return _call('_getAllocationProfile', m);
   }
 
-  /// Returns a ServiceObject (a specialization of an ObjRef).
   @undocumented
   @override
   Future<ObjRef> getInstances(String isolateId, String classId, int limit) {
@@ -1412,7 +1084,6 @@ class VmService implements VmServiceInterface {
     return _call('_clearCpuProfile', {'isolateId': isolateId});
   }
 
-  /// `tags` is one of UserVM, UserOnly, VMUser, VMOnly, or None.
   @undocumented
   @override
   Future<CpuProfile> getCpuProfile(String isolateId, String tags) {
