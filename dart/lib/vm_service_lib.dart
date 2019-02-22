@@ -1623,7 +1623,6 @@ class BoundField {
     value = createServiceObject(json['value']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -2078,7 +2077,6 @@ class ContextElement {
     value = createServiceObject(json['value']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -2553,7 +2551,6 @@ class Flag {
     valueAsString = json['valueAsString'];
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -3493,7 +3490,6 @@ class LibraryDependency {
     target = createServiceObject(json['target']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -3527,7 +3523,6 @@ class MapAssociation {
     value = createServiceObject(json['value']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4082,7 +4077,6 @@ class SourceReportCoverage {
     misses = new List<int>.from(json['misses']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4151,7 +4145,6 @@ class SourceReportRange {
         : new List<int>.from(json['possibleBreakpoints']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4248,7 +4241,6 @@ class TimelineEvent {
 
   TimelineEvent._fromJson(Map<String, dynamic> json) {}
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     return json;
@@ -4613,7 +4605,6 @@ class CodeRegion {
     code = createServiceObject(json['code']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4654,7 +4645,6 @@ class ProfileFunction {
     codes = new List<int>.from(json['codes']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({

@@ -1244,7 +1244,9 @@ class Type extends Member {
       gen.writeln(
           'Map<String, dynamic> toJson() => throw UnimplementedError();');
     } else {
-      gen.writeln('@override');
+      if (isResponse) {
+        gen.writeln('@override');
+      }
       gen.writeln('Map<String, dynamic> toJson() {');
       if (superName == null || superName == 'Response') {
         // The base Response type doesn't have a toJson
