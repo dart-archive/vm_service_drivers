@@ -263,7 +263,7 @@ class ExtensionData {
 
   ExtensionData() : data = {};
 
-  ExtensionData._fromJson(this.data) {}
+  ExtensionData._fromJson(this.data);
 
   String toString() => '[ExtensionData ${data}]';
 }
@@ -1069,26 +1069,6 @@ class Type extends Member {
 
   Type(this.parent, String categoryName, String definition, [this.docs]) {
     _parse(new Tokenizer(definition).tokenize());
-    // Anything with an `id` should have a `fixedId` boolean also, but that
-    // isn't in the protocol definition.
-    if (fields.any((f) => f.name == 'id') &&
-        !fields.any((f) => f.name == 'fixedId')) {
-      var field = TypeField(this, '')
-        ..type = (MemberType()..types = [TypeRef('bool')])
-        ..name = 'fixedId'
-        ..optional = true;
-      fields.add(field);
-    }
-
-    // The vm sends a name for VM objects even though that isn't in the
-    // protocol.
-    if (name == 'VM' && !fields.any((f) => f.name == 'name')) {
-      var field = TypeField(this, '')
-        ..type = (MemberType()..types = [TypeRef('String')])
-        ..name = 'name'
-        ..optional = true;
-      fields.add(field);
-    }
   }
 
   Type._(this.parent, this.rawName, this.name, this.superName, this.docs);
@@ -1178,10 +1158,16 @@ class Type extends Member {
 
     String superCall = superName == null ? '' : ": super._fromJson(json) ";
     if (name == 'Response') {
-      gen.writeln('${publicName}._fromJson(this.json) {');
+      gen.write('${publicName}._fromJson(this.json)');
     } else {
-      gen.writeln(
-          '${publicName}._fromJson(Map<String, dynamic> json) ${superCall}{');
+      gen.write(
+          '${publicName}._fromJson(Map<String, dynamic> json) ${superCall}');
+    }
+
+    if (fields.isEmpty) {
+      gen.writeln(';');
+    } else {
+      gen.writeln('{');
     }
 
     fields.forEach((TypeField field) {
@@ -1256,7 +1242,9 @@ class Type extends Member {
             "createServiceObject(json['${field.name}']);");
       }
     });
-    gen.writeln('}');
+    if (fields.isNotEmpty) {
+      gen.writeln('}');
+    }
     gen.writeln();
 
     // toJson support, the base Response type is not supported
@@ -1264,7 +1252,9 @@ class Type extends Member {
       gen.writeln(
           'Map<String, dynamic> toJson() => throw UnimplementedError();');
     } else {
-      gen.writeln('@override');
+      if (isResponse) {
+        gen.writeln('@override');
+      }
       gen.writeln('Map<String, dynamic> toJson() {');
       if (superName == null || superName == 'Response') {
         // The base Response type doesn't have a toJson
@@ -1273,9 +1263,8 @@ class Type extends Member {
         gen.writeln('var json = super.toJson();');
       }
 
-      // Only Response objects have a `type` field, as defined by protocol,
-      // except `BoundVariable` which does have a `type` field.
-      if (isResponse || rawName == 'BoundVariable') {
+      // Only Response objects have a `type` field, as defined by protocol.
+      if (isResponse) {
         // Overwrites "type" from the super class if we had one.
         gen.writeln("json['type'] = '$rawName';");
       }

@@ -1037,7 +1037,7 @@ _BeingInitialized_ [Sentinel](#sentinel).
 ### BoundVariable
 
 ```
-class BoundVariable {
+class BoundVariable extends Response {
   string name;
   @Instance|@TypeArguments|Sentinel value;
 
@@ -2055,6 +2055,11 @@ class @Isolate extends Response {
   // The id which is passed to the getIsolate RPC to load this isolate.
   string id;
 
+  // Provided and set to true if the id of an Object is fixed. If true, the id
+  // of an Object is guaranteed not to change or expire. The object may, however,
+  // still be _Collected_.
+  bool fixedId [optional];
+
   // A numeric id for this isolate, represented as a string. Unique.
   string number;
 
@@ -2070,6 +2075,11 @@ class Isolate extends Response {
   // The id which is passed to the getIsolate RPC to reload this
   // isolate.
   string id;
+
+  // Provided and set to true if the id of an Object is fixed. If true, the id
+  // of an Object is guaranteed not to change or expire. The object may, however,
+  // still be _Collected_.
+  bool fixedId [optional];
 
   // A numeric id for this isolate, represented as a string. Unique.
   string number;
@@ -2254,6 +2264,11 @@ class @Object extends Response {
   // A unique identifier for an Object. Passed to the
   // getObject RPC to load this Object.
   string id;
+
+  // Provided and set to true if the id of an Object is fixed. If true, the id
+  // of an Object is guaranteed not to change or expire. The object may, however,
+  // still be _Collected_.
+  bool fixedId [optional];
 }
 ```
 
@@ -2266,6 +2281,11 @@ class Object extends Response {
   //
   // Some objects may get a new id when they are reloaded.
   string id;
+
+  // Provided and set to true if the id of an Object is fixed. If true, the id
+  // of an Object is guaranteed not to change or expire. The object may, however,
+  // still be _Collected_.
+  bool fixedId [optional];
 
   // If an object is allocated in the Dart heap, it will have
   // a corresponding class object.
@@ -2396,7 +2416,8 @@ class Script extends Object {
   // scripts.
   string source [optional];
 
-  // A table encoding a mapping from token position to line and column.
+  // A table encoding a mapping from token position to line and column. This
+  // field is null if sources aren't available.
   int[][] tokenPosTable [optional];
 }
 ```
@@ -2694,6 +2715,9 @@ _@VM_ is a reference to a _VM_ object.
 
 ```
 class VM extends Response {
+  // A name identifying this vm. Not guaranteed to be unique.
+  string name;
+
   // Word length on target architecture (e.g. 32, 64).
   int architectureBits;
 

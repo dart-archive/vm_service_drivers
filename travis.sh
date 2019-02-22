@@ -18,7 +18,7 @@ dart tool/generate.dart
 if [ "$BOT" = "dart" ]; then
 
     # Ensure all the code analyzes cleanly.
-    dartanalyzer --fatal-warnings .
+    dartanalyzer --fatal-infos .
 
     # Run the VM service protocol smoke tester.
     dart example/vm_service_lib_tester.dart

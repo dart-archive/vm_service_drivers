@@ -1315,7 +1315,7 @@ class ExtensionData {
 
   ExtensionData() : data = {};
 
-  ExtensionData._fromJson(this.data) {}
+  ExtensionData._fromJson(this.data);
 
   String toString() => '[ExtensionData ${data}]';
 }
@@ -1623,7 +1623,6 @@ class BoundField {
     value = createServiceObject(json['value']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -1647,7 +1646,7 @@ class BoundField {
 ///
 /// If the variable has been optimized out by the compiler, the `value` will be
 /// the `OptimizedOut` [Sentinel].
-class BoundVariable {
+class BoundVariable extends Response {
   static BoundVariable parse(Map<String, dynamic> json) =>
       json == null ? null : new BoundVariable._fromJson(json);
 
@@ -1667,7 +1666,7 @@ class BoundVariable {
 
   BoundVariable();
 
-  BoundVariable._fromJson(Map<String, dynamic> json) {
+  BoundVariable._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     name = json['name'];
     value = createServiceObject(json['value']);
     declarationTokenPos = json['declarationTokenPos'];
@@ -1690,7 +1689,7 @@ class BoundVariable {
   }
 
   String toString() => '[BoundVariable ' //
-      'name: ${name}, value: ${value}, declarationTokenPos: ${declarationTokenPos}, ' //
+      'type: ${type}, name: ${name}, value: ${value}, declarationTokenPos: ${declarationTokenPos}, ' //
       'scopeStartTokenPos: ${scopeStartTokenPos}, scopeEndTokenPos: ${scopeEndTokenPos}]';
 }
 
@@ -2078,7 +2077,6 @@ class ContextElement {
     value = createServiceObject(json['value']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -2553,7 +2551,6 @@ class Flag {
     valueAsString = json['valueAsString'];
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -3215,22 +3212,25 @@ class IsolateRef extends Response {
   /// The id which is passed to the getIsolate RPC to load this isolate.
   String id;
 
+  /// Provided and set to true if the id of an Object is fixed. If true, the id
+  /// of an Object is guaranteed not to change or expire. The object may,
+  /// however, still be _Collected_.
+  @optional
+  bool fixedId;
+
   /// A numeric id for this isolate, represented as a string. Unique.
   String number;
 
   /// A name identifying this isolate. Not guaranteed to be unique.
   String name;
 
-  @optional
-  bool fixedId;
-
   IsolateRef();
 
   IsolateRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     id = json['id'];
+    fixedId = json['fixedId'];
     number = json['number'];
     name = json['name'];
-    fixedId = json['fixedId'];
   }
 
   @override
@@ -3261,6 +3261,12 @@ class Isolate extends Response {
 
   /// The id which is passed to the getIsolate RPC to reload this isolate.
   String id;
+
+  /// Provided and set to true if the id of an Object is fixed. If true, the id
+  /// of an Object is guaranteed not to change or expire. The object may,
+  /// however, still be _Collected_.
+  @optional
+  bool fixedId;
 
   /// A numeric id for this isolate, represented as a string. Unique.
   String number;
@@ -3312,13 +3318,11 @@ class Isolate extends Response {
   @optional
   List<String> extensionRPCs;
 
-  @optional
-  bool fixedId;
-
   Isolate();
 
   Isolate._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     id = json['id'];
+    fixedId = json['fixedId'];
     number = json['number'];
     name = json['name'];
     startTime = json['startTime'];
@@ -3336,7 +3340,6 @@ class Isolate extends Response {
     extensionRPCs = json['extensionRPCs'] == null
         ? null
         : new List<String>.from(json['extensionRPCs']);
-    fixedId = json['fixedId'];
   }
 
   @override
@@ -3356,11 +3359,11 @@ class Isolate extends Response {
       'breakpoints': breakpoints.map((f) => f.toJson()).toList(),
       'exceptionPauseMode': exceptionPauseMode,
     });
+    _setIfNotNull(json, 'fixedId', fixedId);
     _setIfNotNull(json, 'rootLib', rootLib?.toJson());
     _setIfNotNull(json, 'error', error?.toJson());
     _setIfNotNull(
         json, 'extensionRPCs', extensionRPCs?.map((f) => f)?.toList());
-    _setIfNotNull(json, 'fixedId', fixedId);
     return json;
   }
 
@@ -3503,7 +3506,6 @@ class LibraryDependency {
     target = createServiceObject(json['target']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -3537,7 +3539,6 @@ class MapAssociation {
     value = createServiceObject(json['value']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -3616,7 +3617,7 @@ class NullValRef extends InstanceRef {
 
   NullValRef();
 
-  NullValRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
+  NullValRef._fromJson(Map<String, dynamic> json) : super._fromJson(json);
 
   @override
   Map<String, dynamic> toJson() {
@@ -3640,7 +3641,7 @@ class NullVal extends Instance {
 
   NullVal();
 
-  NullVal._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
+  NullVal._fromJson(Map<String, dynamic> json) : super._fromJson(json);
 
   @override
   Map<String, dynamic> toJson() {
@@ -3665,6 +3666,9 @@ class ObjRef extends Response {
   /// this Object.
   String id;
 
+  /// Provided and set to true if the id of an Object is fixed. If true, the id
+  /// of an Object is guaranteed not to change or expire. The object may,
+  /// however, still be _Collected_.
   @optional
   bool fixedId;
 
@@ -3704,6 +3708,12 @@ class Obj extends Response {
   /// Some objects may get a new id when they are reloaded.
   String id;
 
+  /// Provided and set to true if the id of an Object is fixed. If true, the id
+  /// of an Object is guaranteed not to change or expire. The object may,
+  /// however, still be _Collected_.
+  @optional
+  bool fixedId;
+
   /// If an object is allocated in the Dart heap, it will have a corresponding
   /// class object.
   ///
@@ -3725,16 +3735,13 @@ class Obj extends Response {
   @optional
   int size;
 
-  @optional
-  bool fixedId;
-
   Obj();
 
   Obj._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     id = json['id'];
+    fixedId = json['fixedId'];
     classRef = createServiceObject(json['class']);
     size = json['size'];
-    fixedId = json['fixedId'];
   }
 
   @override
@@ -3744,9 +3751,9 @@ class Obj extends Response {
     json.addAll({
       'id': id,
     });
+    _setIfNotNull(json, 'fixedId', fixedId);
     _setIfNotNull(json, 'class', classRef?.toJson());
     _setIfNotNull(json, 'size', size);
-    _setIfNotNull(json, 'fixedId', fixedId);
     return json;
   }
 
@@ -3918,7 +3925,8 @@ class Script extends Obj {
   @optional
   String source;
 
-  /// A table encoding a mapping from token position to line and column.
+  /// A table encoding a mapping from token position to line and column. This
+  /// field is null if sources aren't available.
   @optional
   List<List<int>> tokenPosTable;
 
@@ -4085,7 +4093,6 @@ class SourceReportCoverage {
     misses = new List<int>.from(json['misses']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4154,7 +4161,6 @@ class SourceReportRange {
         : new List<int>.from(json['possibleBreakpoints']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4229,7 +4235,7 @@ class Success extends Response {
 
   Success();
 
-  Success._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
+  Success._fromJson(Map<String, dynamic> json) : super._fromJson(json);
 
   @override
   Map<String, dynamic> toJson() {
@@ -4249,9 +4255,8 @@ class TimelineEvent {
 
   TimelineEvent();
 
-  TimelineEvent._fromJson(Map<String, dynamic> json) {}
+  TimelineEvent._fromJson(Map<String, dynamic> json);
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     return json;
@@ -4464,6 +4469,9 @@ class VM extends Response {
   static VM parse(Map<String, dynamic> json) =>
       json == null ? null : new VM._fromJson(json);
 
+  /// A name identifying this vm. Not guaranteed to be unique.
+  String name;
+
   /// Word length on target architecture (e.g. 32, 64).
   int architectureBits;
 
@@ -4487,12 +4495,10 @@ class VM extends Response {
   /// A list of isolates running in the VM.
   List<IsolateRef> isolates;
 
-  @optional
-  String name;
-
   VM();
 
   VM._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    name = json['name'];
     architectureBits = json['architectureBits'];
     targetCPU = json['targetCPU'];
     hostCPU = json['hostCPU'];
@@ -4500,7 +4506,6 @@ class VM extends Response {
     pid = json['pid'];
     startTime = json['startTime'];
     isolates = new List<IsolateRef>.from(createServiceObject(json['isolates']));
-    name = json['name'];
   }
 
   @override
@@ -4508,6 +4513,7 @@ class VM extends Response {
     var json = <String, dynamic>{};
     json['type'] = 'VM';
     json.addAll({
+      'name': name,
       'architectureBits': architectureBits,
       'targetCPU': targetCPU,
       'hostCPU': hostCPU,
@@ -4516,7 +4522,6 @@ class VM extends Response {
       'startTime': startTime,
       'isolates': isolates.map((f) => f.toJson()).toList(),
     });
-    _setIfNotNull(json, 'name', name);
     return json;
   }
 
@@ -4616,7 +4621,6 @@ class CodeRegion {
     code = createServiceObject(json['code']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
@@ -4657,7 +4661,6 @@ class ProfileFunction {
     codes = new List<int>.from(json['codes']);
   }
 
-  @override
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};
     json.addAll({
