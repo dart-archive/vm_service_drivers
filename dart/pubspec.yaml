@@ -12,6 +12,7 @@ dependencies:
   meta: ^1.0.2
 
 dev_dependencies:
+  async: ^2.0.0
   markdown: ^2.0.0
   mockito: ^4.0.0
   path: ^1.0.0
