@@ -814,6 +814,10 @@ public class VmService extends VmServiceBase {
         ((ResponseConsumer) consumer).received(new AllocationProfile(json));
         return;
       }
+      if (responseType.equals("BoundVariable")) {
+        ((ResponseConsumer) consumer).received(new BoundVariable(json));
+        return;
+      }
       if (responseType.equals("Breakpoint")) {
         ((ResponseConsumer) consumer).received(new Breakpoint(json));
         return;

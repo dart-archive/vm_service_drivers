@@ -246,6 +246,7 @@ vms.BoundField assertBoundField(vms.BoundField obj) {
 
 vms.BoundVariable assertBoundVariable(vms.BoundVariable obj) {
   assertNotNull(obj);
+  assertString(obj.type);
   assertString(obj.name);
   if (obj.value is vms.InstanceRef) {
     assertInstanceRef(obj.value);
@@ -896,6 +897,7 @@ List<vms.VMRef> assertVMRefs(List<vms.VMRef> list) {
 vms.VM assertVM(vms.VM obj) {
   assertNotNull(obj);
   assertString(obj.type);
+  assertString(obj.name);
   assertInt(obj.architectureBits);
   assertString(obj.targetCPU);
   assertString(obj.hostCPU);
