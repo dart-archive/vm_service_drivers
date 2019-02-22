@@ -1315,7 +1315,7 @@ class ExtensionData {
 
   ExtensionData() : data = {};
 
-  ExtensionData._fromJson(this.data) {}
+  ExtensionData._fromJson(this.data);
 
   String toString() => '[ExtensionData ${data}]';
 }
@@ -3601,7 +3601,7 @@ class NullValRef extends InstanceRef {
 
   NullValRef();
 
-  NullValRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
+  NullValRef._fromJson(Map<String, dynamic> json) : super._fromJson(json);
 
   @override
   Map<String, dynamic> toJson() {
@@ -3625,7 +3625,7 @@ class NullVal extends Instance {
 
   NullVal();
 
-  NullVal._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
+  NullVal._fromJson(Map<String, dynamic> json) : super._fromJson(json);
 
   @override
   Map<String, dynamic> toJson() {
@@ -4219,7 +4219,7 @@ class Success extends Response {
 
   Success();
 
-  Success._fromJson(Map<String, dynamic> json) : super._fromJson(json) {}
+  Success._fromJson(Map<String, dynamic> json) : super._fromJson(json);
 
   @override
   Map<String, dynamic> toJson() {
@@ -4239,7 +4239,7 @@ class TimelineEvent {
 
   TimelineEvent();
 
-  TimelineEvent._fromJson(Map<String, dynamic> json) {}
+  TimelineEvent._fromJson(Map<String, dynamic> json);
 
   Map<String, dynamic> toJson() {
     var json = <String, dynamic>{};

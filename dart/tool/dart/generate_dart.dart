@@ -263,7 +263,7 @@ class ExtensionData {
 
   ExtensionData() : data = {};
 
-  ExtensionData._fromJson(this.data) {}
+  ExtensionData._fromJson(this.data);
 
   String toString() => '[ExtensionData ${data}]';
 }
@@ -1158,10 +1158,16 @@ class Type extends Member {
 
     String superCall = superName == null ? '' : ": super._fromJson(json) ";
     if (name == 'Response') {
-      gen.writeln('${publicName}._fromJson(this.json) {');
+      gen.write('${publicName}._fromJson(this.json)');
     } else {
-      gen.writeln(
-          '${publicName}._fromJson(Map<String, dynamic> json) ${superCall}{');
+      gen.write(
+          '${publicName}._fromJson(Map<String, dynamic> json) ${superCall}');
+    }
+
+    if (fields.isEmpty) {
+      gen.writeln(';');
+    } else {
+      gen.writeln('{');
     }
 
     fields.forEach((TypeField field) {
@@ -1236,7 +1242,9 @@ class Type extends Member {
             "createServiceObject(json['${field.name}']);");
       }
     });
-    gen.writeln('}');
+    if (fields.isNotEmpty) {
+      gen.writeln('}');
+    }
     gen.writeln();
 
     // toJson support, the base Response type is not supported
