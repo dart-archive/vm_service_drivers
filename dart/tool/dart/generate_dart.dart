@@ -291,7 +291,7 @@ if (_streamSubscriptions.containsKey(id)) {
       'details': "The stream '\$id' is already subscribed",
     });
 }
-_streamSubscriptions[id] = serviceImpl.onEvent(id).listen((e) {
+_streamSubscriptions[id] = serviceImplementation.onEvent(id).listen((e) {
   responseSink.add({
     'jsonrpc': '2.0',
     'method': 'streamNotify',
@@ -486,6 +486,9 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
 
     // The service interface, both servers and clients implement this.
     gen.writeStatement('''
+/// A class representation of the Dart VM Service Protocol.
+///
+/// Both clients and servers should implement this interface.
 abstract class VmServiceInterface {
   /// Returns the stream for a given stream id.
   ///
@@ -503,15 +506,17 @@ abstract class VmServiceInterface {
     // The server class, takes a VmServiceInterface and delegates to it
     // automatically.
     gen.write('''
+  /// A Dart VM Service Protocol server that delegates requests to a
+  /// [VmServiceInterface] implementation.
   class VmServer {
     final Stream<Map<String, Object>> requestStream;
     final StreamSink<Map<String, Object>> responseSink;
-    final VmServiceInterface serviceImpl;
+    final VmServiceInterface serviceImplementation;
 
     /// Manages streams for `streamListen` and `streamCancel` requests.
     final _streamSubscriptions = <String, StreamSubscription>{};
 
-    VmServer(this.requestStream, this.responseSink, this.serviceImpl) {
+    VmServer(this.requestStream, this.responseSink, this.serviceImplementation) {
       requestStream.listen(_delegateRequest);
     }
 
@@ -532,7 +537,7 @@ abstract class VmServiceInterface {
       } else if (m.name == 'streamCancel') {
         gen.writeln(_streamCancelCaseImpl);
       } else {
-        gen.write("response = await serviceImpl.${m.name}(");
+        gen.write("response = await serviceImplementation.${m.name}(");
         // Positional args
         m.args.where((arg) => !arg.optional).forEach((arg) {
           gen.write("params['${arg.name}'], ");
@@ -648,7 +653,6 @@ Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
 // _Service
 Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
 
-// Listen for a specific stream id.
 @override
 Stream<Event> onEvent(String streamId) => _getEventController(streamId).stream;
 ''');
@@ -862,7 +866,7 @@ class Method extends Member {
   String get publicName => isUndocumented ? name.substring(1) : name;
 
   void generate(DartGenerator gen) {
-    generateDefinition(gen, withOverrides: true);
+    generateDefinition(gen, withDocs: false, withOverrides: true);
     if (!hasArgs) {
       gen.writeStatement("=> _call('${name}');");
     } else if (hasOptionalArgs) {
@@ -896,9 +900,10 @@ class Method extends Member {
   ///
   /// If [withOverrides] is `true` then it will add an `@override` annotation
   /// before each method.
-  void generateDefinition(DartGenerator gen, {bool withOverrides = false}) {
+  void generateDefinition(DartGenerator gen,
+      {bool withDocs = true, bool withOverrides = false}) {
     gen.writeln();
-    if (docs != null) {
+    if (withDocs && docs != null) {
       String _docs = docs == null ? '' : docs;
       if (returnType.isMultipleReturns) {
         _docs += '\n\nThe return value can be one of '
