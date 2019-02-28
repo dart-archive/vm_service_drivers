@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.14.3-dev.2
+- Add `callServiceExtension` method to the `VmServiceInterface` class.
+  - The `VmServer` will delegate all requests whose methods start with `ext.` to
+    that implementation.
+
 ## 3.14.3-dev.1
 - Add `VmServiceInterface` and `VmServer` classes, which can handle routing
   jsonrpc2 requests to a `VmServiceInterface` instance, and serializing the
