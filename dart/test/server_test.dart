@@ -4,6 +4,7 @@
 
 @TestOn('vm')
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:async/async.dart';
 import 'package:mockito/mockito.dart';
@@ -15,12 +16,15 @@ void main() {
   MockVmService serviceMock;
   StreamController<Map<String, Object>> requestsController;
   StreamController<Map<String, Object>> responsesController;
+  ServiceExtensionRegistry serviceRegistry;
 
   setUp(() {
     serviceMock = MockVmService();
     requestsController = StreamController<Map<String, Object>>();
     responsesController = StreamController<Map<String, Object>>();
-    VmServer(requestsController.stream, responsesController.sink, serviceMock);
+    serviceRegistry = ServiceExtensionRegistry();
+    VmServerConnection(requestsController.stream, responsesController.sink,
+        serviceRegistry, serviceMock);
   });
 
   tearDown(() {
@@ -249,6 +253,57 @@ void main() {
               RPCError('streamCancel', 104, 'Stream not subscribed', {
             'details': "The stream '$streamId' is not subscribed",
           }))));
+    });
+  });
+
+  group('registerService', () {
+    test('can delegate requests between clients', () async {
+      var serviceId = 'ext.test.service';
+      var responseQueue = StreamQueue(responsesController.stream);
+
+      var clientInputController =
+          StreamController<Map<String, Object>>.broadcast();
+      var clientOutputController =
+          StreamController<Map<String, Object>>.broadcast();
+      var client = VmService(clientInputController.stream.map(jsonEncode),
+          (String message) => clientOutputController.add(jsonDecode(message)));
+
+      var serviceMock2 = MockVmService();
+      var serviceMock2Connection = VmServerConnection(
+          clientOutputController.stream,
+          clientInputController.sink,
+          serviceRegistry,
+          serviceMock2);
+
+      var requestParams = {'foo': 'bar'};
+      var expectedResponse = Response()..json = {'zap': 'zip'};
+      await client.registerService(serviceId, null);
+      await client.registerServiceCallback(serviceId, (request) async {
+        expect(request, equals(requestParams));
+        return {'result': expectedResponse.toJson()};
+      });
+
+      var serviceRequest = rpcRequest(serviceId, params: requestParams);
+
+      requestsController.add(serviceRequest);
+      expect(await responseQueue.next, rpcResponse(expectedResponse));
+
+      // Kill the client that registered the handler, it should now fall back
+      // on `callServiceExtension`.
+      await client.dispose();
+      await clientInputController.close();
+      await clientOutputController.close();
+      // This should complete as well.
+      await serviceMock2Connection.done;
+
+      var mockResponse = Response()..json = {'mock': 'response'};
+      when(serviceMock.callServiceExtension(serviceId,
+              args: argThat(equals(requestParams), named: 'args'),
+              isolateId: argThat(isNull, named: 'isolateId')))
+          .thenAnswer((_) async => mockResponse);
+
+      requestsController.add(serviceRequest);
+      expect(await responseQueue.next, rpcResponse(mockResponse));
     });
   });
 }

@@ -47,6 +47,9 @@ import 'dart:async';
 import 'dart:convert' show base64, jsonDecode, jsonEncode, utf8;
 import 'dart:typed_data';
 
+import 'src/service_extension_registry.dart';
+
+export 'src/service_extension_registry.dart' show ServiceExtensionRegistry;
 ''';
 
 final String _implCode = r'''
@@ -285,6 +288,10 @@ class _NullLog implements Log {
 }
 ''';
 
+final _registerServiceImpl = '''
+_serviceExtensionRegistry.registerExtension(params['service'], this);
+response =  Success();''';
+
 final _streamListenCaseImpl = '''
 var id = params['streamId'];
 if (_streamSubscriptions.containsKey(id)) {
@@ -292,8 +299,8 @@ if (_streamSubscriptions.containsKey(id)) {
       'details': "The stream '\$id' is already subscribed",
     });
 }
-_streamSubscriptions[id] = serviceImplementation.onEvent(id).listen((e) {
-  responseSink.add({
+_streamSubscriptions[id] = _serviceImplementation.onEvent(id).listen((e) {
+  _responseSink.add({
     'jsonrpc': '2.0',
     'method': 'streamNotify',
     'params': {
@@ -510,22 +517,62 @@ abstract class VmServiceInterface {
     // The server class, takes a VmServiceInterface and delegates to it
     // automatically.
     gen.write('''
-  /// A Dart VM Service Protocol server that delegates requests to a
+  /// A Dart VM Service Protocol connection that delegates requests to a
   /// [VmServiceInterface] implementation.
-  class VmServer {
-    final Stream<Map<String, Object>> requestStream;
-    final StreamSink<Map<String, Object>> responseSink;
-    final VmServiceInterface serviceImplementation;
+  class VmServerConnection {
+    final Stream<Map<String, Object>> _requestStream;
+    final StreamSink<Map<String, Object>> _responseSink;
+    final ServiceExtensionRegistry _serviceExtensionRegistry;
+    final VmServiceInterface _serviceImplementation;
+    /// Used to create unique ids when acting as a proxy between clients.
+    int _nextServiceRequestId = 0;
 
     /// Manages streams for `streamListen` and `streamCancel` requests.
     final _streamSubscriptions = <String, StreamSubscription>{};
 
-    VmServer(this.requestStream, this.responseSink, this.serviceImplementation) {
-      requestStream.listen(_delegateRequest);
+    /// Completes when [_requestStream] is done.
+    Future get done => _doneCompleter.future;
+    final _doneCompleter = Completer<Null>();
+
+    /// Pending service extension requests to this client by id.
+    final _pendingServiceExtensionRequests =
+        <String, Completer<Map<String, Object>>>{};
+
+    VmServerConnection(
+        this._requestStream, this._responseSink, this._serviceExtensionRegistry,
+        this._serviceImplementation) {
+      _requestStream.listen(_delegateRequest, onDone: _doneCompleter.complete);
+    }
+
+    /// Invoked when the current client has registered some extension, and
+    /// another client sends an RPC request for that extension.
+    ///
+    /// We don't attempt to do any serialization or deserialization of the
+    /// request or response in this case
+    Future<Map<String, Object>> forwardServiceExtensionRequest(
+        Map<String, Object> request) {
+      var originalId = request['id'];
+      request = Map.of(request);
+      // Modify the request ID to ensure we don't have conflicts between
+      // multiple clients ids.
+      var newId = '\${_nextServiceRequestId++}:\$originalId';
+      request['id'] = newId;
+      var responseCompleter = Completer<Map<String, Object>>();
+      _pendingServiceExtensionRequests[newId] = responseCompleter;
+      _responseSink.add(request);
+      return responseCompleter.future;
     }
 
     void _delegateRequest(Map<String, Object> request) async {
       try {
+        var id = request['id'] as String;
+        if (_pendingServiceExtensionRequests.containsKey(id)) {
+          // Restore the original request ID.
+          var originalId = id.substring(id.indexOf(':') + 1);
+          _pendingServiceExtensionRequests[id].complete(
+              Map.of(request)..['id'] = originalId);
+          return;
+        }
         var method = request['method'] as String;
         if (method == null) {
           throw RPCError(null, -32600, 'Invalid Request', request);
@@ -533,13 +580,10 @@ abstract class VmServiceInterface {
         var params = request['params'] as Map;
         Response response;
 
-        if (method.startsWith('ext.')) {
-          var args = params == null ? null : new Map.of(params);
-          var isolateId = args?.remove('isolateId');
-          response = await serviceImplementation.callServiceExtension(
-              method, isolateId: isolateId, args: args);
-        } else {
-          switch(method) {
+        switch(method) {
+          case '_registerService':
+            $_registerServiceImpl
+            break;
     ''');
     methods.where((m) => !m.isUndocumented).forEach((m) {
       gen.writeln("case '${m.name}':");
@@ -548,7 +592,7 @@ abstract class VmServiceInterface {
       } else if (m.name == 'streamCancel') {
         gen.writeln(_streamCancelCaseImpl);
       } else {
-        gen.write("response = await serviceImplementation.${m.name}(");
+        gen.write("response = await _serviceImplementation.${m.name}(");
         // Positional args
         m.args.where((arg) => !arg.optional).forEach((arg) {
           gen.write("params['${arg.name}'], ");
@@ -564,12 +608,30 @@ abstract class VmServiceInterface {
       }
       gen.writeln('break;');
     });
-    // Throw for unrecognized methods.
+    // Handle service extensions
     gen.writeln('default:');
-    gen.writeln("throw RPCError(method, -32601, 'Method not found', request);");
-    // terminate the switch
-    gen.writeln('}');
-    // terminate the if/else
+    gen.writeln('''
+        var registeredClient = _serviceExtensionRegistry.clientFor(method);
+        if (registeredClient != null) {
+          // Check for any client which has registered this extension, if we
+          // have one then delgate the request to that client.
+          _responseSink.add(
+            await registeredClient.forwardServiceExtensionRequest(request));
+          // Bail out early in this case, we are just acting as a proxy and
+          // never get a `Response` instance.
+          return;
+        } else if (method.startsWith('ext.')) {
+          // Remaining methods with `ext.` are assumed to be registered via
+          // dart:developer, which the service implementation handles.
+          var args = params == null ? null : new Map.of(params);
+          var isolateId = args?.remove('isolateId');
+          response = await _serviceImplementation.callServiceExtension(method,
+              isolateId: isolateId, args: args);
+        } else {
+          throw RPCError(method, -32601, 'Method not found', request);
+        }
+''');
+    // Terminate the switch
     gen.writeln('}');
 
     // Handle null responses
@@ -580,10 +642,10 @@ abstract class VmServiceInterface {
     ''');
 
     // Generate the json success response
-    gen.write("""responseSink.add({
+    gen.write("""_responseSink.add({
   'jsonrpc': '2.0',
   'result': response.toJson(),
-  'id': request['id'],
+  'id': id,
 });
 """);
 
@@ -593,7 +655,7 @@ abstract class VmServiceInterface {
         var error = e is RPCError
             ? {'code': e.code, 'data': e.data, 'message': e.message}
             : {'code': -32603, 'message': e.toString()};
-        responseSink.add({
+        _responseSink.add({
           'jsonrpc': '2.0',
           'error': error,
           'id': request['id'],
