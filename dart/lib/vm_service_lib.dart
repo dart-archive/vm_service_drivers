@@ -580,6 +580,10 @@ abstract class VmServiceInterface {
 
 /// A Dart VM Service Protocol connection that delegates requests to a
 /// [VmServiceInterface] implementation.
+///
+/// One of these should be created for each client, but they should generally
+/// share the same [VmServiceInterface] and [ServiceExtensionRegistry]
+/// instances.
 class VmServerConnection {
   final Stream<Map<String, Object>> _requestStream;
   final StreamSink<Map<String, Object>> _responseSink;
@@ -610,7 +614,7 @@ class VmServerConnection {
   ///
   /// We don't attempt to do any serialization or deserialization of the
   /// request or response in this case
-  Future<Map<String, Object>> forwardServiceExtensionRequest(
+  Future<Map<String, Object>> _forwardServiceExtensionRequest(
       Map<String, Object> request) {
     var originalId = request['id'];
     request = Map.of(request);
@@ -627,6 +631,7 @@ class VmServerConnection {
   void _delegateRequest(Map<String, Object> request) async {
     try {
       var id = request['id'] as String;
+      // Check if this is actually a response to a pending request.
       if (_pendingServiceExtensionRequests.containsKey(id)) {
         // Restore the original request ID.
         var originalId = id.substring(id.indexOf(':') + 1);
@@ -832,8 +837,8 @@ class VmServerConnection {
           if (registeredClient != null) {
             // Check for any client which has registered this extension, if we
             // have one then delgate the request to that client.
-            _responseSink.add(
-                await registeredClient.forwardServiceExtensionRequest(request));
+            _responseSink.add(await registeredClient
+                ._forwardServiceExtensionRequest(request));
             // Bail out early in this case, we are just acting as a proxy and
             // never get a `Response` instance.
             return;
