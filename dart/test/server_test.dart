@@ -61,6 +61,79 @@ void main() {
       expect(responsesController.stream, emits(rpcResponse(isolate)));
       requestsController.add(request);
     });
+
+    group('custom service extensions', () {
+      test('with no params or isolateId', () {
+        var extension = 'ext.cool';
+        var request = rpcRequest(extension, params: null);
+        var response = Response()..json = {"hello": "world"};
+        when(serviceMock.callServiceExtension(
+          extension,
+          isolateId: argThat(isNull, named: 'isolateId'),
+          args: argThat(isNull, named: 'args'),
+        )).thenAnswer((Invocation invocation) {
+          expect(invocation.namedArguments,
+              equals({Symbol('isolateId'): null, Symbol('args'): null}));
+          return Future.value(response);
+        });
+        expect(responsesController.stream, emits(rpcResponse(response)));
+        requestsController.add(request);
+      });
+
+      test('with isolateId and no other params', () {
+        var extension = 'ext.cool';
+        var request = rpcRequest(extension, params: {'isolateId': '1'});
+        var response = Response()..json = {"hello": "world"};
+        when(serviceMock.callServiceExtension(
+          extension,
+          isolateId: argThat(equals('1'), named: 'isolateId'),
+          args: argThat(equals({}), named: 'args'),
+        )).thenAnswer((Invocation invocation) {
+          expect(invocation.namedArguments,
+              equals({Symbol('isolateId'): '1', Symbol('args'): {}}));
+          return Future.value(response);
+        });
+        expect(responsesController.stream, emits(rpcResponse(response)));
+        requestsController.add(request);
+      });
+
+      test('with params and no isolateId', () {
+        var extension = 'ext.cool';
+        var params = {'cool': 'option'};
+        var request = rpcRequest(extension, params: params);
+        var response = Response()..json = {"hello": "world"};
+        when(serviceMock.callServiceExtension(
+          extension,
+          isolateId: argThat(isNull, named: 'isolateId'),
+          args: argThat(equals(params), named: 'args'),
+        )).thenAnswer((Invocation invocation) {
+          expect(invocation.namedArguments,
+              equals({Symbol('isolateId'): null, Symbol('args'): params}));
+          return Future.value(response);
+        });
+        expect(responsesController.stream, emits(rpcResponse(response)));
+        requestsController.add(request);
+      });
+
+      test('with params and isolateId', () {
+        var extension = 'ext.cool';
+        var params = {'cool': 'option'};
+        var request =
+            rpcRequest(extension, params: Map.of(params)..['isolateId'] = '1');
+        var response = Response()..json = {"hello": "world"};
+        when(serviceMock.callServiceExtension(
+          extension,
+          isolateId: argThat(equals("1"), named: 'isolateId'),
+          args: argThat(equals(params), named: 'args'),
+        )).thenAnswer((Invocation invocation) {
+          expect(invocation.namedArguments,
+              equals({Symbol('isolateId'): '1', Symbol('args'): params}));
+          return Future.value(response);
+        });
+        expect(responsesController.stream, emits(rpcResponse(response)));
+        requestsController.add(request);
+      });
+    });
   });
 
   group('error handling', () {

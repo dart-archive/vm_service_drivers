@@ -142,6 +142,10 @@ abstract class VmServiceInterface {
   /// server to get access to the real event streams.
   Stream<Event> onEvent(String streamId);
 
+  /// Handler for calling extra service extensions.
+  Future<Response> callServiceExtension(String method,
+      {String isolateId, Map args});
+
   /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
   /// some script.
   ///
@@ -586,196 +590,207 @@ class VmServer {
 
   void _delegateRequest(Map<String, Object> request) async {
     try {
-      var method = request['method'];
+      var method = request['method'] as String;
       if (method == null) {
         throw RPCError(null, -32600, 'Invalid Request', request);
       }
       var params = request['params'] as Map;
       Response response;
-      switch (method) {
-        case 'addBreakpoint':
-          response = await serviceImplementation.addBreakpoint(
-            params['isolateId'],
-            params['scriptId'],
-            params['line'],
-            column: params['column'],
-          );
-          break;
-        case 'addBreakpointWithScriptUri':
-          response = await serviceImplementation.addBreakpointWithScriptUri(
-            params['isolateId'],
-            params['scriptUri'],
-            params['line'],
-            column: params['column'],
-          );
-          break;
-        case 'addBreakpointAtEntry':
-          response = await serviceImplementation.addBreakpointAtEntry(
-            params['isolateId'],
-            params['functionId'],
-          );
-          break;
-        case 'invoke':
-          response = await serviceImplementation.invoke(
-            params['isolateId'],
-            params['targetId'],
-            params['selector'],
-            params['argumentIds'],
-          );
-          break;
-        case 'evaluate':
-          response = await serviceImplementation.evaluate(
-            params['isolateId'],
-            params['targetId'],
-            params['expression'],
-            scope: params['scope'],
-          );
-          break;
-        case 'evaluateInFrame':
-          response = await serviceImplementation.evaluateInFrame(
-            params['isolateId'],
-            params['frameIndex'],
-            params['expression'],
-            scope: params['scope'],
-          );
-          break;
-        case 'getFlagList':
-          response = await serviceImplementation.getFlagList();
-          break;
-        case 'getIsolate':
-          response = await serviceImplementation.getIsolate(
-            params['isolateId'],
-          );
-          break;
-        case 'getScripts':
-          response = await serviceImplementation.getScripts(
-            params['isolateId'],
-          );
-          break;
-        case 'getObject':
-          response = await serviceImplementation.getObject(
-            params['isolateId'],
-            params['objectId'],
-            offset: params['offset'],
-            count: params['count'],
-          );
-          break;
-        case 'getStack':
-          response = await serviceImplementation.getStack(
-            params['isolateId'],
-          );
-          break;
-        case 'getSourceReport':
-          response = await serviceImplementation.getSourceReport(
-            params['isolateId'],
-            params['reports'],
-            scriptId: params['scriptId'],
-            tokenPos: params['tokenPos'],
-            endTokenPos: params['endTokenPos'],
-            forceCompile: params['forceCompile'],
-          );
-          break;
-        case 'getVersion':
-          response = await serviceImplementation.getVersion();
-          break;
-        case 'getVM':
-          response = await serviceImplementation.getVM();
-          break;
-        case 'pause':
-          response = await serviceImplementation.pause(
-            params['isolateId'],
-          );
-          break;
-        case 'kill':
-          response = await serviceImplementation.kill(
-            params['isolateId'],
-          );
-          break;
-        case 'reloadSources':
-          response = await serviceImplementation.reloadSources(
-            params['isolateId'],
-            force: params['force'],
-            pause: params['pause'],
-            rootLibUri: params['rootLibUri'],
-            packagesUri: params['packagesUri'],
-          );
-          break;
-        case 'removeBreakpoint':
-          response = await serviceImplementation.removeBreakpoint(
-            params['isolateId'],
-            params['breakpointId'],
-          );
-          break;
-        case 'resume':
-          response = await serviceImplementation.resume(
-            params['isolateId'],
-            step: params['step'],
-            frameIndex: params['frameIndex'],
-          );
-          break;
-        case 'setExceptionPauseMode':
-          response = await serviceImplementation.setExceptionPauseMode(
-            params['isolateId'],
-            params['mode'],
-          );
-          break;
-        case 'setFlag':
-          response = await serviceImplementation.setFlag(
-            params['name'],
-            params['value'],
-          );
-          break;
-        case 'setLibraryDebuggable':
-          response = await serviceImplementation.setLibraryDebuggable(
-            params['isolateId'],
-            params['libraryId'],
-            params['isDebuggable'],
-          );
-          break;
-        case 'setName':
-          response = await serviceImplementation.setName(
-            params['isolateId'],
-            params['name'],
-          );
-          break;
-        case 'setVMName':
-          response = await serviceImplementation.setVMName(
-            params['name'],
-          );
-          break;
-        case 'streamCancel':
-          var id = params['streamId'];
-          var existing = _streamSubscriptions.remove(id);
-          if (existing == null) {
-            throw RPCError('streamCancel', 104, 'Stream not subscribed', {
-              'details': "The stream '$id' is not subscribed",
+
+      if (method.startsWith('ext.')) {
+        var args = params == null ? null : new Map.of(params);
+        var isolateId = args?.remove('isolateId');
+        response = await serviceImplementation.callServiceExtension(method,
+            isolateId: isolateId, args: args);
+      } else {
+        switch (method) {
+          case 'addBreakpoint':
+            response = await serviceImplementation.addBreakpoint(
+              params['isolateId'],
+              params['scriptId'],
+              params['line'],
+              column: params['column'],
+            );
+            break;
+          case 'addBreakpointWithScriptUri':
+            response = await serviceImplementation.addBreakpointWithScriptUri(
+              params['isolateId'],
+              params['scriptUri'],
+              params['line'],
+              column: params['column'],
+            );
+            break;
+          case 'addBreakpointAtEntry':
+            response = await serviceImplementation.addBreakpointAtEntry(
+              params['isolateId'],
+              params['functionId'],
+            );
+            break;
+          case 'invoke':
+            response = await serviceImplementation.invoke(
+              params['isolateId'],
+              params['targetId'],
+              params['selector'],
+              params['argumentIds'],
+            );
+            break;
+          case 'evaluate':
+            response = await serviceImplementation.evaluate(
+              params['isolateId'],
+              params['targetId'],
+              params['expression'],
+              scope: params['scope'],
+            );
+            break;
+          case 'evaluateInFrame':
+            response = await serviceImplementation.evaluateInFrame(
+              params['isolateId'],
+              params['frameIndex'],
+              params['expression'],
+              scope: params['scope'],
+            );
+            break;
+          case 'getFlagList':
+            response = await serviceImplementation.getFlagList();
+            break;
+          case 'getIsolate':
+            response = await serviceImplementation.getIsolate(
+              params['isolateId'],
+            );
+            break;
+          case 'getScripts':
+            response = await serviceImplementation.getScripts(
+              params['isolateId'],
+            );
+            break;
+          case 'getObject':
+            response = await serviceImplementation.getObject(
+              params['isolateId'],
+              params['objectId'],
+              offset: params['offset'],
+              count: params['count'],
+            );
+            break;
+          case 'getStack':
+            response = await serviceImplementation.getStack(
+              params['isolateId'],
+            );
+            break;
+          case 'getSourceReport':
+            response = await serviceImplementation.getSourceReport(
+              params['isolateId'],
+              params['reports'],
+              scriptId: params['scriptId'],
+              tokenPos: params['tokenPos'],
+              endTokenPos: params['endTokenPos'],
+              forceCompile: params['forceCompile'],
+            );
+            break;
+          case 'getVersion':
+            response = await serviceImplementation.getVersion();
+            break;
+          case 'getVM':
+            response = await serviceImplementation.getVM();
+            break;
+          case 'pause':
+            response = await serviceImplementation.pause(
+              params['isolateId'],
+            );
+            break;
+          case 'kill':
+            response = await serviceImplementation.kill(
+              params['isolateId'],
+            );
+            break;
+          case 'reloadSources':
+            response = await serviceImplementation.reloadSources(
+              params['isolateId'],
+              force: params['force'],
+              pause: params['pause'],
+              rootLibUri: params['rootLibUri'],
+              packagesUri: params['packagesUri'],
+            );
+            break;
+          case 'removeBreakpoint':
+            response = await serviceImplementation.removeBreakpoint(
+              params['isolateId'],
+              params['breakpointId'],
+            );
+            break;
+          case 'resume':
+            response = await serviceImplementation.resume(
+              params['isolateId'],
+              step: params['step'],
+              frameIndex: params['frameIndex'],
+            );
+            break;
+          case 'setExceptionPauseMode':
+            response = await serviceImplementation.setExceptionPauseMode(
+              params['isolateId'],
+              params['mode'],
+            );
+            break;
+          case 'setFlag':
+            response = await serviceImplementation.setFlag(
+              params['name'],
+              params['value'],
+            );
+            break;
+          case 'setLibraryDebuggable':
+            response = await serviceImplementation.setLibraryDebuggable(
+              params['isolateId'],
+              params['libraryId'],
+              params['isDebuggable'],
+            );
+            break;
+          case 'setName':
+            response = await serviceImplementation.setName(
+              params['isolateId'],
+              params['name'],
+            );
+            break;
+          case 'setVMName':
+            response = await serviceImplementation.setVMName(
+              params['name'],
+            );
+            break;
+          case 'streamCancel':
+            var id = params['streamId'];
+            var existing = _streamSubscriptions.remove(id);
+            if (existing == null) {
+              throw RPCError('streamCancel', 104, 'Stream not subscribed', {
+                'details': "The stream '$id' is not subscribed",
+              });
+            }
+            await existing.cancel();
+            response = Success();
+            break;
+          case 'streamListen':
+            var id = params['streamId'];
+            if (_streamSubscriptions.containsKey(id)) {
+              throw RPCError('streamListen', 103, 'Stream already subscribed', {
+                'details': "The stream '$id' is already subscribed",
+              });
+            }
+            _streamSubscriptions[id] =
+                serviceImplementation.onEvent(id).listen((e) {
+              responseSink.add({
+                'jsonrpc': '2.0',
+                'method': 'streamNotify',
+                'params': {
+                  'streamId': id,
+                  'event': e.toJson(),
+                },
+              });
             });
-          }
-          await existing.cancel();
-          response = Success();
-          break;
-        case 'streamListen':
-          var id = params['streamId'];
-          if (_streamSubscriptions.containsKey(id)) {
-            throw RPCError('streamListen', 103, 'Stream already subscribed', {
-              'details': "The stream '$id' is already subscribed",
-            });
-          }
-          _streamSubscriptions[id] =
-              serviceImplementation.onEvent(id).listen((e) {
-            responseSink.add({
-              'jsonrpc': '2.0',
-              'method': 'streamNotify',
-              'params': {
-                'streamId': id,
-                'event': e.toJson(),
-              },
-            });
-          });
-          response = Success();
-          break;
-        default:
-          throw RPCError(method, -32601, 'Method not found', request);
+            response = Success();
+            break;
+          default:
+            throw RPCError(method, -32601, 'Method not found', request);
+        }
+      }
+      if (response == null) {
+        throw StateError('Invalid null response from service');
       }
       responseSink.add({
         'jsonrpc': '2.0',
@@ -1119,6 +1134,7 @@ class VmService implements VmServiceInterface {
   /// Invoke a specific service protocol extension method.
   ///
   /// See https://api.dartlang.org/stable/dart-developer/dart-developer-library.html.
+  @override
   Future<Response> callServiceExtension(String method,
       {String isolateId, Map args}) {
     if (args == null && isolateId == null) {
@@ -3809,7 +3825,12 @@ class Response {
     type = json['type'];
   }
 
-  Map<String, dynamic> toJson() => throw UnimplementedError();
+  Map<String, dynamic> toJson() {
+    var result = json == null ? <String, dynamic>{} : Map.of(json);
+    result['type'] = type ?? 'Response';
+    return result;
+  }
+
   String toString() => '[Response type: ${type}]';
 }
 

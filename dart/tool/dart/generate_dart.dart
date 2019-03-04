@@ -63,6 +63,7 @@ final String _implCode = r'''
   /// Invoke a specific service protocol extension method.
   ///
   /// See https://api.dartlang.org/stable/dart-developer/dart-developer-library.html.
+  @override
   Future<Response> callServiceExtension(String method, {
     String isolateId,
     Map args
@@ -495,6 +496,9 @@ abstract class VmServiceInterface {
   /// This is not a part of the spec, but is needed for both the client and
   /// server to get access to the real event streams.
   Stream<Event> onEvent(String streamId);
+
+  /// Handler for calling extra service extensions.
+  Future<Response> callServiceExtension(String method, {String isolateId, Map args});
 ''');
     methods.forEach((m) {
       m.generateDefinition(gen);
@@ -522,13 +526,20 @@ abstract class VmServiceInterface {
 
     void _delegateRequest(Map<String, Object> request) async {
       try {
-        var method = request['method'];
+        var method = request['method'] as String;
         if (method == null) {
           throw RPCError(null, -32600, 'Invalid Request', request);
         }
         var params = request['params'] as Map;
         Response response;
-        switch(method) {
+
+        if (method.startsWith('ext.')) {
+          var args = params == null ? null : new Map.of(params);
+          var isolateId = args?.remove('isolateId');
+          response = await serviceImplementation.callServiceExtension(
+              method, isolateId: isolateId, args: args);
+        } else {
+          switch(method) {
     ''');
     methods.where((m) => !m.isUndocumented).forEach((m) {
       gen.writeln("case '${m.name}':");
@@ -558,6 +569,15 @@ abstract class VmServiceInterface {
     gen.writeln("throw RPCError(method, -32601, 'Method not found', request);");
     // terminate the switch
     gen.writeln('}');
+    // terminate the if/else
+    gen.writeln('}');
+
+    // Handle null responses
+    gen.write('''
+      if (response == null) {
+        throw StateError('Invalid null response from service');
+      }
+    ''');
 
     // Generate the json success response
     gen.write("""responseSink.add({
@@ -1249,8 +1269,12 @@ class Type extends Member {
 
     // toJson support, the base Response type is not supported
     if (name == 'Response') {
-      gen.writeln(
-          'Map<String, dynamic> toJson() => throw UnimplementedError();');
+      gen.writeln('''
+Map<String, dynamic> toJson() {
+  var result = json == null ? <String, dynamic>{} : Map.of(json);
+  result['type'] = type ?? 'Response';
+  return result;
+}''');
     } else {
       if (isResponse) {
         gen.writeln('@override');
