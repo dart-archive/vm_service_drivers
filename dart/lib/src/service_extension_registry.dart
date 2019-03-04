@@ -19,14 +19,15 @@ class ServiceExtensionRegistry {
   /// Registers [extension] for [client].
   ///
   /// All future requests for [extension] will be routed to [client].
-  void registerExtension(String extension, VmServerConnection client) async {
+  void registerExtension(String extension, VmServerConnection client) {
     if (_extensionToConnection.containsKey(extension)) {
       throw RPCError('registerExtension', 111, 'Service already registered');
     }
     _extensionToConnection[extension] = client;
     // Remove the mapping if the client disconnects.
-    await client.done;
-    _extensionToConnection.remove(extension);
+    client.done.whenComplete(() {
+      _extensionToConnection.remove(extension);
+    });
   }
 
   /// Returns the [VmServerConnection] for a given [extension], or `null` if

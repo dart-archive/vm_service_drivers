@@ -266,18 +266,22 @@ void main() {
       var clientOutputController =
           StreamController<Map<String, Object>>.broadcast();
       var client = VmService(clientInputController.stream.map(jsonEncode),
-          (String message) => clientOutputController.add(jsonDecode(message)));
+          (String message) => clientOutputController.add(jsonDecode(message)),
+          disposeHandler: () async {
+        await clientInputController.close();
+        await clientOutputController.close();
+      });
 
-      var serviceMock2 = MockVmService();
-      var serviceMock2Connection = VmServerConnection(
-          clientOutputController.stream,
-          clientInputController.sink,
-          serviceRegistry,
-          serviceMock2);
+      var clientConnection = VmServerConnection(clientOutputController.stream,
+          clientInputController.sink, serviceRegistry, serviceMock);
 
       var requestParams = {'foo': 'bar'};
       var expectedResponse = Response()..json = {'zap': 'zip'};
       await client.registerService(serviceId, null);
+      // Duplicate registrations should fail.
+      expect(client.registerService(serviceId, null),
+          throwsA(const TypeMatcher<RPCError>()));
+
       await client.registerServiceCallback(serviceId, (request) async {
         expect(request, equals(requestParams));
         return {'result': expectedResponse.toJson()};
@@ -290,11 +294,9 @@ void main() {
 
       // Kill the client that registered the handler, it should now fall back
       // on `callServiceExtension`.
-      await client.dispose();
-      await clientInputController.close();
-      await clientOutputController.close();
+      client.dispose();
       // This should complete as well.
-      await serviceMock2Connection.done;
+      await clientConnection.done;
 
       var mockResponse = Response()..json = {'mock': 'response'};
       when(serviceMock.callServiceExtension(serviceId,
