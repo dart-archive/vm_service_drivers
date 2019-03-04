@@ -7,6 +7,8 @@
     services registered through `dart:developer` should be handled by the
     `VmServiceInterface` implementation (which should invoke the registered
     callback directly).
+- Added a `ServiceExtensionRegistry` class, which tracks which clients have
+  registered which service extensions.
 - **breaking**: Renamed `VmServer` to `VmServerConnection`.
   - One `VmServerConnection` should be created _per client_ connection to the
     server. These should typically all share the same underlying
