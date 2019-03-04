@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.14.3-dev.3
+- Add support for automatically delegating service extension requests to the
+  client which registered them.
+  - This is only for services that are registered via the vm service protocol,
+    services registered through `dart:developer` should be handled by the
+    `VmServiceInterface` implementation (which should invoke the registered
+    callback directly).
+- **breaking**: Renamed `VmServer` to `VmServerConnection`.
+  - One `VmServerConnection` should be created _per client_ connection to the
+    server. These should typically all share the same underlying
+    `VmServiceInterface` instance, as well as the same
+    `ServiceExtensionRegistry` instance.
+
 ## 3.14.3-dev.2
 - Add `callServiceExtension` method to the `VmServiceInterface` class.
   - The `VmServer` will delegate all requests whose methods start with `ext.` to
