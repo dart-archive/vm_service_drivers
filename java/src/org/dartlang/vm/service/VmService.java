@@ -77,7 +77,7 @@ public class VmService extends VmServiceBase {
   /**
    * The minor version number of the protocol supported by this client.
    */
-  public static final int versionMinor = 14;
+  public static final int versionMinor = 15;
 
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
@@ -183,13 +183,15 @@ public class VmService extends VmServiceBase {
   /**
    * The [evaluate] RPC is used to evaluate an expression in the context of some target.
    * @param scope This parameter is optional and may be null.
+   * @param disableBreakpoints This parameter is optional and may be null.
    */
-  public void evaluate(String isolateId, String targetId, String expression, Map<String, String> scope, EvaluateConsumer consumer) {
+  public void evaluate(String isolateId, String targetId, String expression, Map<String, String> scope, Boolean disableBreakpoints, EvaluateConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("targetId", targetId);
     params.addProperty("expression", expression);
     if (scope != null) params.add("scope", convertMapToJsonObject(scope));
+    if (disableBreakpoints != null) params.addProperty("disableBreakpoints", disableBreakpoints);
     request("evaluate", params, consumer);
   }
 
@@ -211,13 +213,15 @@ public class VmService extends VmServiceBase {
    * stack frame. [frameIndex] is the index of the desired Frame, with an index of [0] indicating
    * the top (most recent) frame.
    * @param scope This parameter is optional and may be null.
+   * @param disableBreakpoints This parameter is optional and may be null.
    */
-  public void evaluateInFrame(String isolateId, int frameIndex, String expression, Map<String, String> scope, EvaluateInFrameConsumer consumer) {
+  public void evaluateInFrame(String isolateId, int frameIndex, String expression, Map<String, String> scope, Boolean disableBreakpoints, EvaluateInFrameConsumer consumer) {
     JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     params.addProperty("frameIndex", frameIndex);
     params.addProperty("expression", expression);
     if (scope != null) params.add("scope", convertMapToJsonObject(scope));
+    if (disableBreakpoints != null) params.addProperty("disableBreakpoints", disableBreakpoints);
     request("evaluateInFrame", params, consumer);
   }
 
@@ -388,6 +392,22 @@ public class VmService extends VmServiceBase {
   public void getVersion(VersionConsumer consumer) {
     JsonObject params = new JsonObject();
     request("getVersion", params, consumer);
+  }
+
+  /**
+   * The [invoke] RPC is used to perform regular method invocation on some receiver, as if by
+   * dart:mirror's ObjectMirror.invoke. Note this does not provide a way to perform getter, setter
+   * or constructor invocation.
+   * @param disableBreakpoints This parameter is optional and may be null.
+   */
+  public void invoke(String isolateId, String targetId, String selector, List<String> argumentIds, Boolean disableBreakpoints, InvokeConsumer consumer) {
+    JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    params.addProperty("targetId", targetId);
+    params.addProperty("selector", selector);
+    params.add("argumentIds", convertIterableToJsonArray(argumentIds));
+    if (disableBreakpoints != null) params.addProperty("disableBreakpoints", disableBreakpoints);
+    request("invoke", params, consumer);
   }
 
   /**

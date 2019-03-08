@@ -17,7 +17,7 @@ import 'src/service_extension_registry.dart';
 
 export 'src/service_extension_registry.dart' show ServiceExtensionRegistry;
 
-const String vmServiceVersion = '3.14.0';
+const String vmServiceVersion = '3.15.0';
 
 /// @optional
 const String optional = 'optional';
@@ -222,6 +222,12 @@ abstract class VmServiceInterface {
   ///
   /// Each elements of `argumentId` may refer to an [Instance].
   ///
+  /// If `disableBreakpoints` is provided and set to true, any breakpoints hit
+  /// as a result of this invocation are ignored, including pauses resulting
+  /// from a call to <code>debugger()</code>debugger() from
+  /// <code>dart:developer</code>dart:developer. Defaults to false if not
+  /// provided.
+  ///
   /// If `targetId` or any element of `argumentIds` is a temporary id which has
   /// expired, then the `Expired` [Sentinel] is returned.
   ///
@@ -240,7 +246,8 @@ abstract class VmServiceInterface {
   ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   Future<dynamic> invoke(String isolateId, String targetId, String selector,
-      List<String> argumentIds);
+      List<String> argumentIds,
+      {bool disableBreakpoints});
 
   /// The `evaluate` RPC is used to evaluate an expression in the context of
   /// some target.
@@ -260,6 +267,10 @@ abstract class VmServiceInterface {
   /// provided in `scope` may shadow instance members, class members and
   /// top-level members.
   ///
+  /// If `disableBreakpoints` is provided and set to true, any breakpoints hit
+  /// as a result of this evaluation are ignored. Defaults to false if not
+  /// provided.
+  ///
   /// If expression is failed to parse and compile, then [rpc error] 113
   /// "Expression compilation error" is returned.
   ///
@@ -271,7 +282,7 @@ abstract class VmServiceInterface {
   ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   Future<dynamic> evaluate(String isolateId, String targetId, String expression,
-      {Map<String, String> scope});
+      {Map<String, String> scope, bool disableBreakpoints});
 
   /// The `evaluateInFrame` RPC is used to evaluate an expression in the context
   /// of a particular stack frame. `frameIndex` is the index of the desired
@@ -282,6 +293,10 @@ abstract class VmServiceInterface {
   /// evaluated, which is a child scope of the frame's current scope. This means
   /// bindings provided in `scope` may shadow instance members, class members,
   /// top-level members, parameters and locals.
+  ///
+  /// If `disableBreakpoints` is provided and set to true, any breakpoints hit
+  /// as a result of this evaluation are ignored. Defaults to false if not
+  /// provided.
   ///
   /// If expression is failed to parse and compile, then [rpc error] 113
   /// "Expression compilation error" is returned.
@@ -295,7 +310,7 @@ abstract class VmServiceInterface {
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   Future<dynamic> evaluateInFrame(
       String isolateId, int frameIndex, String expression,
-      {Map<String, String> scope});
+      {Map<String, String> scope, bool disableBreakpoints});
 
   /// The `getFlagList` RPC returns a list of all command line flags in the VM
   /// along with their current values.
@@ -679,6 +694,7 @@ class VmServerConnection {
             params['targetId'],
             params['selector'],
             params['argumentIds'],
+            disableBreakpoints: params['disableBreakpoints'],
           );
           break;
         case 'evaluate':
@@ -687,6 +703,7 @@ class VmServerConnection {
             params['targetId'],
             params['expression'],
             scope: params['scope'],
+            disableBreakpoints: params['disableBreakpoints'],
           );
           break;
         case 'evaluateInFrame':
@@ -695,6 +712,7 @@ class VmServerConnection {
             params['frameIndex'],
             params['expression'],
             scope: params['scope'],
+            disableBreakpoints: params['disableBreakpoints'],
           );
           break;
         case 'getFlagList':
@@ -966,37 +984,45 @@ class VmService implements VmServiceInterface {
 
   @override
   Future<dynamic> invoke(String isolateId, String targetId, String selector,
-      List<String> argumentIds) {
-    return _call('invoke', {
+      List<String> argumentIds,
+      {bool disableBreakpoints}) {
+    Map m = {
       'isolateId': isolateId,
       'targetId': targetId,
       'selector': selector,
       'argumentIds': argumentIds
-    });
+    };
+    if (disableBreakpoints != null)
+      m['disableBreakpoints'] = disableBreakpoints;
+    return _call('invoke', m);
   }
 
   @override
   Future<dynamic> evaluate(String isolateId, String targetId, String expression,
-      {Map<String, String> scope}) {
+      {Map<String, String> scope, bool disableBreakpoints}) {
     Map m = {
       'isolateId': isolateId,
       'targetId': targetId,
       'expression': expression
     };
     if (scope != null) m['scope'] = scope;
+    if (disableBreakpoints != null)
+      m['disableBreakpoints'] = disableBreakpoints;
     return _call('evaluate', m);
   }
 
   @override
   Future<dynamic> evaluateInFrame(
       String isolateId, int frameIndex, String expression,
-      {Map<String, String> scope}) {
+      {Map<String, String> scope, bool disableBreakpoints}) {
     Map m = {
       'isolateId': isolateId,
       'frameIndex': frameIndex,
       'expression': expression
     };
     if (scope != null) m['scope'] = scope;
+    if (disableBreakpoints != null)
+      m['disableBreakpoints'] = disableBreakpoints;
     return _call('evaluateInFrame', m);
   }
 
