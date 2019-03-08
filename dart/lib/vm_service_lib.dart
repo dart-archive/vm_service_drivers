@@ -172,8 +172,12 @@ abstract class VmServiceInterface {
   /// Note that breakpoints are added and removed on a per-isolate basis.
   ///
   /// See [Breakpoint].
-  Future<Breakpoint> addBreakpoint(String isolateId, String scriptId, int line,
-      {int column});
+  Future<Breakpoint> addBreakpoint(
+    String isolateId,
+    String scriptId,
+    int line, {
+    int column,
+  });
 
   /// The `addBreakpoint` RPC is used to add a breakpoint at a specific line of
   /// some script. This RPC is useful when a script has not yet been assigned an
@@ -200,8 +204,11 @@ abstract class VmServiceInterface {
   ///
   /// See [Breakpoint].
   Future<Breakpoint> addBreakpointWithScriptUri(
-      String isolateId, String scriptUri, int line,
-      {int column});
+    String isolateId,
+    String scriptUri,
+    int line, {
+    int column,
+  });
 
   /// The `addBreakpointAtEntry` RPC is used to add a breakpoint at the
   /// entrypoint of some function.
@@ -245,9 +252,13 @@ abstract class VmServiceInterface {
   /// will be returned.
   ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
-  Future<dynamic> invoke(String isolateId, String targetId, String selector,
-      List<String> argumentIds,
-      {bool disableBreakpoints});
+  Future<dynamic> invoke(
+    String isolateId,
+    String targetId,
+    String selector,
+    List<String> argumentIds, {
+    bool disableBreakpoints,
+  });
 
   /// The `evaluate` RPC is used to evaluate an expression in the context of
   /// some target.
@@ -281,8 +292,13 @@ abstract class VmServiceInterface {
   /// will be returned.
   ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
-  Future<dynamic> evaluate(String isolateId, String targetId, String expression,
-      {Map<String, String> scope, bool disableBreakpoints});
+  Future<dynamic> evaluate(
+    String isolateId,
+    String targetId,
+    String expression, {
+    Map<String, String> scope,
+    bool disableBreakpoints,
+  });
 
   /// The `evaluateInFrame` RPC is used to evaluate an expression in the context
   /// of a particular stack frame. `frameIndex` is the index of the desired
@@ -309,8 +325,12 @@ abstract class VmServiceInterface {
   ///
   /// The return value can be one of [InstanceRef], [ErrorRef] or [Sentinel].
   Future<dynamic> evaluateInFrame(
-      String isolateId, int frameIndex, String expression,
-      {Map<String, String> scope, bool disableBreakpoints});
+    String isolateId,
+    int frameIndex,
+    String expression, {
+    Map<String, String> scope,
+    bool disableBreakpoints,
+  });
 
   /// The `getFlagList` RPC returns a list of all command line flags in the VM
   /// along with their current values.
@@ -356,8 +376,12 @@ abstract class VmServiceInterface {
   /// Float32x4List, and Float64x2List. These parameters are otherwise ignored.
   ///
   /// The return value can be one of [Obj] or [Sentinel].
-  Future<dynamic> getObject(String isolateId, String objectId,
-      {int offset, int count});
+  Future<dynamic> getObject(
+    String isolateId,
+    String objectId, {
+    int offset,
+    int count,
+  });
 
   /// The `getStack` RPC is used to retrieve the current execution stack and
   /// message queue for an isolate. The isolate does not need to be paused.
@@ -399,8 +423,14 @@ abstract class VmServiceInterface {
   ///
   /// See [SourceReport].
   Future<SourceReport> getSourceReport(
-      String isolateId, /*List<SourceReportKind>*/ List<String> reports,
-      {String scriptId, int tokenPos, int endTokenPos, bool forceCompile});
+    String isolateId,
+    /*List<SourceReportKind>*/
+    List<String> reports, {
+    String scriptId,
+    int tokenPos,
+    int endTokenPos,
+    bool forceCompile,
+  });
 
   /// The `getVersion` RPC is used to determine what version of the Service
   /// Protocol is served by a VM.
@@ -444,8 +474,13 @@ abstract class VmServiceInterface {
   ///
   /// if the `packagesUri` parameter is provided, it indicates the new uri to
   /// the Isolate's package map (.packages) file.
-  Future<ReloadReport> reloadSources(String isolateId,
-      {bool force, bool pause, String rootLibUri, String packagesUri});
+  Future<ReloadReport> reloadSources(
+    String isolateId, {
+    bool force,
+    bool pause,
+    String rootLibUri,
+    String packagesUri,
+  });
 
   /// The `removeBreakpoint` RPC is used to remove a breakpoint by its `id`.
   ///
@@ -960,8 +995,12 @@ class VmService implements VmServiceInterface {
       _getEventController(streamId).stream;
 
   @override
-  Future<Breakpoint> addBreakpoint(String isolateId, String scriptId, int line,
-      {int column}) {
+  Future<Breakpoint> addBreakpoint(
+    String isolateId,
+    String scriptId,
+    int line, {
+    int column,
+  }) {
     Map m = {'isolateId': isolateId, 'scriptId': scriptId, 'line': line};
     if (column != null) m['column'] = column;
     return _call('addBreakpoint', m);
@@ -969,8 +1008,11 @@ class VmService implements VmServiceInterface {
 
   @override
   Future<Breakpoint> addBreakpointWithScriptUri(
-      String isolateId, String scriptUri, int line,
-      {int column}) {
+    String isolateId,
+    String scriptUri,
+    int line, {
+    int column,
+  }) {
     Map m = {'isolateId': isolateId, 'scriptUri': scriptUri, 'line': line};
     if (column != null) m['column'] = column;
     return _call('addBreakpointWithScriptUri', m);
@@ -983,9 +1025,13 @@ class VmService implements VmServiceInterface {
   }
 
   @override
-  Future<dynamic> invoke(String isolateId, String targetId, String selector,
-      List<String> argumentIds,
-      {bool disableBreakpoints}) {
+  Future<dynamic> invoke(
+    String isolateId,
+    String targetId,
+    String selector,
+    List<String> argumentIds, {
+    bool disableBreakpoints,
+  }) {
     Map m = {
       'isolateId': isolateId,
       'targetId': targetId,
@@ -998,8 +1044,13 @@ class VmService implements VmServiceInterface {
   }
 
   @override
-  Future<dynamic> evaluate(String isolateId, String targetId, String expression,
-      {Map<String, String> scope, bool disableBreakpoints}) {
+  Future<dynamic> evaluate(
+    String isolateId,
+    String targetId,
+    String expression, {
+    Map<String, String> scope,
+    bool disableBreakpoints,
+  }) {
     Map m = {
       'isolateId': isolateId,
       'targetId': targetId,
@@ -1013,8 +1064,12 @@ class VmService implements VmServiceInterface {
 
   @override
   Future<dynamic> evaluateInFrame(
-      String isolateId, int frameIndex, String expression,
-      {Map<String, String> scope, bool disableBreakpoints}) {
+    String isolateId,
+    int frameIndex,
+    String expression, {
+    Map<String, String> scope,
+    bool disableBreakpoints,
+  }) {
     Map m = {
       'isolateId': isolateId,
       'frameIndex': frameIndex,
@@ -1040,8 +1095,12 @@ class VmService implements VmServiceInterface {
   }
 
   @override
-  Future<dynamic> getObject(String isolateId, String objectId,
-      {int offset, int count}) {
+  Future<dynamic> getObject(
+    String isolateId,
+    String objectId, {
+    int offset,
+    int count,
+  }) {
     Map m = {'isolateId': isolateId, 'objectId': objectId};
     if (offset != null) m['offset'] = offset;
     if (count != null) m['count'] = count;
@@ -1055,8 +1114,14 @@ class VmService implements VmServiceInterface {
 
   @override
   Future<SourceReport> getSourceReport(
-      String isolateId, /*List<SourceReportKind>*/ List<String> reports,
-      {String scriptId, int tokenPos, int endTokenPos, bool forceCompile}) {
+    String isolateId,
+    /*List<SourceReportKind>*/
+    List<String> reports, {
+    String scriptId,
+    int tokenPos,
+    int endTokenPos,
+    bool forceCompile,
+  }) {
     Map m = {'isolateId': isolateId, 'reports': reports};
     if (scriptId != null) m['scriptId'] = scriptId;
     if (tokenPos != null) m['tokenPos'] = tokenPos;
@@ -1082,8 +1147,13 @@ class VmService implements VmServiceInterface {
   }
 
   @override
-  Future<ReloadReport> reloadSources(String isolateId,
-      {bool force, bool pause, String rootLibUri, String packagesUri}) {
+  Future<ReloadReport> reloadSources(
+    String isolateId, {
+    bool force,
+    bool pause,
+    String rootLibUri,
+    String packagesUri,
+  }) {
     Map m = {'isolateId': isolateId};
     if (force != null) m['force'] = force;
     if (pause != null) m['pause'] = pause;

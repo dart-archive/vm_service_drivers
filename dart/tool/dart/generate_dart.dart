@@ -1022,6 +1022,7 @@ class Method extends Member {
         return '${typeName} ${arg.name}';
       }
     }).join(', '));
+    if (args.length >= 4) gen.write(',');
     if (startedOptional) gen.write('}');
     gen.write(') ');
   }
