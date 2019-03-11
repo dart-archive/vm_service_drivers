@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.14.3-dev.4
+- Add support for the `_Service` stream in the `VmServerConnection` directly.
+
 ## 3.14.3-dev.3
 - Add support for automatically delegating service extension requests to the
   client which registered them.
