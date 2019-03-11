@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:async/async.dart';
 import 'package:mockito/mockito.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:test/test.dart';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -305,7 +306,7 @@ void main() {
                   ..method = serviceId
                   ..service = serviceId));
 
-        await requestsController.close();
+        unawaited(requestsController.close());
         // And the unregister event when the original client disconnects.
         expect(
             await responseQueue2.next,
