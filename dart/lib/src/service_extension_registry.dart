@@ -2,7 +2,12 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import '../vm_service_lib.dart' show VmServerConnection, RPCError;
+import 'dart:async';
+
+import 'package:stream_transform/stream_transform.dart';
+
+import '../vm_service_lib.dart'
+    show VmServerConnection, RPCError, Event, EventKind;
 
 /// A registry of custom service extensions to [VmServerConnection]s in which
 /// they were registered.
@@ -14,6 +19,9 @@ class ServiceExtensionRegistry {
   /// only the services registered through the `_registerService` rpc method.
   final _extensionToConnection = <String, VmServerConnection>{};
 
+  /// Controller for tracking registration and unregistration events.
+  final _eventController = StreamController<Event>.broadcast();
+
   ServiceExtensionRegistry();
 
   /// Registers [extension] for [client].
@@ -23,10 +31,13 @@ class ServiceExtensionRegistry {
     if (_extensionToConnection.containsKey(extension)) {
       throw RPCError('registerExtension', 111, 'Service already registered');
     }
+    _eventController.sink.add(_toRegistrationEvent(extension));
     _extensionToConnection[extension] = client;
     // Remove the mapping if the client disconnects.
     client.done.whenComplete(() {
       _extensionToConnection.remove(extension);
+      _eventController.sink.add(_toRegistrationEvent(extension,
+          kind: EventKind.kServiceUnregistered));
     });
   }
 
@@ -37,4 +48,22 @@ class ServiceExtensionRegistry {
   /// shut down at any time.
   VmServerConnection clientFor(String extension) =>
       _extensionToConnection[extension];
+
+  /// All of the currently registered extensions
+  Iterable<String> get registeredExtensions => _extensionToConnection.keys;
+
+  /// Emits an [Event] of type `ServiceRegistered` for all current and future
+  /// extensions that are registered, and `ServiceUnregistered` when those
+  /// clients disconnect.
+  Stream<Event> get onExtensionEvent => _eventController.stream
+      .transform(startWithMany(registeredExtensions.map(_toRegistrationEvent)));
+
+  /// Creates a `_Service` stream event, with a default kind of
+  /// [EventKind.kServiceRegistered].
+  Event _toRegistrationEvent(String method,
+          {String kind = EventKind.kServiceRegistered}) =>
+      Event()
+        ..kind = kind
+        ..service = method
+        ..method = method;
 }

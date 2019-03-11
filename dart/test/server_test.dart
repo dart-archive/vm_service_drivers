@@ -254,6 +254,69 @@ void main() {
             'details': "The stream '$streamId' is not subscribed",
           }))));
     });
+
+    group('_Service', () {
+      final serviceStream = '_Service';
+      StreamQueue<Map<String, Object>> responseQueue;
+
+      setUp(() {
+        responseQueue = StreamQueue(responsesController.stream);
+      });
+
+      test('gives register and unregister events', () async {
+        var serviceId = 'ext.test.service';
+        requestsController.add(
+            rpcRequest('streamListen', params: {'streamId': serviceStream}));
+        await responseQueue.next;
+        requestsController.add(
+            rpcRequest('_registerService', params: {'service': serviceId}));
+        await responseQueue.next;
+        expect(
+            await responseQueue.next,
+            streamNotifyResponse(
+                '_Service',
+                Event()
+                  ..kind = EventKind.kServiceRegistered
+                  ..method = serviceId
+                  ..service = serviceId));
+
+        // Connect another client to get the previous register events and the
+        // unregister event.
+        var requestsController2 = StreamController<Map<String, Object>>();
+        var responsesController2 = StreamController<Map<String, Object>>();
+        var responseQueue2 = StreamQueue(responsesController2.stream);
+        addTearDown(() {
+          requestsController2.close();
+          responsesController2.close();
+        });
+
+        VmServerConnection(requestsController2.stream,
+            responsesController2.sink, serviceRegistry, null);
+        requestsController2.add(
+            rpcRequest('streamListen', params: {'streamId': serviceStream}));
+        await responseQueue2.next;
+        // Should get the previously registered extension event.
+        expect(
+            await responseQueue2.next,
+            streamNotifyResponse(
+                '_Service',
+                Event()
+                  ..kind = EventKind.kServiceRegistered
+                  ..method = serviceId
+                  ..service = serviceId));
+
+        await requestsController.close();
+        // And the unregister event when the original client disconnects.
+        expect(
+            await responseQueue2.next,
+            streamNotifyResponse(
+                '_Service',
+                Event()
+                  ..kind = EventKind.kServiceUnregistered
+                  ..method = serviceId
+                  ..service = serviceId));
+      });
+    });
   });
 
   group('registerService', () {
