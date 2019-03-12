@@ -308,8 +308,30 @@ void main() {
         requestsController2.add(
             rpcRequest('streamListen', params: {'streamId': serviceStream}));
         // Need to give the client a chance to subscribe.
-        await Future(() {});
+        await pumpEventQueue();
         unawaited(requestsController.close());
+        // Give the old client a chance to shut down
+        await pumpEventQueue();
+
+        // Connect yet another client, it should get zero registration events.
+        var requestsController3 = StreamController<Map<String, Object>>();
+        var responsesController3 = StreamController<Map<String, Object>>();
+
+        VmServerConnection(requestsController3.stream,
+            responsesController3.sink, serviceRegistry, null);
+        expect(
+            responsesController3.stream,
+            neverEmits(streamNotifyResponse(
+                serviceStream,
+                Event()
+                  ..kind = EventKind.kServiceRegistered
+                  ..method = serviceId
+                  ..service = serviceId)));
+        // Give it a chance to deliver events.
+        await pumpEventQueue();
+        // Disconnect the client so the test can shut down.
+        unawaited(requestsController3.close());
+        unawaited(responsesController3.close());
       });
     });
   });
