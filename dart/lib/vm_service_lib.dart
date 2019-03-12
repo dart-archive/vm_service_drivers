@@ -657,6 +657,8 @@ class VmServerConnection {
   VmServerConnection(this._requestStream, this._responseSink,
       this._serviceExtensionRegistry, this._serviceImplementation) {
     _requestStream.listen(_delegateRequest, onDone: _doneCompleter.complete);
+    done.then(
+        (_) => _streamSubscriptions.values.forEach((sub) => sub.cancel()));
   }
 
   /// Invoked when the current client has registered some extension, and
@@ -872,8 +874,11 @@ class VmServerConnection {
               'details': "The stream '$id' is already subscribed",
             });
           }
-          _streamSubscriptions[id] =
-              _serviceImplementation.onEvent(id).listen((e) {
+
+          var stream = id == '_Service'
+              ? _serviceExtensionRegistry.onExtensionEvent
+              : _serviceImplementation.onEvent(id);
+          _streamSubscriptions[id] = stream.listen((e) {
             _responseSink.add({
               'jsonrpc': '2.0',
               'method': 'streamNotify',
@@ -889,7 +894,7 @@ class VmServerConnection {
           var registeredClient = _serviceExtensionRegistry.clientFor(method);
           if (registeredClient != null) {
             // Check for any client which has registered this extension, if we
-            // have one then delgate the request to that client.
+            // have one then delegate the request to that client.
             _responseSink.add(await registeredClient
                 ._forwardServiceExtensionRequest(request));
             // Bail out early in this case, we are just acting as a proxy and

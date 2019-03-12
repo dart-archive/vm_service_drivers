@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:async/async.dart';
 import 'package:mockito/mockito.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:test/test.dart';
 
 import 'package:vm_service_lib/vm_service_lib.dart';
@@ -253,6 +254,77 @@ void main() {
               RPCError('streamCancel', 104, 'Stream not subscribed', {
             'details': "The stream '$streamId' is not subscribed",
           }))));
+    });
+
+    group('_Service', () {
+      final serviceStream = '_Service';
+
+      test('gives register and unregister events', () async {
+        var serviceId = 'ext.test.service';
+        var serviceRegisteredEvent = streamNotifyResponse(
+            serviceStream,
+            Event()
+              ..kind = EventKind.kServiceRegistered
+              ..method = serviceId
+              ..service = serviceId);
+        var serviceUnRegisteredEvent = streamNotifyResponse(
+            serviceStream,
+            Event()
+              ..kind = EventKind.kServiceUnregistered
+              ..method = serviceId
+              ..service = serviceId);
+
+        requestsController.add(
+            rpcRequest('streamListen', params: {'streamId': serviceStream}));
+        requestsController.add(
+            rpcRequest('_registerService', params: {'service': serviceId}));
+        await expect(
+            responsesController.stream, emitsThrough(serviceRegisteredEvent));
+
+        // Connect another client to get the previous register events and the
+        // unregister event.
+        var requestsController2 = StreamController<Map<String, Object>>();
+        var responsesController2 = StreamController<Map<String, Object>>();
+        addTearDown(() {
+          requestsController2.close();
+          responsesController2.close();
+        });
+
+        VmServerConnection(requestsController2.stream,
+            responsesController2.sink, serviceRegistry, null);
+
+        expect(
+            responsesController2.stream,
+            emitsThrough(emitsInOrder(
+                [serviceRegisteredEvent, serviceUnRegisteredEvent])));
+
+        // Should get the previously registered extension event, as well as
+        // the unregister event when the client disconnects.
+        requestsController2.add(
+            rpcRequest('streamListen', params: {'streamId': serviceStream}));
+        // Need to give the client a chance to subscribe.
+        await pumpEventQueue();
+        unawaited(requestsController.close());
+        // Give the old client a chance to shut down
+        await pumpEventQueue();
+
+        // Connect yet another client, it should get zero registration or
+        // unregistration events.
+        var requestsController3 = StreamController<Map<String, Object>>();
+        var responsesController3 = StreamController<Map<String, Object>>();
+
+        VmServerConnection(requestsController3.stream,
+            responsesController3.sink, serviceRegistry, null);
+        expect(
+            responsesController3.stream,
+            neverEmits(
+                anyOf(serviceRegisteredEvent, serviceUnRegisteredEvent)));
+        // Give it a chance to deliver events.
+        await pumpEventQueue();
+        // Disconnect the client so the test can shut down.
+        unawaited(requestsController3.close());
+        unawaited(responsesController3.close());
+      });
     });
   });
 
