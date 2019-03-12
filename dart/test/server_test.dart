@@ -289,13 +289,13 @@ void main() {
             responsesController2.stream,
             emitsThrough(emitsInOrder([
               streamNotifyResponse(
-                  '_Service',
+                  serviceStream,
                   Event()
                     ..kind = EventKind.kServiceRegistered
                     ..method = serviceId
                     ..service = serviceId),
               streamNotifyResponse(
-                  '_Service',
+                  serviceStream,
                   Event()
                     ..kind = EventKind.kServiceUnregistered
                     ..method = serviceId

@@ -919,10 +919,14 @@ class VmServerConnection {
         'result': response.toJson(),
         'id': id,
       });
-    } catch (e) {
+    } catch (e, s) {
       var error = e is RPCError
           ? {'code': e.code, 'data': e.data, 'message': e.message}
-          : {'code': -32603, 'message': e.toString()};
+          : {
+              'code': -32603,
+              'data': {'stackTrace': s.toString()},
+              'message': e.toString()
+            };
       _responseSink.add({
         'jsonrpc': '2.0',
         'error': error,
