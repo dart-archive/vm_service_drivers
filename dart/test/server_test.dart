@@ -261,18 +261,25 @@ void main() {
 
       test('gives register and unregister events', () async {
         var serviceId = 'ext.test.service';
+        var serviceRegisteredEvent = streamNotifyResponse(
+            serviceStream,
+            Event()
+              ..kind = EventKind.kServiceRegistered
+              ..method = serviceId
+              ..service = serviceId);
+        var serviceUnRegisteredEvent = streamNotifyResponse(
+            serviceStream,
+            Event()
+              ..kind = EventKind.kServiceUnregistered
+              ..method = serviceId
+              ..service = serviceId);
+
         requestsController.add(
             rpcRequest('streamListen', params: {'streamId': serviceStream}));
         requestsController.add(
             rpcRequest('_registerService', params: {'service': serviceId}));
         await expect(
-            responsesController.stream,
-            emitsThrough(streamNotifyResponse(
-                '_Service',
-                Event()
-                  ..kind = EventKind.kServiceRegistered
-                  ..method = serviceId
-                  ..service = serviceId)));
+            responsesController.stream, emitsThrough(serviceRegisteredEvent));
 
         // Connect another client to get the previous register events and the
         // unregister event.
@@ -288,20 +295,8 @@ void main() {
 
         expect(
             responsesController2.stream,
-            emitsThrough(emitsInOrder([
-              streamNotifyResponse(
-                  serviceStream,
-                  Event()
-                    ..kind = EventKind.kServiceRegistered
-                    ..method = serviceId
-                    ..service = serviceId),
-              streamNotifyResponse(
-                  serviceStream,
-                  Event()
-                    ..kind = EventKind.kServiceUnregistered
-                    ..method = serviceId
-                    ..service = serviceId),
-            ])));
+            emitsThrough(emitsInOrder(
+                [serviceRegisteredEvent, serviceUnRegisteredEvent])));
 
         // Should get the previously registered extension event, as well as
         // the unregister event when the client disconnects.
@@ -313,7 +308,8 @@ void main() {
         // Give the old client a chance to shut down
         await pumpEventQueue();
 
-        // Connect yet another client, it should get zero registration events.
+        // Connect yet another client, it should get zero registration or
+        // unregistration events.
         var requestsController3 = StreamController<Map<String, Object>>();
         var responsesController3 = StreamController<Map<String, Object>>();
 
@@ -321,12 +317,8 @@ void main() {
             responsesController3.sink, serviceRegistry, null);
         expect(
             responsesController3.stream,
-            neverEmits(streamNotifyResponse(
-                serviceStream,
-                Event()
-                  ..kind = EventKind.kServiceRegistered
-                  ..method = serviceId
-                  ..service = serviceId)));
+            neverEmits(
+                anyOf(serviceRegisteredEvent, serviceUnRegisteredEvent)));
         // Give it a chance to deliver events.
         await pumpEventQueue();
         // Disconnect the client so the test can shut down.
