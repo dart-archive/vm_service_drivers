@@ -874,6 +874,7 @@ class VmServerConnection {
               'details': "The stream '$id' is already subscribed",
             });
           }
+
           var stream = id == '_Service'
               ? _serviceExtensionRegistry.onExtensionEvent
               : _serviceImplementation.onEvent(id);
@@ -894,9 +895,8 @@ class VmServerConnection {
           if (registeredClient != null) {
             // Check for any client which has registered this extension, if we
             // have one then delegate the request to that client.
-            var result =
-                await registeredClient._forwardServiceExtensionRequest(request);
-            _responseSink.add(result);
+            _responseSink.add(await registeredClient
+                ._forwardServiceExtensionRequest(request));
             // Bail out early in this case, we are just acting as a proxy and
             // never get a `Response` instance.
             return;
@@ -919,14 +919,10 @@ class VmServerConnection {
         'result': response.toJson(),
         'id': id,
       });
-    } catch (e, s) {
+    } catch (e) {
       var error = e is RPCError
           ? {'code': e.code, 'data': e.data, 'message': e.message}
-          : {
-              'code': -32603,
-              'data': {'stackTrace': s.toString()},
-              'message': e.toString()
-            };
+          : {'code': -32603, 'message': e.toString()};
       _responseSink.add({
         'jsonrpc': '2.0',
         'error': error,

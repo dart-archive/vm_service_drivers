@@ -258,6 +258,7 @@ void main() {
 
     group('_Service', () {
       final serviceStream = '_Service';
+
       test('gives register and unregister events', () async {
         var serviceId = 'ext.test.service';
         requestsController.add(
