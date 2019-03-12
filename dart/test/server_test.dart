@@ -258,34 +258,25 @@ void main() {
 
     group('_Service', () {
       final serviceStream = '_Service';
-      StreamQueue<Map<String, Object>> responseQueue;
-
-      setUp(() {
-        responseQueue = StreamQueue(responsesController.stream);
-      });
-
       test('gives register and unregister events', () async {
         var serviceId = 'ext.test.service';
         requestsController.add(
             rpcRequest('streamListen', params: {'streamId': serviceStream}));
-        await responseQueue.next;
         requestsController.add(
             rpcRequest('_registerService', params: {'service': serviceId}));
-        await responseQueue.next;
-        expect(
-            await responseQueue.next,
-            streamNotifyResponse(
+        await expect(
+            responsesController.stream,
+            emitsThrough(streamNotifyResponse(
                 '_Service',
                 Event()
                   ..kind = EventKind.kServiceRegistered
                   ..method = serviceId
-                  ..service = serviceId));
+                  ..service = serviceId)));
 
         // Connect another client to get the previous register events and the
         // unregister event.
         var requestsController2 = StreamController<Map<String, Object>>();
         var responsesController2 = StreamController<Map<String, Object>>();
-        var responseQueue2 = StreamQueue(responsesController2.stream);
         addTearDown(() {
           requestsController2.close();
           responsesController2.close();
@@ -293,29 +284,31 @@ void main() {
 
         VmServerConnection(requestsController2.stream,
             responsesController2.sink, serviceRegistry, null);
+
+        expect(
+            responsesController2.stream,
+            emitsThrough(emitsInOrder([
+              streamNotifyResponse(
+                  '_Service',
+                  Event()
+                    ..kind = EventKind.kServiceRegistered
+                    ..method = serviceId
+                    ..service = serviceId),
+              streamNotifyResponse(
+                  '_Service',
+                  Event()
+                    ..kind = EventKind.kServiceUnregistered
+                    ..method = serviceId
+                    ..service = serviceId),
+            ])));
+
+        // Should get the previously registered extension event, as well as
+        // the unregister event when the client disconnects.
         requestsController2.add(
             rpcRequest('streamListen', params: {'streamId': serviceStream}));
-        await responseQueue2.next;
-        // Should get the previously registered extension event.
-        expect(
-            await responseQueue2.next,
-            streamNotifyResponse(
-                '_Service',
-                Event()
-                  ..kind = EventKind.kServiceRegistered
-                  ..method = serviceId
-                  ..service = serviceId));
-
+        // Need to give the client a chance to subscribe.
+        await Future(() {});
         unawaited(requestsController.close());
-        // And the unregister event when the original client disconnects.
-        expect(
-            await responseQueue2.next,
-            streamNotifyResponse(
-                '_Service',
-                Event()
-                  ..kind = EventKind.kServiceUnregistered
-                  ..method = serviceId
-                  ..service = serviceId));
       });
     });
   });
