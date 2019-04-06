@@ -227,7 +227,9 @@ class TypeWriter {
     }
     methodDecl.write('  ');
     if (modifiers != null && modifiers.isNotEmpty) {
-      methodDecl.write('$modifiers ');
+      if (!isInterface || modifiers != 'public') {
+        methodDecl.write('$modifiers ');
+      }
     }
     methodDecl.write('$returnType $name(');
     methodDecl.write(args
@@ -273,8 +275,9 @@ class TypeWriter {
           .forEach((line) => buffer.writeln(' * $line'));
       buffer.writeln(' */');
     }
-    buffer.writeln(
-        "@SuppressWarnings({\"WeakerAccess\", \"unused\", \"UnnecessaryInterfaceModifier\"})");
+
+    buffer.writeln('@SuppressWarnings({"WeakerAccess", "unused"})');
+
     buffer.write('$modifiers $kind $className');
     if (superclassName != null) {
       buffer.write(' extends ${classNameFor(superclassName)}');
@@ -292,9 +295,9 @@ class TypeWriter {
     });
     _methods.keys.toList()
       ..sort()
-      ..forEach((mthName) {
+      ..forEach((String methodName) {
         buffer.writeln();
-        buffer.write(_methods[mthName]);
+        buffer.write(_methods[methodName]);
       });
     buffer.writeln('}');
     return buffer.toString();
