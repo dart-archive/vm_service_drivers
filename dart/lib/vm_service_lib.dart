@@ -1536,7 +1536,7 @@ class ErrorKind {
   /// The isolate has encountered a Dart language error in the program.
   static const String kLanguageError = 'LanguageError';
 
-  /// The isolate has encounted an internal error. These errors should be
+  /// The isolate has encountered an internal error. These errors should be
   /// reported as bugs.
   static const String kInternalError = 'InternalError';
 

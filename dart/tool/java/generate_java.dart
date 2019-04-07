@@ -646,7 +646,7 @@ class Method extends Member {
     javaMethodArgs
         .add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
     writer.addMethod(publicName, javaMethodArgs, (StatementWriter writer) {
-      writer.addLine('JsonObject params = new JsonObject();');
+      writer.addLine('final JsonObject params = new JsonObject();');
       for (MethodArg arg in args) {
         if (!includeOptional && arg.optional) continue;
         var name = arg.name;
@@ -949,7 +949,7 @@ class TypeField extends Member {
     if (type.isMultipleReturns && !type.isValueAndSentinel) {
       writer.addMethod(accessorName, [], (StatementWriter w) {
         w.addImport('com.google.gson.JsonObject');
-        w.addLine('JsonObject elem = (JsonObject)json.get("$name");');
+        w.addLine('final JsonObject elem = (JsonObject)json.get("$name");');
         w.addLine('if (elem == null) return null;\n');
         for (TypeRef t in type.types) {
           String refName = t.name;
@@ -1067,7 +1067,7 @@ class TypeRef {
       } else {
         if (defaultValue != null) {
           writer.addImport('com.google.gson.JsonElement');
-          writer.addLine('JsonElement elem = json.get("$propertyName");');
+          writer.addLine('final JsonElement elem = json.get("$propertyName");');
           writer.addLine(
               'return elem != null ? elem.getAsBoolean() : $defaultValue;');
         } else if (optional) {
@@ -1127,7 +1127,7 @@ class TypeRef {
           writer.addLine('');
         }
         writer.addImport('com.google.gson.JsonElement');
-        writer.addLine('JsonElement value = json.get("$propertyName");');
+        writer.addLine('final JsonElement value = json.get("$propertyName");');
         writer.addLine('try {');
         writer.addLine('  return value == null ? $name.Unknown'
             ' : $name.valueOf(value.getAsString());');
@@ -1156,10 +1156,10 @@ class TypeRef {
       } else {
         if (canBeSentinel) {
           writer.addImport('com.google.gson.JsonElement');
-          writer.addLine('JsonElement elem = json.get("$propertyName");');
+          writer.addLine('final JsonElement elem = json.get("$propertyName");');
           writer.addLine('if (!elem.isJsonObject()) return null;');
-          writer.addLine('JsonObject child = elem.getAsJsonObject();');
-          writer.addLine('String type = child.get("type").getAsString();');
+          writer.addLine('final JsonObject child = elem.getAsJsonObject();');
+          writer.addLine('final String type = child.get("type").getAsString();');
           writer.addLine('if ("Sentinel".equals(type)) return null;');
           writer.addLine('return new $name(child);');
         } else {

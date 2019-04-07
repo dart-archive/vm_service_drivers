@@ -1293,7 +1293,7 @@ enum ErrorKind {
   // The isolate has encountered a Dart language error in the program.
   LanguageError,
 
-  // The isolate has encounted an internal error. These errors should be
+  // The isolate has encountered an internal error. These errors should be
   // reported as bugs.
   InternalError,
 
