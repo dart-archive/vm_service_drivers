@@ -43,14 +43,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 abstract class VmServiceBase implements VmServiceConst {
-
   /**
    * Connect to the VM observatory service via the specified URI
    *
    * @return an API object for interacting with the VM service (not {@code null}).
    */
   public static VmService connect(final String url) throws IOException {
-
     // Validate URL
     URI uri;
     try {
@@ -169,7 +167,10 @@ abstract class VmServiceBase implements VmServiceConst {
    * Connect to the VM observatory service on the given local port.
    *
    * @return an API object for interacting with the VM service (not {@code null}).
+   *
+   * @deprecated prefer the Url based constructor {@link VmServiceBase#connect}
    */
+  @Deprecated
   public static VmService localConnect(int port) throws IOException {
     return connect("ws://localhost:" + port + "/ws");
   }
@@ -341,7 +342,7 @@ abstract class VmServiceBase implements VmServiceConst {
   }
 
   public void connectionOpened() {
-    for (VmServiceListener listener : vmListeners) {
+    for (VmServiceListener listener : new ArrayList<>(vmListeners)) {
       try {
         listener.connectionOpened();
       } catch (Exception e) {
@@ -351,7 +352,7 @@ abstract class VmServiceBase implements VmServiceConst {
   }
 
   private void forwardEvent(String streamId, Event event) {
-    for (VmServiceListener listener : vmListeners) {
+    for (VmServiceListener listener : new ArrayList<>(vmListeners)) {
       try {
         listener.received(streamId, event);
       } catch (Exception e) {
@@ -361,7 +362,7 @@ abstract class VmServiceBase implements VmServiceConst {
   }
 
   public void connectionClosed() {
-    for (VmServiceListener listener : vmListeners) {
+    for (VmServiceListener listener : new ArrayList<>(vmListeners)) {
       try {
         listener.connectionClosed();
       } catch (Exception e) {
