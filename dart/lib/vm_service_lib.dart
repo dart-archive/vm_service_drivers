@@ -4106,6 +4106,14 @@ class Script extends Obj {
   /// The library which owns this script.
   LibraryRef library;
 
+  /// Undocumented field on Script.
+  @optional
+  int lineOffset;
+
+  /// Undocumented field on Script.
+  @optional
+  int columnOffset;
+
   /// The source code for this script. This can be null for certain built-in
   /// scripts.
   @optional
@@ -4121,9 +4129,13 @@ class Script extends Obj {
   Script._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     uri = json['uri'];
     library = createServiceObject(json['library']);
+    lineOffset = json['lineOffset'];
+    columnOffset = json['columnOffset'];
     source = json['source'];
-    tokenPosTable = new List<List<int>>.from(
-        json['tokenPosTable'].map((dynamic list) => new List<int>.from(list)));
+    tokenPosTable = json['tokenPosTable'] == null
+        ? null
+        : new List<List<int>>.from(json['tokenPosTable']
+            .map((dynamic list) => new List<int>.from(list)));
   }
 
   @override
@@ -4134,6 +4146,8 @@ class Script extends Obj {
       'uri': uri,
       'library': library.toJson(),
     });
+    _setIfNotNull(json, 'lineOffset', lineOffset);
+    _setIfNotNull(json, 'columnOffset', columnOffset);
     _setIfNotNull(json, 'source', source);
     _setIfNotNull(json, 'tokenPosTable',
         tokenPosTable?.map((f) => f?.toList())?.toList());
