@@ -1308,8 +1308,11 @@ class Type extends Member {
             "LibraryDependency.parse));");
       } else if (name == 'Script' && field.name == 'tokenPosTable') {
         // Special case `Script.tokenPosTable`.
-        gen.writeln(
-            "tokenPosTable = new List<List<int>>.from(json['tokenPosTable'].map"
+        gen.write("tokenPosTable = ");
+        if (field.optional) {
+          gen.write("json['tokenPosTable'] == null ? null : ");
+        }
+        gen.writeln("new List<List<int>>.from(json['tokenPosTable'].map"
             "((dynamic list) => new List<int>.from(list)));");
       } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;

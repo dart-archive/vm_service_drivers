@@ -270,6 +270,7 @@ public class VmServiceTest {
     processArgs.add("--pause_isolates_on_start");
     processArgs.add("--observe");
     processArgs.add("--enable-vm-service=" + vmPort);
+    processArgs.add("--disable-service-auth-codes");
     processArgs.add(dartFile.getAbsolutePath());
     processBuilder = new ProcessBuilder(processArgs);
     System.out.println("=================================================");

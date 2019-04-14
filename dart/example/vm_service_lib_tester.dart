@@ -20,15 +20,22 @@ final int port = 7575;
 VmService serviceClient;
 
 void main() {
+  Process process;
+
+  tearDown(() {
+    process?.kill();
+  });
+
   test('integration', () async {
     String sdk = path.dirname(path.dirname(Platform.resolvedExecutable));
 
     print('Using sdk at ${sdk}.');
 
     // pause_isolates_on_start, pause_isolates_on_exit
-    Process process = await Process.start('${sdk}/bin/dart', [
+    process = await Process.start('${sdk}/bin/dart', [
       '--pause_isolates_on_start',
       '--enable-vm-service=${port}',
+      '--disable-service-auth-codes',
       'example/sample_main.dart'
     ]);
 
@@ -58,8 +65,8 @@ void main() {
       if (!checkResponseJsonCompatibility) return;
 
       // For each received event, check that we can deserialize it and
-      // reserialize it back to the same exact representation (minus
-      // private fields).
+      // reserialize it back to the same exact representation (minus private
+      // fields).
       var json = jsonDecode(str);
       var originalJson = json['result'] as Map<String, dynamic>;
       if (originalJson == null && json['method'] == 'streamNotify') {
@@ -114,13 +121,13 @@ void main() {
     await testServiceRegistration();
     checkResponseJsonCompatibility = true;
 
+    await testScriptParse(vm.isolates.first);
     await testSourceReport(vm.isolates.first);
 
     IsolateRef isolateRef = isolates.first;
     print(await serviceClient.resume(isolateRef.id));
 
     serviceClient.dispose();
-    process.kill();
   });
 }
 
@@ -167,6 +174,21 @@ Future testServiceRegistration() async {
   });
   await otherClient.streamListen('_Service');
   await completer.future;
+}
+
+Future testScriptParse(IsolateRef isolateRef) async {
+  final Isolate isolate = await serviceClient.getIsolate(isolateRef.id);
+  final Library rootLibrary =
+      await serviceClient.getObject(isolateRef.id, isolate.rootLib.id);
+  final ScriptRef scriptRef = rootLibrary.scripts.first;
+
+  final Script script =
+      await serviceClient.getObject(isolateRef.id, scriptRef.id);
+  print(script);
+  print(script.uri);
+  print(script.library);
+  print(script.source.length);
+  print(script.tokenPosTable.length);
 }
 
 Future testSourceReport(IsolateRef isolateRef) async {
