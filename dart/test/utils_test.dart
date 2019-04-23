@@ -5,62 +5,31 @@
 import 'package:test/test.dart';
 import 'package:vm_service_lib/utils.dart';
 
-@TestOn('vm')
 void main() {
-  group('getVmWsUriFromObservatoryUri', () {
-    void check(String input, String expected) {
+  test('getVmWsUriFromObservatoryUri maps URIs correctly', () {
+    final testCases = {
+      'http://localhost:123/': 'ws://localhost:123/ws',
+      'https://localhost:123/': 'wss://localhost:123/ws',
+      'ws://localhost:123/': 'ws://localhost:123/ws',
+      'wss://localhost:123/': 'wss://localhost:123/ws',
+      'http://localhost:123/ABCDEF=/': 'ws://localhost:123/ABCDEF=/ws',
+      'https://localhost:123/ABCDEF=/': 'wss://localhost:123/ABCDEF=/ws',
+      'ws://localhost:123/ABCDEF=/': 'ws://localhost:123/ABCDEF=/ws',
+      'wss://localhost:123/ABCDEF=/': 'wss://localhost:123/ABCDEF=/ws',
+      'http://localhost:123': 'ws://localhost:123/ws',
+      'https://localhost:123': 'wss://localhost:123/ws',
+      'ws://localhost:123': 'ws://localhost:123/ws',
+      'wss://localhost:123': 'wss://localhost:123/ws',
+      'http://localhost:123/ABCDEF=': 'ws://localhost:123/ABCDEF=/ws',
+      'https://localhost:123/ABCDEF=': 'wss://localhost:123/ABCDEF=/ws',
+      'ws://localhost:123/ABCDEF=': 'ws://localhost:123/ABCDEF=/ws',
+      'wss://localhost:123/ABCDEF=': 'wss://localhost:123/ABCDEF=/ws',
+    };
+
+    testCases.forEach((String input, String expected) {
       final inputUri = Uri.parse(input);
       final actualUri = getVmWsUriFromObservatoryUri(inputUri);
       expect(actualUri.toString(), equals(expected));
-    }
-
-    test('handles http URIs',
-        () => check('http://localhost:123/', 'ws://localhost:123/ws'));
-    test('handles https URIs',
-        () => check('https://localhost:123/', 'wss://localhost:123/ws'));
-    test('handles ws URIs',
-        () => check('ws://localhost:123/', 'ws://localhost:123/ws'));
-    test('handles wss URIs',
-        () => check('wss://localhost:123/', 'wss://localhost:123/ws'));
-    test(
-        'handles http URIs with tokens',
-        () => check(
-            'http://localhost:123/ABCDEF=/', 'ws://localhost:123/ABCDEF=/ws'));
-    test(
-        'handles https URIs with tokens',
-        () => check('https://localhost:123/ABCDEF=/',
-            'wss://localhost:123/ABCDEF=/ws'));
-    test(
-        'handles ws URIs with tokens',
-        () => check(
-            'ws://localhost:123/ABCDEF=/', 'ws://localhost:123/ABCDEF=/ws'));
-    test(
-        'handles wss URIs with tokens',
-        () => check(
-            'wss://localhost:123/ABCDEF=/', 'wss://localhost:123/ABCDEF=/ws'));
-    test('handles http URIs without trailing slashes',
-        () => check('http://localhost:123', 'ws://localhost:123/ws'));
-    test('handles https URIs without trailing slashes',
-        () => check('https://localhost:123', 'wss://localhost:123/ws'));
-    test('handles ws URIs without trailing slashes',
-        () => check('ws://localhost:123', 'ws://localhost:123/ws'));
-    test('handles wss URIs without trailing slashes',
-        () => check('wss://localhost:123', 'wss://localhost:123/ws'));
-    test(
-        'handles http URIs without trailing slashes with tokens',
-        () => check(
-            'http://localhost:123/ABCDEF=', 'ws://localhost:123/ABCDEF=/ws'));
-    test(
-        'handles https URIs without trailing slashes with tokens',
-        () => check(
-            'https://localhost:123/ABCDEF=', 'wss://localhost:123/ABCDEF=/ws'));
-    test(
-        'handles ws URIs without trailing slashes with tokens',
-        () => check(
-            'ws://localhost:123/ABCDEF=', 'ws://localhost:123/ABCDEF=/ws'));
-    test(
-        'handles wss URIs without trailing slashes with tokens',
-        () => check(
-            'wss://localhost:123/ABCDEF=', 'wss://localhost:123/ABCDEF=/ws'));
+    });
   });
 }
