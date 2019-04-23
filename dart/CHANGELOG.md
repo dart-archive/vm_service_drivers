@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.15.1
+- Add `getVmWsUriFromObservatoryUri`, a helper function to convert observatory URIs
+  into the required WebSocket URI for connecting to the VM service.
+
 ## 3.15.0
 - support service protocol version 3.15
 - fix an issue decoding null `Script.tokenPosTable` values
