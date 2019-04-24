@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.15.1+1
+- rename `getVmWsUriFromObservatoryUri` to `convertToWebSocketUrl`
+
 ## 3.15.1
 - Add `getVmWsUriFromObservatoryUri`, a helper function to convert observatory URIs
   into the required WebSocket URI for connecting to the VM service.
