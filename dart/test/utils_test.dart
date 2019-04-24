@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import 'package:vm_service_lib/utils.dart';
 
 void main() {
-  test('getVmWsUriFromObservatoryUri maps URIs correctly', () {
+  test('convertToWebSocketUrl maps URIs correctly', () {
     final testCases = {
       'http://localhost:123/': 'ws://localhost:123/ws',
       'https://localhost:123/': 'wss://localhost:123/ws',
@@ -28,7 +28,7 @@ void main() {
 
     testCases.forEach((String input, String expected) {
       final inputUri = Uri.parse(input);
-      final actualUri = getVmWsUriFromObservatoryUri(inputUri);
+      final actualUri = convertToWebSocketUrl(serviceProtocolUrl: inputUri);
       expect(actualUri.toString(), equals(expected));
     });
   });
