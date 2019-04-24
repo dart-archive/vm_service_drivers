@@ -739,7 +739,7 @@ class VmServerConnection {
             params['isolateId'],
             params['targetId'],
             params['expression'],
-            scope: params['scope'],
+            scope: params['scope']?.cast<String, String>(),
             disableBreakpoints: params['disableBreakpoints'],
           );
           break;
@@ -748,7 +748,7 @@ class VmServerConnection {
             params['isolateId'],
             params['frameIndex'],
             params['expression'],
-            scope: params['scope'],
+            scope: params['scope']?.cast<String, String>(),
             disableBreakpoints: params['disableBreakpoints'],
           );
           break;
@@ -919,10 +919,10 @@ class VmServerConnection {
         'result': response.toJson(),
         'id': id,
       });
-    } catch (e) {
+    } catch (e, st) {
       var error = e is RPCError
           ? {'code': e.code, 'data': e.data, 'message': e.message}
-          : {'code': -32603, 'message': e.toString()};
+          : {'code': -32603, 'message': '$e\n$st'};
       _responseSink.add({
         'jsonrpc': '2.0',
         'error': error,

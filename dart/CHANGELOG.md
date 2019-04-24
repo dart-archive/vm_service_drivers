@@ -2,6 +2,7 @@
 
 ## 3.15.1+1
 - rename `getVmWsUriFromObservatoryUri` to `convertToWebSocketUrl`
+- fix an assignment issue in `evaluate`
 
 ## 3.15.1
 - Add `getVmWsUriFromObservatoryUri`, a helper function to convert observatory URIs
