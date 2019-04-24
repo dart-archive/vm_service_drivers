@@ -612,7 +612,12 @@ abstract class VmServiceInterface {
         var namedArgs = m.args.where((arg) => arg.optional);
         if (namedArgs.isNotEmpty) {
           namedArgs.forEach((arg) {
-            gen.writeln("${arg.name}: params['${arg.name}'], ");
+            if (arg.name == 'scope') {
+              gen.writeln(
+                  "${arg.name}: params['${arg.name}']?.cast<String, String>(), ");
+            } else {
+              gen.writeln("${arg.name}: params['${arg.name}'], ");
+            }
           });
         }
         gen.writeln(");");
@@ -661,11 +666,11 @@ abstract class VmServiceInterface {
 """);
 
     // Close the try block, handle errors
-    gen.write('''
-      } catch (e) {
+    gen.write(r'''
+      } catch (e, st) {
         var error = e is RPCError
             ? {'code': e.code, 'data': e.data, 'message': e.message}
-            : {'code': -32603, 'message': e.toString()};
+            : {'code': -32603, 'message': '$e\n$st'};
         _responseSink.add({
           'jsonrpc': '2.0',
           'error': error,
