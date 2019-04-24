@@ -10,7 +10,6 @@ import 'package:async/async.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:test/test.dart';
-
 import 'package:vm_service_lib/vm_service_lib.dart';
 
 void main() {
@@ -155,7 +154,10 @@ void main() {
       var request = rpcRequest("getVersion");
       var error = UnimplementedError();
       when(serviceMock.getVersion()).thenAnswer((_) => Future.error(error));
-      expect(responsesController.stream, emits(rpcErrorResponse(error)));
+      expect(
+          responsesController.stream.map((response) => '$response'),
+          emits(startsWith(
+              '{jsonrpc: 2.0, error: {code: -32603, message: UnimplementedError')));
       requestsController.add(request);
     });
   });

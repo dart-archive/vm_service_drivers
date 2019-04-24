@@ -3,6 +3,7 @@
 ## 3.15.1
 - Add `getVmWsUriFromObservatoryUri`, a helper function to convert observatory URIs
   into the required WebSocket URI for connecting to the VM service.
+- fix an assignment issue in `evaluate`
 
 ## 3.15.0
 - support service protocol version 3.15
