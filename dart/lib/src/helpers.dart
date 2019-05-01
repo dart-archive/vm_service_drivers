@@ -62,3 +62,27 @@ class TagCounter {
 //  // int chunkCount
 //  // int nodeCount
 //}
+
+/// Wraps a successful result and ensures that it has the required `type` field.
+Map<String, dynamic> resultFor(Map<String, dynamic> result) {
+  if (result == null) {
+    throw ArgumentError.notNull('result');
+  }
+  if (result['type'] == null) {
+    throw ArgumentError.notNull('result["type"]');
+  }
+  return {'result': result};
+}
+
+Map<String, dynamic> errorFor(Map<String, dynamic> error) => {'error': error};
+
+/// The `RpcError` type is used to indicate that an operation did not complete
+/// successfully.
+class RpcError {
+  final String code, message;
+  RpcError(this.code, this.message);
+
+  Map<String, dynamic> toJson() => {'code': code, 'message': message};
+
+  String toString() => '[Error: ${code} ${message}]';
+}

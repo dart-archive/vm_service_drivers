@@ -49,6 +49,7 @@ import 'dart:typed_data';
 
 import 'src/service_extension_registry.dart';
 
+export 'src/helpers.dart' show resultFor, errorFor, RpcError;
 export 'src/service_extension_registry.dart' show ServiceExtensionRegistry;
 ''';
 
