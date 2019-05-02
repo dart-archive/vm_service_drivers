@@ -1449,13 +1449,15 @@ class VmService implements VmServiceInterface {
       return {
         'error': {
           'code': -32601, // Method not found
-          'message': 'Method not found \'${method}\''
+          'message': 'Method not found \'$method\''
         }
       };
-    } catch (e, s) {
-      return <String, dynamic>{
-        'code': -32000, // SERVER ERROR
-        'message': 'Unexpected Server Error ${e}\n${s}'
+    } catch (e, st) {
+      return {
+        'error': {
+          'code': -32000, // SERVER ERROR
+          'message': 'Unexpected Server Error $e\n$st'
+        }
       };
     }
   }
