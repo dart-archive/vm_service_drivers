@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.15.1+2
+- fix handling of errors in registered service callbacks to return valid
+  JSON-RPC errors and avoid the client getting "Service Disappeared" responses
+
 ## 3.15.1+1
 - rename `getVmWsUriFromObservatoryUri` to `convertToWebSocketUrl`
 - fix an assignment issue in `evaluate`
