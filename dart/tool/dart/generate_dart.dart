@@ -224,9 +224,11 @@ final String _implCode = r'''
         }
       };
     } catch (e, s) {
-      return <String, dynamic>{
-        'code': -32000, // SERVER ERROR
-        'message': 'Unexpected Server Error ${e}\n${s}'
+      return {
+        'error': {
+          'code': -32000, // SERVER ERROR
+          'message': 'Unexpected Server Error ${e}\n${s}'
+        }
       };
     }
   }
