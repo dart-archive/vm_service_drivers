@@ -265,7 +265,9 @@ class TypeWriter {
     interfaceNames.forEach((t) => addImport(t));
     if (_imports.isNotEmpty) {
       var sorted = _imports.toList()..sort();
-      for (String typeName in sorted) buffer.writeln('import $typeName;');
+      for (String typeName in sorted) {
+        buffer.writeln('import $typeName;');
+      }
       buffer.writeln();
     }
     if (javadoc != null && javadoc.isNotEmpty) {

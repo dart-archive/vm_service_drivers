@@ -1026,7 +1026,9 @@ class VmService implements VmServiceInterface {
     int column,
   }) {
     Map m = {'isolateId': isolateId, 'scriptId': scriptId, 'line': line};
-    if (column != null) m['column'] = column;
+    if (column != null) {
+      m['column'] = column;
+    }
     return _call('addBreakpoint', m);
   }
 
@@ -1038,7 +1040,9 @@ class VmService implements VmServiceInterface {
     int column,
   }) {
     Map m = {'isolateId': isolateId, 'scriptUri': scriptUri, 'line': line};
-    if (column != null) m['column'] = column;
+    if (column != null) {
+      m['column'] = column;
+    }
     return _call('addBreakpointWithScriptUri', m);
   }
 
@@ -1062,8 +1066,9 @@ class VmService implements VmServiceInterface {
       'selector': selector,
       'argumentIds': argumentIds
     };
-    if (disableBreakpoints != null)
+    if (disableBreakpoints != null) {
       m['disableBreakpoints'] = disableBreakpoints;
+    }
     return _call('invoke', m);
   }
 
@@ -1080,9 +1085,12 @@ class VmService implements VmServiceInterface {
       'targetId': targetId,
       'expression': expression
     };
-    if (scope != null) m['scope'] = scope;
-    if (disableBreakpoints != null)
+    if (scope != null) {
+      m['scope'] = scope;
+    }
+    if (disableBreakpoints != null) {
       m['disableBreakpoints'] = disableBreakpoints;
+    }
     return _call('evaluate', m);
   }
 
@@ -1099,9 +1107,12 @@ class VmService implements VmServiceInterface {
       'frameIndex': frameIndex,
       'expression': expression
     };
-    if (scope != null) m['scope'] = scope;
-    if (disableBreakpoints != null)
+    if (scope != null) {
+      m['scope'] = scope;
+    }
+    if (disableBreakpoints != null) {
       m['disableBreakpoints'] = disableBreakpoints;
+    }
     return _call('evaluateInFrame', m);
   }
 
@@ -1131,8 +1142,12 @@ class VmService implements VmServiceInterface {
     int count,
   }) {
     Map m = {'isolateId': isolateId, 'objectId': objectId};
-    if (offset != null) m['offset'] = offset;
-    if (count != null) m['count'] = count;
+    if (offset != null) {
+      m['offset'] = offset;
+    }
+    if (count != null) {
+      m['count'] = count;
+    }
     return _call('getObject', m);
   }
 
@@ -1152,10 +1167,18 @@ class VmService implements VmServiceInterface {
     bool forceCompile,
   }) {
     Map m = {'isolateId': isolateId, 'reports': reports};
-    if (scriptId != null) m['scriptId'] = scriptId;
-    if (tokenPos != null) m['tokenPos'] = tokenPos;
-    if (endTokenPos != null) m['endTokenPos'] = endTokenPos;
-    if (forceCompile != null) m['forceCompile'] = forceCompile;
+    if (scriptId != null) {
+      m['scriptId'] = scriptId;
+    }
+    if (tokenPos != null) {
+      m['tokenPos'] = tokenPos;
+    }
+    if (endTokenPos != null) {
+      m['endTokenPos'] = endTokenPos;
+    }
+    if (forceCompile != null) {
+      m['forceCompile'] = forceCompile;
+    }
     return _call('getSourceReport', m);
   }
 
@@ -1184,10 +1207,18 @@ class VmService implements VmServiceInterface {
     String packagesUri,
   }) {
     Map m = {'isolateId': isolateId};
-    if (force != null) m['force'] = force;
-    if (pause != null) m['pause'] = pause;
-    if (rootLibUri != null) m['rootLibUri'] = rootLibUri;
-    if (packagesUri != null) m['packagesUri'] = packagesUri;
+    if (force != null) {
+      m['force'] = force;
+    }
+    if (pause != null) {
+      m['pause'] = pause;
+    }
+    if (rootLibUri != null) {
+      m['rootLibUri'] = rootLibUri;
+    }
+    if (packagesUri != null) {
+      m['packagesUri'] = packagesUri;
+    }
     return _call('reloadSources', m);
   }
 
@@ -1201,8 +1232,12 @@ class VmService implements VmServiceInterface {
   Future<Success> resume(String isolateId,
       {/*StepOption*/ String step, int frameIndex}) {
     Map m = {'isolateId': isolateId};
-    if (step != null) m['step'] = step;
-    if (frameIndex != null) m['frameIndex'] = frameIndex;
+    if (step != null) {
+      m['step'] = step;
+    }
+    if (frameIndex != null) {
+      m['frameIndex'] = frameIndex;
+    }
     return _call('resume', m);
   }
 
@@ -1270,8 +1305,12 @@ class VmService implements VmServiceInterface {
   Future<AllocationProfile> getAllocationProfile(String isolateId,
       {String gc, bool reset}) {
     Map m = {'isolateId': isolateId};
-    if (gc != null) m['gc'] = gc;
-    if (reset != null) m['reset'] = reset;
+    if (gc != null) {
+      m['gc'] = gc;
+    }
+    if (reset != null) {
+      m['reset'] = reset;
+    }
     return _call('_getAllocationProfile', m);
   }
 
