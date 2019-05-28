@@ -137,6 +137,7 @@ String assertEventKind(String obj) {
   if (obj == "IsolateRunnable") return obj;
   if (obj == "IsolateStart") return obj;
   if (obj == "IsolateUpdate") return obj;
+  if (obj == "Logging") return obj;
   if (obj == "None") return obj;
   if (obj == "PauseBreakpoint") return obj;
   if (obj == "PauseException") return obj;
@@ -653,6 +654,20 @@ List<vms.LibraryDependency> assertLibraryDependencies(
   return list;
 }
 
+vms.LogRecord assertLogRecord(vms.LogRecord obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertInstanceRef(obj.message);
+  assertInt(obj.time);
+  assertInt(obj.level);
+  assertInt(obj.sequenceNumber);
+  assertInstanceRef(obj.loggerName);
+  assertInstanceRef(obj.zone);
+  assertInstanceRef(obj.error);
+  assertInstanceRef(obj.stackTrace);
+  return obj;
+}
+
 vms.MapAssociation assertMapAssociation(vms.MapAssociation obj) {
   assertNotNull(obj);
   if (obj.key is vms.InstanceRef) {
@@ -669,6 +684,15 @@ vms.MapAssociation assertMapAssociation(vms.MapAssociation obj) {
   } else {
     throw "Unexpected value: ${obj.value}";
   }
+  return obj;
+}
+
+vms.MemoryUsage assertMemoryUsage(vms.MemoryUsage obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertInt(obj.externalUsage);
+  assertInt(obj.heapCapacity);
+  assertInt(obj.heapUsage);
   return obj;
 }
 

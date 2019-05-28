@@ -59,6 +59,8 @@ public class VmService extends VmServiceBase {
 
   public static final String ISOLATE_STREAM_ID = "Isolate";
 
+  public static final String LOGGING_STREAM_ID = "Logging";
+
   public static final String STDERR_STREAM_ID = "Stderr";
 
   public static final String STDOUT_STREAM_ID = "Stdout";
@@ -77,7 +79,7 @@ public class VmService extends VmServiceBase {
   /**
    * The minor version number of the protocol supported by this client.
    */
-  public static final int versionMinor = 15;
+  public static final int versionMinor = 17;
 
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
@@ -293,6 +295,15 @@ public class VmService extends VmServiceBase {
     final JsonObject params = new JsonObject();
     params.addProperty("isolateId", isolateId);
     request("getIsolate", params, consumer);
+  }
+
+  /**
+   * The [getMemoryUsage] RPC is used to lookup an isolate's memory usage statistics by its [id].
+   */
+  public void getMemoryUsage(String isolateId, GetMemoryUsageConsumer consumer) {
+    final JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
+    request("getMemoryUsage", params, consumer);
   }
 
   /**
@@ -697,6 +708,16 @@ public class VmService extends VmServiceBase {
         return;
       }
     }
+    if (consumer instanceof GetMemoryUsageConsumer) {
+      if (responseType.equals("MemoryUsage")) {
+        ((GetMemoryUsageConsumer) consumer).received(new MemoryUsage(json));
+        return;
+      }
+      if (responseType.equals("Sentinel")) {
+        ((GetMemoryUsageConsumer) consumer).received(new Sentinel(json));
+        return;
+      }
+    }
     if (consumer instanceof GetObjectConsumer) {
       if (responseType.equals("Breakpoint")) {
         ((GetObjectConsumer) consumer).received(new Breakpoint(json));
@@ -936,6 +957,14 @@ public class VmService extends VmServiceBase {
       }
       if (responseType.equals("@Library")) {
         ((ResponseConsumer) consumer).received(new LibraryRef(json));
+        return;
+      }
+      if (responseType.equals("LogRecord")) {
+        ((ResponseConsumer) consumer).received(new LogRecord(json));
+        return;
+      }
+      if (responseType.equals("MemoryUsage")) {
+        ((ResponseConsumer) consumer).received(new MemoryUsage(json));
         return;
       }
       if (responseType.equals("Message")) {
