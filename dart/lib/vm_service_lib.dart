@@ -3469,6 +3469,12 @@ class IsolateRef extends Response {
   /// The id which is passed to the getIsolate RPC to load this isolate.
   String id;
 
+  /// Provided and set to true if the id of an Object is fixed. If true, the id
+  /// of an Object is guaranteed not to change or expire. The object may,
+  /// however, still be _Collected_.
+  @optional
+  bool fixedId;
+
   /// A numeric id for this isolate, represented as a string. Unique.
   String number;
 
@@ -3479,6 +3485,7 @@ class IsolateRef extends Response {
 
   IsolateRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     id = json['id'];
+    fixedId = json['fixedId'];
     number = json['number'];
     name = json['name'];
   }
@@ -3492,6 +3499,7 @@ class IsolateRef extends Response {
       'number': number,
       'name': name,
     });
+    _setIfNotNull(json, 'fixedId', fixedId);
     return json;
   }
 
@@ -3510,6 +3518,12 @@ class Isolate extends Response {
 
   /// The id which is passed to the getIsolate RPC to reload this isolate.
   String id;
+
+  /// Provided and set to true if the id of an Object is fixed. If true, the id
+  /// of an Object is guaranteed not to change or expire. The object may,
+  /// however, still be _Collected_.
+  @optional
+  bool fixedId;
 
   /// A numeric id for this isolate, represented as a string. Unique.
   String number;
@@ -3565,6 +3579,7 @@ class Isolate extends Response {
 
   Isolate._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     id = json['id'];
+    fixedId = json['fixedId'];
     number = json['number'];
     name = json['name'];
     startTime = json['startTime'];
@@ -3601,6 +3616,7 @@ class Isolate extends Response {
       'breakpoints': breakpoints.map((f) => f.toJson()).toList(),
       'exceptionPauseMode': exceptionPauseMode,
     });
+    _setIfNotNull(json, 'fixedId', fixedId);
     _setIfNotNull(json, 'rootLib', rootLib?.toJson());
     _setIfNotNull(json, 'error', error?.toJson());
     _setIfNotNull(

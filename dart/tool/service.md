@@ -2094,6 +2094,11 @@ class @Isolate extends Response {
   // The id which is passed to the getIsolate RPC to load this isolate.
   string id;
 
+  // Provided and set to true if the id of an Object is fixed. If true, the id
+  // of an Object is guaranteed not to change or expire. The object may, however,
+  // still be _Collected_.
+  bool fixedId [optional];
+
   // A numeric id for this isolate, represented as a string. Unique.
   string number;
 
@@ -2109,6 +2114,11 @@ class Isolate extends Response {
   // The id which is passed to the getIsolate RPC to reload this
   // isolate.
   string id;
+
+  // Provided and set to true if the id of an Object is fixed. If true, the id
+  // of an Object is guaranteed not to change or expire. The object may, however,
+  // still be _Collected_.
+  bool fixedId [optional];
 
   // A numeric id for this isolate, represented as a string. Unique.
   string number;
