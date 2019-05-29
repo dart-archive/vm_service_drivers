@@ -1,12 +1,15 @@
-language: dart
-dart:
-  - dev
+language: java
+jdk:
+  - oraclejdk8
+install: ant deps
 
-before_install:
-  - sudo apt-get install -y ant
+before_script:
+  - echo Installing Dart...
+  - curl https://storage.googleapis.com/dart-archive/channels/dev/release/latest/sdk/dartsdk-linux-x64-release.zip > dart-sdk.zip
+  - unzip dart-sdk.zip > /dev/null
+  - export PATH="$PATH":`pwd`/dart-sdk/bin
 
 script:
-  - jdk_switcher use oraclejdk8
   - ./travis.sh
 
 env:

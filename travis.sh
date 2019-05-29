@@ -7,6 +7,11 @@
 # Fast fail the script on failures.
 set -e
 
+# Print out language versions.
+dart --version
+java -version
+
+# Switch to the dart/ sub-dir.
 pushd dart
 
 # Provision pub packages.
@@ -30,8 +35,6 @@ elif [ "$BOT" = "java" ]; then
 
     popd
     pushd java
-
-    java -version
 
     # Run the Java tests.
     ant -f build.xml
