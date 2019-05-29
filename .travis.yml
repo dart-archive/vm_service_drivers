@@ -1,7 +1,9 @@
 language: java
 jdk:
   - openjdk10
-install: ant deps
+
+before_install:
+  - sudo apt-get install -y ant
 
 before_script:
   - echo Installing Dart...
