@@ -9,7 +9,8 @@ before_script:
   - echo Installing Dart...
   - curl https://storage.googleapis.com/dart-archive/channels/dev/release/latest/sdk/dartsdk-linux-x64-release.zip > dart-sdk.zip
   - unzip dart-sdk.zip > /dev/null
-  - export PATH="$PATH":`pwd`/dart-sdk/bin
+  - export DART_SDK=`pwd`/dart-sdk
+  - export PATH="$PATH":"$DART_SDK"/bin
 
 script:
   - ./travis.sh
