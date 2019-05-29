@@ -1,13 +1,12 @@
 language: dart
 dart:
   - dev
-jdk:
-  - oraclejdk8
 
 before_install:
   - sudo apt-get install -y ant
 
 script:
+  - jdk_switcher use oraclejdk8
   - ./travis.sh
 
 env:
