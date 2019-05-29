@@ -366,8 +366,9 @@ class Api extends Member with ApiParseUtil {
             (isPara(nodes[i + 1]) || isBlockquote(nodes[i + 1]))) {
           Element p = nodes[++i];
           String str = TextOutputVisitor.printText(p);
-          if (!str.contains('|') && !str.contains('``'))
+          if (!str.contains('|') && !str.contains('``')) {
             str = collapseWhitespace(str);
+          }
           docs = '${docs}\n\n${str}';
         }
 
@@ -979,7 +980,9 @@ class Method extends Member {
       gen.writeln('};');
       args.where((MethodArg a) => a.optional).forEach((MethodArg arg) {
         String valueRef = arg.name;
-        gen.writeln("if (${arg.name} != null) m['${arg.name}'] = ${valueRef};");
+        gen.writeln("if (${arg.name} != null) {");
+        gen.writeln("m['${arg.name}'] = ${valueRef};");
+        gen.writeln("}");
       });
       gen.writeStatement("return _call('${name}', m);");
       gen.writeStatement('}');

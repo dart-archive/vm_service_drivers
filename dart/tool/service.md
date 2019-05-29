@@ -1,8 +1,8 @@
-# Dart VM Service Protocol 3.15
+# Dart VM Service Protocol 3.17
 
 > Please post feedback to the [observatory-discuss group][discuss-list]
 
-This document describes of _version 3.15_ of the Dart VM Service Protocol. This
+This document describes of _version 3.17_ of the Dart VM Service Protocol. This
 protocol is used to communicate with a running Dart Virtual Machine.
 
 To use the Service Protocol, start the VM with the *--observe* flag.
@@ -31,6 +31,7 @@ The Service Protocol uses [JSON-RPC 2.0][].
   - [evaluateInFrame](#evaluateinframe)
   - [getFlagList](#getflaglist)
   - [getIsolate](#getisolate)
+  - [getMemoryUsage](#getmemoryusage)
   - [getScripts](#getscripts)
   - [getObject](#getobject)
   - [getSourceReport](#getsourcereport)
@@ -74,7 +75,9 @@ The Service Protocol uses [JSON-RPC 2.0][].
   - [Isolate](#isolate)
   - [Library](#library)
   - [LibraryDependency](#librarydependency)
+  - [LogRecord](#logrecord)
   - [MapAssociation](#mapassociation)
+  - [MemoryUsage](#memoryusage)
   - [Message](#message)
   - [Null](#null)
   - [Object](#object)
@@ -544,7 +547,7 @@ instance members, class members and top-level members.
 If _disableBreakpoints_ is provided and set to true, any breakpoints hit as a
 result of this evaluation are ignored. Defaults to false if not provided.
 
-If expression is failed to parse and compile, then [rpc error](#rpc-error) 113
+If the expression fails to parse and compile, then [rpc error](#rpc-error) 113
 "Expression compilation error" is returned.
 
 If an error occurs while evaluating the expression, an [@Error](#error)
@@ -577,7 +580,7 @@ members, parameters and locals.
 If _disableBreakpoints_ is provided and set to true, any breakpoints hit as a
 result of this evaluation are ignored. Defaults to false if not provided.
 
-If expression is failed to parse and compile, then [rpc error](#rpc-error) 113
+If the expression fails to parse and compile, then [rpc error](#rpc-error) 113
 "Expression compilation error" is returned.
 
 If an error occurs while evaluating the expression, an [@Error](#error)
@@ -604,6 +607,20 @@ Isolate|Sentinel getIsolate(string isolateId)
 ```
 
 The _getIsolate_ RPC is used to lookup an _Isolate_ object by its _id_.
+
+If _isolateId_ refers to an isolate which has exited, then the
+_Collected_ [Sentinel](#sentinel) is returned.
+
+See [Isolate](#isolate).
+
+### getMemoryUsage
+
+```
+MemoryUsage|Sentinel getMemoryUsage(string isolateId)
+```
+
+The _getMemoryUsage_ RPC is used to lookup an isolate's memory usage
+statistics by its _id_.
 
 If _isolateId_ refers to an isolate which has exited, then the
 _Collected_ [Sentinel](#sentinel) is returned.
@@ -931,6 +948,7 @@ Debug | PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException
 GC | GC
 Extension | Extension
 Timeline | TimelineEvents
+Logging | Logging
 
 Additionally, some embedders provide the _Stdout_ and _Stderr_
 streams.  These streams allow the client to subscribe to writes to
@@ -1409,6 +1427,11 @@ class Event extends Response {
   //   IsolateReloaded
   //   IsolateSpawn
   string status [optional];
+
+  // LogRecord data.
+  //
+  // This is provided for the Logging event.
+  LogRecord logRecord [optional];
 }
 ```
 
@@ -1491,6 +1514,9 @@ enum EventKind {
 
   // Event from dart:developer.postEvent.
   Extension
+
+  // Event from dart:developer.log.
+  Logging
 }
 ```
 
@@ -2211,6 +2237,39 @@ class LibraryDependency {
 
 A _LibraryDependency_ provides information about an import or export.
 
+### LogRecord
+
+```
+class LogRecord extends Response {
+  // The log message.
+  @Instance message;
+
+  // The timestamp.
+  int time;
+
+  // The severity level (a value between 0 and 2000).
+  //
+  // See the package:logging `Level` class for an overview of the possible
+  // values.
+  int level;
+
+  // A monotonically increasing sequence number.
+  int sequenceNumber;
+
+  // The name of the source of the log message.
+  @Instance loggerName;
+
+  // The zone where the log was emitted.
+  @Instance zone;
+
+  // An error object associated with this log event.
+  @Instance error;
+
+  // A stack trace associated with this log event.
+  @Instance stackTrace;
+}
+```
+
 ### MapAssociation
 
 ```
@@ -2219,6 +2278,31 @@ class MapAssociation {
   @Instance|Sentinel value;
 }
 ```
+
+### MemoryUsage
+
+```
+class MemoryUsage extends Response {
+  // The amount of non-Dart memory that is retained by Dart objects. For
+  // example, memory associated with Dart objects through APIs such as
+  // Dart_NewWeakPersistentHandle and Dart_NewExternalTypedData.  This usage is
+  // only as accurate as the values supplied to these APIs from the VM embedder or
+  // native extensions. This external memory applies GC pressure, but is separate
+  // from heapUsage and heapCapacity.
+  int externalUsage;
+
+  // The total capacity of the heap in bytes. This is the amount of memory used
+  // by the Dart heap from the perspective of the operating system.
+  int heapCapacity;
+
+  // The current heap memory usage in bytes. Heap usage is always less than or
+  // equal to the heap capacity.
+  int heapUsage;
+}
+```
+
+An _MemoryUsage_ object provides heap usage information for a specific
+isolate at a given point in time.
 
 ### Message
 
@@ -2425,10 +2509,8 @@ class Script extends Object {
   // The library which owns this script.
   @Library library;
 
-  // Undocumented field on Script.
   int lineOffset [optional];
 
-  // Undocumented field on Script.
   int columnOffset [optional];
 
   // The source code for this script. This can be null for certain built-in
@@ -2784,5 +2866,7 @@ version | comments
 3.13 | Class 'mixin' field now properly set for kernel transformed mixin applications.
 3.14 | Flag 'profile_period' can now be set at runtime, allowing for the profiler sample rate to be changed while the program is running.
 3.15 | Added `disableBreakpoints` parameter to `invoke`, `evaluate`, and `evaluateInFrame`.
+3.16 | Add 'getMemoryUsage' RPC and 'MemoryUsage' object.
+3.17 | Add 'Logging' event kind and the LogRecord class.
 
 [discuss-list]: https://groups.google.com/a/dartlang.org/forum/#!forum/observatory-discuss

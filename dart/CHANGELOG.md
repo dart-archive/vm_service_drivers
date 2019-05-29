@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.17.0
+- rev to 3.17.0; expose the Logging event and the getMemoryUsage call
+
 ## 3.15.1+2
 - fix handling of errors in registered service callbacks to return valid
   JSON-RPC errors and avoid the client getting "Service Disappeared" responses

@@ -17,7 +17,7 @@ import 'src/service_extension_registry.dart';
 
 export 'src/service_extension_registry.dart' show ServiceExtensionRegistry;
 
-const String vmServiceVersion = '3.15.0';
+const String vmServiceVersion = '3.17.0';
 
 /// @optional
 const String optional = 'optional';
@@ -103,7 +103,9 @@ Map<String, Function> _typeFactories = {
   '@Library': LibraryRef.parse,
   'Library': Library.parse,
   'LibraryDependency': LibraryDependency.parse,
+  'LogRecord': LogRecord.parse,
   'MapAssociation': MapAssociation.parse,
+  'MemoryUsage': MemoryUsage.parse,
   'Message': Message.parse,
   '@Null': NullValRef.parse,
   'Null': NullVal.parse,
@@ -282,7 +284,7 @@ abstract class VmServiceInterface {
   /// as a result of this evaluation are ignored. Defaults to false if not
   /// provided.
   ///
-  /// If expression is failed to parse and compile, then [rpc error] 113
+  /// If the expression fails to parse and compile, then [rpc error] 113
   /// "Expression compilation error" is returned.
   ///
   /// If an error occurs while evaluating the expression, an [ErrorRef]
@@ -314,7 +316,7 @@ abstract class VmServiceInterface {
   /// as a result of this evaluation are ignored. Defaults to false if not
   /// provided.
   ///
-  /// If expression is failed to parse and compile, then [rpc error] 113
+  /// If the expression fails to parse and compile, then [rpc error] 113
   /// "Expression compilation error" is returned.
   ///
   /// If an error occurs while evaluating the expression, an [ErrorRef]
@@ -347,6 +349,17 @@ abstract class VmServiceInterface {
   ///
   /// The return value can be one of [Isolate] or [Sentinel].
   Future<dynamic> getIsolate(String isolateId);
+
+  /// The `getMemoryUsage` RPC is used to lookup an isolate's memory usage
+  /// statistics by its `id`.
+  ///
+  /// If `isolateId` refers to an isolate which has exited, then the `Collected`
+  /// [Sentinel] is returned.
+  ///
+  /// See [Isolate].
+  ///
+  /// The return value can be one of [MemoryUsage] or [Sentinel].
+  Future<dynamic> getMemoryUsage(String isolateId);
 
   /// The `getScripts` RPC is used to retrieve a `ScriptList` containing all
   /// scripts for an isolate based on the isolate's `isolateId`.
@@ -577,6 +590,7 @@ abstract class VmServiceInterface {
   /// GC | GC
   /// Extension | Extension
   /// Timeline | TimelineEvents
+  /// Logging | Logging
   ///
   /// Additionally, some embedders provide the `Stdout` and `Stderr` streams.
   /// These streams allow the client to subscribe to writes to stdout and
@@ -757,6 +771,11 @@ class VmServerConnection {
           break;
         case 'getIsolate':
           response = await _serviceImplementation.getIsolate(
+            params['isolateId'],
+          );
+          break;
+        case 'getMemoryUsage':
+          response = await _serviceImplementation.getMemoryUsage(
             params['isolateId'],
           );
           break;
@@ -1007,7 +1026,9 @@ class VmService implements VmServiceInterface {
     int column,
   }) {
     Map m = {'isolateId': isolateId, 'scriptId': scriptId, 'line': line};
-    if (column != null) m['column'] = column;
+    if (column != null) {
+      m['column'] = column;
+    }
     return _call('addBreakpoint', m);
   }
 
@@ -1019,7 +1040,9 @@ class VmService implements VmServiceInterface {
     int column,
   }) {
     Map m = {'isolateId': isolateId, 'scriptUri': scriptUri, 'line': line};
-    if (column != null) m['column'] = column;
+    if (column != null) {
+      m['column'] = column;
+    }
     return _call('addBreakpointWithScriptUri', m);
   }
 
@@ -1043,8 +1066,9 @@ class VmService implements VmServiceInterface {
       'selector': selector,
       'argumentIds': argumentIds
     };
-    if (disableBreakpoints != null)
+    if (disableBreakpoints != null) {
       m['disableBreakpoints'] = disableBreakpoints;
+    }
     return _call('invoke', m);
   }
 
@@ -1061,9 +1085,12 @@ class VmService implements VmServiceInterface {
       'targetId': targetId,
       'expression': expression
     };
-    if (scope != null) m['scope'] = scope;
-    if (disableBreakpoints != null)
+    if (scope != null) {
+      m['scope'] = scope;
+    }
+    if (disableBreakpoints != null) {
       m['disableBreakpoints'] = disableBreakpoints;
+    }
     return _call('evaluate', m);
   }
 
@@ -1080,9 +1107,12 @@ class VmService implements VmServiceInterface {
       'frameIndex': frameIndex,
       'expression': expression
     };
-    if (scope != null) m['scope'] = scope;
-    if (disableBreakpoints != null)
+    if (scope != null) {
+      m['scope'] = scope;
+    }
+    if (disableBreakpoints != null) {
       m['disableBreakpoints'] = disableBreakpoints;
+    }
     return _call('evaluateInFrame', m);
   }
 
@@ -1092,6 +1122,11 @@ class VmService implements VmServiceInterface {
   @override
   Future<dynamic> getIsolate(String isolateId) {
     return _call('getIsolate', {'isolateId': isolateId});
+  }
+
+  @override
+  Future<dynamic> getMemoryUsage(String isolateId) {
+    return _call('getMemoryUsage', {'isolateId': isolateId});
   }
 
   @override
@@ -1107,8 +1142,12 @@ class VmService implements VmServiceInterface {
     int count,
   }) {
     Map m = {'isolateId': isolateId, 'objectId': objectId};
-    if (offset != null) m['offset'] = offset;
-    if (count != null) m['count'] = count;
+    if (offset != null) {
+      m['offset'] = offset;
+    }
+    if (count != null) {
+      m['count'] = count;
+    }
     return _call('getObject', m);
   }
 
@@ -1128,10 +1167,18 @@ class VmService implements VmServiceInterface {
     bool forceCompile,
   }) {
     Map m = {'isolateId': isolateId, 'reports': reports};
-    if (scriptId != null) m['scriptId'] = scriptId;
-    if (tokenPos != null) m['tokenPos'] = tokenPos;
-    if (endTokenPos != null) m['endTokenPos'] = endTokenPos;
-    if (forceCompile != null) m['forceCompile'] = forceCompile;
+    if (scriptId != null) {
+      m['scriptId'] = scriptId;
+    }
+    if (tokenPos != null) {
+      m['tokenPos'] = tokenPos;
+    }
+    if (endTokenPos != null) {
+      m['endTokenPos'] = endTokenPos;
+    }
+    if (forceCompile != null) {
+      m['forceCompile'] = forceCompile;
+    }
     return _call('getSourceReport', m);
   }
 
@@ -1160,10 +1207,18 @@ class VmService implements VmServiceInterface {
     String packagesUri,
   }) {
     Map m = {'isolateId': isolateId};
-    if (force != null) m['force'] = force;
-    if (pause != null) m['pause'] = pause;
-    if (rootLibUri != null) m['rootLibUri'] = rootLibUri;
-    if (packagesUri != null) m['packagesUri'] = packagesUri;
+    if (force != null) {
+      m['force'] = force;
+    }
+    if (pause != null) {
+      m['pause'] = pause;
+    }
+    if (rootLibUri != null) {
+      m['rootLibUri'] = rootLibUri;
+    }
+    if (packagesUri != null) {
+      m['packagesUri'] = packagesUri;
+    }
     return _call('reloadSources', m);
   }
 
@@ -1177,8 +1232,12 @@ class VmService implements VmServiceInterface {
   Future<Success> resume(String isolateId,
       {/*StepOption*/ String step, int frameIndex}) {
     Map m = {'isolateId': isolateId};
-    if (step != null) m['step'] = step;
-    if (frameIndex != null) m['frameIndex'] = frameIndex;
+    if (step != null) {
+      m['step'] = step;
+    }
+    if (frameIndex != null) {
+      m['frameIndex'] = frameIndex;
+    }
     return _call('resume', m);
   }
 
@@ -1246,8 +1305,12 @@ class VmService implements VmServiceInterface {
   Future<AllocationProfile> getAllocationProfile(String isolateId,
       {String gc, bool reset}) {
     Map m = {'isolateId': isolateId};
-    if (gc != null) m['gc'] = gc;
-    if (reset != null) m['reset'] = reset;
+    if (gc != null) {
+      m['gc'] = gc;
+    }
+    if (reset != null) {
+      m['reset'] = reset;
+    }
     return _call('_getAllocationProfile', m);
   }
 
@@ -1619,6 +1682,9 @@ class EventKind {
 
   /// Event from dart:developer.postEvent.
   static const String kExtension = 'Extension';
+
+  /// Event from dart:developer.log.
+  static const String kLogging = 'Logging';
 
   /// Notification that a Service has been registered into the Service Protocol
   /// from another client.
@@ -2488,6 +2554,12 @@ class Event extends Response {
   @optional
   String status;
 
+  /// LogRecord data.
+  ///
+  /// This is provided for the Logging event.
+  @optional
+  LogRecord logRecord;
+
   /// The service identifier.
   ///
   /// This is provided for the event kinds:
@@ -2536,6 +2608,7 @@ class Event extends Response {
             createServiceObject(json['timelineEvents']));
     atAsyncSuspension = json['atAsyncSuspension'];
     status = json['status'];
+    logRecord = createServiceObject(json['logRecord']);
     service = json['service'];
     method = json['method'];
     alias = json['alias'];
@@ -2565,6 +2638,7 @@ class Event extends Response {
         timelineEvents?.map((f) => f?.toJson())?.toList());
     _setIfNotNull(json, 'atAsyncSuspension', atAsyncSuspension);
     _setIfNotNull(json, 'status', status);
+    _setIfNotNull(json, 'logRecord', logRecord?.toJson());
     _setIfNotNull(json, 'service', service);
     _setIfNotNull(json, 'method', method);
     _setIfNotNull(json, 'alias', alias);
@@ -3705,6 +3779,70 @@ class LibraryDependency {
       'target: ${target}]';
 }
 
+class LogRecord extends Response {
+  static LogRecord parse(Map<String, dynamic> json) =>
+      json == null ? null : new LogRecord._fromJson(json);
+
+  /// The log message.
+  InstanceRef message;
+
+  /// The timestamp.
+  int time;
+
+  /// The severity level (a value between 0 and 2000).
+  ///
+  /// See the package:logging `Level` class for an overview of the possible
+  /// values.
+  int level;
+
+  /// A monotonically increasing sequence number.
+  int sequenceNumber;
+
+  /// The name of the source of the log message.
+  InstanceRef loggerName;
+
+  /// The zone where the log was emitted.
+  InstanceRef zone;
+
+  /// An error object associated with this log event.
+  InstanceRef error;
+
+  /// A stack trace associated with this log event.
+  InstanceRef stackTrace;
+
+  LogRecord();
+
+  LogRecord._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    message = createServiceObject(json['message']);
+    time = json['time'];
+    level = json['level'];
+    sequenceNumber = json['sequenceNumber'];
+    loggerName = createServiceObject(json['loggerName']);
+    zone = createServiceObject(json['zone']);
+    error = createServiceObject(json['error']);
+    stackTrace = createServiceObject(json['stackTrace']);
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json['type'] = 'LogRecord';
+    json.addAll({
+      'message': message.toJson(),
+      'time': time,
+      'level': level,
+      'sequenceNumber': sequenceNumber,
+      'loggerName': loggerName.toJson(),
+      'zone': zone.toJson(),
+      'error': error.toJson(),
+      'stackTrace': stackTrace.toJson(),
+    });
+    return json;
+  }
+
+  String toString() => '[LogRecord]';
+}
+
 class MapAssociation {
   static MapAssociation parse(Map<String, dynamic> json) =>
       json == null ? null : new MapAssociation._fromJson(json);
@@ -3732,6 +3870,53 @@ class MapAssociation {
   }
 
   String toString() => '[MapAssociation key: ${key}, value: ${value}]';
+}
+
+/// An `MemoryUsage` object provides heap usage information for a specific
+/// isolate at a given point in time.
+class MemoryUsage extends Response {
+  static MemoryUsage parse(Map<String, dynamic> json) =>
+      json == null ? null : new MemoryUsage._fromJson(json);
+
+  /// The amount of non-Dart memory that is retained by Dart objects. For
+  /// example, memory associated with Dart objects through APIs such as
+  /// Dart_NewWeakPersistentHandle and Dart_NewExternalTypedData.  This usage is
+  /// only as accurate as the values supplied to these APIs from the VM embedder
+  /// or native extensions. This external memory applies GC pressure, but is
+  /// separate from heapUsage and heapCapacity.
+  int externalUsage;
+
+  /// The total capacity of the heap in bytes. This is the amount of memory used
+  /// by the Dart heap from the perspective of the operating system.
+  int heapCapacity;
+
+  /// The current heap memory usage in bytes. Heap usage is always less than or
+  /// equal to the heap capacity.
+  int heapUsage;
+
+  MemoryUsage();
+
+  MemoryUsage._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    externalUsage = json['externalUsage'];
+    heapCapacity = json['heapCapacity'];
+    heapUsage = json['heapUsage'];
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json['type'] = 'MemoryUsage';
+    json.addAll({
+      'externalUsage': externalUsage,
+      'heapCapacity': heapCapacity,
+      'heapUsage': heapUsage,
+    });
+    return json;
+  }
+
+  String toString() => '[MemoryUsage ' //
+      'type: ${type}, externalUsage: ${externalUsage}, heapCapacity: ${heapCapacity}, ' //
+      'heapUsage: ${heapUsage}]';
 }
 
 /// A `Message` provides information about a pending isolate message and the
@@ -4108,11 +4293,9 @@ class Script extends Obj {
   /// The library which owns this script.
   LibraryRef library;
 
-  /// Undocumented field on Script.
   @optional
   int lineOffset;
 
-  /// Undocumented field on Script.
   @optional
   int columnOffset;
 

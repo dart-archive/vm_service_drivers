@@ -29,8 +29,6 @@ public class Script extends Obj {
   }
 
   /**
-   * Undocumented field on Script.
-   *
    * Can return <code>null</code>.
    */
   public int getColumnOffset() {
@@ -45,8 +43,6 @@ public class Script extends Obj {
   }
 
   /**
-   * Undocumented field on Script.
-   *
    * Can return <code>null</code>.
    */
   public int getLineOffset() {
