@@ -31,6 +31,8 @@ elif [ "$BOT" = "java" ]; then
     popd
     pushd java
 
+    java -version
+
     # Run the Java tests.
     ant -f build.xml
 
