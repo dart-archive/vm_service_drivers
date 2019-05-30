@@ -986,37 +986,36 @@ class VmService implements VmServiceInterface {
     _disposeHandler = disposeHandler;
   }
 
+  @override
+  Stream<Event> onEvent(String streamId) =>
+      _getEventController(streamId).stream;
+
   // VMUpdate
   Stream<Event> get onVMEvent => _getEventController('VM').stream;
 
-  // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
+  // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, IsolateReload, ServiceExtensionAdded
   Stream<Event> get onIsolateEvent => _getEventController('Isolate').stream;
 
-  // PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException,
-  // Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect
+  // PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException, PausePostRequest, Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect, None
   Stream<Event> get onDebugEvent => _getEventController('Debug').stream;
 
   // GC
   Stream<Event> get onGCEvent => _getEventController('GC').stream;
+
+  // Extension
+  Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
+
+  // TimelineEvents
+  Stream<Event> get onTimelineEvent => _getEventController('Timeline').stream;
+
+  // Logging
+  Stream<Event> get onLoggingEvent => _getEventController('Logging').stream;
 
   // WriteEvent
   Stream<Event> get onStdoutEvent => _getEventController('Stdout').stream;
 
   // WriteEvent
   Stream<Event> get onStderrEvent => _getEventController('Stderr').stream;
-
-  // Extension
-  Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
-
-  // _Graph
-  Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
-
-  // _Service
-  Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
-
-  @override
-  Stream<Event> onEvent(String streamId) =>
-      _getEventController(streamId).stream;
 
   @override
   Future<Breakpoint> addBreakpoint(
@@ -1607,6 +1606,21 @@ class ErrorKind {
 
   /// The isolate has been terminated by an external source.
   static const String kTerminationError = 'TerminationError';
+}
+
+/// An enum of available event streams.
+class EventStreams {
+  EventStreams._();
+
+  static const String kVM = 'VM';
+  static const String kIsolate = 'Isolate';
+  static const String kDebug = 'Debug';
+  static const String kGC = 'GC';
+  static const String kExtension = 'Extension';
+  static const String kTimeline = 'Timeline';
+  static const String kLogging = 'Logging';
+  static const String kStdout = 'Stdout';
+  static const String kStderr = 'Stderr';
 }
 
 /// Adding new values to `EventKind` is considered a backwards compatible

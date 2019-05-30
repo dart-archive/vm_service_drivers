@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:pedantic/pedantic.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
 import 'package:vm_service_lib/vm_service_lib_io.dart';
@@ -102,12 +103,9 @@ void main() {
     serviceClient.onStdoutEvent.listen((e) => print('onStdoutEvent: ${e}'));
     serviceClient.onStderrEvent.listen((e) => print('onStderrEvent: ${e}'));
 
-    // ignore: unawaited_futures
-    serviceClient.streamListen('Isolate');
-    // ignore: unawaited_futures
-    serviceClient.streamListen('Debug');
-    // ignore: unawaited_futures
-    serviceClient.streamListen('Stdout');
+    unawaited(serviceClient.streamListen(EventStreams.kIsolate));
+    unawaited(serviceClient.streamListen(EventStreams.kDebug));
+    unawaited(serviceClient.streamListen(EventStreams.kStdout));
 
     VM vm = await serviceClient.getVM();
     print('hostCPU=${vm.hostCPU}');
@@ -161,7 +159,7 @@ Future testServiceRegistration() async {
   VmService otherClient =
       await vmServiceConnect(host, port, log: new StdoutLog());
   Completer completer = new Completer();
-  otherClient.onServiceEvent.listen((e) async {
+  otherClient.onEvent('_Service').listen((e) async {
     if (e.service == serviceName && e.kind == EventKind.kServiceRegistered) {
       assert(e.alias == serviceAlias);
       Response response = await serviceClient.callMethod(

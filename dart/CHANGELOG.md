@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.17.0+1
+- generate a list of available event streams
+
 ## 3.17.0
 - rev to 3.17.0; expose the Logging event and the getMemoryUsage call
 
