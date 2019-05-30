@@ -345,6 +345,7 @@ class Api extends Member with ApiParseUtil {
   List<Method> methods = [];
   List<Enum> enums = [];
   List<Type> types = [];
+  List<StreamCategory> streamCategories = [];
 
   void parse(List<Node> nodes) {
     serviceVersion = ApiParseUtil.parseVersionString(nodes);
@@ -386,6 +387,10 @@ class Api extends Member with ApiParseUtil {
     for (Type type in types) {
       type.removeDuplicateFieldDefs();
     }
+
+    Method streamListenMethod =
+        methods.singleWhere((method) => method.name == 'streamListen');
+    _parseStreamListenDocs(streamListenMethod.docs);
   }
 
   String get name => 'api';
@@ -726,37 +731,12 @@ VmService(Stream<dynamic> /*String|List<int>*/ inStream, void writeMessage(Strin
   _disposeHandler = disposeHandler;
 }
 
-// VMUpdate
-Stream<Event> get onVMEvent => _getEventController('VM').stream;
-
-// IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
-Stream<Event> get onIsolateEvent => _getEventController('Isolate').stream;
-
-// PauseStart, PauseExit, PauseBreakpoint, PauseInterrupted, PauseException,
-// Resume, BreakpointAdded, BreakpointResolved, BreakpointRemoved, Inspect
-Stream<Event> get onDebugEvent => _getEventController('Debug').stream;
-
-// GC
-Stream<Event> get onGCEvent => _getEventController('GC').stream;
-
-// WriteEvent
-Stream<Event> get onStdoutEvent => _getEventController('Stdout').stream;
-
-// WriteEvent
-Stream<Event> get onStderrEvent => _getEventController('Stderr').stream;
-
-// Extension
-Stream<Event> get onExtensionEvent => _getEventController('Extension').stream;
-
-// _Graph
-Stream<Event> get onGraphEvent => _getEventController('_Graph').stream;
-
-// _Service
-Stream<Event> get onServiceEvent => _getEventController('_Service').stream;
-
 @override
 Stream<Event> onEvent(String streamId) => _getEventController(streamId).stream;
 ''');
+
+    // streamCategories
+    streamCategories.forEach((s) => s.generate(gen));
 
     gen.writeln();
     methods.forEach((m) => m.generate(gen));
@@ -765,7 +745,12 @@ Stream<Event> onEvent(String streamId) => _getEventController(streamId).stream;
     gen.writeln();
     gen.out(_rpcError);
     gen.writeln('// enums');
-    enums.forEach((e) => e.generate(gen));
+    enums.forEach((e) {
+      if (e.name == 'EventKind') {
+        _generateEventStream(gen);
+      }
+      e.generate(gen);
+    });
     gen.writeln();
     gen.writeln('// types');
     types.where((t) => !t.skip).forEach((t) => t.generate(gen));
@@ -945,6 +930,66 @@ vms.Event assertIsolateEvent(vms.Event event) {
 
   Type getType(String name) =>
       types.firstWhere((t) => t.name == name, orElse: () => null);
+
+  void _parseStreamListenDocs(String docs) {
+    Iterator<String> lines = docs.split('\n').map((l) => l.trim()).iterator;
+    bool inStreamDef = false;
+
+    while (lines.moveNext()) {
+      final String line = lines.current;
+
+      if (line.startsWith('streamId |')) {
+        inStreamDef = true;
+        lines.moveNext();
+      } else if (inStreamDef) {
+        if (line.isEmpty) {
+          inStreamDef = false;
+        } else {
+          streamCategories.add(new StreamCategory(line));
+        }
+      }
+    }
+  }
+
+  void _generateEventStream(DartGenerator gen) {
+    gen.writeln();
+    gen.writeDocs('An enum of available event streams.');
+    gen.writeln('class EventStreams {');
+    gen.writeln('EventStreams._();');
+    gen.writeln();
+
+    streamCategories.forEach((c) {
+      gen.writeln("static const String k${c.name} = '${c.name}';");
+    });
+
+    gen.writeln('}');
+  }
+}
+
+class StreamCategory {
+  String _name;
+  List<String> _events;
+
+  StreamCategory(String line) {
+    // Debug | PauseStart, PauseExit, ...
+    _name = line.split('|')[0].trim();
+
+    line = line.split('|')[1];
+    _events = line.split(',').map((w) => w.trim()).toList();
+  }
+
+  String get name => _name;
+
+  List<String> get events => _events;
+
+  void generate(DartGenerator gen) {
+    gen.writeln();
+    gen.writeln('// ${events.join(', ')}');
+    gen.writeln(
+        "Stream<Event> get on${name}Event => _getEventController('$name').stream;");
+  }
+
+  String toString() => '$name: $events';
 }
 
 class Method extends Member {
