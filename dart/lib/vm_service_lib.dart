@@ -690,8 +690,6 @@ abstract class VmServiceInterface {
 
   /// `roots` is one of User or VM. The results are returned as a stream of
   /// [_Graph] events.
-  ///
-  /// Returns a ServiceObject (a specialization of an ObjRef).
   @undocumented
   Future<Success> requestHeapSnapshot(
       String isolateId, String roots, bool collectGarbage);
@@ -1465,7 +1463,9 @@ class VmService implements VmServiceInterface {
       return _call(method, {'isolateId': isolateId});
     } else {
       args = new Map.from(args);
-      args['isolateId'] = isolateId;
+      if (isolateId != null) {
+        args['isolateId'] = isolateId;
+      }
       return _call(method, args);
     }
   }

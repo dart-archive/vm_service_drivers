@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.20.0+1
+- handle null isolate ids in `callServiceExtension`
+
 ## 3.20.0
 - rev to 3.20.0; expose public methods added in 3.17 - 3.20 VM Service Protocol versions
 
