@@ -912,6 +912,7 @@ vms.Event assertIsolateEvent(vms.Event event) {
             'ClassHeapStats',
             'CodeRegion',
             'ProfileFunction',
+            'TimelineEvent',
           ].contains(type.name)) {
         type.generateListAssert(gen);
       }

@@ -900,7 +900,7 @@ vms.Stack assertStack(vms.Stack obj) {
 vms.Timeline assertTimeline(vms.Timeline obj) {
   assertNotNull(obj);
   assertString(obj.type);
-  obj.traceEvents.forEach(assertTimelineEvent);
+  assertTimelineEvents(obj.traceEvents);
   assertInt(obj.timeOriginMicros);
   assertInt(obj.timeExtentMicros);
   return obj;
@@ -909,6 +909,13 @@ vms.Timeline assertTimeline(vms.Timeline obj) {
 vms.TimelineEvent assertTimelineEvent(vms.TimelineEvent obj) {
   assertNotNull(obj);
   return obj;
+}
+
+List<vms.TimelineEvent> assertTimelineEvents(List<vms.TimelineEvent> list) {
+  for (vms.TimelineEvent elem in list) {
+    assertTimelineEvent(elem);
+  }
+  return list;
 }
 
 vms.TimelineFlags assertTimelineFlags(vms.TimelineFlags obj) {
