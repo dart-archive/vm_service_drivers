@@ -1985,8 +1985,12 @@ class AllocationProfile extends Response {
   AllocationProfile._fromJson(Map<String, dynamic> json)
       : super._fromJson(json) {
     memoryUsage = createServiceObject(json['memoryUsage']);
-    dateLastAccumulatorReset = json['dateLastAccumulatorReset'];
-    dateLastServiceGC = json['dateLastServiceGC'];
+    dateLastAccumulatorReset = json['dateLastAccumulatorReset'] is String
+        ? int.parse(json['dateLastAccumulatorReset'])
+        : json['dateLastAccumulatorReset'];
+    dateLastServiceGC = json['dateLastServiceGC'] is String
+        ? int.parse(json['dateLastServiceGC'])
+        : json['dateLastServiceGC'];
     members =
         new List<ClassHeapStats>.from(createServiceObject(json['members']));
   }
@@ -3855,8 +3859,8 @@ class InstanceSet extends Response {
 
   InstanceSet._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     totalCount = json['totalCount'];
-    instances =
-        new List<InstanceRef>.from(createServiceObject(json['instances']));
+    instances = new List<InstanceRef>.from(
+        createServiceObject(json['instances'] ?? json['samples']));
   }
 
   @override
