@@ -77,7 +77,9 @@ final String _implCode = r'''
       return _call(method, {'isolateId': isolateId});
     } else {
       args = new Map.from(args);
-      args['isolateId'] = isolateId;
+      if (isolateId != null) {
+        args['isolateId'] = isolateId;
+      }
       return _call(method, args);
     }
   }
