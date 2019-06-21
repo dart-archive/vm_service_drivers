@@ -17,8 +17,6 @@ Success _requestHeapSnapshot(string isolateId, string roots, bool collectGarbage
 _roots_ is one of User or VM. The results are returned as a stream of
 [_Graph] events.
 
-Returns a ServiceObject (a specialization of an ObjRef).
-
 ### _clearCpuProfile
 
 ```
