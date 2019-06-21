@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.20.0
+- rev to 3.20.0; expose public methods added in 3.17 - 3.20 VM Service Protocol versions
+
 ## 3.17.0+1
 - generate a list of available event streams
 

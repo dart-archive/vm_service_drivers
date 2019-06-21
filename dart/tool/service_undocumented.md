@@ -17,31 +17,6 @@ Success _requestHeapSnapshot(string isolateId, string roots, bool collectGarbage
 _roots_ is one of User or VM. The results are returned as a stream of
 [_Graph] events.
 
-### _getAllocationProfile
-
-```
-AllocationProfile _getAllocationProfile(
-  string isolateId,
-  string gc [optional],
-  bool reset [optional]
-)
-```
-
-Valid values for _gc_ are 'full'.
-
-
-### _getInstances
-
-```
-@Object _getInstances(
-  string isolateId,
-  string classId,
-  int limit
-)
-```
-
-Returns a ServiceObject (a specialization of an ObjRef).
-
 ### _clearCpuProfile
 
 ```
@@ -55,24 +30,6 @@ _CpuProfile _getCpuProfile(string isolateId, string tags)
 ```
 
 _tags_ is one of UserVM, UserOnly, VMUser, VMOnly, or None.
-
-### _clearVMTimeline
-
-```
-Success _clearVMTimeline()
-```
-
-### _setVMTimelineFlags
-
-```
-Success _setVMTimelineFlags(string[] recordedStreams)
-```
-
-### _getVMTimeline
-
-```
-Response _getVMTimeline()
-```
 
 ### _CpuProfile
 
