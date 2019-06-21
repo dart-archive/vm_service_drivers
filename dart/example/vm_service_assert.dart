@@ -232,6 +232,14 @@ String assertStepOption(String obj) {
   throw "invalid StepOption: $obj";
 }
 
+vms.AllocationProfile assertAllocationProfile(vms.AllocationProfile obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertMemoryUsage(obj.memoryUsage);
+  assertClassHeapStatss(obj.members);
+  return obj;
+}
+
 vms.BoundField assertBoundField(vms.BoundField obj) {
   assertNotNull(obj);
   assertFieldRef(obj.decl);
@@ -322,6 +330,28 @@ vms.Class assertClass(vms.Class obj) {
   assertFuncRefs(obj.functions);
   assertClassRefs(obj.subclasses);
   return obj;
+}
+
+vms.ClassHeapStats assertClassHeapStats(vms.ClassHeapStats obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertInt(obj.accumulatedSize);
+  assertInt(obj.bytesCurrent);
+  assertInt(obj.instancesAccumulated);
+  assertInt(obj.instancesCurrent);
+  assertClassRef(obj.classRef);
+  assertInts(obj.new_);
+  assertInts(obj.old);
+  assertInt(obj.promotedBytes);
+  assertInt(obj.promotedInstances);
+  return obj;
+}
+
+List<vms.ClassHeapStats> assertClassHeapStatss(List<vms.ClassHeapStats> list) {
+  for (vms.ClassHeapStats elem in list) {
+    assertClassHeapStats(elem);
+  }
+  return list;
 }
 
 vms.ClassList assertClassList(vms.ClassList obj) {
@@ -606,6 +636,14 @@ vms.Isolate assertIsolate(vms.Isolate obj) {
   return obj;
 }
 
+vms.InstanceSet assertInstanceSet(vms.InstanceSet obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertInt(obj.totalCount);
+  assertInstanceRefs(obj.instances);
+  return obj;
+}
+
 vms.LibraryRef assertLibraryRef(vms.LibraryRef obj) {
   assertNotNull(obj);
   assertString(obj.type);
@@ -859,8 +897,26 @@ vms.Stack assertStack(vms.Stack obj) {
   return obj;
 }
 
+vms.Timeline assertTimeline(vms.Timeline obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  obj.traceEvents.forEach(assertTimelineEvent);
+  assertInt(obj.timeOriginMicros);
+  assertInt(obj.timeExtentMicros);
+  return obj;
+}
+
 vms.TimelineEvent assertTimelineEvent(vms.TimelineEvent obj) {
   assertNotNull(obj);
+  return obj;
+}
+
+vms.TimelineFlags assertTimelineFlags(vms.TimelineFlags obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertString(obj.recorderName);
+  assertStrings(obj.availableStreams);
+  assertStrings(obj.recordedStreams);
   return obj;
 }
 
@@ -980,32 +1036,6 @@ List<vms.ProfileFunction> assertProfileFunctions(
     List<vms.ProfileFunction> list) {
   for (vms.ProfileFunction elem in list) {
     assertProfileFunction(elem);
-  }
-  return list;
-}
-
-vms.AllocationProfile assertAllocationProfile(vms.AllocationProfile obj) {
-  assertNotNull(obj);
-  assertString(obj.type);
-  assertString(obj.dateLastServiceGC);
-  assertClassHeapStatss(obj.members);
-  return obj;
-}
-
-vms.ClassHeapStats assertClassHeapStats(vms.ClassHeapStats obj) {
-  assertNotNull(obj);
-  assertString(obj.type);
-  assertClassRef(obj.classRef);
-  assertInts(obj.new_);
-  assertInts(obj.old);
-  assertInt(obj.promotedBytes);
-  assertInt(obj.promotedInstances);
-  return obj;
-}
-
-List<vms.ClassHeapStats> assertClassHeapStatss(List<vms.ClassHeapStats> list) {
-  for (vms.ClassHeapStats elem in list) {
-    assertClassHeapStats(elem);
   }
   return list;
 }

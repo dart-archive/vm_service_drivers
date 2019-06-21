@@ -17,7 +17,7 @@ import 'src/service_extension_registry.dart';
 
 export 'src/service_extension_registry.dart' show ServiceExtensionRegistry;
 
-const String vmServiceVersion = '3.17.0';
+const String vmServiceVersion = '3.20.0';
 
 /// @optional
 const String optional = 'optional';
@@ -74,11 +74,13 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     Map<String, dynamic> params);
 
 Map<String, Function> _typeFactories = {
+  'AllocationProfile': AllocationProfile.parse,
   'BoundField': BoundField.parse,
   'BoundVariable': BoundVariable.parse,
   'Breakpoint': Breakpoint.parse,
   '@Class': ClassRef.parse,
   'Class': Class.parse,
+  'ClassHeapStats': ClassHeapStats.parse,
   'ClassList': ClassList.parse,
   '@Code': CodeRef.parse,
   'Code': Code.parse,
@@ -100,6 +102,7 @@ Map<String, Function> _typeFactories = {
   'Instance': Instance.parse,
   '@Isolate': IsolateRef.parse,
   'Isolate': Isolate.parse,
+  'InstanceSet': InstanceSet.parse,
   '@Library': LibraryRef.parse,
   'Library': Library.parse,
   'LibraryDependency': LibraryDependency.parse,
@@ -123,7 +126,9 @@ Map<String, Function> _typeFactories = {
   'SourceReportRange': SourceReportRange.parse,
   'Stack': Stack.parse,
   'Success': Success.parse,
+  'Timeline': Timeline.parse,
   'TimelineEvent': TimelineEvent.parse,
+  'TimelineFlags': TimelineFlags.parse,
   '@TypeArguments': TypeArgumentsRef.parse,
   'TypeArguments': TypeArguments.parse,
   'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
@@ -133,8 +138,6 @@ Map<String, Function> _typeFactories = {
   '_CpuProfile': CpuProfile.parse,
   'CodeRegion': CodeRegion.parse,
   'ProfileFunction': ProfileFunction.parse,
-  'AllocationProfile': AllocationProfile.parse,
-  'ClassHeapStats': ClassHeapStats.parse,
   'HeapSpace': HeapSpace.parse,
 };
 
@@ -222,6 +225,11 @@ abstract class VmServiceInterface {
   ///
   /// Note that breakpoints are added and removed on a per-isolate basis.
   Future<Breakpoint> addBreakpointAtEntry(String isolateId, String functionId);
+
+  /// Clears all VM timeline events.
+  ///
+  /// See [Success].
+  Future<Success> clearVMTimeline();
 
   /// The `invoke` RPC is used to perform regular method invocation on some
   /// receiver, as if by dart:mirror's ObjectMirror.invoke. Note this does not
@@ -334,11 +342,35 @@ abstract class VmServiceInterface {
     bool disableBreakpoints,
   });
 
+  /// The `getAllocationProfile` RPC is used to retrieve allocation information
+  /// for a given isolate.
+  ///
+  /// If `reset` is provided and is set to true, the allocation accumulators
+  /// will be reset before collecting allocation information.
+  ///
+  /// If `gc` is provided and is set to true, a garbage collection will be
+  /// attempted before collecting allocation information. There is no guarantee
+  /// that a garbage collection will be actually be performed.
+  Future<AllocationProfile> getAllocationProfile(String isolateId,
+      {bool reset, bool gc});
+
   /// The `getFlagList` RPC returns a list of all command line flags in the VM
   /// along with their current values.
   ///
   /// See [FlagList].
   Future<FlagList> getFlagList();
+
+  /// The `getInstances` RPC is used to retrieve a set of instances which are of
+  /// a specific type.
+  ///
+  /// `objectId` is the ID of the <code>Class</code>Class to retrieve instances
+  /// for. `objectId` must be the ID of a <code>Class</code>Class, otherwise an
+  /// error is returned.
+  ///
+  /// `limit` is the maximum number of instances to be returned.
+  ///
+  /// See [InstanceSet].
+  Future<InstanceSet> getInstances(String objectId, int limit);
 
   /// The `getIsolate` RPC is used to lookup an `Isolate` object by its `id`.
   ///
@@ -456,6 +488,37 @@ abstract class VmServiceInterface {
   /// See [VM].
   Future<VM> getVM();
 
+  /// The `getVMTimeline` RPC is used to retrieve an object which contains VM
+  /// timeline events.
+  ///
+  /// The `timeOriginMicros` parameter is the beginning of the time range used
+  /// to filter timeline events. It uses the same monotonic clock as
+  /// dart:developer's <code>Timeline.now</code>Timeline.now and the VM
+  /// embedding API's <code>Dart_TimelineGetMicros</code>Dart_TimelineGetMicros.
+  ///
+  /// The `timeExtentMicros` parameter specifies how large the time range used
+  /// to filter timeline events should be.
+  ///
+  /// For example, given `timeOriginMicros` and `timeExtentMicros`, only
+  /// timeline events from the following time range will be returned:
+  /// <code>(timeOriginMicros, timeOriginMicros +
+  /// timeExtentMicros)</code>(timeOriginMicros, timeOriginMicros +
+  /// timeExtentMicros).
+  ///
+  /// If `getVMTimeline` is invoked while the current recorder is one of Fuchsia
+  /// or Systrace, the `114` error code, invalid timeline request, will be
+  /// returned as timeline events are handled by the OS in these modes.
+  Future<Timeline> getVMTimeline(int timeOriginMicros, int timeExtentMicros);
+
+  /// The `getVMTimelineFlags` RPC returns information about the current VM
+  /// timeline configuration.
+  ///
+  /// To change which timeline streams are currently enabled, see
+  /// [setVMTimelineFlags].
+  ///
+  /// See [TimelineFlags].
+  Future<TimelineFlags> getVMTimelineFlags();
+
   /// The `pause` RPC is used to interrupt a running isolate. The RPC enqueues
   /// the interrupt request and potentially returns before the isolate is
   /// paused.
@@ -563,6 +626,19 @@ abstract class VmServiceInterface {
   /// See [Success].
   Future<Success> setVMName(String name);
 
+  /// The `setVMTimelineFlags` RPC is used to set which timeline streams are
+  /// enabled.
+  ///
+  /// The `recordedStreams` parameter is the list of all timeline streams which
+  /// are to be enabled. Streams not explicitly specified will be disabled.
+  /// Invalid stream names are ignored.
+  ///
+  /// To get the list of currently enabled timeline streams, see
+  /// [getVMTimelineFlags].
+  ///
+  /// See [Success].
+  Future<Success> setVMTimelineFlags(List<String> recordedStreams);
+
   /// The `streamCancel` RPC cancels a stream subscription in the VM.
   ///
   /// If the client is not subscribed to the stream, the `104` (Stream not
@@ -614,30 +690,17 @@ abstract class VmServiceInterface {
 
   /// `roots` is one of User or VM. The results are returned as a stream of
   /// [_Graph] events.
+  ///
+  /// Returns a ServiceObject (a specialization of an ObjRef).
   @undocumented
   Future<Success> requestHeapSnapshot(
       String isolateId, String roots, bool collectGarbage);
-
-  /// Valid values for `gc` are 'full'.
-  @undocumented
-  Future<AllocationProfile> getAllocationProfile(String isolateId,
-      {String gc, bool reset});
-
-  /// Returns a ServiceObject (a specialization of an ObjRef).
-  @undocumented
-  Future<ObjRef> getInstances(String isolateId, String classId, int limit);
   @undocumented
   Future<Success> clearCpuProfile(String isolateId);
 
   /// `tags` is one of UserVM, UserOnly, VMUser, VMOnly, or None.
   @undocumented
   Future<CpuProfile> getCpuProfile(String isolateId, String tags);
-  @undocumented
-  Future<Success> clearVMTimeline();
-  @undocumented
-  Future<Success> setVMTimelineFlags(List<String> recordedStreams);
-  @undocumented
-  Future<Response> getVMTimeline();
   @undocumented
   Future<Success> registerService(String service, String alias);
 }
@@ -739,6 +802,9 @@ class VmServerConnection {
             params['functionId'],
           );
           break;
+        case 'clearVMTimeline':
+          response = await _serviceImplementation.clearVMTimeline();
+          break;
         case 'invoke':
           response = await _serviceImplementation.invoke(
             params['isolateId'],
@@ -766,8 +832,21 @@ class VmServerConnection {
             disableBreakpoints: params['disableBreakpoints'],
           );
           break;
+        case 'getAllocationProfile':
+          response = await _serviceImplementation.getAllocationProfile(
+            params['isolateId'],
+            reset: params['reset'],
+            gc: params['gc'],
+          );
+          break;
         case 'getFlagList':
           response = await _serviceImplementation.getFlagList();
+          break;
+        case 'getInstances':
+          response = await _serviceImplementation.getInstances(
+            params['objectId'],
+            params['limit'],
+          );
           break;
         case 'getIsolate':
           response = await _serviceImplementation.getIsolate(
@@ -812,6 +891,15 @@ class VmServerConnection {
           break;
         case 'getVM':
           response = await _serviceImplementation.getVM();
+          break;
+        case 'getVMTimeline':
+          response = await _serviceImplementation.getVMTimeline(
+            params['timeOriginMicros'],
+            params['timeExtentMicros'],
+          );
+          break;
+        case 'getVMTimelineFlags':
+          response = await _serviceImplementation.getVMTimelineFlags();
           break;
         case 'pause':
           response = await _serviceImplementation.pause(
@@ -873,6 +961,11 @@ class VmServerConnection {
         case 'setVMName':
           response = await _serviceImplementation.setVMName(
             params['name'],
+          );
+          break;
+        case 'setVMTimelineFlags':
+          response = await _serviceImplementation.setVMTimelineFlags(
+            params['recordedStreams'],
           );
           break;
         case 'streamCancel':
@@ -1052,6 +1145,9 @@ class VmService implements VmServiceInterface {
   }
 
   @override
+  Future<Success> clearVMTimeline() => _call('clearVMTimeline');
+
+  @override
   Future<dynamic> invoke(
     String isolateId,
     String targetId,
@@ -1116,7 +1212,25 @@ class VmService implements VmServiceInterface {
   }
 
   @override
+  Future<AllocationProfile> getAllocationProfile(String isolateId,
+      {bool reset, bool gc}) {
+    Map m = {'isolateId': isolateId};
+    if (reset != null) {
+      m['reset'] = reset;
+    }
+    if (gc != null) {
+      m['gc'] = gc;
+    }
+    return _call('getAllocationProfile', m);
+  }
+
+  @override
   Future<FlagList> getFlagList() => _call('getFlagList');
+
+  @override
+  Future<InstanceSet> getInstances(String objectId, int limit) {
+    return _call('getInstances', {'objectId': objectId, 'limit': limit});
+  }
 
   @override
   Future<dynamic> getIsolate(String isolateId) {
@@ -1186,6 +1300,17 @@ class VmService implements VmServiceInterface {
 
   @override
   Future<VM> getVM() => _call('getVM');
+
+  @override
+  Future<Timeline> getVMTimeline(int timeOriginMicros, int timeExtentMicros) {
+    return _call('getVMTimeline', {
+      'timeOriginMicros': timeOriginMicros,
+      'timeExtentMicros': timeExtentMicros
+    });
+  }
+
+  @override
+  Future<TimelineFlags> getVMTimelineFlags() => _call('getVMTimelineFlags');
 
   @override
   Future<Success> pause(String isolateId) {
@@ -1273,6 +1398,11 @@ class VmService implements VmServiceInterface {
   }
 
   @override
+  Future<Success> setVMTimelineFlags(List<String> recordedStreams) {
+    return _call('setVMTimelineFlags', {'recordedStreams': recordedStreams});
+  }
+
+  @override
   Future<Success> streamCancel(String streamId) {
     return _call('streamCancel', {'streamId': streamId});
   }
@@ -1301,27 +1431,6 @@ class VmService implements VmServiceInterface {
 
   @undocumented
   @override
-  Future<AllocationProfile> getAllocationProfile(String isolateId,
-      {String gc, bool reset}) {
-    Map m = {'isolateId': isolateId};
-    if (gc != null) {
-      m['gc'] = gc;
-    }
-    if (reset != null) {
-      m['reset'] = reset;
-    }
-    return _call('_getAllocationProfile', m);
-  }
-
-  @undocumented
-  @override
-  Future<ObjRef> getInstances(String isolateId, String classId, int limit) {
-    return _call('_getInstances',
-        {'isolateId': isolateId, 'classId': classId, 'limit': limit});
-  }
-
-  @undocumented
-  @override
   Future<Success> clearCpuProfile(String isolateId) {
     return _call('_clearCpuProfile', {'isolateId': isolateId});
   }
@@ -1331,20 +1440,6 @@ class VmService implements VmServiceInterface {
   Future<CpuProfile> getCpuProfile(String isolateId, String tags) {
     return _call('_getCpuProfile', {'isolateId': isolateId, 'tags': tags});
   }
-
-  @undocumented
-  @override
-  Future<Success> clearVMTimeline() => _call('_clearVMTimeline');
-
-  @undocumented
-  @override
-  Future<Success> setVMTimelineFlags(List<String> recordedStreams) {
-    return _call('_setVMTimelineFlags', {'recordedStreams': recordedStreams});
-  }
-
-  @undocumented
-  @override
-  Future<Response> getVMTimeline() => _call('_getVMTimeline');
 
   @undocumented
   @override
@@ -1862,6 +1957,57 @@ class StepOption {
 
 // types
 
+///
+class AllocationProfile extends Response {
+  static AllocationProfile parse(Map<String, dynamic> json) =>
+      json == null ? null : new AllocationProfile._fromJson(json);
+
+  /// Information about memory usage for the isolate.
+  MemoryUsage memoryUsage;
+
+  /// The timestamp of the last accumulator reset.
+  ///
+  /// If the accumulators have not been reset, this field is not present.
+  @optional
+  int dateLastAccumulatorReset;
+
+  /// The timestamp of the last manually triggered GC.
+  ///
+  /// If a GC has not been triggered manually, this field is not present.
+  @optional
+  int dateLastServiceGC;
+
+  /// Allocation information for all class types.
+  List<ClassHeapStats> members;
+
+  AllocationProfile();
+
+  AllocationProfile._fromJson(Map<String, dynamic> json)
+      : super._fromJson(json) {
+    memoryUsage = createServiceObject(json['memoryUsage']);
+    dateLastAccumulatorReset = json['dateLastAccumulatorReset'];
+    dateLastServiceGC = json['dateLastServiceGC'];
+    members =
+        new List<ClassHeapStats>.from(createServiceObject(json['members']));
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json['type'] = 'AllocationProfile';
+    json.addAll({
+      'memoryUsage': memoryUsage.toJson(),
+      'members': members.map((f) => f.toJson()).toList(),
+    });
+    _setIfNotNull(json, 'dateLastAccumulatorReset', dateLastAccumulatorReset);
+    _setIfNotNull(json, 'dateLastServiceGC', dateLastServiceGC);
+    return json;
+  }
+
+  String toString() => '[AllocationProfile ' //
+      'type: ${type}, memoryUsage: ${memoryUsage}, members: ${members}]';
+}
+
 /// A `BoundField` represents a field bound to a particular value in an
 /// `Instance`.
 ///
@@ -2150,6 +2296,71 @@ class Class extends Obj {
   operator ==(other) => other is Class && id == other.id;
 
   String toString() => '[Class]';
+}
+
+///
+class ClassHeapStats extends Response {
+  static ClassHeapStats parse(Map<String, dynamic> json) =>
+      json == null ? null : new ClassHeapStats._fromJson(json);
+
+  /// The number of bytes allocated for instances of class since the accumulator
+  /// was last reset.
+  int accumulatedSize;
+
+  /// The number of bytes currently allocated for instances of class.
+  int bytesCurrent;
+
+  /// The number of instances of class which have been allocated since the
+  /// accumulator was last reset.
+  int instancesAccumulated;
+
+  /// The number of instances of class which are currently alive.
+  int instancesCurrent;
+
+  /// The class for which this memory information is associated.
+  ClassRef classRef;
+
+  List<int> new_;
+
+  List<int> old;
+
+  int promotedBytes;
+
+  int promotedInstances;
+
+  ClassHeapStats();
+
+  ClassHeapStats._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    accumulatedSize = json['accumulatedSize'];
+    bytesCurrent = json['bytesCurrent'];
+    instancesAccumulated = json['instancesAccumulated'];
+    instancesCurrent = json['instancesCurrent'];
+    classRef = createServiceObject(json['class']);
+    new_ = new List<int>.from(json['new']);
+    old = new List<int>.from(json['old']);
+    promotedBytes = json['promotedBytes'];
+    promotedInstances = json['promotedInstances'];
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json['type'] = 'ClassHeapStats';
+    json.addAll({
+      'accumulatedSize': accumulatedSize,
+      'bytesCurrent': bytesCurrent,
+      'instancesAccumulated': instancesAccumulated,
+      'instancesCurrent': instancesCurrent,
+      'class': classRef.toJson(),
+      'new': new_.map((f) => f).toList(),
+      'old': old.map((f) => f).toList(),
+      'promotedBytes': promotedBytes,
+      'promotedInstances': promotedInstances,
+    });
+    return json;
+  }
+
+  String toString() => '[ClassHeapStats]';
 }
 
 class ClassList extends Response {
@@ -3483,12 +3694,6 @@ class IsolateRef extends Response {
   /// The id which is passed to the getIsolate RPC to load this isolate.
   String id;
 
-  /// Provided and set to true if the id of an Object is fixed. If true, the id
-  /// of an Object is guaranteed not to change or expire. The object may,
-  /// however, still be _Collected_.
-  @optional
-  bool fixedId;
-
   /// A numeric id for this isolate, represented as a string. Unique.
   String number;
 
@@ -3499,7 +3704,6 @@ class IsolateRef extends Response {
 
   IsolateRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     id = json['id'];
-    fixedId = json['fixedId'];
     number = json['number'];
     name = json['name'];
   }
@@ -3513,7 +3717,6 @@ class IsolateRef extends Response {
       'number': number,
       'name': name,
     });
-    _setIfNotNull(json, 'fixedId', fixedId);
     return json;
   }
 
@@ -3532,12 +3735,6 @@ class Isolate extends Response {
 
   /// The id which is passed to the getIsolate RPC to reload this isolate.
   String id;
-
-  /// Provided and set to true if the id of an Object is fixed. If true, the id
-  /// of an Object is guaranteed not to change or expire. The object may,
-  /// however, still be _Collected_.
-  @optional
-  bool fixedId;
 
   /// A numeric id for this isolate, represented as a string. Unique.
   String number;
@@ -3593,7 +3790,6 @@ class Isolate extends Response {
 
   Isolate._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     id = json['id'];
-    fixedId = json['fixedId'];
     number = json['number'];
     name = json['name'];
     startTime = json['startTime'];
@@ -3630,7 +3826,6 @@ class Isolate extends Response {
       'breakpoints': breakpoints.map((f) => f.toJson()).toList(),
       'exceptionPauseMode': exceptionPauseMode,
     });
-    _setIfNotNull(json, 'fixedId', fixedId);
     _setIfNotNull(json, 'rootLib', rootLib?.toJson());
     _setIfNotNull(json, 'error', error?.toJson());
     _setIfNotNull(
@@ -3643,6 +3838,40 @@ class Isolate extends Response {
   operator ==(other) => other is Isolate && id == other.id;
 
   String toString() => '[Isolate]';
+}
+
+/// See [getInstances].
+class InstanceSet extends Response {
+  static InstanceSet parse(Map<String, dynamic> json) =>
+      json == null ? null : new InstanceSet._fromJson(json);
+
+  /// The number of instances of the requested type currently allocated.
+  int totalCount;
+
+  /// An array of instances of the requested type.
+  List<InstanceRef> instances;
+
+  InstanceSet();
+
+  InstanceSet._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    totalCount = json['totalCount'];
+    instances =
+        new List<InstanceRef>.from(createServiceObject(json['instances']));
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json['type'] = 'InstanceSet';
+    json.addAll({
+      'totalCount': totalCount,
+      'instances': instances.map((f) => f.toJson()).toList(),
+    });
+    return json;
+  }
+
+  String toString() => '[InstanceSet ' //
+      'type: ${type}, totalCount: ${totalCount}, instances: ${instances}]';
 }
 
 /// `LibraryRef` is a reference to a `Library`.
@@ -4646,6 +4875,45 @@ class Success extends Response {
   String toString() => '[Success type: ${type}]';
 }
 
+class Timeline extends Response {
+  static Timeline parse(Map<String, dynamic> json) =>
+      json == null ? null : new Timeline._fromJson(json);
+
+  /// A list of timeline events.
+  List<TimelineEvent> traceEvents;
+
+  /// The start of the period of time in which traceEvents were collected.
+  int timeOriginMicros;
+
+  /// The duration of time covered by the timeline.
+  int timeExtentMicros;
+
+  Timeline();
+
+  Timeline._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    traceEvents =
+        new List<TimelineEvent>.from(createServiceObject(json['traceEvents']));
+    timeOriginMicros = json['timeOriginMicros'];
+    timeExtentMicros = json['timeExtentMicros'];
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json['type'] = 'Timeline';
+    json.addAll({
+      'traceEvents': traceEvents.map((f) => f.toJson()).toList(),
+      'timeOriginMicros': timeOriginMicros,
+      'timeExtentMicros': timeExtentMicros,
+    });
+    return json;
+  }
+
+  String toString() => '[Timeline ' //
+      'type: ${type}, traceEvents: ${traceEvents}, timeOriginMicros: ${timeOriginMicros}, ' //
+      'timeExtentMicros: ${timeExtentMicros}]';
+}
+
 /// An `TimelineEvent` is an arbitrary map that contains a [Trace Event Format]
 /// event.
 class TimelineEvent {
@@ -4662,6 +4930,46 @@ class TimelineEvent {
   }
 
   String toString() => '[TimelineEvent ]';
+}
+
+class TimelineFlags extends Response {
+  static TimelineFlags parse(Map<String, dynamic> json) =>
+      json == null ? null : new TimelineFlags._fromJson(json);
+
+  /// The name of the recorder currently in use. Recorder types include, but are
+  /// not limited to: Callback, Endless, Fuchsia, Ring, Startup, and Systrace.
+  /// Set to "null" if no recorder is currently set.
+  String recorderName;
+
+  /// The list of all available timeline streams.
+  List<String> availableStreams;
+
+  /// The list of timeline streams that are currently enabled.
+  List<String> recordedStreams;
+
+  TimelineFlags();
+
+  TimelineFlags._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    recorderName = json['recorderName'];
+    availableStreams = new List<String>.from(json['availableStreams']);
+    recordedStreams = new List<String>.from(json['recordedStreams']);
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json['type'] = 'TimelineFlags';
+    json.addAll({
+      'recorderName': recorderName,
+      'availableStreams': availableStreams.map((f) => f).toList(),
+      'recordedStreams': recordedStreams.map((f) => f).toList(),
+    });
+    return json;
+  }
+
+  String toString() => '[TimelineFlags ' //
+      'type: ${type}, recorderName: ${recorderName}, availableStreams: ${availableStreams}, ' //
+      'recordedStreams: ${recordedStreams}]';
 }
 
 /// `TypeArgumentsRef` is a reference to a `TypeArguments` object.
@@ -5075,81 +5383,6 @@ class ProfileFunction {
   String toString() => '[ProfileFunction ' //
       'kind: ${kind}, inclusiveTicks: ${inclusiveTicks}, exclusiveTicks: ${exclusiveTicks}, ' //
       'function: ${function}, codes: ${codes}]';
-}
-
-class AllocationProfile extends Response {
-  static AllocationProfile parse(Map<String, dynamic> json) =>
-      json == null ? null : new AllocationProfile._fromJson(json);
-
-  String dateLastServiceGC;
-
-  List<ClassHeapStats> members;
-
-  AllocationProfile();
-
-  AllocationProfile._fromJson(Map<String, dynamic> json)
-      : super._fromJson(json) {
-    dateLastServiceGC = json['dateLastServiceGC'];
-    members =
-        new List<ClassHeapStats>.from(createServiceObject(json['members']));
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    var json = <String, dynamic>{};
-    json['type'] = 'AllocationProfile';
-    json.addAll({
-      'dateLastServiceGC': dateLastServiceGC,
-      'members': members.map((f) => f.toJson()).toList(),
-    });
-    return json;
-  }
-
-  String toString() => '[AllocationProfile ' //
-      'type: ${type}, dateLastServiceGC: ${dateLastServiceGC}, members: ${members}]';
-}
-
-class ClassHeapStats extends Response {
-  static ClassHeapStats parse(Map<String, dynamic> json) =>
-      json == null ? null : new ClassHeapStats._fromJson(json);
-
-  ClassRef classRef;
-
-  List<int> new_;
-
-  List<int> old;
-
-  int promotedBytes;
-
-  int promotedInstances;
-
-  ClassHeapStats();
-
-  ClassHeapStats._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
-    classRef = createServiceObject(json['class']);
-    new_ = new List<int>.from(json['new']);
-    old = new List<int>.from(json['old']);
-    promotedBytes = json['promotedBytes'];
-    promotedInstances = json['promotedInstances'];
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    var json = <String, dynamic>{};
-    json['type'] = 'ClassHeapStats';
-    json.addAll({
-      'class': classRef.toJson(),
-      'new': new_.map((f) => f).toList(),
-      'old': old.map((f) => f).toList(),
-      'promotedBytes': promotedBytes,
-      'promotedInstances': promotedInstances,
-    });
-    return json;
-  }
-
-  String toString() => '[ClassHeapStats ' //
-      'type: ${type}, classRef: ${classRef}, new_: ${new_}, old: ${old}, ' //
-      'promotedBytes: ${promotedBytes}, promotedInstances: ${promotedInstances}]';
 }
 
 class HeapSpace extends Response {
