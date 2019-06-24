@@ -31,11 +31,11 @@ public class InstanceSet extends Response {
   /**
    * An array of instances of the requested type.
    */
-  public ElementList<InstanceRef> getInstances() {
-    return new ElementList<InstanceRef>(json.get("instances").getAsJsonArray()) {
+  public ElementList<ObjRef> getInstances() {
+    return new ElementList<ObjRef>(json.get("instances").getAsJsonArray()) {
       @Override
-      protected InstanceRef basicGet(JsonArray array, int index) {
-        return new InstanceRef(array.get(index).getAsJsonObject());
+      protected ObjRef basicGet(JsonArray array, int index) {
+        return new ObjRef(array.get(index).getAsJsonObject());
       }
     };
   }

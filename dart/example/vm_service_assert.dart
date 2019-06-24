@@ -640,7 +640,7 @@ vms.InstanceSet assertInstanceSet(vms.InstanceSet obj) {
   assertNotNull(obj);
   assertString(obj.type);
   assertInt(obj.totalCount);
-  assertInstanceRefs(obj.instances);
+  assertObjRefs(obj.instances);
   return obj;
 }
 

@@ -1028,7 +1028,13 @@ class Method extends Member {
       gen.writeln('};');
       args.where((MethodArg a) => a.optional).forEach((MethodArg arg) {
         String valueRef = arg.name;
-        gen.writeln("if (${arg.name} != null) {");
+        // Special case for `getAllocationProfile`. We do not want to add these
+        // params if they are false.
+        if (name == 'getAllocationProfile') {
+          gen.writeln("if (${arg.name} != null && ${arg.name}) {");
+        } else {
+          gen.writeln("if (${arg.name} != null) {");
+        }
         gen.writeln("m['${arg.name}'] = ${valueRef};");
         gen.writeln("}");
       });
@@ -1324,7 +1330,14 @@ class Type extends Member {
 
     fields.forEach((TypeField field) {
       if (field.type.isSimple || field.type.isEnum) {
-        gen.write("${field.generatableName} = json['${field.name}']");
+        // Special case `AllocationProfile`.
+        if (name == 'AllocationProfile' && field.type.name == 'int') {
+          gen.write(
+              "${field.generatableName} = json['${field.name}'] is String ? "
+                  "int.parse(json['${field.name}']) : json['${field.name}']");
+        } else {
+          gen.write("${field.generatableName} = json['${field.name}']");
+        }
         if (field.defaultValue != null) {
           gen.write(' ?? ${field.defaultValue}');
         }
@@ -1385,11 +1398,25 @@ class Type extends Member {
           }
         } else {
           if (fieldType.isListTypeSimple) {
-            gen.writeln("${field.generatableName} = "
-                "new List<${fieldType.listTypeArg}>.from($ref);");
+            // Special case `ClassHeapStats`. Pre 3.18, responses included keys
+            // `new` and `old`. Post 3.18, these will be null.
+            if (name == 'ClassHeapStats') {
+              gen.writeln("${field.generatableName} = $ref == null ? null : "
+                  "new List<${fieldType.listTypeArg}>.from($ref);");
+            } else {
+              gen.writeln("${field.generatableName} = "
+                  "new List<${fieldType.listTypeArg}>.from($ref);");
+            }
           } else {
-            gen.writeln("${field.generatableName} = "
-                "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref));");
+            // Special case `InstanceSet`. Pre 3.20, instances were sent in a
+            // field named 'samples' instead of 'instances'.
+            if (name == 'InstanceSet') {
+              gen.writeln("${field.generatableName} = "
+                  "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref ?? json['samples']));");
+            } else {
+              gen.writeln("${field.generatableName} = "
+                  "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref));");
+            }
           }
         }
       } else {

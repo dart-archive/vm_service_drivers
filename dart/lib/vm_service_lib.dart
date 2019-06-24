@@ -370,7 +370,8 @@ abstract class VmServiceInterface {
   /// `limit` is the maximum number of instances to be returned.
   ///
   /// See [InstanceSet].
-  Future<InstanceSet> getInstances(String objectId, int limit);
+  Future<InstanceSet> getInstances(
+      String isolateId, String objectId, int limit);
 
   /// The `getIsolate` RPC is used to lookup an `Isolate` object by its `id`.
   ///
@@ -842,6 +843,7 @@ class VmServerConnection {
           break;
         case 'getInstances':
           response = await _serviceImplementation.getInstances(
+            params['isolateId'],
             params['objectId'],
             params['limit'],
           );
@@ -1213,10 +1215,10 @@ class VmService implements VmServiceInterface {
   Future<AllocationProfile> getAllocationProfile(String isolateId,
       {bool reset, bool gc}) {
     Map m = {'isolateId': isolateId};
-    if (reset != null) {
+    if (reset != null && reset) {
       m['reset'] = reset;
     }
-    if (gc != null) {
+    if (gc != null && gc) {
       m['gc'] = gc;
     }
     return _call('getAllocationProfile', m);
@@ -1226,8 +1228,10 @@ class VmService implements VmServiceInterface {
   Future<FlagList> getFlagList() => _call('getFlagList');
 
   @override
-  Future<InstanceSet> getInstances(String objectId, int limit) {
-    return _call('getInstances', {'objectId': objectId, 'limit': limit});
+  Future<InstanceSet> getInstances(
+      String isolateId, String objectId, int limit) {
+    return _call('getInstances',
+        {'isolateId': isolateId, 'objectId': objectId, 'limit': limit});
   }
 
   @override
@@ -1985,8 +1989,12 @@ class AllocationProfile extends Response {
   AllocationProfile._fromJson(Map<String, dynamic> json)
       : super._fromJson(json) {
     memoryUsage = createServiceObject(json['memoryUsage']);
-    dateLastAccumulatorReset = json['dateLastAccumulatorReset'];
-    dateLastServiceGC = json['dateLastServiceGC'];
+    dateLastAccumulatorReset = json['dateLastAccumulatorReset'] is String
+        ? int.parse(json['dateLastAccumulatorReset'])
+        : json['dateLastAccumulatorReset'];
+    dateLastServiceGC = json['dateLastServiceGC'] is String
+        ? int.parse(json['dateLastServiceGC'])
+        : json['dateLastServiceGC'];
     members =
         new List<ClassHeapStats>.from(createServiceObject(json['members']));
   }
@@ -2336,8 +2344,8 @@ class ClassHeapStats extends Response {
     instancesAccumulated = json['instancesAccumulated'];
     instancesCurrent = json['instancesCurrent'];
     classRef = createServiceObject(json['class']);
-    new_ = new List<int>.from(json['new']);
-    old = new List<int>.from(json['old']);
+    new_ = json['new'] == null ? null : new List<int>.from(json['new']);
+    old = json['old'] == null ? null : new List<int>.from(json['old']);
     promotedBytes = json['promotedBytes'];
     promotedInstances = json['promotedInstances'];
   }
@@ -3849,14 +3857,14 @@ class InstanceSet extends Response {
   int totalCount;
 
   /// An array of instances of the requested type.
-  List<InstanceRef> instances;
+  List<ObjRef> instances;
 
   InstanceSet();
 
   InstanceSet._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     totalCount = json['totalCount'];
-    instances =
-        new List<InstanceRef>.from(createServiceObject(json['instances']));
+    instances = new List<ObjRef>.from(
+        createServiceObject(json['instances'] ?? json['samples']));
   }
 
   @override
