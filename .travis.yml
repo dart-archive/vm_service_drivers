@@ -10,7 +10,9 @@ script:
 
 env:
   - BOT=dart
-  - BOT=java
+# TODO(devoncarew): Re-enable this bot:
+#   https://github.com/dart-lang/vm_service_drivers/issues/238
+#  - BOT=java
 
 branches:
   only:
