@@ -1215,10 +1215,10 @@ class VmService implements VmServiceInterface {
   Future<AllocationProfile> getAllocationProfile(String isolateId,
       {bool reset, bool gc}) {
     Map m = {'isolateId': isolateId};
-    if (reset != null) {
+    if (reset != null && reset) {
       m['reset'] = reset;
     }
-    if (gc != null) {
+    if (gc != null && gc) {
       m['gc'] = gc;
     }
     return _call('getAllocationProfile', m);

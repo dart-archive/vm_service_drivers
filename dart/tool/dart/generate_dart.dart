@@ -1028,7 +1028,13 @@ class Method extends Member {
       gen.writeln('};');
       args.where((MethodArg a) => a.optional).forEach((MethodArg arg) {
         String valueRef = arg.name;
-        gen.writeln("if (${arg.name} != null) {");
+        // Special case for `getAllocationProfile`. We do not want to add these
+        // params if they are false.
+        if (name == 'getAllocationProfile') {
+          gen.writeln("if (${arg.name} != null && ${arg.name}) {");
+        } else {
+          gen.writeln("if (${arg.name} != null) {");
+        }
         gen.writeln("m['${arg.name}'] = ${valueRef};");
         gen.writeln("}");
       });
