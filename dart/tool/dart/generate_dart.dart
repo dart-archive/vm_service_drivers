@@ -1392,8 +1392,15 @@ class Type extends Member {
           }
         } else {
           if (fieldType.isListTypeSimple) {
-            gen.writeln("${field.generatableName} = "
-                "new List<${fieldType.listTypeArg}>.from($ref);");
+            // Special case `ClassHeapStats`. Pre 3.18, responses included keys
+            // `new` and `old`. Post 3.18, these will be null.
+            if (name == 'ClassHeapStats') {
+              gen.writeln("${field.generatableName} = $ref == null ? null : "
+                  "new List<${fieldType.listTypeArg}>.from($ref);");
+            } else {
+              gen.writeln("${field.generatableName} = "
+                  "new List<${fieldType.listTypeArg}>.from($ref);");
+            }
           } else {
             // Special case `InstanceSet`. Pre 3.20, instances were sent in a
             // field named 'samples' instead of 'instances'.

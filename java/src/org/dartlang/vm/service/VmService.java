@@ -273,8 +273,9 @@ public class VmService extends VmServiceBase {
   /**
    * The [getInstances] RPC is used to retrieve a set of instances which are of a specific type.
    */
-  public void getInstances(String objectId, int limit, InstanceSetConsumer consumer) {
+  public void getInstances(String isolateId, String objectId, int limit, InstanceSetConsumer consumer) {
     final JsonObject params = new JsonObject();
+    params.addProperty("isolateId", isolateId);
     params.addProperty("objectId", objectId);
     params.addProperty("limit", limit);
     request("getInstances", params, consumer);

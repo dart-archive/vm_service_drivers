@@ -643,7 +643,8 @@ See [FlagList](#flaglist).
 ### getInstances
 
 ```
-InstanceSet getInstances(string objectId,
+InstanceSet getInstances(string isolateId,
+                         string objectId,
                          int limit)
 ```
 
@@ -2321,7 +2322,7 @@ class InstanceSet extends Response {
   int totalCount;
 
   // An array of instances of the requested type.
-  @Instance[] instances;
+  @Object[] instances;
 }
 ```
 
