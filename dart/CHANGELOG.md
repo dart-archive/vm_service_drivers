@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.20.0+2
+- allow optional params in `getVMTimeline`
+
 ## 3.20.0+1
 - handle null isolate ids in `callServiceExtension`
 - add backwards compatibility for `InstanceSet` and `AllocationProfile`

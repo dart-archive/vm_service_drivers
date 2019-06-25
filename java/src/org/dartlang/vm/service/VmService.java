@@ -383,11 +383,21 @@ public class VmService extends VmServiceBase {
 
   /**
    * The [getVMTimeline] RPC is used to retrieve an object which contains VM timeline events.
+   * @param timeOriginMicros This parameter is optional and may be null.
+   * @param timeExtentMicros This parameter is optional and may be null.
    */
-  public void getVMTimeline(int timeOriginMicros, int timeExtentMicros, TimelineConsumer consumer) {
+  public void getVMTimeline(Integer timeOriginMicros, Integer timeExtentMicros, TimelineConsumer consumer) {
     final JsonObject params = new JsonObject();
-    params.addProperty("timeOriginMicros", timeOriginMicros);
-    params.addProperty("timeExtentMicros", timeExtentMicros);
+    if (timeOriginMicros != null) params.addProperty("timeOriginMicros", timeOriginMicros);
+    if (timeExtentMicros != null) params.addProperty("timeExtentMicros", timeExtentMicros);
+    request("getVMTimeline", params, consumer);
+  }
+
+  /**
+   * The [getVMTimeline] RPC is used to retrieve an object which contains VM timeline events.
+   */
+  public void getVMTimeline(TimelineConsumer consumer) {
+    final JsonObject params = new JsonObject();
     request("getVMTimeline", params, consumer);
   }
 

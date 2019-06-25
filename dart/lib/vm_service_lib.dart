@@ -509,7 +509,7 @@ abstract class VmServiceInterface {
   /// If `getVMTimeline` is invoked while the current recorder is one of Fuchsia
   /// or Systrace, the `114` error code, invalid timeline request, will be
   /// returned as timeline events are handled by the OS in these modes.
-  Future<Timeline> getVMTimeline(int timeOriginMicros, int timeExtentMicros);
+  Future<Timeline> getVMTimeline({int timeOriginMicros, int timeExtentMicros});
 
   /// The `getVMTimelineFlags` RPC returns information about the current VM
   /// timeline configuration.
@@ -894,8 +894,8 @@ class VmServerConnection {
           break;
         case 'getVMTimeline':
           response = await _serviceImplementation.getVMTimeline(
-            params['timeOriginMicros'],
-            params['timeExtentMicros'],
+            timeOriginMicros: params['timeOriginMicros'],
+            timeExtentMicros: params['timeExtentMicros'],
           );
           break;
         case 'getVMTimelineFlags':
@@ -1304,11 +1304,15 @@ class VmService implements VmServiceInterface {
   Future<VM> getVM() => _call('getVM');
 
   @override
-  Future<Timeline> getVMTimeline(int timeOriginMicros, int timeExtentMicros) {
-    return _call('getVMTimeline', {
-      'timeOriginMicros': timeOriginMicros,
-      'timeExtentMicros': timeExtentMicros
-    });
+  Future<Timeline> getVMTimeline({int timeOriginMicros, int timeExtentMicros}) {
+    Map m = {};
+    if (timeOriginMicros != null) {
+      m['timeOriginMicros'] = timeOriginMicros;
+    }
+    if (timeExtentMicros != null) {
+      m['timeExtentMicros'] = timeExtentMicros;
+    }
+    return _call('getVMTimeline', m);
   }
 
   @override

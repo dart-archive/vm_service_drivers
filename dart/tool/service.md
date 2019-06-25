@@ -807,8 +807,8 @@ See [VM](#vm).
 ### getVMTimeline
 
 ```
-Timeline getVMTimeline(int timeOriginMicros,
-                       int timeExtentMicros)
+Timeline getVMTimeline(int timeOriginMicros [optional],
+                       int timeExtentMicros [optional])
 ```
 
 The _getVMTimeline_ RPC is used to retrieve an object which contains VM timeline
