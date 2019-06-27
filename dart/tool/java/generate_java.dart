@@ -870,6 +870,18 @@ class Type extends Member {
         writer.addLine('super(json);');
       });
 
+      if (name == 'InstanceRef' || name == 'Instance') {
+        writer.addMethod(
+          'isNull',
+          [],
+          (StatementWriter writer) {
+            writer.addLine('return getKind() == InstanceKind.Null;');
+          },
+          returnType: 'boolean',
+          javadoc: 'Returns whether this instance represents null.',
+        );
+      }
+
       for (var field in fields) {
         field.generateAccessor(writer);
       }
@@ -1059,8 +1071,13 @@ class TypeRef {
 
   Type get type => api.types.firstWhere((t) => t.name == name);
 
-  void generateAccessStatements(StatementWriter writer, String propertyName,
-      {bool canBeSentinel = false, String defaultValue, bool optional = false}) {
+  void generateAccessStatements(
+    StatementWriter writer,
+    String propertyName, {
+    bool canBeSentinel = false,
+    String defaultValue,
+    bool optional = false,
+  }) {
     if (name == 'boolean') {
       if (isArray) {
         print('skipped accessor body for $propertyName');
@@ -1159,7 +1176,8 @@ class TypeRef {
           writer.addLine('final JsonElement elem = json.get("$propertyName");');
           writer.addLine('if (!elem.isJsonObject()) return null;');
           writer.addLine('final JsonObject child = elem.getAsJsonObject();');
-          writer.addLine('final String type = child.get("type").getAsString();');
+          writer
+              .addLine('final String type = child.get("type").getAsString();');
           writer.addLine('if ("Sentinel".equals(type)) return null;');
           writer.addLine('return new $name(child);');
         } else {
