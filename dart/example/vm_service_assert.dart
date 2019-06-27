@@ -927,6 +927,13 @@ vms.TimelineFlags assertTimelineFlags(vms.TimelineFlags obj) {
   return obj;
 }
 
+vms.Timestamp assertTimestamp(vms.Timestamp obj) {
+  assertNotNull(obj);
+  assertString(obj.type);
+  assertInt(obj.timestamp);
+  return obj;
+}
+
 vms.TypeArgumentsRef assertTypeArgumentsRef(vms.TypeArgumentsRef obj) {
   assertNotNull(obj);
   assertString(obj.type);

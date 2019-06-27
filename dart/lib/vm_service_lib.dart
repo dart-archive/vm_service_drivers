@@ -17,7 +17,7 @@ import 'src/service_extension_registry.dart';
 
 export 'src/service_extension_registry.dart' show ServiceExtensionRegistry;
 
-const String vmServiceVersion = '3.20.0';
+const String vmServiceVersion = '3.21.0';
 
 /// @optional
 const String optional = 'optional';
@@ -129,6 +129,7 @@ Map<String, Function> _typeFactories = {
   'Timeline': Timeline.parse,
   'TimelineEvent': TimelineEvent.parse,
   'TimelineFlags': TimelineFlags.parse,
+  'Timestamp': Timestamp.parse,
   '@TypeArguments': TypeArgumentsRef.parse,
   'TypeArguments': TypeArguments.parse,
   'UnresolvedSourceLocation': UnresolvedSourceLocation.parse,
@@ -496,6 +497,8 @@ abstract class VmServiceInterface {
   /// to filter timeline events. It uses the same monotonic clock as
   /// dart:developer's <code>Timeline.now</code>Timeline.now and the VM
   /// embedding API's <code>Dart_TimelineGetMicros</code>Dart_TimelineGetMicros.
+  /// See [getVMTimelineMicros] for access to this clock through the service
+  /// protocol.
   ///
   /// The `timeExtentMicros` parameter specifies how large the time range used
   /// to filter timeline events should be.
@@ -519,6 +522,16 @@ abstract class VmServiceInterface {
   ///
   /// See [TimelineFlags].
   Future<TimelineFlags> getVMTimelineFlags();
+
+  /// The `getVMTimelineMicros` RPC returns the current time stamp from the
+  /// clock used by the timeline, similar to
+  /// <code>Timeline.now</code>Timeline.now in
+  /// <code>dart:developer</code>dart:developer and
+  /// <code>Dart_TimelineGetMicros</code>Dart_TimelineGetMicros in the VM
+  /// embedding API.
+  ///
+  /// See [Timestamp] and [getVMTimeline].
+  Future<Timestamp> getVMTimelineMicros();
 
   /// The `pause` RPC is used to interrupt a running isolate. The RPC enqueues
   /// the interrupt request and potentially returns before the isolate is
@@ -900,6 +913,9 @@ class VmServerConnection {
           break;
         case 'getVMTimelineFlags':
           response = await _serviceImplementation.getVMTimelineFlags();
+          break;
+        case 'getVMTimelineMicros':
+          response = await _serviceImplementation.getVMTimelineMicros();
           break;
         case 'pause':
           response = await _serviceImplementation.pause(
@@ -1317,6 +1333,9 @@ class VmService implements VmServiceInterface {
 
   @override
   Future<TimelineFlags> getVMTimelineFlags() => _call('getVMTimelineFlags');
+
+  @override
+  Future<Timestamp> getVMTimelineMicros() => _call('getVMTimelineMicros');
 
   @override
   Future<Success> pause(String isolateId) {
@@ -4982,6 +5001,32 @@ class TimelineFlags extends Response {
   String toString() => '[TimelineFlags ' //
       'type: ${type}, recorderName: ${recorderName}, availableStreams: ${availableStreams}, ' //
       'recordedStreams: ${recordedStreams}]';
+}
+
+class Timestamp extends Response {
+  static Timestamp parse(Map<String, dynamic> json) =>
+      json == null ? null : new Timestamp._fromJson(json);
+
+  /// A timestamp in microseconds since epoch.
+  int timestamp;
+
+  Timestamp();
+
+  Timestamp._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    timestamp = json['timestamp'];
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+    json['type'] = 'Timestamp';
+    json.addAll({
+      'timestamp': timestamp,
+    });
+    return json;
+  }
+
+  String toString() => '[Timestamp type: ${type}, timestamp: ${timestamp}]';
 }
 
 /// `TypeArgumentsRef` is a reference to a `TypeArguments` object.

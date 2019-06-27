@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.21.0
+- support service protocol version 3.21
+
 ## 3.20.0+2
 - allow optional params in `getVMTimeline`
 
