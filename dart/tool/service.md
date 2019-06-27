@@ -1292,7 +1292,8 @@ class Class extends Object {
   bool const;
 
   // The library which contains this class.
-  @Library library;
+  // TODO: This should be @Library, but the VM can return @Instance objects here.
+  @Object library;
 
   // The location of this class in the source code.
   SourceLocation location [optional];
@@ -2085,11 +2086,13 @@ class Instance extends Object {
   //   Closure
   @Function closureFunction [optional];
 
+  // TODO(devoncarew): this can return an InstanceRef
+  //
   // The context associated with a Closure instance.
   //
   // Provided for instance kinds:
   //   Closure
-  @Context closureContext [optional];
+  //@Context closureContext [optional];
 
   // The referent of a MirrorReference instance.
   //
