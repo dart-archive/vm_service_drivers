@@ -98,6 +98,7 @@ public class Instance extends Obj {
   /**
    * Instance references always include their class.
    */
+  @Override
   @NotNull
   public ClassRef getClassRef() {
     return new ClassRef((JsonObject) json.get("class"));

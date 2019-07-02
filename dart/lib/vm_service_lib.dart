@@ -242,9 +242,8 @@ abstract class VmServiceInterface {
   ///
   /// If `disableBreakpoints` is provided and set to true, any breakpoints hit
   /// as a result of this invocation are ignored, including pauses resulting
-  /// from a call to <code>debugger()</code>debugger() from
-  /// <code>dart:developer</code>dart:developer. Defaults to false if not
-  /// provided.
+  /// from a call to `debugger()` from `dart:developer`. Defaults to false if
+  /// not provided.
   ///
   /// If `targetId` or any element of `argumentIds` is a temporary id which has
   /// expired, then the `Expired` [Sentinel] is returned.
@@ -364,9 +363,8 @@ abstract class VmServiceInterface {
   /// The `getInstances` RPC is used to retrieve a set of instances which are of
   /// a specific type.
   ///
-  /// `objectId` is the ID of the <code>Class</code>Class to retrieve instances
-  /// for. `objectId` must be the ID of a <code>Class</code>Class, otherwise an
-  /// error is returned.
+  /// `objectId` is the ID of the `Class` to retrieve instances for. `objectId`
+  /// must be the ID of a `Class`, otherwise an error is returned.
   ///
   /// `limit` is the maximum number of instances to be returned.
   ///
@@ -495,19 +493,16 @@ abstract class VmServiceInterface {
   ///
   /// The `timeOriginMicros` parameter is the beginning of the time range used
   /// to filter timeline events. It uses the same monotonic clock as
-  /// dart:developer's <code>Timeline.now</code>Timeline.now and the VM
-  /// embedding API's <code>Dart_TimelineGetMicros</code>Dart_TimelineGetMicros.
-  /// See [getVMTimelineMicros] for access to this clock through the service
-  /// protocol.
+  /// dart:developer's `Timeline.now` and the VM embedding API's
+  /// `Dart_TimelineGetMicros`. See [getVMTimelineMicros] for access to this
+  /// clock through the service protocol.
   ///
   /// The `timeExtentMicros` parameter specifies how large the time range used
   /// to filter timeline events should be.
   ///
   /// For example, given `timeOriginMicros` and `timeExtentMicros`, only
   /// timeline events from the following time range will be returned:
-  /// <code>(timeOriginMicros, timeOriginMicros +
-  /// timeExtentMicros)</code>(timeOriginMicros, timeOriginMicros +
-  /// timeExtentMicros).
+  /// `(timeOriginMicros, timeOriginMicros + timeExtentMicros)`.
   ///
   /// If `getVMTimeline` is invoked while the current recorder is one of Fuchsia
   /// or Systrace, the `114` error code, invalid timeline request, will be
@@ -524,11 +519,8 @@ abstract class VmServiceInterface {
   Future<TimelineFlags> getVMTimelineFlags();
 
   /// The `getVMTimelineMicros` RPC returns the current time stamp from the
-  /// clock used by the timeline, similar to
-  /// <code>Timeline.now</code>Timeline.now in
-  /// <code>dart:developer</code>dart:developer and
-  /// <code>Dart_TimelineGetMicros</code>Dart_TimelineGetMicros in the VM
-  /// embedding API.
+  /// clock used by the timeline, similar to `Timeline.now` in `dart:developer`
+  /// and `Dart_TimelineGetMicros` in the VM embedding API.
   ///
   /// See [Timestamp] and [getVMTimeline].
   Future<Timestamp> getVMTimelineMicros();
@@ -543,7 +535,7 @@ abstract class VmServiceInterface {
   Future<Success> pause(String isolateId);
 
   /// The `kill` RPC is used to kill an isolate as if by dart:isolate's
-  /// <code>Isolate.kill(IMMEDIATE)</code>Isolate.kill(IMMEDIATE).
+  /// `Isolate.kill(IMMEDIATE)`.
   ///
   /// The isolate is killed regardless of whether it is paused or running.
   ///
@@ -3396,6 +3388,10 @@ class Instance extends Obj {
   /// What kind of instance is this?
   /*InstanceKind*/ String kind;
 
+  /// Instance references always include their class.
+  @override
+  ClassRef classRef;
+
   /// The value of this instance as a string.
   ///
   /// Provided for the instance kinds:
@@ -3642,6 +3638,7 @@ class Instance extends Obj {
 
   Instance._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
     kind = json['kind'];
+    classRef = createServiceObject(json['class']);
     valueAsString = json['valueAsString'];
     valueAsStringIsTruncated = json['valueAsStringIsTruncated'] ?? false;
     length = json['length'];
@@ -3680,6 +3677,7 @@ class Instance extends Obj {
     json['type'] = 'Instance';
     json.addAll({
       'kind': kind,
+      'class': classRef.toJson(),
     });
     _setIfNotNull(json, 'valueAsString', valueAsString);
     _setIfNotNull(
@@ -3714,7 +3712,8 @@ class Instance extends Obj {
 
   operator ==(other) => other is Instance && id == other.id;
 
-  String toString() => '[Instance type: ${type}, id: ${id}, kind: ${kind}]';
+  String toString() => '[Instance ' //
+      'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
 }
 
 /// `IsolateRef` is a reference to an `Isolate` object.
@@ -4257,14 +4256,23 @@ class NullValRef extends InstanceRef {
   static NullValRef parse(Map<String, dynamic> json) =>
       json == null ? null : new NullValRef._fromJson(json);
 
+  /// Always 'null'.
+  @override
+  String valueAsString;
+
   NullValRef();
 
-  NullValRef._fromJson(Map<String, dynamic> json) : super._fromJson(json);
+  NullValRef._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    valueAsString = json['valueAsString'];
+  }
 
   @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = '@Null';
+    json.addAll({
+      'valueAsString': valueAsString,
+    });
     return json;
   }
 
@@ -4273,7 +4281,8 @@ class NullValRef extends InstanceRef {
   operator ==(other) => other is NullValRef && id == other.id;
 
   String toString() => '[NullValRef ' //
-      'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}]';
+      'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, ' //
+      'valueAsString: ${valueAsString}]';
 }
 
 /// A `NullVal` object represents the Dart language value null.
@@ -4281,14 +4290,23 @@ class NullVal extends Instance {
   static NullVal parse(Map<String, dynamic> json) =>
       json == null ? null : new NullVal._fromJson(json);
 
+  /// Always 'null'.
+  @override
+  String valueAsString;
+
   NullVal();
 
-  NullVal._fromJson(Map<String, dynamic> json) : super._fromJson(json);
+  NullVal._fromJson(Map<String, dynamic> json) : super._fromJson(json) {
+    valueAsString = json['valueAsString'];
+  }
 
   @override
   Map<String, dynamic> toJson() {
     var json = super.toJson();
     json['type'] = 'Null';
+    json.addAll({
+      'valueAsString': valueAsString,
+    });
     return json;
   }
 
@@ -4296,7 +4314,9 @@ class NullVal extends Instance {
 
   operator ==(other) => other is NullVal && id == other.id;
 
-  String toString() => '[NullVal type: ${type}, id: ${id}, kind: ${kind}]';
+  String toString() => '[NullVal ' //
+      'type: ${type}, id: ${id}, kind: ${kind}, classRef: ${classRef}, ' //
+      'valueAsString: ${valueAsString}]';
 }
 
 /// `ObjRef` is a reference to a `Obj`.
