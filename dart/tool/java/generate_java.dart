@@ -319,6 +319,10 @@ class Api extends Member with ApiParseUtil {
     // or Enum values.
     _mergeTypes();
     _mergeEnums();
+
+    for (Type type in types) {
+      type.calculateFieldOverrides();
+    }
   }
 
   void setDefaultValue(String typeName, String propertyName) {
@@ -757,15 +761,6 @@ class TextOutputVisitor implements NodeVisitor {
 
   String toString() => buf.toString().trim();
 
-  void visitElementAfter(Element element) {
-    if (element.tag == 'p') {
-      buf.write('\n\n');
-    } else if (element.tag == 'em') {
-      buf.write(']');
-      _inRef = false;
-    }
-  }
-
   bool visitElementBefore(Element element) {
     if (element.tag == 'em') {
       buf.write('[');
@@ -774,6 +769,8 @@ class TextOutputVisitor implements NodeVisitor {
       // Nothing to do.
     } else if (element.tag == 'a') {
       // Nothing to do - we're not writing out <a> refs (they won't resolve).
+    } else if (element.tag == 'code') {
+      buf.write(renderToHtml([element]));
     } else {
       print('unknown tag: ${element.tag}');
       buf.write(renderToHtml([element]));
@@ -786,6 +783,15 @@ class TextOutputVisitor implements NodeVisitor {
     String t = text.text;
     if (_inRef) t = _coerceRefType(t);
     buf.write(t);
+  }
+
+  void visitElementAfter(Element element) {
+    if (element.tag == 'em') {
+      buf.write(']');
+      _inRef = false;
+    } else if (element.tag == 'p') {
+      buf.write('\n\n');
+    }
   }
 
   static String printText(Node node) {
@@ -905,8 +911,23 @@ class Type extends Member {
 
   Type getSuper() => superName == null ? null : api.getType(superName);
 
+  bool hasField(String name) {
+    if (fields.any((field) => field.name == name)) return true;
+    return getSuper()?.hasField(name) ?? false;
+  }
+
   void _parse(Token token) {
     new TypeParser(token).parseInto(this);
+  }
+
+  void calculateFieldOverrides() {
+    for (TypeField field in fields.toList()) {
+      if (superName == null) continue;
+
+      if (getSuper().hasField(field.name)) {
+        field.setOverrides();
+      }
+    }
   }
 }
 
@@ -930,8 +951,13 @@ class TypeField extends Member {
   String name;
   bool optional = false;
   String defaultValue;
+  bool overrides = false;
 
   TypeField(this.parent, this._docs);
+
+  void setOverrides() {
+    overrides = true;
+  }
 
   String get accessorName {
     var remappedName = _nameRemap[name];
@@ -979,12 +1005,22 @@ class TypeField extends Member {
         returnType = 'long';
       }
 
-      writer.addMethod(accessorName, [], (StatementWriter writer) {
-        type.valueType.generateAccessStatements(writer, name,
+      writer.addMethod(
+        accessorName,
+        [],
+        (StatementWriter writer) {
+          type.valueType.generateAccessStatements(
+            writer,
+            name,
             canBeSentinel: type.isValueAndSentinel,
             defaultValue: defaultValue,
-            optional: optional);
-      }, javadoc: docs, returnType: returnType);
+            optional: optional,
+          );
+        },
+        javadoc: docs,
+        returnType: returnType,
+        isOverride: overrides,
+      );
     }
   }
 }
