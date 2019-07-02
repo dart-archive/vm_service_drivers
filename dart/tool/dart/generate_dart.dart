@@ -387,7 +387,7 @@ class Api extends Member with ApiParseUtil {
     }
 
     for (Type type in types) {
-      type.removeDuplicateFieldDefs();
+      type.calculateFieldOverrides();
     }
 
     Method streamListenMethod =
@@ -1334,7 +1334,7 @@ class Type extends Member {
         if (name == 'AllocationProfile' && field.type.name == 'int') {
           gen.write(
               "${field.generatableName} = json['${field.name}'] is String ? "
-                  "int.parse(json['${field.name}']) : json['${field.name}']");
+              "int.parse(json['${field.name}']) : json['${field.name}']");
         } else {
           gen.write("${field.generatableName} = json['${field.name}']");
         }
@@ -1599,13 +1599,12 @@ Map<String, dynamic> toJson() {
     new TypeParser(token).parseInto(this);
   }
 
-  void removeDuplicateFieldDefs() {
+  void calculateFieldOverrides() {
     for (TypeField field in fields.toList()) {
       if (superName == null) continue;
 
       if (getSuper().hasField(field.name)) {
-        print('Removing duplicate field def: ${name}.${field.name}.');
-        fields.remove(field);
+        field.setOverrides();
       }
     }
   }
@@ -1633,8 +1632,13 @@ class TypeField extends Member {
   String name;
   bool optional = false;
   String defaultValue;
+  bool overrides = false;
 
   TypeField(this.parent, this._docs);
+
+  void setOverrides() {
+    overrides = true;
+  }
 
   String get docs {
     String str = _docs == null ? '' : _docs;
@@ -1653,6 +1657,7 @@ class TypeField extends Member {
   void generate(DartGenerator gen) {
     if (docs.isNotEmpty) gen.writeDocs(docs);
     if (optional) gen.write('@optional ');
+    if (overrides) gen.write('@override ');
     String typeName =
         api.isEnumName(type.name) ? '/*${type.name}*/ String' : type.name;
     gen.writeStatement('${typeName} ${generatableName};');
@@ -1749,7 +1754,7 @@ class TextOutputVisitor implements NodeVisitor {
   TextOutputVisitor();
 
   bool visitElementBefore(Element element) {
-    if (element.tag == 'em') {
+    if (element.tag == 'em' || element.tag == 'code') {
       buf.write('`');
       _em = true;
     } else if (element.tag == 'p') {
@@ -1759,9 +1764,6 @@ class TextOutputVisitor implements NodeVisitor {
       _blockquote = true;
     } else if (element.tag == 'a') {
       _href = true;
-    } else {
-      print('unknown tag: ${element.tag}');
-      buf.write(renderToHtml([element]));
     }
 
     return true;
@@ -1783,16 +1785,19 @@ class TextOutputVisitor implements NodeVisitor {
   }
 
   void visitElementAfter(Element element) {
-    if (element.tag == 'p') {
+    if (element.tag == 'em' || element.tag == 'code') {
+      buf.write('`');
+      _em = false;
+    } else if (element.tag == 'p') {
       buf.write('\n\n');
-    } else if (element.tag == 'a') {
-      _href = false;
     } else if (element.tag == 'blockquote') {
       //buf.write('```\n');
       _blockquote = false;
-    } else if (element.tag == 'em') {
-      buf.write('`');
-      _em = false;
+    } else if (element.tag == 'a') {
+      _href = false;
+    } else {
+      print('             </${element.tag}>');
+      buf.write(renderToHtml([element]));
     }
   }
 
