@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@link CodeRef} is a reference to a {@link Code} object.
@@ -31,6 +32,7 @@ public class CodeRef extends ObjRef {
   /**
    * What kind of code object is this?
    */
+  @NotNull
   public CodeKind getKind() {
     final JsonElement value = json.get("kind");
     try {
@@ -43,6 +45,7 @@ public class CodeRef extends ObjRef {
   /**
    * A name for this code object.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }

@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link Null} object represents the Dart language value null.
@@ -30,6 +31,7 @@ public class Null extends Instance {
   /**
    * Always 'null'.
    */
+  @NotNull
   public String getValueAsString() {
     return json.get("valueAsString").getAsString();
   }

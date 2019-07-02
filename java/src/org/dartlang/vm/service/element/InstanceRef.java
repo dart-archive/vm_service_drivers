@@ -17,6 +17,8 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * {@link InstanceRef} is a reference to an {@link Instance}.
@@ -31,6 +33,7 @@ public class InstanceRef extends ObjRef {
   /**
    * Instance references always include their class.
    */
+  @NotNull
   public ClassRef getClassRef() {
     return new ClassRef((JsonObject) json.get("class"));
   }
@@ -38,6 +41,7 @@ public class InstanceRef extends ObjRef {
   /**
    * What kind of instance is this?
    */
+  @NotNull
   public InstanceKind getKind() {
     final JsonElement value = json.get("kind");
     try {
@@ -84,6 +88,7 @@ public class InstanceRef extends ObjRef {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getName() {
     return json.get("name") == null ? null : json.get("name").getAsString();
   }
@@ -96,6 +101,7 @@ public class InstanceRef extends ObjRef {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ClassRef getParameterizedClass() {
     return json.get("parameterizedClass") == null ? null : new ClassRef((JsonObject) json.get("parameterizedClass"));
   }
@@ -110,6 +116,7 @@ public class InstanceRef extends ObjRef {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getPattern() {
     return json.get("pattern") == null ? null : new InstanceRef((JsonObject) json.get("pattern"));
   }
@@ -122,6 +129,7 @@ public class InstanceRef extends ObjRef {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ClassRef getTypeClass() {
     return json.get("typeClass") == null ? null : new ClassRef((JsonObject) json.get("typeClass"));
   }
@@ -142,6 +150,7 @@ public class InstanceRef extends ObjRef {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getValueAsString() {
     return json.get("valueAsString") == null ? null : json.get("valueAsString").getAsString();
   }

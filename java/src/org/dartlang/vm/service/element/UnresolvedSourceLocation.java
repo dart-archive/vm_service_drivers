@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The {@link UnresolvedSourceLocation} class is used to refer to an unresolved breakpoint
@@ -54,6 +55,7 @@ public class UnresolvedSourceLocation extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ScriptRef getScript() {
     return json.get("script") == null ? null : new ScriptRef((JsonObject) json.get("script"));
   }
@@ -63,6 +65,7 @@ public class UnresolvedSourceLocation extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getScriptUri() {
     return json.get("scriptUri") == null ? null : json.get("scriptUri").getAsString();
   }

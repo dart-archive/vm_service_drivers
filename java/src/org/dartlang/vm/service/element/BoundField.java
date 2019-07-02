@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link BoundField} represents a field bound to a particular value in an {@link Instance}.
@@ -28,6 +29,7 @@ public class BoundField extends Element {
     super(json);
   }
 
+  @NotNull
   public FieldRef getDecl() {
     return new FieldRef((JsonObject) json.get("decl"));
   }
@@ -35,6 +37,7 @@ public class BoundField extends Element {
   /**
    * @return one of <code>InstanceRef</code> or <code>Sentinel</code>
    */
+  @NotNull
   public InstanceRef getValue() {
     final JsonElement elem = json.get("value");
     if (!elem.isJsonObject()) return null;

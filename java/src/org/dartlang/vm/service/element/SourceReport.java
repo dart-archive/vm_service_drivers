@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link SourceReport} class represents a set of reports tied to source locations in an
@@ -37,6 +38,7 @@ public class SourceReport extends Response {
    *
    * Note that ranges may be duplicated, in the case of mixins.
    */
+  @NotNull
   public ElementList<SourceReportRange> getRanges() {
     return new ElementList<SourceReportRange>(json.get("ranges").getAsJsonArray()) {
       @Override
@@ -49,6 +51,7 @@ public class SourceReport extends Response {
   /**
    * A list of scripts, referenced by index in the report's ranges.
    */
+  @NotNull
   public ElementList<ScriptRef> getScripts() {
     return new ElementList<ScriptRef>(json.get("scripts").getAsJsonArray()) {
       @Override

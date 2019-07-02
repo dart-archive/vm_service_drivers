@@ -16,6 +16,8 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A {@link Message} provides information about a pending isolate message and the function that
@@ -33,6 +35,7 @@ public class Message extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public FuncRef getHandler() {
     return json.get("handler") == null ? null : new FuncRef((JsonObject) json.get("handler"));
   }
@@ -50,6 +53,7 @@ public class Message extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public SourceLocation getLocation() {
     return json.get("location") == null ? null : new SourceLocation((JsonObject) json.get("location"));
   }
@@ -58,6 +62,7 @@ public class Message extends Response {
    * An instance id for the decoded message. This id can be passed to other RPCs, for example,
    * getObject or evaluate.
    */
+  @NotNull
   public String getMessageObjectId() {
     return json.get("messageObjectId").getAsString();
   }
@@ -65,6 +70,7 @@ public class Message extends Response {
   /**
    * An advisory name describing this message.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }

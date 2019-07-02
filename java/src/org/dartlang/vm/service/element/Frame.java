@@ -18,6 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Frame extends Response {
@@ -29,6 +30,7 @@ public class Frame extends Response {
   /**
    * Can return <code>null</code>.
    */
+  @Nullable
   public CodeRef getCode() {
     return json.get("code") == null ? null : new CodeRef((JsonObject) json.get("code"));
   }
@@ -36,6 +38,7 @@ public class Frame extends Response {
   /**
    * Can return <code>null</code>.
    */
+  @Nullable
   public FuncRef getFunction() {
     return json.get("function") == null ? null : new FuncRef((JsonObject) json.get("function"));
   }
@@ -47,6 +50,7 @@ public class Frame extends Response {
   /**
    * Can return <code>null</code>.
    */
+  @Nullable
   public FrameKind getKind() {
     if (json.get("kind") == null) return null;
     
@@ -61,6 +65,7 @@ public class Frame extends Response {
   /**
    * Can return <code>null</code>.
    */
+  @Nullable
   public SourceLocation getLocation() {
     return json.get("location") == null ? null : new SourceLocation((JsonObject) json.get("location"));
   }
@@ -68,6 +73,7 @@ public class Frame extends Response {
   /**
    * Can return <code>null</code>.
    */
+  @Nullable
   public ElementList<BoundVariable> getVars() {
     if (json.get("vars") == null) return null;
     

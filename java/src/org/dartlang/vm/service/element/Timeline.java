@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Timeline extends Response {
@@ -42,6 +43,7 @@ public class Timeline extends Response {
   /**
    * A list of timeline events.
    */
+  @NotNull
   public ElementList<TimelineEvent> getTraceEvents() {
     return new ElementList<TimelineEvent>(json.get("traceEvents").getAsJsonArray()) {
       @Override

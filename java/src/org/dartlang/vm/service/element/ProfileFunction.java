@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonObject;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ProfileFunction extends Element {
@@ -33,6 +34,7 @@ public class ProfileFunction extends Element {
     return json.get("exclusiveTicks") == null ? -1 : json.get("exclusiveTicks").getAsInt();
   }
 
+  @NotNull
   public FuncRef getFunction() {
     return new FuncRef((JsonObject) json.get("function"));
   }
@@ -41,6 +43,7 @@ public class ProfileFunction extends Element {
     return json.get("inclusiveTicks") == null ? -1 : json.get("inclusiveTicks").getAsInt();
   }
 
+  @NotNull
   public String getKind() {
     return json.get("kind").getAsString();
   }

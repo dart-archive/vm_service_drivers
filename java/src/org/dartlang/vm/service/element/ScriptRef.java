@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@link ScriptRef} is a reference to a {@link Script}.
@@ -30,6 +31,7 @@ public class ScriptRef extends ObjRef {
   /**
    * The uri from which this script was loaded.
    */
+  @NotNull
   public String getUri() {
     return json.get("uri").getAsString();
   }

@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class LogRecord extends Response {
@@ -27,6 +28,7 @@ public class LogRecord extends Response {
   /**
    * An error object associated with this log event.
    */
+  @NotNull
   public InstanceRef getError() {
     return new InstanceRef((JsonObject) json.get("error"));
   }
@@ -43,6 +45,7 @@ public class LogRecord extends Response {
   /**
    * The name of the source of the log message.
    */
+  @NotNull
   public InstanceRef getLoggerName() {
     return new InstanceRef((JsonObject) json.get("loggerName"));
   }
@@ -50,6 +53,7 @@ public class LogRecord extends Response {
   /**
    * The log message.
    */
+  @NotNull
   public InstanceRef getMessage() {
     return new InstanceRef((JsonObject) json.get("message"));
   }
@@ -64,6 +68,7 @@ public class LogRecord extends Response {
   /**
    * A stack trace associated with this log event.
    */
+  @NotNull
   public InstanceRef getStackTrace() {
     return new InstanceRef((JsonObject) json.get("stackTrace"));
   }
@@ -78,6 +83,7 @@ public class LogRecord extends Response {
   /**
    * The zone where the log was emitted.
    */
+  @NotNull
   public InstanceRef getZone() {
     return new InstanceRef((JsonObject) json.get("zone"));
   }

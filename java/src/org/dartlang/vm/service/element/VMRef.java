@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@link VMRef} is a reference to a {@link VM} object.
@@ -30,6 +31,7 @@ public class VMRef extends Response {
   /**
    * A name identifying this vm. Not guaranteed to be unique.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }

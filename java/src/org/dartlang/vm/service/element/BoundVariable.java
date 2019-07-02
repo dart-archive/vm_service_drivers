@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link BoundVariable} represents a local variable bound to a particular value in a {@link
@@ -35,6 +36,7 @@ public class BoundVariable extends Response {
     return json.get("declarationTokenPos") == null ? -1 : json.get("declarationTokenPos").getAsInt();
   }
 
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }

@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link TypeArguments} object represents the type argument vector for some instantiated generic
@@ -32,6 +33,7 @@ public class TypeArguments extends Obj {
   /**
    * A name for this type argument list.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
@@ -41,6 +43,7 @@ public class TypeArguments extends Obj {
    *
    * The value will always be one of the kinds: Type, TypeRef, TypeParameter, BoundedType.
    */
+  @NotNull
   public ElementList<InstanceRef> getTypes() {
     return new ElementList<InstanceRef>(json.get("types").getAsJsonArray()) {
       @Override

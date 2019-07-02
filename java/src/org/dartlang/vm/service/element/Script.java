@@ -17,6 +17,8 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonObject;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A {@link Script} provides information about a Dart language script.
@@ -38,6 +40,7 @@ public class Script extends Obj {
   /**
    * The library which owns this script.
    */
+  @NotNull
   public LibraryRef getLibrary() {
     return new LibraryRef((JsonObject) json.get("library"));
   }
@@ -54,6 +57,7 @@ public class Script extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getSource() {
     return json.get("source") == null ? null : json.get("source").getAsString();
   }
@@ -71,6 +75,7 @@ public class Script extends Obj {
   /**
    * The uri from which this script was loaded.
    */
+  @NotNull
   public String getUri() {
     return json.get("uri").getAsString();
   }

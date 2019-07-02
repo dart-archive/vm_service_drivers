@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An {@link FuncRef} is a reference to a {@link Func}.
@@ -30,6 +31,7 @@ public class FuncRef extends ObjRef {
   /**
    * The name of this function.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }

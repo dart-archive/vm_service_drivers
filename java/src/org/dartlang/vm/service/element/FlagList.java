@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link FlagList} represents the complete set of VM command line flags.
@@ -31,6 +32,7 @@ public class FlagList extends Response {
   /**
    * A list of all flags in the VM.
    */
+  @NotNull
   public ElementList<Flag> getFlags() {
     return new ElementList<Flag>(json.get("flags").getAsJsonArray()) {
       @Override

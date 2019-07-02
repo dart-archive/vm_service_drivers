@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An {@link FieldRef} is a reference to a {@link Field}.
@@ -32,6 +33,7 @@ public class FieldRef extends ObjRef {
    *
    * The value will always be of one of the kinds: Type, TypeRef, TypeParameter, BoundedType.
    */
+  @NotNull
   public InstanceRef getDeclaredType() {
     return new InstanceRef((JsonObject) json.get("declaredType"));
   }
@@ -39,6 +41,7 @@ public class FieldRef extends ObjRef {
   /**
    * The name of this field.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
@@ -46,6 +49,7 @@ public class FieldRef extends ObjRef {
   /**
    * The owner of this field, which can be either a Library or a Class.
    */
+  @NotNull
   public ObjRef getOwner() {
     return new ObjRef((JsonObject) json.get("owner"));
   }

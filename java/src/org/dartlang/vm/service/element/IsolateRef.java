@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@link IsolateRef} is a reference to an {@link Isolate} object.
@@ -30,6 +31,7 @@ public class IsolateRef extends Response {
   /**
    * The id which is passed to the getIsolate RPC to load this isolate.
    */
+  @NotNull
   public String getId() {
     return json.get("id").getAsString();
   }
@@ -37,6 +39,7 @@ public class IsolateRef extends Response {
   /**
    * A name identifying this isolate. Not guaranteed to be unique.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
@@ -44,6 +47,7 @@ public class IsolateRef extends Response {
   /**
    * A numeric id for this isolate, represented as a string. Unique.
    */
+  @NotNull
   public String getNumber() {
     return json.get("number").getAsString();
   }

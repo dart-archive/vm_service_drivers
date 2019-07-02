@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CodeRegion extends Element {
@@ -24,6 +25,7 @@ public class CodeRegion extends Element {
     super(json);
   }
 
+  @NotNull
   public CodeRef getCode() {
     return new CodeRef((JsonObject) json.get("code"));
   }
@@ -36,6 +38,7 @@ public class CodeRegion extends Element {
     return json.get("inclusiveTicks") == null ? -1 : json.get("inclusiveTicks").getAsInt();
   }
 
+  @NotNull
   public String getKind() {
     return json.get("kind").getAsString();
   }

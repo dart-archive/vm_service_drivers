@@ -18,6 +18,8 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An {@link Instance} represents an instance of the Dart language class {@link Obj}.
@@ -37,6 +39,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ElementList<MapAssociation> getAssociations() {
     if (json.get("associations") == null) return null;
     
@@ -59,6 +62,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getBound() {
     return json.get("bound") == null ? null : new InstanceRef((JsonObject) json.get("bound"));
   }
@@ -86,6 +90,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getBytes() {
     return json.get("bytes") == null ? null : json.get("bytes").getAsString();
   }
@@ -93,6 +98,7 @@ public class Instance extends Obj {
   /**
    * Instance references always include their class.
    */
+  @NotNull
   public ClassRef getClassRef() {
     return new ClassRef((JsonObject) json.get("class"));
   }
@@ -105,6 +111,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public FuncRef getClosureFunction() {
     return json.get("closureFunction") == null ? null : new FuncRef((JsonObject) json.get("closureFunction"));
   }
@@ -148,6 +155,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ElementList<InstanceRef> getElements() {
     if (json.get("elements") == null) return null;
     
@@ -164,6 +172,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ElementList<BoundField> getFields() {
     if (json.get("fields") == null) return null;
     
@@ -202,6 +211,7 @@ public class Instance extends Obj {
   /**
    * What kind of instance is this?
    */
+  @NotNull
   public InstanceKind getKind() {
     final JsonElement value = json.get("kind");
     try {
@@ -253,6 +263,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getMirrorReferent() {
     return json.get("mirrorReferent") == null ? null : new InstanceRef((JsonObject) json.get("mirrorReferent"));
   }
@@ -265,6 +276,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getName() {
     return json.get("name") == null ? null : json.get("name").getAsString();
   }
@@ -318,6 +330,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ClassRef getParameterizedClass() {
     return json.get("parameterizedClass") == null ? null : new ClassRef((JsonObject) json.get("parameterizedClass"));
   }
@@ -330,6 +343,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getPattern() {
     return json.get("pattern") == null ? null : json.get("pattern").getAsString();
   }
@@ -342,6 +356,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getPropertyKey() {
     return json.get("propertyKey") == null ? null : new InstanceRef((JsonObject) json.get("propertyKey"));
   }
@@ -354,6 +369,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getPropertyValue() {
     return json.get("propertyValue") == null ? null : new InstanceRef((JsonObject) json.get("propertyValue"));
   }
@@ -369,6 +385,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getTargetType() {
     return json.get("targetType") == null ? null : new InstanceRef((JsonObject) json.get("targetType"));
   }
@@ -381,6 +398,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public TypeArgumentsRef getTypeArguments() {
     return json.get("typeArguments") == null ? null : new TypeArgumentsRef((JsonObject) json.get("typeArguments"));
   }
@@ -393,6 +411,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ClassRef getTypeClass() {
     return json.get("typeClass") == null ? null : new ClassRef((JsonObject) json.get("typeClass"));
   }
@@ -408,6 +427,7 @@ public class Instance extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getValueAsString() {
     return json.get("valueAsString") == null ? null : json.get("valueAsString").getAsString();
   }

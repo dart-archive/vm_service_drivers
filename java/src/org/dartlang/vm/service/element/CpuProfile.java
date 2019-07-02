@@ -18,6 +18,7 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CpuProfile extends Response {
@@ -26,6 +27,7 @@ public class CpuProfile extends Response {
     super(json);
   }
 
+  @NotNull
   public ElementList<CodeRegion> getCodes() {
     return new ElementList<CodeRegion>(json.get("codes").getAsJsonArray()) {
       @Override
@@ -43,6 +45,7 @@ public class CpuProfile extends Response {
     return getListInt("exclusiveFunctionTrie");
   }
 
+  @NotNull
   public ElementList<ProfileFunction> getFunctions() {
     return new ElementList<ProfileFunction>(json.get("functions").getAsJsonArray()) {
       @Override

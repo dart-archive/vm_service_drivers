@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link Sentinel} is used to indicate that the normal response is not available.
@@ -31,6 +32,7 @@ public class Sentinel extends Response {
   /**
    * What kind of sentinel is this?
    */
+  @NotNull
   public SentinelKind getKind() {
     final JsonElement value = json.get("kind");
     try {
@@ -43,6 +45,7 @@ public class Sentinel extends Response {
   /**
    * A reasonable string representation of this sentinel.
    */
+  @NotNull
   public String getValueAsString() {
     return json.get("valueAsString").getAsString();
   }

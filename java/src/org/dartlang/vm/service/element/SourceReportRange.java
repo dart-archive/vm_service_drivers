@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonObject;
 import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The {@link SourceReportRange} class represents a range of executable code (function, method,
@@ -42,6 +43,7 @@ public class SourceReportRange extends Element {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public SourceReportCoverage getCoverage() {
     return json.get("coverage") == null ? null : new SourceReportCoverage((JsonObject) json.get("coverage"));
   }
@@ -59,6 +61,7 @@ public class SourceReportRange extends Element {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ErrorRef getError() {
     return json.get("error") == null ? null : new ErrorRef((JsonObject) json.get("error"));
   }

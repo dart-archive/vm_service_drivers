@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@link ErrorRef} is a reference to an {@link ErrorObj}.
@@ -31,6 +32,7 @@ public class ErrorRef extends ObjRef {
   /**
    * What kind of error is this?
    */
+  @NotNull
   public ErrorKind getKind() {
     final JsonElement value = json.get("kind");
     try {
@@ -43,6 +45,7 @@ public class ErrorRef extends ObjRef {
   /**
    * A description of the error.
    */
+  @NotNull
   public String getMessage() {
     return json.get("message").getAsString();
   }

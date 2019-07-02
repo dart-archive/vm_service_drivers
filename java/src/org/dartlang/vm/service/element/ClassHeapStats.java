@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonObject;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ClassHeapStats extends Response {
@@ -42,6 +43,7 @@ public class ClassHeapStats extends Response {
   /**
    * The class for which this memory information is associated.
    */
+  @NotNull
   public ClassRef getClassRef() {
     return new ClassRef((JsonObject) json.get("class"));
   }

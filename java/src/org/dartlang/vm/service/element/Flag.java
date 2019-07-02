@@ -16,6 +16,8 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A {@link Flag} represents a single VM command line flag.
@@ -30,6 +32,7 @@ public class Flag extends Element {
   /**
    * A description of the flag.
    */
+  @NotNull
   public String getComment() {
     return json.get("comment").getAsString();
   }
@@ -44,6 +47,7 @@ public class Flag extends Element {
   /**
    * The name of the flag.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
@@ -55,6 +59,7 @@ public class Flag extends Element {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getValueAsString() {
     return json.get("valueAsString") == null ? null : json.get("valueAsString").getAsString();
   }

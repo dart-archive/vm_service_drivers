@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Every non-error response returned by the Service Protocol extends {@link Response}. By using the
@@ -32,6 +33,7 @@ public class Response extends Element {
    * Every response returned by the VM Service has the type property. This allows the client
    * distinguish between different kinds of responses.
    */
+  @NotNull
   public String getType() {
     return json.get("type").getAsString();
   }

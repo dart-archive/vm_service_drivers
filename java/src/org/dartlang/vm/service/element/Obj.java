@@ -16,6 +16,8 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An {@link Obj} is a persistent object that is owned by some isolate.
@@ -37,6 +39,7 @@ public class Obj extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ClassRef getClassRef() {
     return json.get("class") == null ? null : new ClassRef((JsonObject) json.get("class"));
   }
@@ -56,6 +59,7 @@ public class Obj extends Response {
    *
    * Some objects may get a new id when they are reloaded.
    */
+  @NotNull
   public String getId() {
     return json.get("id").getAsString();
   }

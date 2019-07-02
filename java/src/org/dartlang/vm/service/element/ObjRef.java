@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@link ObjRef} is a reference to a {@link Obj}.
@@ -40,6 +41,7 @@ public class ObjRef extends Response {
   /**
    * A unique identifier for an Object. Passed to the getObject RPC to load this Object.
    */
+  @NotNull
   public String getId() {
     return json.get("id").getAsString();
   }

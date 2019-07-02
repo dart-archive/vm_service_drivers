@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@link ClassRef} is a reference to a {@link ClassObj}.
@@ -30,6 +31,7 @@ public class ClassRef extends ObjRef {
   /**
    * The name of this class.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }

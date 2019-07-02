@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonObject;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class TimelineFlags extends Response {
@@ -28,6 +29,7 @@ public class TimelineFlags extends Response {
   /**
    * The list of all available timeline streams.
    */
+  @NotNull
   public List<String> getAvailableStreams() {
     return getListString("availableStreams");
   }
@@ -35,6 +37,7 @@ public class TimelineFlags extends Response {
   /**
    * The list of timeline streams that are currently enabled.
    */
+  @NotNull
   public List<String> getRecordedStreams() {
     return getListString("recordedStreams");
   }
@@ -44,6 +47,7 @@ public class TimelineFlags extends Response {
    * Callback, Endless, Fuchsia, Ring, Startup, and Systrace. Set to "null" if no recorder is
    * currently set.
    */
+  @NotNull
   public String getRecorderName() {
     return json.get("recorderName").getAsString();
   }

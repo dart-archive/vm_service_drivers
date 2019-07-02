@@ -16,13 +16,19 @@ export 'src_gen_java.dart' show JavaGenerator;
 
 const String servicePackage = 'org.dartlang.vm.service';
 
-const List<String> simpleTypes = const [
+const Set<String> simpleTypes = const {
   'BigDecimal',
   'boolean',
   'int',
   'String',
-  'double'
-];
+  'double',
+};
+
+const Set<String> primitiveTypes = const {
+  'boolean',
+  'int',
+  'double',
+};
 
 const vmServiceJavadoc = '''
 {@link VmService} allows control of and access to information in a running
@@ -645,26 +651,31 @@ class Method extends Member {
         new List.from(mthArgs.map((a) => a.asJavaMethodArg));
     javaMethodArgs
         .add(new JavaMethodArg('consumer', classNameFor(consumerTypeName)));
-    writer.addMethod(publicName, javaMethodArgs, (StatementWriter writer) {
-      writer.addLine('final JsonObject params = new JsonObject();');
-      for (MethodArg arg in args) {
-        if (!includeOptional && arg.optional) continue;
-        var name = arg.name;
-        String op = arg.optional ? 'if (${name} != null) ' : '';
-        if (arg.isEnumType) {
-          writer.addLine('${op}params.addProperty("$name", $name.name());');
-        } else if (arg.type.name == 'Map') {
-          writer.addLine(
-              '${op}params.add("$name", convertMapToJsonObject($name));');
-        } else if (arg.type.arrayDepth > 0) {
-          writer.addLine(
-              '${op}params.add("$name", convertIterableToJsonArray($name));');
-        } else {
-          writer.addLine('${op}params.addProperty("$name", $name);');
+    writer.addMethod(
+      publicName,
+      javaMethodArgs,
+      (StatementWriter writer) {
+        writer.addLine('final JsonObject params = new JsonObject();');
+        for (MethodArg arg in args) {
+          if (!includeOptional && arg.optional) continue;
+          var name = arg.name;
+          String op = arg.optional ? 'if (${name} != null) ' : '';
+          if (arg.isEnumType) {
+            writer.addLine('${op}params.addProperty("$name", $name.name());');
+          } else if (arg.type.name == 'Map') {
+            writer.addLine(
+                '${op}params.add("$name", convertMapToJsonObject($name));');
+          } else if (arg.type.arrayDepth > 0) {
+            writer.addLine(
+                '${op}params.add("$name", convertIterableToJsonArray($name));');
+          } else {
+            writer.addLine('${op}params.addProperty("$name", $name);');
+          }
         }
-      }
-      writer.addLine('request("$name", params, consumer);');
-    }, javadoc: javadoc.toString());
+        writer.addLine('request("$name", params, consumer);');
+      },
+      javadoc: javadoc.toString(),
+    );
   }
 
   void _parse(Token token) {
@@ -979,12 +990,27 @@ class TypeField extends Member {
         returnType = 'long';
       }
 
-      writer.addMethod(accessorName, [], (StatementWriter writer) {
-        type.valueType.generateAccessStatements(writer, name,
+      bool nullable;
+      if (!type.valueType.isPrimitive) {
+        nullable = optional;
+      }
+
+      writer.addMethod(
+        accessorName,
+        [],
+        (StatementWriter writer) {
+          type.valueType.generateAccessStatements(
+            writer,
+            name,
             canBeSentinel: type.isValueAndSentinel,
             defaultValue: defaultValue,
-            optional: optional);
-      }, javadoc: docs, returnType: returnType);
+            optional: optional,
+          );
+        },
+        javadoc: docs,
+        returnType: returnType,
+        isNullable: nullable,
+      );
     }
   }
 }
@@ -1044,6 +1070,8 @@ class TypeRef {
   bool get isEnum => name.endsWith('Kind') || name.endsWith('Mode');
 
   bool get isSimple => simpleTypes.contains(name);
+
+  bool get isPrimitive => primitiveTypes.contains(name);
 
   bool get isUndocumented => name.startsWith('_');
 

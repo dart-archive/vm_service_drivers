@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class AllocationProfile extends Response {
@@ -50,6 +51,7 @@ public class AllocationProfile extends Response {
   /**
    * Allocation information for all class types.
    */
+  @NotNull
   public ElementList<ClassHeapStats> getMembers() {
     return new ElementList<ClassHeapStats>(json.get("members").getAsJsonArray()) {
       @Override
@@ -62,6 +64,7 @@ public class AllocationProfile extends Response {
   /**
    * Information about memory usage for the isolate.
    */
+  @NotNull
   public MemoryUsage getMemoryUsage() {
     return new MemoryUsage((JsonObject) json.get("memoryUsage"));
   }

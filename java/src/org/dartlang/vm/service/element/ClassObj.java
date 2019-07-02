@@ -17,6 +17,8 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A {@link ClassObj} provides information about a Dart language class.
@@ -33,6 +35,7 @@ public class ClassObj extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ErrorRef getError() {
     return json.get("error") == null ? null : new ErrorRef((JsonObject) json.get("error"));
   }
@@ -40,6 +43,7 @@ public class ClassObj extends Obj {
   /**
    * A list of fields in this class. Does not include fields from superclasses.
    */
+  @NotNull
   public ElementList<FieldRef> getFields() {
     return new ElementList<FieldRef>(json.get("fields").getAsJsonArray()) {
       @Override
@@ -52,6 +56,7 @@ public class ClassObj extends Obj {
   /**
    * A list of functions in this class. Does not include functions from superclasses.
    */
+  @NotNull
   public ElementList<FuncRef> getFunctions() {
     return new ElementList<FuncRef>(json.get("functions").getAsJsonArray()) {
       @Override
@@ -66,6 +71,7 @@ public class ClassObj extends Obj {
    *
    * The values will be of the kind: Type.
    */
+  @NotNull
   public ElementList<InstanceRef> getInterfaces() {
     return new ElementList<InstanceRef>(json.get("interfaces").getAsJsonArray()) {
       @Override
@@ -79,6 +85,7 @@ public class ClassObj extends Obj {
    * The library which contains this class. TODO: This should be @Library, but the VM can return
    * @Instance objects here.
    */
+  @NotNull
   public ObjRef getLibrary() {
     return new ObjRef((JsonObject) json.get("library"));
   }
@@ -88,6 +95,7 @@ public class ClassObj extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public SourceLocation getLocation() {
     return json.get("location") == null ? null : new SourceLocation((JsonObject) json.get("location"));
   }
@@ -99,6 +107,7 @@ public class ClassObj extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getMixin() {
     return json.get("mixin") == null ? null : new InstanceRef((JsonObject) json.get("mixin"));
   }
@@ -106,6 +115,7 @@ public class ClassObj extends Obj {
   /**
    * The name of this class.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
@@ -113,6 +123,7 @@ public class ClassObj extends Obj {
   /**
    * A list of subclasses of this class.
    */
+  @NotNull
   public ElementList<ClassRef> getSubclasses() {
     return new ElementList<ClassRef>(json.get("subclasses").getAsJsonArray()) {
       @Override
@@ -127,6 +138,7 @@ public class ClassObj extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ClassRef getSuperClass() {
     return json.get("super") == null ? null : new ClassRef((JsonObject) json.get("super"));
   }
@@ -138,6 +150,7 @@ public class ClassObj extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getSuperType() {
     return json.get("superType") == null ? null : new InstanceRef((JsonObject) json.get("superType"));
   }

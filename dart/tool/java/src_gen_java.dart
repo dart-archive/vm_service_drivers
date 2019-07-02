@@ -213,6 +213,7 @@ class TypeWriter {
     String modifiers = 'public',
     String returnType = 'void',
     bool isOverride = false,
+    bool isNullable,
   }) {
     var methodDecl = new StringBuffer();
     if (javadoc != null && javadoc.isNotEmpty) {
@@ -224,6 +225,15 @@ class TypeWriter {
     }
     if (isOverride) {
       methodDecl.writeln('  @Override');
+    }
+    if (isNullable != null) {
+      if (isNullable) {
+        addImport('org.jetbrains.annotations.Nullable');
+        methodDecl.writeln('  @Nullable');
+      } else {
+        addImport('org.jetbrains.annotations.NotNull');
+        methodDecl.writeln('  @NotNull');
+      }
     }
     methodDecl.write('  ');
     if (modifiers != null && modifiers.isNotEmpty) {

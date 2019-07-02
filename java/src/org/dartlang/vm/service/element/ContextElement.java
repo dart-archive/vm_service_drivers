@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ContextElement extends Element {
@@ -28,6 +29,7 @@ public class ContextElement extends Element {
   /**
    * @return one of <code>InstanceRef</code> or <code>Sentinel</code>
    */
+  @NotNull
   public InstanceRef getValue() {
     final JsonElement elem = json.get("value");
     if (!elem.isJsonObject()) return null;

@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class VM extends Response {
@@ -35,6 +36,7 @@ public class VM extends Response {
   /**
    * The CPU we are actually running on.
    */
+  @NotNull
   public String getHostCPU() {
     return json.get("hostCPU").getAsString();
   }
@@ -42,6 +44,7 @@ public class VM extends Response {
   /**
    * A list of isolates running in the VM.
    */
+  @NotNull
   public ElementList<IsolateRef> getIsolates() {
     return new ElementList<IsolateRef>(json.get("isolates").getAsJsonArray()) {
       @Override
@@ -54,6 +57,7 @@ public class VM extends Response {
   /**
    * A name identifying this vm. Not guaranteed to be unique.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
@@ -77,6 +81,7 @@ public class VM extends Response {
   /**
    * The CPU we are generating code for.
    */
+  @NotNull
   public String getTargetCPU() {
     return json.get("targetCPU").getAsString();
   }
@@ -84,6 +89,7 @@ public class VM extends Response {
   /**
    * The Dart VM version string.
    */
+  @NotNull
   public String getVersion() {
     return json.get("version").getAsString();
   }

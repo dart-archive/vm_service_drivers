@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@link LibraryRef} is a reference to a {@link Library}.
@@ -30,6 +31,7 @@ public class LibraryRef extends ObjRef {
   /**
    * The name of this library.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
@@ -37,6 +39,7 @@ public class LibraryRef extends ObjRef {
   /**
    * The uri of this library.
    */
+  @NotNull
   public String getUri() {
     return json.get("uri").getAsString();
   }

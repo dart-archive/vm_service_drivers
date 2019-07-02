@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ClassList extends Response {
@@ -25,6 +26,7 @@ public class ClassList extends Response {
     super(json);
   }
 
+  @NotNull
   public ElementList<ClassRef> getClasses() {
     return new ElementList<ClassRef>(json.get("classes").getAsJsonArray()) {
       @Override

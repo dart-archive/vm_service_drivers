@@ -18,6 +18,8 @@ package org.dartlang.vm.service.element;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An {@link Event} is an asynchronous notification from the VM. It is delivered only when the
@@ -38,6 +40,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getAlias() {
     return json.get("alias") == null ? null : json.get("alias").getAsString();
   }
@@ -66,6 +69,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public Breakpoint getBreakpoint() {
     return json.get("breakpoint") == null ? null : new Breakpoint((JsonObject) json.get("breakpoint"));
   }
@@ -77,6 +81,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getBytes() {
     return json.get("bytes") == null ? null : json.get("bytes").getAsString();
   }
@@ -86,6 +91,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getException() {
     return json.get("exception") == null ? null : new InstanceRef((JsonObject) json.get("exception"));
   }
@@ -97,6 +103,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ExtensionData getExtensionData() {
     return json.get("extensionData") == null ? null : new ExtensionData((JsonObject) json.get("extensionData"));
   }
@@ -108,6 +115,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getExtensionKind() {
     return json.get("extensionKind") == null ? null : json.get("extensionKind").getAsString();
   }
@@ -119,6 +127,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getExtensionRPC() {
     return json.get("extensionRPC") == null ? null : json.get("extensionRPC").getAsString();
   }
@@ -130,6 +139,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getInspectee() {
     return json.get("inspectee") == null ? null : new InstanceRef((JsonObject) json.get("inspectee"));
   }
@@ -142,6 +152,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public IsolateRef getIsolate() {
     return json.get("isolate") == null ? null : new IsolateRef((JsonObject) json.get("isolate"));
   }
@@ -149,6 +160,7 @@ public class Event extends Response {
   /**
    * What kind of event is this?
    */
+  @NotNull
   public EventKind getKind() {
     final JsonElement value = json.get("kind");
     try {
@@ -165,6 +177,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public LogRecord getLogRecord() {
     return json.get("logRecord") == null ? null : new LogRecord((JsonObject) json.get("logRecord"));
   }
@@ -178,6 +191,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getMethod() {
     return json.get("method") == null ? null : json.get("method").getAsString();
   }
@@ -196,6 +210,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ElementList<Breakpoint> getPauseBreakpoints() {
     if (json.get("pauseBreakpoints") == null) return null;
     
@@ -216,6 +231,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getService() {
     return json.get("service") == null ? null : json.get("service").getAsString();
   }
@@ -227,6 +243,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public String getStatus() {
     return json.get("status") == null ? null : json.get("status").getAsString();
   }
@@ -238,6 +255,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ElementList<TimelineEvent> getTimelineEvents() {
     if (json.get("timelineEvents") == null) return null;
     
@@ -274,6 +292,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public Frame getTopFrame() {
     return json.get("topFrame") == null ? null : new Frame((JsonObject) json.get("topFrame"));
   }
@@ -286,6 +305,7 @@ public class Event extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public VMRef getVm() {
     return json.get("vm") == null ? null : new VMRef((JsonObject) json.get("vm"));
   }

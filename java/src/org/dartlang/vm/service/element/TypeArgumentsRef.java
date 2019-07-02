@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@link TypeArgumentsRef} is a reference to a {@link TypeArguments} object.
@@ -30,6 +31,7 @@ public class TypeArgumentsRef extends ObjRef {
   /**
    * A name for this type argument list.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }

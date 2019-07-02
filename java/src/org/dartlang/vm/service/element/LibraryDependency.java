@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link LibraryDependency} provides information about an import or export.
@@ -44,6 +45,7 @@ public class LibraryDependency extends Element {
   /**
    * The prefix of an 'as' import, or null.
    */
+  @NotNull
   public String getPrefix() {
     return json.get("prefix").getAsString();
   }
@@ -51,6 +53,7 @@ public class LibraryDependency extends Element {
   /**
    * The library being imported or exported.
    */
+  @NotNull
   public LibraryRef getTarget() {
     return new LibraryRef((JsonObject) json.get("target"));
   }

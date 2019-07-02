@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * See getInstances.
@@ -31,6 +32,7 @@ public class InstanceSet extends Response {
   /**
    * An array of instances of the requested type.
    */
+  @NotNull
   public ElementList<ObjRef> getInstances() {
     return new ElementList<ObjRef>(json.get("instances").getAsJsonArray()) {
       @Override

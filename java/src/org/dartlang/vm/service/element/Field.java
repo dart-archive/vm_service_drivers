@@ -16,6 +16,8 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A {@link Field} provides information about a Dart language field or variable.
@@ -32,6 +34,7 @@ public class Field extends Obj {
    *
    * The value will always be of one of the kinds: Type, TypeRef, TypeParameter, BoundedType.
    */
+  @NotNull
   public InstanceRef getDeclaredType() {
     return new InstanceRef((JsonObject) json.get("declaredType"));
   }
@@ -41,6 +44,7 @@ public class Field extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public SourceLocation getLocation() {
     return json.get("location") == null ? null : new SourceLocation((JsonObject) json.get("location"));
   }
@@ -48,6 +52,7 @@ public class Field extends Obj {
   /**
    * The name of this field.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
@@ -55,6 +60,7 @@ public class Field extends Obj {
   /**
    * The owner of this field, which can be either a Library or a Class.
    */
+  @NotNull
   public ObjRef getOwner() {
     return new ObjRef((JsonObject) json.get("owner"));
   }
@@ -64,6 +70,7 @@ public class Field extends Obj {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public InstanceRef getStaticValue() {
     return json.get("staticValue") == null ? null : new InstanceRef((JsonObject) json.get("staticValue"));
   }

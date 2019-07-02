@@ -17,6 +17,8 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Stack extends Response {
@@ -28,6 +30,7 @@ public class Stack extends Response {
   /**
    * Can return <code>null</code>.
    */
+  @Nullable
   public ElementList<Frame> getAsyncCausalFrames() {
     if (json.get("asyncCausalFrames") == null) return null;
     
@@ -42,6 +45,7 @@ public class Stack extends Response {
   /**
    * Can return <code>null</code>.
    */
+  @Nullable
   public ElementList<Frame> getAwaiterFrames() {
     if (json.get("awaiterFrames") == null) return null;
     
@@ -53,6 +57,7 @@ public class Stack extends Response {
     };
   }
 
+  @NotNull
   public ElementList<Frame> getFrames() {
     return new ElementList<Frame>(json.get("frames").getAsJsonArray()) {
       @Override
@@ -62,6 +67,7 @@ public class Stack extends Response {
     };
   }
 
+  @NotNull
   public ElementList<Message> getMessages() {
     return new ElementList<Message>(json.get("messages").getAsJsonArray()) {
       @Override

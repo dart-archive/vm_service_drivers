@@ -19,6 +19,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An {@link Isolate} object provides information about one isolate in the VM.
@@ -33,6 +35,7 @@ public class Isolate extends Response {
   /**
    * A list of all breakpoints for this isolate.
    */
+  @NotNull
   public ElementList<Breakpoint> getBreakpoints() {
     return new ElementList<Breakpoint>(json.get("breakpoints").getAsJsonArray()) {
       @Override
@@ -47,6 +50,7 @@ public class Isolate extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public ErrorObj getError() {
     return json.get("error") == null ? null : new ErrorObj((JsonObject) json.get("error"));
   }
@@ -54,6 +58,7 @@ public class Isolate extends Response {
   /**
    * The current pause on exception mode for this isolate.
    */
+  @NotNull
   public ExceptionPauseMode getExceptionPauseMode() {
     final JsonElement value = json.get("exceptionPauseMode");
     try {
@@ -68,6 +73,7 @@ public class Isolate extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public List<String> getExtensionRPCs() {
     return json.get("extensionRPCs") == null ? null : getListString("extensionRPCs");
   }
@@ -75,6 +81,7 @@ public class Isolate extends Response {
   /**
    * The id which is passed to the getIsolate RPC to reload this isolate.
    */
+  @NotNull
   public String getId() {
     return json.get("id").getAsString();
   }
@@ -84,6 +91,7 @@ public class Isolate extends Response {
    *
    * Guaranteed to be initialized when the IsolateRunnable event fires.
    */
+  @NotNull
   public ElementList<LibraryRef> getLibraries() {
     return new ElementList<LibraryRef>(json.get("libraries").getAsJsonArray()) {
       @Override
@@ -103,6 +111,7 @@ public class Isolate extends Response {
   /**
    * A name identifying this isolate. Not guaranteed to be unique.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
@@ -110,6 +119,7 @@ public class Isolate extends Response {
   /**
    * A numeric id for this isolate, represented as a string. Unique.
    */
+  @NotNull
   public String getNumber() {
     return json.get("number").getAsString();
   }
@@ -118,6 +128,7 @@ public class Isolate extends Response {
    * The last pause event delivered to the isolate. If the isolate is running, this will be a
    * resume event.
    */
+  @NotNull
   public Event getPauseEvent() {
     return new Event((JsonObject) json.get("pauseEvent"));
   }
@@ -136,6 +147,7 @@ public class Isolate extends Response {
    *
    * Can return <code>null</code>.
    */
+  @Nullable
   public LibraryRef getRootLib() {
     return json.get("rootLib") == null ? null : new LibraryRef((JsonObject) json.get("rootLib"));
   }

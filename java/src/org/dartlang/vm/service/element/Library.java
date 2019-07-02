@@ -17,6 +17,7 @@ package org.dartlang.vm.service.element;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link Library} provides information about a Dart language library.
@@ -31,6 +32,7 @@ public class Library extends Obj {
   /**
    * A list of all classes in this library.
    */
+  @NotNull
   public ElementList<ClassRef> getClasses() {
     return new ElementList<ClassRef>(json.get("classes").getAsJsonArray()) {
       @Override
@@ -50,6 +52,7 @@ public class Library extends Obj {
   /**
    * A list of the imports for this library.
    */
+  @NotNull
   public ElementList<LibraryDependency> getDependencies() {
     return new ElementList<LibraryDependency>(json.get("dependencies").getAsJsonArray()) {
       @Override
@@ -62,6 +65,7 @@ public class Library extends Obj {
   /**
    * A list of the top-level functions in this library.
    */
+  @NotNull
   public ElementList<FuncRef> getFunctions() {
     return new ElementList<FuncRef>(json.get("functions").getAsJsonArray()) {
       @Override
@@ -74,6 +78,7 @@ public class Library extends Obj {
   /**
    * The name of this library.
    */
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
@@ -81,6 +86,7 @@ public class Library extends Obj {
   /**
    * A list of the scripts which constitute this library.
    */
+  @NotNull
   public ElementList<ScriptRef> getScripts() {
     return new ElementList<ScriptRef>(json.get("scripts").getAsJsonArray()) {
       @Override
@@ -93,6 +99,7 @@ public class Library extends Obj {
   /**
    * The uri of this library.
    */
+  @NotNull
   public String getUri() {
     return json.get("uri").getAsString();
   }
@@ -100,6 +107,7 @@ public class Library extends Obj {
   /**
    * A list of the top-level variables in this library.
    */
+  @NotNull
   public ElementList<FieldRef> getVariables() {
     return new ElementList<FieldRef>(json.get("variables").getAsJsonArray()) {
       @Override

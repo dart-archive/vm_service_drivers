@@ -16,6 +16,7 @@ package org.dartlang.vm.service.element;
 // This is a generated file.
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class HeapSpace extends Response {
@@ -40,6 +41,7 @@ public class HeapSpace extends Response {
     return json.get("external") == null ? -1 : json.get("external").getAsInt();
   }
 
+  @NotNull
   public String getName() {
     return json.get("name").getAsString();
   }
