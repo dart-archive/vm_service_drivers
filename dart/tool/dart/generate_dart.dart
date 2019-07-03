@@ -513,6 +513,13 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     gen.writeln('};');
     gen.writeln();
 
+    gen.writeln('Map<String, String> _methodReturnTypes = {');
+    methods.forEach((Method method) {
+      gen.writeln("'${method.name}' : '${method.returnType.name}',");
+    });
+    gen.writeln('};');
+    gen.writeln();
+
     // The service interface, both servers and clients implement this.
     gen.writeStatement('''
 /// A class representation of the Dart VM Service Protocol.
