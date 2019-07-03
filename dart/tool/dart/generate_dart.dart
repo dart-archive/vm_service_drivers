@@ -178,7 +178,7 @@ final String _implCode = r'''
   void _processResponse(Map<String, dynamic> json) {
     Completer completer = _completers.remove(json['id']);
     String methodName = _methodCalls.remove(json['id']);
-
+    String returnType = _methodReturnTypes[methodName];
     if (completer == null) {
       _log.severe('unmatched request response: ${jsonEncode(json)}');
     } else if (json['error'] != null) {
@@ -189,7 +189,7 @@ final String _implCode = r'''
       if (_typeFactories[type] == null) {
         completer.complete(Response.parse(result));
       } else {
-        completer.complete(createServiceObject(result));
+        completer.complete(createServiceObject(result, returnType));
       }
     }
   }
@@ -454,13 +454,20 @@ const String undocumented = 'undocumented';
 /// This is useful for handling the results of the Stdout or Stderr events.
 String decodeBase64(String str) => utf8.decode(base64.decode(str));
 
-Object createServiceObject(dynamic json) {
+// Returns true if a response is the Dart `null` instance.
+bool _isNullInstance(Map json) => ((json['type'] == '@Instance') &&
+                                  (json['kind'] == 'Null'));
+
+Object createServiceObject(dynamic json, [String expectedType]) {
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => createServiceObject(e)).toList();
+    return json.map((e) => createServiceObject(e, expectedType)).toList();
   } else if (json is Map) {
     String type = json['type'];
+    if (_isNullInstance(json) && (expectedType != type)) {
+      return null;
+    }
     if (_typeFactories[type] == null) {
       return null;
     } else {
@@ -499,7 +506,7 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
 
 ''');
     gen.writeln();
-    gen.write('Map<String, Function> _typeFactories = {');
+    gen.writeln('Map<String, Function> _typeFactories = {');
     types.forEach((Type type) {
       gen.writeln("'${type.rawName}': ${type.publicName}.parse,");
     });
@@ -1394,7 +1401,7 @@ class Type extends Member {
                 "new List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = $ref == null ? null : "
-                "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref));");
+                "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref, '${fieldType.listTypeArg}'));");
           }
         } else {
           if (fieldType.isListTypeSimple) {
@@ -1412,16 +1419,16 @@ class Type extends Member {
             // field named 'samples' instead of 'instances'.
             if (name == 'InstanceSet') {
               gen.writeln("${field.generatableName} = "
-                  "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref ?? json['samples']));");
+                  "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref ?? json['samples'], '${fieldType.listTypeArg}'));");
             } else {
               gen.writeln("${field.generatableName} = "
-                  "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref));");
+                  "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref, '${fieldType.listTypeArg}'));");
             }
           }
         }
       } else {
         gen.writeln("${field.generatableName} = "
-            "createServiceObject(json['${field.name}']);");
+            "createServiceObject(json['${field.name}'], '${field.type.name}');");
       }
     });
     if (fields.isNotEmpty) {
