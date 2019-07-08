@@ -67,7 +67,14 @@ public class Event extends Response {
    * Can return <code>null</code>.
    */
   public Breakpoint getBreakpoint() {
-    return json.get("breakpoint") == null ? null : new Breakpoint((JsonObject) json.get("breakpoint"));
+    JsonObject obj = (JsonObject) json.get("breakpoint");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new Breakpoint(obj);
   }
 
   /**
@@ -87,7 +94,9 @@ public class Event extends Response {
    * Can return <code>null</code>.
    */
   public InstanceRef getException() {
-    return json.get("exception") == null ? null : new InstanceRef((JsonObject) json.get("exception"));
+    JsonObject obj = (JsonObject) json.get("exception");
+    if (obj == null) return null;
+    return new InstanceRef(obj);
   }
 
   /**
@@ -98,7 +107,14 @@ public class Event extends Response {
    * Can return <code>null</code>.
    */
   public ExtensionData getExtensionData() {
-    return json.get("extensionData") == null ? null : new ExtensionData((JsonObject) json.get("extensionData"));
+    JsonObject obj = (JsonObject) json.get("extensionData");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new ExtensionData(obj);
   }
 
   /**
@@ -131,7 +147,9 @@ public class Event extends Response {
    * Can return <code>null</code>.
    */
   public InstanceRef getInspectee() {
-    return json.get("inspectee") == null ? null : new InstanceRef((JsonObject) json.get("inspectee"));
+    JsonObject obj = (JsonObject) json.get("inspectee");
+    if (obj == null) return null;
+    return new InstanceRef(obj);
   }
 
   /**
@@ -143,7 +161,14 @@ public class Event extends Response {
    * Can return <code>null</code>.
    */
   public IsolateRef getIsolate() {
-    return json.get("isolate") == null ? null : new IsolateRef((JsonObject) json.get("isolate"));
+    JsonObject obj = (JsonObject) json.get("isolate");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new IsolateRef(obj);
   }
 
   /**
@@ -166,7 +191,14 @@ public class Event extends Response {
    * Can return <code>null</code>.
    */
   public LogRecord getLogRecord() {
-    return json.get("logRecord") == null ? null : new LogRecord((JsonObject) json.get("logRecord"));
+    JsonObject obj = (JsonObject) json.get("logRecord");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new LogRecord(obj);
   }
 
   /**
@@ -275,7 +307,14 @@ public class Event extends Response {
    * Can return <code>null</code>.
    */
   public Frame getTopFrame() {
-    return json.get("topFrame") == null ? null : new Frame((JsonObject) json.get("topFrame"));
+    JsonObject obj = (JsonObject) json.get("topFrame");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new Frame(obj);
   }
 
   /**
@@ -287,6 +326,13 @@ public class Event extends Response {
    * Can return <code>null</code>.
    */
   public VMRef getVm() {
-    return json.get("vm") == null ? null : new VMRef((JsonObject) json.get("vm"));
+    JsonObject obj = (JsonObject) json.get("vm");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new VMRef(obj);
   }
 }
