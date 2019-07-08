@@ -60,7 +60,9 @@ public class Instance extends Obj {
    * Can return <code>null</code>.
    */
   public InstanceRef getBound() {
-    return json.get("bound") == null ? null : new InstanceRef((JsonObject) json.get("bound"));
+    JsonObject obj = (JsonObject) json.get("bound");
+    if (obj == null) return null;
+    return new InstanceRef(obj);
   }
 
   /**
@@ -99,6 +101,25 @@ public class Instance extends Obj {
   }
 
   /**
+   * The context associated with a Closure instance.
+   *
+   * Provided for instance kinds:
+   *  - Closure
+   *
+   * Can return <code>null</code>.
+   */
+  public ContextRef getClosureContext() {
+    JsonObject obj = (JsonObject) json.get("closureContext");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new ContextRef(obj);
+  }
+
+  /**
    * The function associated with a Closure instance.
    *
    * Provided for instance kinds:
@@ -107,7 +128,14 @@ public class Instance extends Obj {
    * Can return <code>null</code>.
    */
   public FuncRef getClosureFunction() {
-    return json.get("closureFunction") == null ? null : new FuncRef((JsonObject) json.get("closureFunction"));
+    JsonObject obj = (JsonObject) json.get("closureFunction");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new FuncRef(obj);
   }
 
   /**
@@ -242,12 +270,7 @@ public class Instance extends Obj {
   }
 
   /**
-   * TODO(devoncarew): this can return an InstanceRef
-   *
-   * The context associated with a Closure instance.
-   *
-   * Provided for instance kinds:
-   *  - Closure@Context closureContext [optional]; The referent of a MirrorReference instance.
+   * The referent of a MirrorReference instance.
    *
    * Provided for instance kinds:
    *  - MirrorReference
@@ -255,7 +278,9 @@ public class Instance extends Obj {
    * Can return <code>null</code>.
    */
   public InstanceRef getMirrorReferent() {
-    return json.get("mirrorReferent") == null ? null : new InstanceRef((JsonObject) json.get("mirrorReferent"));
+    JsonObject obj = (JsonObject) json.get("mirrorReferent");
+    if (obj == null) return null;
+    return new InstanceRef(obj);
   }
 
   /**
@@ -320,7 +345,14 @@ public class Instance extends Obj {
    * Can return <code>null</code>.
    */
   public ClassRef getParameterizedClass() {
-    return json.get("parameterizedClass") == null ? null : new ClassRef((JsonObject) json.get("parameterizedClass"));
+    JsonObject obj = (JsonObject) json.get("parameterizedClass");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new ClassRef(obj);
   }
 
   /**
@@ -344,7 +376,9 @@ public class Instance extends Obj {
    * Can return <code>null</code>.
    */
   public InstanceRef getPropertyKey() {
-    return json.get("propertyKey") == null ? null : new InstanceRef((JsonObject) json.get("propertyKey"));
+    JsonObject obj = (JsonObject) json.get("propertyKey");
+    if (obj == null) return null;
+    return new InstanceRef(obj);
   }
 
   /**
@@ -356,7 +390,9 @@ public class Instance extends Obj {
    * Can return <code>null</code>.
    */
   public InstanceRef getPropertyValue() {
-    return json.get("propertyValue") == null ? null : new InstanceRef((JsonObject) json.get("propertyValue"));
+    JsonObject obj = (JsonObject) json.get("propertyValue");
+    if (obj == null) return null;
+    return new InstanceRef(obj);
   }
 
   /**
@@ -371,7 +407,9 @@ public class Instance extends Obj {
    * Can return <code>null</code>.
    */
   public InstanceRef getTargetType() {
-    return json.get("targetType") == null ? null : new InstanceRef((JsonObject) json.get("targetType"));
+    JsonObject obj = (JsonObject) json.get("targetType");
+    if (obj == null) return null;
+    return new InstanceRef(obj);
   }
 
   /**
@@ -383,7 +421,14 @@ public class Instance extends Obj {
    * Can return <code>null</code>.
    */
   public TypeArgumentsRef getTypeArguments() {
-    return json.get("typeArguments") == null ? null : new TypeArgumentsRef((JsonObject) json.get("typeArguments"));
+    JsonObject obj = (JsonObject) json.get("typeArguments");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new TypeArgumentsRef(obj);
   }
 
   /**
@@ -395,7 +440,14 @@ public class Instance extends Obj {
    * Can return <code>null</code>.
    */
   public ClassRef getTypeClass() {
-    return json.get("typeClass") == null ? null : new ClassRef((JsonObject) json.get("typeClass"));
+    JsonObject obj = (JsonObject) json.get("typeClass");
+    if (obj == null) return null;
+    final String type = json.get("type").getAsString();
+    if ("Instance".equals(type) || "@Instance".equals(type)) {
+      final String kind = json.get("kind").getAsString();
+      if ("Null".equals(kind)) return null;
+    }
+    return new ClassRef(obj);
   }
 
   /**
