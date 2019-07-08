@@ -31,6 +31,9 @@ String _coerceRefType(String typeName) {
   return typeName;
 }
 
+String _typeRefListToString(List<TypeRef> types) =>
+    '[' + types.map((e) => "'" + e.name + "'").join(',') + ']';
+
 final String _headerCode = r'''
 // Copyright (c) 2015, the Dart project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
@@ -178,7 +181,7 @@ final String _implCode = r'''
   void _processResponse(Map<String, dynamic> json) {
     Completer completer = _completers.remove(json['id']);
     String methodName = _methodCalls.remove(json['id']);
-    String returnType = _methodReturnTypes[methodName];
+    List<String> returnTypes = _methodReturnTypes[methodName];
     if (completer == null) {
       _log.severe('unmatched request response: ${jsonEncode(json)}');
     } else if (json['error'] != null) {
@@ -189,7 +192,7 @@ final String _implCode = r'''
       if (_typeFactories[type] == null) {
         completer.complete(Response.parse(result));
       } else {
-        completer.complete(createServiceObject(result, returnType));
+        completer.complete(createServiceObject(result, returnTypes));
       }
     }
   }
@@ -458,14 +461,14 @@ String decodeBase64(String str) => utf8.decode(base64.decode(str));
 bool _isNullInstance(Map json) => ((json['type'] == '@Instance') &&
                                   (json['kind'] == 'Null'));
 
-Object createServiceObject(dynamic json, [String expectedType]) {
+Object createServiceObject(dynamic json, [List<String> expectedTypes]) {
   if (json == null) return null;
 
   if (json is List) {
-    return json.map((e) => createServiceObject(e, expectedType)).toList();
+    return json.map((e) => createServiceObject(e, expectedTypes)).toList();
   } else if (json is Map) {
     String type = json['type'];
-    if (_isNullInstance(json) && (expectedType != type)) {
+    if (_isNullInstance(json) && (!expectedTypes.contains(type))) {
       return null;
     }
     if (_typeFactories[type] == null) {
@@ -513,9 +516,10 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(
     gen.writeln('};');
     gen.writeln();
 
-    gen.writeln('Map<String, String> _methodReturnTypes = {');
+    gen.writeln('Map<String, List<String>> _methodReturnTypes = {');
     methods.forEach((Method method) {
-      gen.writeln("'${method.name}' : '${method.returnType.name}',");
+      String returnTypes = _typeRefListToString(method.returnType.types);
+      gen.writeln("'${method.name}' : $returnTypes,");
     });
     gen.writeln('};');
     gen.writeln();
@@ -1401,6 +1405,7 @@ class Type extends Member {
             "((dynamic list) => new List<int>.from(list)));");
       } else if (field.type.isArray) {
         TypeRef fieldType = field.type.types.first;
+        String typesList = _typeRefListToString(field.type.types);
         String ref = "json['${field.name}']";
         if (field.optional) {
           if (fieldType.isListTypeSimple) {
@@ -1408,7 +1413,7 @@ class Type extends Member {
                 "new List<${fieldType.listTypeArg}>.from($ref);");
           } else {
             gen.writeln("${field.generatableName} = $ref == null ? null : "
-                "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref, '${fieldType.listTypeArg}'));");
+                "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref, $typesList));");
           }
         } else {
           if (fieldType.isListTypeSimple) {
@@ -1426,16 +1431,17 @@ class Type extends Member {
             // field named 'samples' instead of 'instances'.
             if (name == 'InstanceSet') {
               gen.writeln("${field.generatableName} = "
-                  "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref ?? json['samples'], '${fieldType.listTypeArg}'));");
+                  "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref ?? json['samples'], $typesList));");
             } else {
               gen.writeln("${field.generatableName} = "
-                  "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref, '${fieldType.listTypeArg}'));");
+                  "new List<${fieldType.listTypeArg}>.from(createServiceObject($ref, $typesList));");
             }
           }
         }
       } else {
+        String typesList = _typeRefListToString(field.type.types);
         gen.writeln("${field.generatableName} = "
-            "createServiceObject(json['${field.name}'], '${field.type.name}');");
+            "createServiceObject(json['${field.name}'], $typesList);");
       }
     });
     if (fields.isNotEmpty) {
