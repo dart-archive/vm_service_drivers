@@ -24,7 +24,8 @@ main(List<String> args) async {
   var document = new Document();
   StringBuffer buf = new StringBuffer(file.readAsStringSync());
   buf.writeln();
-  buf.write(new File(join(appDirPath, 'service_undocumented.md')).readAsStringSync());
+  buf.write(
+      new File(join(appDirPath, 'service_undocumented.md')).readAsStringSync());
   var nodes = document.parseLines(buf.toString().split('\n'));
   print('Parsed ${file.path}.');
   print('Service protocol version ${ApiParseUtil.parseVersionString(nodes)}.');
@@ -115,7 +116,8 @@ void _stampPubspec(Version version) {
       Version v = new Version.parse(line.substring(pattern.length));
       String pre = v.preRelease.isEmpty ? null : v.preRelease.join('-');
       String build = v.build.isEmpty ? null : v.build.join('+');
-      v = new Version(version.major, version.minor, v.patch, pre: pre, build: build);
+      v = new Version(version.major, version.minor, v.patch,
+          pre: pre, build: build);
       return '${pattern}${v.toString()}';
     } else {
       return line;
@@ -133,6 +135,8 @@ void _checkUpdateChangelog(Version version) {
 
   File file = new File('CHANGELOG.md');
   String text = file.readAsStringSync();
-  bool containsReleaseNotes = text.split('\n').any((line) => line.startsWith(check));
-  if (!containsReleaseNotes) throw '`${check}` not found in the CHANGELOG.md file';
+  bool containsReleaseNotes =
+      text.split('\n').any((line) => line.startsWith(check));
+  if (!containsReleaseNotes)
+    throw '`${check}` not found in the CHANGELOG.md file';
 }
