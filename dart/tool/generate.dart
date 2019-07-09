@@ -137,6 +137,7 @@ void _checkUpdateChangelog(Version version) {
   String text = file.readAsStringSync();
   bool containsReleaseNotes =
       text.split('\n').any((line) => line.startsWith(check));
-  if (!containsReleaseNotes)
+  if (!containsReleaseNotes) {
     throw '`${check}` not found in the CHANGELOG.md file';
+  }
 }
