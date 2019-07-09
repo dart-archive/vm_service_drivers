@@ -32,7 +32,7 @@ String _coerceRefType(String typeName) {
 }
 
 String _typeRefListToString(List<TypeRef> types) =>
-    '[' + types.map((e) => "'" + e.name + "'").join(',') + ']';
+    'const [' + types.map((e) => "'" + e.name + "'").join(',') + ']';
 
 final String _headerCode = r'''
 // Copyright (c) 2015, the Dart project authors.  Please see the AUTHORS file
