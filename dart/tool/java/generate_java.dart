@@ -1218,8 +1218,20 @@ class TypeRef {
           writer.addLine('return new $name(child);');
         } else {
           if (optional) {
-            writer.addLine('return json.get("$propertyName") == null ? '
-                'null : new $name((JsonObject) json.get("$propertyName"));');
+            writer.addLine(
+                'JsonObject obj = (JsonObject) json.get("$propertyName");');
+            writer.addLine('if (obj == null) return null;');
+            if ((name != 'InstanceRef') && (name != 'Instance')) {
+              writer.addLine(
+                  'final String type = json.get("type").getAsString();');
+              writer.addLine(
+                  'if ("Instance".equals(type) || "@Instance".equals(type)) {');
+              writer.addLine(
+                  '  final String kind = json.get("kind").getAsString();');
+              writer.addLine('  if ("Null".equals(kind)) return null;');
+              writer.addLine('}');
+            }
+            writer.addLine('return new $name(obj);');
           } else {
             writer.addLine(
                 'return new $name((JsonObject) json.get("$propertyName"));');
