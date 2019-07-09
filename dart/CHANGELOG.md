@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.21.1
+- **breaking**: Fixed issue where an `InstanceRef` of type `null` could be returned
+  instead of null for non-`InstanceRef` properties and return values. As a
+  result, some property and return types have been changed from Obj to their
+  correct types.
+
 ## 3.21.0
 - support service protocol version 3.21
 
