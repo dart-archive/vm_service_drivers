@@ -33,7 +33,7 @@ String decodeBase64(String str) => utf8.decode(base64.decode(str));
 bool _isNullInstance(Map json) =>
     ((json['type'] == '@Instance') && (json['kind'] == 'Null'));
 
-Object createServiceObject(dynamic json, [List<String> expectedTypes]) {
+Object createServiceObject(dynamic json, List<String> expectedTypes) {
   if (json == null) return null;
 
   if (json is List) {
@@ -1615,7 +1615,8 @@ class VmService implements VmServiceInterface {
       String streamId = map['params']['streamId'];
       Map event = map['params']['event'];
       event['_data'] = data;
-      _getEventController(streamId).add(createServiceObject(event));
+      _getEventController(streamId)
+          .add(createServiceObject(event, const ['Event']));
     }
   }
 
@@ -1677,7 +1678,8 @@ class VmService implements VmServiceInterface {
     final Map params = json['params'];
     if (method == 'streamNotify') {
       String streamId = params['streamId'];
-      _getEventController(streamId).add(createServiceObject(params['event']));
+      _getEventController(streamId)
+          .add(createServiceObject(params['event'], const ['Event']));
     } else {
       await _routeRequest(method, params);
     }
