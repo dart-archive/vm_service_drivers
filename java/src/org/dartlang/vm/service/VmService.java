@@ -61,6 +61,8 @@ public class VmService extends VmServiceBase {
 
   public static final String LOGGING_STREAM_ID = "Logging";
 
+  public static final String SERVICE_STREAM_ID = "Service";
+
   public static final String STDERR_STREAM_ID = "Stderr";
 
   public static final String STDOUT_STREAM_ID = "Stdout";
@@ -68,8 +70,6 @@ public class VmService extends VmServiceBase {
   public static final String TIMELINE_STREAM_ID = "Timeline";
 
   public static final String VM_STREAM_ID = "VM";
-
-  public static final String SERVICE_STREAM_ID = "_Service";
 
   /**
    * The major version number of the protocol supported by this client.
@@ -79,7 +79,7 @@ public class VmService extends VmServiceBase {
   /**
    * The minor version number of the protocol supported by this client.
    */
-  public static final int versionMinor = 21;
+  public static final int versionMinor = 22;
 
   /**
    * The [addBreakpoint] RPC is used to add a breakpoint at a specific line of some script.
@@ -480,13 +480,15 @@ public class VmService extends VmServiceBase {
   }
 
   /**
-   * @undocumented
+   * Registers a service that can be invoked by other VM service clients, where
+   * <code>service</code>service is the name of the service to advertise and
+   * <code>alias</code>alias is an alternative name for the registered service.
    */
   public void registerService(String service, String alias, SuccessConsumer consumer) {
     final JsonObject params = new JsonObject();
     params.addProperty("service", service);
     params.addProperty("alias", alias);
-    request("_registerService", params, consumer);
+    request("registerService", params, consumer);
   }
 
   /**

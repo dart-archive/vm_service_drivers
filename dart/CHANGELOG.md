@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.22.0
+- The `registerService` RPC and `Service` stream are now public.
+- `Event` has been updated to include the optional `service`, `method`, and
+  `alias` properties.
+
 ## 3.21.1
 - **breaking**: Fixed issue where an `InstanceRef` of type `null` could be returned
   instead of null for non-`InstanceRef` properties and return values. As a

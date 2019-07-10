@@ -17,7 +17,7 @@ import 'src/service_extension_registry.dart';
 
 export 'src/service_extension_registry.dart' show ServiceExtensionRegistry;
 
-const String vmServiceVersion = '3.21.0';
+const String vmServiceVersion = '3.22.0';
 
 /// @optional
 const String optional = 'optional';
@@ -591,6 +591,16 @@ abstract class VmServiceInterface {
   /// See [Success].
   Future<Success> kill(String isolateId);
 
+  /// Registers a service that can be invoked by other VM service clients, where
+  /// `service` is the name of the service to advertise and `alias` is an
+  /// alternative name for the registered service.
+  ///
+  /// Requests made to the new service will be forwarded to the client which
+  /// originally registered the service.
+  ///
+  /// See [Success].
+  Future<Success> registerService(String service, String alias);
+
   /// The `reloadSources` RPC is used to perform a hot reload of an Isolate's
   /// sources.
   ///
@@ -722,6 +732,7 @@ abstract class VmServiceInterface {
   /// Extension | Extension
   /// Timeline | TimelineEvents
   /// Logging | Logging
+  /// Service | ServiceRegistered, ServiceUnregistered
   ///
   /// Additionally, some embedders provide the `Stdout` and `Stderr` streams.
   /// These streams allow the client to subscribe to writes to stdout and
@@ -754,8 +765,6 @@ abstract class VmServiceInterface {
   /// `tags` is one of UserVM, UserOnly, VMUser, VMOnly, or None.
   @undocumented
   Future<CpuProfile> getCpuProfile(String isolateId, String tags);
-  @undocumented
-  Future<Success> registerService(String service, String alias);
 }
 
 /// A Dart VM Service Protocol connection that delegates requests to a
@@ -968,6 +977,12 @@ class VmServerConnection {
             params['isolateId'],
           );
           break;
+        case 'registerService':
+          response = await _serviceImplementation.registerService(
+            params['service'],
+            params['alias'],
+          );
+          break;
         case 'reloadSources':
           response = await _serviceImplementation.reloadSources(
             params['isolateId'],
@@ -1160,6 +1175,9 @@ class VmService implements VmServiceInterface {
 
   // Logging
   Stream<Event> get onLoggingEvent => _getEventController('Logging').stream;
+
+  // ServiceRegistered, ServiceUnregistered
+  Stream<Event> get onServiceEvent => _getEventController('Service').stream;
 
   // WriteEvent
   Stream<Event> get onStdoutEvent => _getEventController('Stdout').stream;
@@ -1389,6 +1407,11 @@ class VmService implements VmServiceInterface {
   }
 
   @override
+  Future<Success> registerService(String service, String alias) {
+    return _call('registerService', {'service': service, 'alias': alias});
+  }
+
+  @override
   Future<ReloadReport> reloadSources(
     String isolateId, {
     bool force,
@@ -1505,12 +1528,6 @@ class VmService implements VmServiceInterface {
   @override
   Future<CpuProfile> getCpuProfile(String isolateId, String tags) {
     return _call('_getCpuProfile', {'isolateId': isolateId, 'tags': tags});
-  }
-
-  @undocumented
-  @override
-  Future<Success> registerService(String service, String alias) {
-    return _call('_registerService', {'service': service, 'alias': alias});
   }
 
   /// Call an arbitrary service protocol method. This allows clients to call
@@ -1784,6 +1801,7 @@ class EventStreams {
   static const String kExtension = 'Extension';
   static const String kTimeline = 'Timeline';
   static const String kLogging = 'Logging';
+  static const String kService = 'Service';
   static const String kStdout = 'Stdout';
   static const String kStderr = 'Stderr';
 }
@@ -4229,7 +4247,7 @@ class MapAssociation {
   String toString() => '[MapAssociation key: ${key}, value: ${value}]';
 }
 
-/// An `MemoryUsage` object provides heap usage information for a specific
+/// A `MemoryUsage` object provides heap usage information for a specific
 /// isolate at a given point in time.
 class MemoryUsage extends Response {
   static MemoryUsage parse(Map<String, dynamic> json) =>
