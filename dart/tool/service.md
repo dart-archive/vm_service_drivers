@@ -1309,8 +1309,7 @@ class Class extends Object {
   bool const;
 
   // The library which contains this class.
-  // TODO: This should be @Library, but the VM can return @Instance objects here.
-  @Object library;
+  @Library library;
 
   // The location of this class in the source code.
   SourceLocation location [optional];
