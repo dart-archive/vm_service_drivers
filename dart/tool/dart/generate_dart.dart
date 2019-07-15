@@ -625,34 +625,34 @@ abstract class VmServiceInterface {
             break;
     ''');
     methods.where((m) => !m.isUndocumented).forEach((m) {
-      if (m.name != 'registerService') {
-        gen.writeln("case '${m.name}':");
-        if (m.name == 'streamListen') {
-          gen.writeln(_streamListenCaseImpl);
-        } else if (m.name == 'streamCancel') {
-          gen.writeln(_streamCancelCaseImpl);
-        } else {
-          gen.write("response = await _serviceImplementation.${m.name}(");
-          // Positional args
-          m.args.where((arg) => !arg.optional).forEach((arg) {
-            gen.write("params['${arg.name}'], ");
+      gen.writeln("case '${m.name}':");
+      if (m.name == 'streamListen') {
+        gen.writeln(_streamListenCaseImpl);
+      } else if (m.name == 'streamCancel') {
+        gen.writeln(_streamCancelCaseImpl);
+      } else if (m.name == 'registerService') {
+        gen.writeln(_registerServiceImpl);
+      } else {
+        gen.write("response = await _serviceImplementation.${m.name}(");
+        // Positional args
+        m.args.where((arg) => !arg.optional).forEach((arg) {
+          gen.write("params['${arg.name}'], ");
+        });
+        // Optional named args
+        var namedArgs = m.args.where((arg) => arg.optional);
+        if (namedArgs.isNotEmpty) {
+          namedArgs.forEach((arg) {
+            if (arg.name == 'scope') {
+              gen.writeln(
+                  "${arg.name}: params['${arg.name}']?.cast<String, String>(), ");
+            } else {
+              gen.writeln("${arg.name}: params['${arg.name}'], ");
+            }
           });
-          // Optional named args
-          var namedArgs = m.args.where((arg) => arg.optional);
-          if (namedArgs.isNotEmpty) {
-            namedArgs.forEach((arg) {
-              if (arg.name == 'scope') {
-                gen.writeln(
-                    "${arg.name}: params['${arg.name}']?.cast<String, String>(), ");
-              } else {
-                gen.writeln("${arg.name}: params['${arg.name}'], ");
-              }
-            });
-          }
-          gen.writeln(");");
         }
-        gen.writeln('break;');
+        gen.writeln(");");
       }
+      gen.writeln('break;');
     });
     // Handle service extensions
     gen.writeln('default:');

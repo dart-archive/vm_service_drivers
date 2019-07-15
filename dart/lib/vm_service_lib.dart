@@ -977,6 +977,10 @@ class VmServerConnection {
             params['isolateId'],
           );
           break;
+        case 'registerService':
+          _serviceExtensionRegistry.registerExtension(params['service'], this);
+          response = Success();
+          break;
         case 'reloadSources':
           response = await _serviceImplementation.reloadSources(
             params['isolateId'],
