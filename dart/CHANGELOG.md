@@ -1,4 +1,7 @@
 # Changelog
+## 3.22.2
+- Fix `registerService` RPC and `Service` stream not being handled correctly.
+- Fixed failing tests.
 
 ## 3.22.1
 - **breaking**: Changed type of `library` property in `Class` objects from

@@ -838,7 +838,7 @@ class VmServerConnection {
       Response response;
 
       switch (method) {
-        case '_registerService':
+        case 'registerService':
           _serviceExtensionRegistry.registerExtension(params['service'], this);
           response = Success();
           break;
@@ -977,12 +977,6 @@ class VmServerConnection {
             params['isolateId'],
           );
           break;
-        case 'registerService':
-          response = await _serviceImplementation.registerService(
-            params['service'],
-            params['alias'],
-          );
-          break;
         case 'reloadSources':
           response = await _serviceImplementation.reloadSources(
             params['isolateId'],
@@ -1059,7 +1053,7 @@ class VmServerConnection {
             });
           }
 
-          var stream = id == '_Service'
+          var stream = id == 'Service'
               ? _serviceExtensionRegistry.onExtensionEvent
               : _serviceImplementation.onEvent(id);
           _streamSubscriptions[id] = stream.listen((e) {

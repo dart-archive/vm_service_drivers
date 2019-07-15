@@ -307,7 +307,7 @@ if (_streamSubscriptions.containsKey(id)) {
     });
 }
 
-var stream = id == '_Service'
+var stream = id == 'Service'
     ? _serviceExtensionRegistry.onExtensionEvent
     : _serviceImplementation.onEvent(id);
 _streamSubscriptions[id] = stream.listen((e) {
@@ -620,37 +620,39 @@ abstract class VmServiceInterface {
         Response response;
 
         switch(method) {
-          case '_registerService':
+          case 'registerService':
             $_registerServiceImpl
             break;
     ''');
     methods.where((m) => !m.isUndocumented).forEach((m) {
-      gen.writeln("case '${m.name}':");
-      if (m.name == 'streamListen') {
-        gen.writeln(_streamListenCaseImpl);
-      } else if (m.name == 'streamCancel') {
-        gen.writeln(_streamCancelCaseImpl);
-      } else {
-        gen.write("response = await _serviceImplementation.${m.name}(");
-        // Positional args
-        m.args.where((arg) => !arg.optional).forEach((arg) {
-          gen.write("params['${arg.name}'], ");
-        });
-        // Optional named args
-        var namedArgs = m.args.where((arg) => arg.optional);
-        if (namedArgs.isNotEmpty) {
-          namedArgs.forEach((arg) {
-            if (arg.name == 'scope') {
-              gen.writeln(
-                  "${arg.name}: params['${arg.name}']?.cast<String, String>(), ");
-            } else {
-              gen.writeln("${arg.name}: params['${arg.name}'], ");
-            }
+      if (m.name != 'registerService') {
+        gen.writeln("case '${m.name}':");
+        if (m.name == 'streamListen') {
+          gen.writeln(_streamListenCaseImpl);
+        } else if (m.name == 'streamCancel') {
+          gen.writeln(_streamCancelCaseImpl);
+        } else {
+          gen.write("response = await _serviceImplementation.${m.name}(");
+          // Positional args
+          m.args.where((arg) => !arg.optional).forEach((arg) {
+            gen.write("params['${arg.name}'], ");
           });
+          // Optional named args
+          var namedArgs = m.args.where((arg) => arg.optional);
+          if (namedArgs.isNotEmpty) {
+            namedArgs.forEach((arg) {
+              if (arg.name == 'scope') {
+                gen.writeln(
+                    "${arg.name}: params['${arg.name}']?.cast<String, String>(), ");
+              } else {
+                gen.writeln("${arg.name}: params['${arg.name}'], ");
+              }
+            });
+          }
+          gen.writeln(");");
         }
-        gen.writeln(");");
+        gen.writeln('break;');
       }
-      gen.writeln('break;');
     });
     // Handle service extensions
     gen.writeln('default:');
