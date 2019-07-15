@@ -278,8 +278,8 @@ void main() {
 
         requestsController.add(
             rpcRequest('streamListen', params: {'streamId': serviceStream}));
-        requestsController.add(
-            rpcRequest('registerService', params: {'service': serviceId}));
+        requestsController
+            .add(rpcRequest('registerService', params: {'service': serviceId}));
         await expect(
             responsesController.stream, emitsThrough(serviceRegisteredEvent));
 

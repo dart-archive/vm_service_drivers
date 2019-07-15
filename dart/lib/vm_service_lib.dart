@@ -838,10 +838,6 @@ class VmServerConnection {
       Response response;
 
       switch (method) {
-        case 'registerService':
-          _serviceExtensionRegistry.registerExtension(params['service'], this);
-          response = Success();
-          break;
         case 'addBreakpoint':
           response = await _serviceImplementation.addBreakpoint(
             params['isolateId'],

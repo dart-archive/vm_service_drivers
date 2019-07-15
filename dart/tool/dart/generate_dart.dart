@@ -620,9 +620,6 @@ abstract class VmServiceInterface {
         Response response;
 
         switch(method) {
-          case 'registerService':
-            $_registerServiceImpl
-            break;
     ''');
     methods.where((m) => !m.isUndocumented).forEach((m) {
       gen.writeln("case '${m.name}':");
