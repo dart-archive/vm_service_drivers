@@ -173,6 +173,7 @@ Map<String, List<String>> _methodReturnTypes = {
   'getVMTimelineMicros': const ['Timestamp'],
   'pause': const ['Success'],
   'kill': const ['Success'],
+  'registerService': const ['Success'],
   'reloadSources': const ['ReloadReport'],
   'removeBreakpoint': const ['Success'],
   'resume': const ['Success'],
@@ -188,7 +189,6 @@ Map<String, List<String>> _methodReturnTypes = {
   '_requestHeapSnapshot': const ['Success'],
   '_clearCpuProfile': const ['Success'],
   '_getCpuProfile': const ['_CpuProfile'],
-  '_registerService': const ['Success'],
 };
 
 /// A class representation of the Dart VM Service Protocol.
@@ -2306,9 +2306,8 @@ class Class extends Obj {
   /// Is this a const class?
   bool isConst;
 
-  /// The library which contains this class. TODO: This should be @Library, but
-  /// the VM can return @Instance objects here.
-  ObjRef library;
+  /// The library which contains this class.
+  LibraryRef library;
 
   /// The location of this class in the source code.
   @optional
@@ -2352,7 +2351,7 @@ class Class extends Obj {
     error = createServiceObject(json['error'], const ['ErrorRef']);
     isAbstract = json['abstract'];
     isConst = json['const'];
-    library = createServiceObject(json['library'], const ['ObjRef']);
+    library = createServiceObject(json['library'], const ['LibraryRef']);
     location = createServiceObject(json['location'], const ['SourceLocation']);
     superClass = createServiceObject(json['super'], const ['ClassRef']);
     superType = createServiceObject(json['superType'], const ['InstanceRef']);

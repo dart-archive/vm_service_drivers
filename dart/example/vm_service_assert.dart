@@ -324,7 +324,7 @@ vms.Class assertClass(vms.Class obj) {
   assertString(obj.name);
   assertBool(obj.isAbstract);
   assertBool(obj.isConst);
-  assertObjRef(obj.library);
+  assertLibraryRef(obj.library);
   assertInstanceRefs(obj.interfaces);
   assertFieldRefs(obj.fields);
   assertFuncRefs(obj.functions);

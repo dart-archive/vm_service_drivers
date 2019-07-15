@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.22.1
+- **breaking**: Changed type of `library` property in `Class` objects from
+  `ObjectRef` to `LibraryRef`.
+
 ## 3.22.0
 - The `registerService` RPC and `Service` stream are now public.
 - `Event` has been updated to include the optional `service`, `method`, and

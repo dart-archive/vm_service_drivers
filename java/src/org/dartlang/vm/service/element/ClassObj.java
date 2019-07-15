@@ -83,11 +83,10 @@ public class ClassObj extends Obj {
   }
 
   /**
-   * The library which contains this class. TODO: This should be @Library, but the VM can return
-   * @Instance objects here.
+   * The library which contains this class.
    */
-  public ObjRef getLibrary() {
-    return new ObjRef((JsonObject) json.get("library"));
+  public LibraryRef getLibrary() {
+    return new LibraryRef((JsonObject) json.get("library"));
   }
 
   /**
