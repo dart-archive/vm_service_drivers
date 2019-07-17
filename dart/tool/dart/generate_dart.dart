@@ -307,7 +307,7 @@ if (_streamSubscriptions.containsKey(id)) {
     });
 }
 
-var stream = id == '_Service'
+var stream = id == 'Service'
     ? _serviceExtensionRegistry.onExtensionEvent
     : _serviceImplementation.onEvent(id);
 _streamSubscriptions[id] = stream.listen((e) {
@@ -620,9 +620,6 @@ abstract class VmServiceInterface {
         Response response;
 
         switch(method) {
-          case '_registerService':
-            $_registerServiceImpl
-            break;
     ''');
     methods.where((m) => !m.isUndocumented).forEach((m) {
       gen.writeln("case '${m.name}':");
@@ -630,6 +627,8 @@ abstract class VmServiceInterface {
         gen.writeln(_streamListenCaseImpl);
       } else if (m.name == 'streamCancel') {
         gen.writeln(_streamCancelCaseImpl);
+      } else if (m.name == 'registerService') {
+        gen.writeln(_registerServiceImpl);
       } else {
         gen.write("response = await _serviceImplementation.${m.name}(");
         // Positional args

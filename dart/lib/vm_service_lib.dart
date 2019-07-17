@@ -838,10 +838,6 @@ class VmServerConnection {
       Response response;
 
       switch (method) {
-        case '_registerService':
-          _serviceExtensionRegistry.registerExtension(params['service'], this);
-          response = Success();
-          break;
         case 'addBreakpoint':
           response = await _serviceImplementation.addBreakpoint(
             params['isolateId'],
@@ -978,10 +974,8 @@ class VmServerConnection {
           );
           break;
         case 'registerService':
-          response = await _serviceImplementation.registerService(
-            params['service'],
-            params['alias'],
-          );
+          _serviceExtensionRegistry.registerExtension(params['service'], this);
+          response = Success();
           break;
         case 'reloadSources':
           response = await _serviceImplementation.reloadSources(
@@ -1059,7 +1053,7 @@ class VmServerConnection {
             });
           }
 
-          var stream = id == '_Service'
+          var stream = id == 'Service'
               ? _serviceExtensionRegistry.onExtensionEvent
               : _serviceImplementation.onEvent(id);
           _streamSubscriptions[id] = stream.listen((e) {

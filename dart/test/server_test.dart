@@ -258,8 +258,8 @@ void main() {
           }))));
     });
 
-    group('_Service', () {
-      final serviceStream = '_Service';
+    group('Service', () {
+      final serviceStream = 'Service';
 
       test('gives register and unregister events', () async {
         var serviceId = 'ext.test.service';
@@ -278,8 +278,8 @@ void main() {
 
         requestsController.add(
             rpcRequest('streamListen', params: {'streamId': serviceStream}));
-        requestsController.add(
-            rpcRequest('_registerService', params: {'service': serviceId}));
+        requestsController
+            .add(rpcRequest('registerService', params: {'service': serviceId}));
         await expect(
             responsesController.stream, emitsThrough(serviceRegisteredEvent));
 
