@@ -1,5 +1,7 @@
 # vm_service_drivers
 
+**This repository is now deprecated and has been republished as `package:vm_service`. Please see [https://github.com/dart-lang/sdk/tree/master/pkg/vm_service](https://github.com/dart-lang/sdk/tree/master/pkg/vm_service) for new changes and to file issues.**
+
 [![Build Status](https://travis-ci.org/dart-lang/vm_service_drivers.svg)](https://travis-ci.org/dart-lang/vm_service_drivers)
 
 This repository contains Dart and Java libraries to access the VM Service
