@@ -1,4 +1,8 @@
 # Changelog
+## 3.22.2+1
+
+**This repository is now deprecated and has been republished as `package:vm_service`. Please see [https://github.com/dart-lang/sdk/tree/master/pkg/vm_service](https://github.com/dart-lang/sdk/tree/master/pkg/vm_service) for new changes and to file issues.**
+
 ## 3.22.2
 - Fix `registerService` RPC and `Service` stream not being handled correctly.
 - Fixed failing tests.

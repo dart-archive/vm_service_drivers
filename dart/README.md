@@ -1,5 +1,7 @@
 # vm_service_lib
 
+**This repository is now deprecated and has been republished as `package:vm_service`. Please see [https://github.com/dart-lang/sdk/tree/master/pkg/vm_service](https://github.com/dart-lang/sdk/tree/master/pkg/vm_service) for new changes and to file issues.**
+
 [![pub package](https://img.shields.io/pub/v/vm_service_lib.svg)](https://pub.dartlang.org/packages/vm_service_lib)
 
 A library to access the VM Service Protocol.
